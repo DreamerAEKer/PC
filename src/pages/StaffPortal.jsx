@@ -72,20 +72,6 @@ export default function StaffPortal() {
 
   const [printData, setPrintData] = useState(null);
 
-  const handleDirectPrintClick = (e) => {
-    const form = e.target.closest('form');
-    if (form && form.checkValidity()) {
-      e.preventDefault(); // Stop async react-hook-form submit
-      
-      // Extract fresh data directly from the DOM to avoid any async state delay
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-      
-      onSubmit(data);
-    }
-    // If not valid, let it pass through to native submit/react-hook-form for error messages
-  };
-
   const onSubmit = (data) => {
     const isBKK = data.province === 'กรุงเทพมหานคร';
     const subTitle = isBKK ? `แขวง${data.subdistrict}` : `ต.${data.subdistrict}`;
@@ -99,12 +85,23 @@ export default function StaffPortal() {
     };
     const record = saveToHistory(processedData);
     
+    // Update the DOM with the print data synchronously
     flushSync(() => {
       setPrintData(record);
     });
-    window.print();
-    reset(); // clear form
-    setScanMode('manual');
+    
+    // Yield to the browser so it can paint the print area before opening the dialog
+    setTimeout(() => {
+      window.print();
+      
+      // Delay the form reset so it doesn't cause a massive React re-render
+      // while Chrome is trying to snapshot the DOM for the print preview.
+      // (window.print is blocking in most browsers, so this runs after dialog closes)
+      setTimeout(() => {
+        reset(); // clear form
+        setScanMode('manual');
+      }, 500);
+    }, 100);
   };
 
   const handlePrintHistory = (record) => {
@@ -444,7 +441,7 @@ export default function StaffPortal() {
                     <input type="text" className="form-control" {...register("did")} />
                   </div>
                 </div>
-                <button type="submit" onClick={handleDirectPrintClick} className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', fontSize: '1.1rem' }}>
+                <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', fontSize: '1.1rem' }}>
                   <Printer size={20} />
                   บันทึกและสั่งพิมพ์ลงไปรษณียบัตร
                 </button>
