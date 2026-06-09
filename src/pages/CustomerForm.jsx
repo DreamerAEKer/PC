@@ -26,7 +26,25 @@ export default function CustomerForm() {
     if (saved) {
       setHistory(JSON.parse(saved));
     }
-  }, []);
+
+    const savedForm = localStorage.getItem('customerFormData');
+    if (savedForm) {
+      try {
+        const data = JSON.parse(savedForm);
+        Object.keys(data).forEach(key => {
+          setValue(key, data[key]);
+        });
+      } catch (e) {}
+    }
+  }, [setValue]);
+
+  const formValues = watch();
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      localStorage.setItem('customerFormData', JSON.stringify(formValues));
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [formValues]);
 
   const onSubmit = async (data) => {
     // Process address into a single string for display and old-compatibility

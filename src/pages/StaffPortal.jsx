@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
@@ -30,11 +31,36 @@ export default function StaffPortal() {
     if (savedStaffName) setStaffName(savedStaffName);
     const savedStaffPhone = localStorage.getItem('staffPhone');
     if (savedStaffPhone) setStaffPhone(savedStaffPhone);
-    const saved = localStorage.getItem('staffHistory');
-    if (saved) {
-      setHistory(JSON.parse(saved));
+    
+    let savedHistory = localStorage.getItem('staffHistory');
+    if (!savedHistory) {
+      savedHistory = localStorage.getItem('printHistory');
+      if (savedHistory) {
+        localStorage.setItem('staffHistory', savedHistory);
+      }
     }
-  }, []);
+    if (savedHistory) {
+      setHistory(JSON.parse(savedHistory));
+    }
+
+    const savedForm = localStorage.getItem('staffFormData');
+    if (savedForm) {
+      try {
+        const data = JSON.parse(savedForm);
+        Object.keys(data).forEach(key => {
+          setValue(key, data[key]);
+        });
+      } catch (e) {}
+    }
+  }, [setValue]);
+
+  const formValues = watch();
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      localStorage.setItem('staffFormData', JSON.stringify(formValues));
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [formValues]);
 
   const saveToHistory = (data) => {
     const newRecord = { ...data, id: Date.now(), timestamp: new Date().toISOString() };
