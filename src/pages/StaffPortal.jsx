@@ -7,7 +7,7 @@ import { QrCode, Keyboard, History, Printer, FileText } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 
 export default function StaffPortal() {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
+  const { register, handleSubmit, setValue, getValues, reset, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
 
   const quantity = watch("quantity", 1);
   const totalPrice = (parseInt(quantity, 10) || 0) * 3;
@@ -71,6 +71,30 @@ export default function StaffPortal() {
   };
 
   const [printData, setPrintData] = useState(null);
+
+  const handleDirectPrintClick = (e) => {
+    const data = getValues();
+    const requiredFields = ['orderDate', 'quantity', 'name', 'phone', 'addressLine1', 'province', 'district', 'subdistrict', 'zipcode'];
+    
+    let isValid = true;
+    for (const field of requiredFields) {
+      const val = data[field];
+      if (!val || (typeof val === 'string' && val.trim() === '') || val === '-') {
+        isValid = false;
+        break;
+      }
+    }
+    
+    const phonePattern = /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i;
+    if (data.phone && !phonePattern.test(data.phone)) {
+      isValid = false;
+    }
+
+    if (isValid) {
+      e.preventDefault();
+      onSubmit(data);
+    }
+  };
 
   const onSubmit = (data) => {
     const isBKK = data.province === 'กรุงเทพมหานคร';
@@ -430,7 +454,7 @@ export default function StaffPortal() {
                     <input type="text" className="form-control" {...register("did")} />
                   </div>
                 </div>
-                <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', fontSize: '1.1rem' }}>
+                <button type="submit" onClick={handleDirectPrintClick} className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', fontSize: '1.1rem' }}>
                   <Printer size={20} />
                   บันทึกและสั่งพิมพ์ลงไปรษณียบัตร
                 </button>
