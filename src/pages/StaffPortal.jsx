@@ -255,18 +255,19 @@ export default function StaffPortal() {
             <div id="reader-hidden" style={{ position: 'absolute', top: '-9999px', width: '500px', height: '500px' }}></div>
 
             {scanMode === 'usb' && (
-              <div style={{ marginBottom: '1.5rem', padding: '1.5rem', backgroundColor: '#f8fafc', border: '2px dashed var(--primary)', borderRadius: '12px', textAlign: 'center' }}>
-                <QrCode size={40} color="var(--primary)" style={{ marginBottom: '1rem' }} />
-                <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>ใช้เครื่องสแกนบาร์โค้ด (USB)</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                  คลิกที่ช่องด้านล่างให้เคอร์เซอร์กระพริบ แล้วยิง QR Code จากหน้าจอมือถือลูกค้าได้เลย
-                </p>
+              <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f8fafc', border: '2px dashed var(--primary)', borderRadius: '12px', textAlign: 'center' }}>
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <strong style={{ color: 'var(--text-main)', fontSize: '1rem' }}>ใช้เครื่องสแกนบาร์โค้ด (USB)</strong>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                    คลิกที่ช่องด้านล่างให้เคอร์เซอร์กระพริบ แล้วยิง QR Code จากหน้าจอมือถือลูกค้าได้เลย
+                  </div>
+                </div>
                 <input 
                   type="text" 
                   autoFocus
                   className="form-control" 
                   placeholder="👉 คลิกที่นี่ แล้วยิงสแกนเนอร์..." 
-                  style={{ fontSize: '1.2rem', padding: '1rem', textAlign: 'center', borderColor: 'var(--primary)', borderWidth: '2px', backgroundColor: '#fff' }}
+                  style={{ fontSize: '1.1rem', padding: '0.75rem', textAlign: 'center', borderColor: 'var(--primary)', borderWidth: '2px', backgroundColor: '#fff' }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
