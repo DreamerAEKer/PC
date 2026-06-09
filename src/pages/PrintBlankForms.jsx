@@ -147,47 +147,47 @@ export default function PrintBlankForms() {
             </div>
 
             {/* Right Column (Main Form - 65%) */}
-            <div style={{ flex: '1', paddingLeft: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.85rem' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '0.95rem', marginBottom: '0.25rem', color: 'var(--primary)', textAlign: 'center' }}>ข้อมูลสำหรับพิมพ์ลงไปรษณียบัตร</div>
+            <div style={{ flex: '1', paddingLeft: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.85rem', minWidth: 0 }}>
+              <div style={{ fontWeight: 'bold', fontSize: '0.95rem', marginBottom: '0.15rem', color: 'var(--primary)', textAlign: 'center' }}>ข้อมูลสำหรับพิมพ์ลงไปรษณียบัตร</div>
               
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.2rem', width: '100%' }}>
                 <span style={{ whiteSpace: 'nowrap' }}>วันที่สั่งจอง:</span>
-                <span className="line-input" style={{ flex: 1.5 }}></span>
+                <span className="line-input" style={{ flex: 1.5, margin: '0 0.2rem', minWidth: '30px' }}></span>
                 <span style={{ whiteSpace: 'nowrap' }}>จำนวน:</span>
-                <span className="line-input" style={{ flex: 1 }}></span>
+                <span className="line-input" style={{ flex: 1, margin: '0 0.2rem', minWidth: '20px' }}></span>
                 <span style={{ whiteSpace: 'nowrap' }}>ใบ (เป็นเงิน:</span>
-                <span className="line-input" style={{ flex: 1 }}></span>
-                <span>บาท)</span>
+                <span className="line-input" style={{ flex: 1, margin: '0 0.2rem', minWidth: '30px' }}></span>
+                <span style={{ whiteSpace: 'nowrap' }}>บาท)</span>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.2rem', width: '100%' }}>
                 <span style={{ whiteSpace: 'nowrap' }}>ชื่อ-สกุล:</span>
-                <span className="line-input" style={{ flex: 2 }}></span>
+                <span className="line-input" style={{ flex: 2, margin: '0 0.2rem' }}></span>
                 <span style={{ whiteSpace: 'nowrap' }}>เบอร์โทร:</span>
-                <span className="line-input" style={{ flex: 1.5 }}></span>
+                <span className="line-input" style={{ flex: 1.5, margin: '0 0.2rem' }}></span>
               </div>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', width: '100%' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-end' }}>
                   <span style={{ whiteSpace: 'nowrap' }}>ที่อยู่จัดส่ง:</span>
-                  <span className="line-input" style={{ flex: 1 }}></span>
+                  <span className="line-input" style={{ flex: 1, margin: '0 0 0 0.2rem' }}></span>
                 </div>
                 <div style={{ borderBottom: '1px dotted #000', height: '1.4rem', width: '100%' }}></div>
                 <div style={{ borderBottom: '1px dotted #000', height: '1.4rem', width: '100%' }}></div>
                 <div style={{ borderBottom: '1px dotted #000', height: '1.4rem', width: '100%' }}></div>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: '0.4rem' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-end', flex: 1, paddingRight: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: '0.2rem', width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', flex: 1, paddingRight: '0.5rem', minWidth: 0 }}>
                   <span style={{ whiteSpace: 'nowrap' }}>รหัสไปรษณีย์:</span>
-                  <span className="line-input" style={{ flex: 1 }}></span>
+                  <span className="line-input" style={{ flex: 1, margin: '0 0 0 0.2rem' }}></span>
                 </div>
                 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ whiteSpace: 'nowrap', fontWeight: 'bold', fontSize: '0.9rem' }}>หรือ D/ID:</span>
-                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>หรือ D/ID:</span>
+                  <div style={{ display: 'flex', gap: '0.15rem' }}>
                     {[1, 2, 3, 4, 5, 6].map(i => (
-                      <div key={i} style={{ width: '26px', height: '30px', border: '1.5px solid #000', borderRadius: '4px', backgroundColor: '#f8fafc' }}></div>
+                      <div key={i} style={{ width: '22px', height: '26px', border: '1.5px solid #000', borderRadius: '3px', backgroundColor: '#f8fafc' }}></div>
                     ))}
                   </div>
                 </div>
