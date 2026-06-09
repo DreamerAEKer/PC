@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useThaiAddress } from 'use-thai-address';
 import { Info } from 'lucide-react';
 
-export default function ThaiAddressFields({ register, setValue, errors, defaultValues }) {
+export default function ThaiAddressFields({ register, setValue, errors, defaultValues, dirtyFields, touchedFields }) {
   const { filteredData, searchByField, reset } = useThaiAddress();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const containerRef = useRef(null);
