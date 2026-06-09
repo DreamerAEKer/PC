@@ -177,11 +177,20 @@ export default function PrintBlankForms() {
                 <div style={{ borderBottom: '1px dotted #000', height: '1.4rem', width: '100%' }}></div>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
-                <span style={{ whiteSpace: 'nowrap' }}>รหัสไปรษณีย์:</span>
-                <span className="line-input" style={{ flex: 1 }}></span>
-                <span style={{ whiteSpace: 'nowrap', fontWeight: 'bold', marginLeft: '0.5rem' }}>หรือ D/ID:</span>
-                <span className="line-input" style={{ flex: 1 }}></span>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: '0.4rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', flex: 1, paddingRight: '1rem' }}>
+                  <span style={{ whiteSpace: 'nowrap' }}>รหัสไปรษณีย์:</span>
+                  <span className="line-input" style={{ flex: 1 }}></span>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ whiteSpace: 'nowrap', fontWeight: 'bold', fontSize: '0.9rem' }}>หรือ D/ID:</span>
+                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                    {[1, 2, 3, 4, 5, 6].map(i => (
+                      <div key={i} style={{ width: '26px', height: '30px', border: '1.5px solid #000', borderRadius: '4px', backgroundColor: '#f8fafc' }}></div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
