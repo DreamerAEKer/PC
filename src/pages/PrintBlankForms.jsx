@@ -97,9 +97,9 @@ export default function PrintBlankForms() {
         </div>
       </div>
 
-      <div className="a4-container">
+      <div className="print-container" style={{ width: '100%', height: '98vh', display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', margin: 0, padding: 0, boxSizing: 'border-box' }}>
         {[1, 2, 3, 4].map((item) => (
-          <div key={item} className="blank-form" style={{ flexDirection: 'row', padding: '0.6cm 0.8cm' }}>
+          <div key={item} className="blank-form" style={{ display: 'flex', flexDirection: 'row', padding: '0.4cm 0.6cm', border: '1px dashed #94a3b8', boxSizing: 'border-box', overflow: 'hidden' }}>
             
             {/* Left Column (Tear-off Receipt - 35%) */}
             <div style={{ flex: '0 0 35%', paddingRight: '0.8rem', borderRight: '1px dashed #94a3b8', display: 'flex', flexDirection: 'column', fontSize: '0.75rem' }}>
