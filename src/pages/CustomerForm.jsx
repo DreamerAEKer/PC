@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
-import { Download, CheckCircle, Clock } from 'lucide-react';
+import { Download, CheckCircle, Clock, Share2 } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 
 export default function CustomerForm() {
@@ -66,6 +66,34 @@ export default function CustomerForm() {
       a.download = `postcard-${Date.now()}.png`;
       a.click();
     }
+  };
+
+  const shareToLine = async () => {
+    const textToShare = `ข้อมูลผู้รับ\nชื่อ: ${generatedData.name}\nเบอร์โทร: ${generatedData.phone}\nที่อยู่: ${generatedData.address} ${generatedData.zipcode}${generatedData.did ? `\nD-ID: ${generatedData.did}` : ''}`;
+    
+    if (navigator.canShare && cardRef.current) {
+      try {
+        const canvas = await html2canvas(cardRef.current, { scale: 2 });
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        if (blob) {
+          const file = new File([blob], `postcard-${Date.now()}.png`, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: 'ข้อมูลผู้รับ',
+              text: 'รูปภาพข้อมูลผู้รับ สำหรับการพิมพ์ไปรษณียบัตร'
+            });
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Share error:', e);
+      }
+    }
+    
+    // Fallback: Share text to LINE app/web directly
+    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(textToShare)}`;
+    window.open(lineUrl, '_blank');
   };
 
   return (
@@ -185,10 +213,16 @@ export default function CustomerForm() {
               )}
             </div>
 
-            <button onClick={downloadImage} className="btn btn-primary" style={{ width: '100%' }}>
-              <Download size={18} />
-              บันทึกเป็นรูปภาพ (ส่งให้ ปณ.)
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
+              <button onClick={downloadImage} className="btn btn-primary" style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                <Download size={18} />
+                บันทึกเป็นรูปภาพ (ส่งให้ ปณ.)
+              </button>
+              <button onClick={shareToLine} className="btn" style={{ width: '100%', backgroundColor: '#00B900', color: 'white', display: 'flex', justifyContent: 'center', gap: '0.5rem', border: 'none' }}>
+                <Share2 size={18} />
+                แชร์ไป LINE
+              </button>
+            </div>>
           </div>
         )}
 
