@@ -131,15 +131,27 @@ export default function StaffPortal() {
     alert("กรุณากรอกข้อมูลให้ครบถ้วนในช่องที่จำเป็นก่อนสั่งพิมพ์ครับ");
   };
 
-  const handleBranchChange = (e) => setBranchName(e.target.value);
-  const handleStaffNameChange = (e) => setStaffName(e.target.value);
-  const handleStaffPhoneChange = (e) => setStaffPhone(e.target.value);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+
+  const handleBranchChange = (e) => {
+    setBranchName(e.target.value);
+    localStorage.setItem('branchName', e.target.value);
+  };
+  const handleStaffNameChange = (e) => {
+    setStaffName(e.target.value);
+    localStorage.setItem('staffName', e.target.value);
+  };
+  const handleStaffPhoneChange = (e) => {
+    setStaffPhone(e.target.value);
+    localStorage.setItem('staffPhone', e.target.value);
+  };
 
   const saveSettings = () => {
     localStorage.setItem('branchName', branchName);
     localStorage.setItem('staffName', staffName);
     localStorage.setItem('staffPhone', staffPhone);
-    alert('บันทึกข้อมูล สาขา, ชื่อ จนท. และเบอร์โทร เรียบร้อยแล้วครับ!');
+    setShowSaveSuccess(true);
+    setTimeout(() => setShowSaveSuccess(false), 3000);
   };
 
   return (
@@ -179,9 +191,12 @@ export default function StaffPortal() {
               style={{ width: '100px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
             />
           </div>
-          <button onClick={saveSettings} className="btn btn-primary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem', marginLeft: '0.25rem' }}>
-            บันทึก
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <button onClick={saveSettings} className="btn btn-primary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem', marginLeft: '0.25rem' }}>
+              บันทึก
+            </button>
+            {showSaveSuccess && <span style={{ color: '#16a34a', fontSize: '0.8rem', marginLeft: '0.5rem', fontWeight: 'bold' }}>✓ เซฟแล้ว</span>}
+          </div>
           
           <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border)', margin: '0 0.5rem' }}></div>
           
