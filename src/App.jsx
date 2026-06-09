@@ -18,22 +18,6 @@ function Navigation() {
         <Package size={28} />
         <span>PostcardApp</span>
       </Link>
-      <nav style={{ display: 'flex', gap: '1rem' }}>
-        <Link 
-          to="/" 
-          className={`btn ${location.pathname === '/' ? 'btn-primary' : 'btn-secondary'}`}
-        >
-          <User size={18} />
-          ลูกค้า (Customer)
-        </Link>
-        <Link 
-          to="/staff" 
-          className={`btn ${location.pathname.startsWith('/staff') ? 'btn-primary' : 'btn-secondary'}`}
-        >
-          <Package size={18} />
-          เจ้าหน้าที่ (Staff)
-        </Link>
-      </nav>
     </header>
   );
 }
