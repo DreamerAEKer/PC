@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
-import { QrCode, Keyboard, History, Printer, FileText } from 'lucide-react';
+import { QrCode, Keyboard, History, Printer, FileText, Settings } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 
 export default function StaffPortal() {
@@ -72,6 +72,15 @@ export default function StaffPortal() {
 
   const [printData, setPrintData] = useState(null);
 
+  const [printSettings, setPrintSettings] = useState(() => {
+    const saved = localStorage.getItem('customPrintSettings');
+    return saved ? JSON.parse(saved) : { top: 4, left: 8, fontSize: 11 };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('customPrintSettings', JSON.stringify(printSettings));
+  }, [printSettings]);
+
   const handleDirectPrintClick = (e) => {
     const form = e.target.closest('form');
     if (form && form.checkValidity()) {
@@ -112,7 +121,8 @@ export default function StaffPortal() {
     // to avoid crashing Chrome's print preview
     setTimeout(() => {
       setHistory(prevHistory => {
-        const updatedHistory = [newRecord, ...prevHistory].slice(0, 50);
+        const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
+        const updatedHistory = [newRecord, ...safeHistory].slice(0, 50);
         localStorage.setItem('staffHistory', JSON.stringify(updatedHistory));
         return updatedHistory;
       });
@@ -255,7 +265,6 @@ export default function StaffPortal() {
         {`
           @media print {
             @page {
-              size: A6 landscape;
               margin: 0;
             }
             body {
@@ -267,12 +276,12 @@ export default function StaffPortal() {
               display: none !important;
             }
             .print-area {
-              width: 14.8cm;
-              height: 10.5cm;
+              width: 100%;
+              height: 100vh;
               background: white;
               position: relative;
-              padding-top: 4.5cm;
-              padding-left: 7cm;
+              padding-top: 4cm;
+              padding-left: 8cm;
               padding-right: 1cm;
               overflow: hidden;
               box-sizing: border-box;
@@ -487,6 +496,27 @@ export default function StaffPortal() {
                   <Printer size={20} />
                   บันทึกและสั่งพิมพ์ลงไปรษณียบัตร
                 </button>
+
+                <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#475569' }}>
+                    <Settings size={16} />
+                    ตั้งค่าตำแหน่งและขนาดการพิมพ์ (ปรับแต่งเอง)
+                  </h4>
+                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: '150px' }}>
+                      <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับลง (ซม.): {printSettings.top}</label>
+                      <input type="range" min="0" max="10" step="0.5" value={printSettings.top} onChange={(e) => setPrintSettings(p => ({...p, top: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: '150px' }}>
+                      <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับขวา (ซม.): {printSettings.left}</label>
+                      <input type="range" min="0" max="15" step="0.5" value={printSettings.left} onChange={(e) => setPrintSettings(p => ({...p, left: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: '150px' }}>
+                      <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขนาดตัวอักษร: {printSettings.fontSize}</label>
+                      <input type="range" min="8" max="24" step="1" value={printSettings.fontSize} onChange={(e) => setPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
+                    </div>
+                  </div>
+                </div>
 
                 {quantity > 0 && (
                   <div style={{
