@@ -1,5 +1,5 @@
-import React from 'react';
-import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
+import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Package, User } from 'lucide-react';
 import { version } from '../package.json';
 import CustomerForm from './pages/CustomerForm';
@@ -9,7 +9,27 @@ import PrintBlankForms from './pages/PrintBlankForms';
 
 function Navigation() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isPrintPage = location.pathname.includes('/print');
+  
+  const [clickCount, setClickCount] = useState(0);
+  const clickTimeoutRef = useRef(null);
+
+  const handleSecretClick = () => {
+    setClickCount((prev) => {
+      const newCount = prev + 1;
+      if (newCount >= 3) {
+        navigate('/staff');
+        return 0;
+      }
+      return newCount;
+    });
+
+    if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+    clickTimeoutRef.current = setTimeout(() => {
+      setClickCount(0);
+    }, 1500); // Reset if not clicked 3 times within 1.5 seconds
+  };
 
   if (isPrintPage) return null; // Hide navigation on print pages
 
@@ -19,7 +39,11 @@ function Navigation() {
         <Package size={28} />
         <span>PostcardApp</span>
       </Link>
-      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.3, fontWeight: 500 }}>
+      <div 
+        onClick={handleSecretClick}
+        style={{ fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.3, fontWeight: 500, cursor: 'pointer', userSelect: 'none' }}
+        title="Secret Portal Entrance"
+      >
         © MrAEK 10501 v{version}
       </div>
     </header>
