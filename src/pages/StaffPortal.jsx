@@ -236,6 +236,7 @@ export default function StaffPortal() {
         {`
           @media print {
             @page {
+              size: 14.8cm 10.5cm;
               margin: 0;
             }
             body {
@@ -247,11 +248,13 @@ export default function StaffPortal() {
               display: none !important;
             }
             .print-area {
-              width: 100%;
-              height: 100vh;
+              width: 14.8cm;
+              height: 10.5cm;
               background: white;
               position: relative;
-              padding: 2cm 2cm 2cm 2cm;
+              padding-top: 4.5cm;
+              padding-left: 5.5cm;
+              padding-right: 1cm;
               overflow: hidden;
               box-sizing: border-box;
             }
