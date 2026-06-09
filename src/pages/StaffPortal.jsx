@@ -131,25 +131,22 @@ export default function StaffPortal() {
     alert("กรุณากรอกข้อมูลให้ครบถ้วนในช่องที่จำเป็นก่อนสั่งพิมพ์ครับ");
   };
 
-  const handleBranchChange = (e) => {
-    const newName = e.target.value;
-    setBranchName(newName);
-    localStorage.setItem('branchName', newName);
-  };
-  const handleStaffNameChange = (e) => {
-    setStaffName(e.target.value);
-    localStorage.setItem('staffName', e.target.value);
-  };
-  const handleStaffPhoneChange = (e) => {
-    setStaffPhone(e.target.value);
-    localStorage.setItem('staffPhone', e.target.value);
+  const handleBranchChange = (e) => setBranchName(e.target.value);
+  const handleStaffNameChange = (e) => setStaffName(e.target.value);
+  const handleStaffPhoneChange = (e) => setStaffPhone(e.target.value);
+
+  const saveSettings = () => {
+    localStorage.setItem('branchName', branchName);
+    localStorage.setItem('staffName', staffName);
+    localStorage.setItem('staffPhone', staffPhone);
+    alert('บันทึกข้อมูล สาขา, ชื่อ จนท. และเบอร์โทร เรียบร้อยแล้วครับ!');
   };
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h2>แดชบอร์ดเจ้าหน้าที่ ปณ.</h2>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#fff', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>สาขา:</span>
             <input 
@@ -157,7 +154,7 @@ export default function StaffPortal() {
               className="form-control" 
               value={branchName} 
               onChange={handleBranchChange} 
-              style={{ width: '160px', padding: '0.3rem 0.5rem', fontSize: '0.9rem' }} 
+              style={{ width: '150px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
             />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -167,8 +164,8 @@ export default function StaffPortal() {
               className="form-control" 
               value={staffName} 
               onChange={handleStaffNameChange} 
-              placeholder="ชื่อเจ้าหน้าที่"
-              style={{ width: '120px', padding: '0.3rem 0.5rem', fontSize: '0.9rem' }} 
+              placeholder="เว้นว่างได้"
+              style={{ width: '100px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
             />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -178,13 +175,19 @@ export default function StaffPortal() {
               className="form-control" 
               value={staffPhone} 
               onChange={handleStaffPhoneChange} 
-              placeholder="เบอร์โทร"
-              style={{ width: '120px', padding: '0.3rem 0.5rem', fontSize: '0.9rem' }} 
+              placeholder="เว้นว่างได้"
+              style={{ width: '100px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
             />
           </div>
-          <button onClick={() => navigate('/print-blank-forms')} className="btn btn-secondary">
-            <FileText size={18} />
-            พิมพ์ฟอร์มเปล่า 4 ใบ (A4)
+          <button onClick={saveSettings} className="btn btn-primary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem', marginLeft: '0.25rem' }}>
+            บันทึก
+          </button>
+          
+          <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border)', margin: '0 0.5rem' }}></div>
+          
+          <button onClick={() => navigate('/print-blank-forms')} className="btn btn-secondary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem' }}>
+            <FileText size={16} />
+            พิมพ์ฟอร์มเปล่า 4 ใบ
           </button>
         </div>
       </div>
