@@ -145,7 +145,16 @@ export default function StaffPortal() {
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
                   <label className="form-label">จำนวน (ใบ)</label>
-                  <input type="number" min="1" className="form-control" required {...register("quantity")} defaultValue="1" />
+                  <input type="number" min="1" className="form-control" required {...register("quantity")} defaultValue="1" list="quantity-options" placeholder="พิมพ์ตัวเลข หรือเลือกจากรายการ" />
+                  <datalist id="quantity-options">
+                    <option value="100" />
+                    <option value="200" />
+                    <option value="300" />
+                    <option value="400" />
+                    <option value="500" />
+                    <option value="1000" />
+                    <option value="2000" />
+                  </datalist>
                 </div>
               </div>
               <div className="form-group">
