@@ -199,9 +199,9 @@ export default function CustomerForm() {
               }}
             >
               <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem' }}>
-                <QRCodeSVG value={generatedData.payload} size={80} level="M" />
+                <QRCodeSVG value={generatedData.payload} size={110} level="L" />
               </div>
-              <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.4rem', paddingRight: '90px' }}>ข้อมูลผู้รับ (สำหรับการพิมพ์)</h2>
+              <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.4rem', paddingRight: '130px' }}>ข้อมูลผู้รับ (สำหรับการพิมพ์)</h2>
               <div style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem' }}>
                 วันที่สั่งจอง: {generatedData.orderDate} | จำนวน: {generatedData.quantity} ใบ<br/>
                 รับจองโดย: G.P.O 10501
