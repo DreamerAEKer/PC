@@ -241,7 +241,7 @@ export default function StaffPortal() {
                 onClick={() => setScanMode('camera')}
                 style={{ flex: 1, padding: '0.5rem', fontSize: '0.9rem', minWidth: '120px' }}
               >
-                <QrCode size={16} /> กล้องเว็บแคม
+                <QrCode size={16} /> นำเข้าข้อมูล
               </button>
             </div>
 
