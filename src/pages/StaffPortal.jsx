@@ -209,7 +209,18 @@ export default function StaffPortal() {
           
           <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border)', margin: '0 0.5rem' }}></div>
           
-          <button onClick={() => navigate('/print-blank-forms', { state: { branchName, staffName, staffPhone } })} className="btn btn-secondary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem' }}>
+          <button 
+            onClick={() => navigate('/print-blank-forms', { state: { branchName, staffName, staffPhone } })} 
+            className="btn" 
+            style={{ 
+              padding: '0.4rem 0.8rem', 
+              fontSize: '0.85rem', 
+              border: '2px solid var(--primary)', 
+              color: 'var(--primary)', 
+              backgroundColor: '#fff',
+              fontWeight: '700'
+            }}
+          >
             <FileText size={16} />
             พิมพ์ฟอร์มเปล่า 4 ใบ
           </button>
