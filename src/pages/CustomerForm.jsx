@@ -83,8 +83,14 @@ export default function CustomerForm() {
             </div>
             <div className="form-group">
               <label className="form-label">เบอร์โทรศัพท์ <span style={{color:'red'}}>*</span></label>
-              <input type="text" className={`form-control ${errors.phone ? 'input-error' : ''}`} required {...register("phone", { required: true })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
-              {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุเบอร์โทรศัพท์</span>}
+              <input type="text" className={`form-control ${errors.phone ? 'input-error' : ''}`} required {...register("phone", { 
+                required: "กรุณาระบุเบอร์โทรศัพท์",
+                pattern: {
+                  value: /^0\d{1,2}[-\s]?\d{3}[-\s]?\d{3,4}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?$/i,
+                  message: "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก เช่น 0812345678 หรือ 021234567 ต่อ 12)"
+                }
+              })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
+              {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.phone.message}</span>}
             </div>
             <ThaiAddressFields register={register} setValue={setValue} errors={errors} />
             <div className="form-group">
