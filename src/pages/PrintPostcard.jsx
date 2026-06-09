@@ -93,7 +93,7 @@ export default function PrintPostcard() {
       </div>
 
       <div className="print-area">
-        <div style={{ fontSize: \`\${fontSize}px\`, lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif' }}>
+        <div style={{ fontSize: `${fontSize}px`, lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1em' }}>
             <div><strong>ผู้รับ</strong></div>
             {data.did && (
