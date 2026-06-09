@@ -150,14 +150,12 @@ export default function PrintBlankForms() {
             <div style={{ flex: '1', paddingLeft: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.85rem', minWidth: 0 }}>
               <div style={{ fontWeight: 'bold', fontSize: '0.95rem', marginBottom: '0.15rem', color: 'var(--primary)', textAlign: 'center' }}>ข้อมูลสำหรับพิมพ์ลงไปรษณียบัตร</div>
               
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.2rem', width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', width: '100%' }}>
                 <span style={{ whiteSpace: 'nowrap' }}>วันที่สั่งจอง:</span>
-                <span className="line-input" style={{ flex: 2, margin: '0 0.2rem', minWidth: '60px' }}></span>
+                <span className="line-input" style={{ flex: 1.5, margin: '0 0.2rem', minWidth: '80px' }}></span>
                 <span style={{ whiteSpace: 'nowrap' }}>จำนวน:</span>
-                <span className="line-input" style={{ flex: 1.2, margin: '0 0.2rem', minWidth: '40px' }}></span>
-                <span style={{ whiteSpace: 'nowrap' }}>ใบ (</span>
-                <span className="line-input" style={{ flex: 1.5, margin: '0 0.2rem', minWidth: '50px' }}></span>
-                <span style={{ whiteSpace: 'nowrap' }}>บาท)</span>
+                <span className="line-input" style={{ flex: 1, margin: '0 0.2rem', minWidth: '60px' }}></span>
+                <span style={{ whiteSpace: 'nowrap' }}>ใบ</span>
               </div>
               
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.2rem', width: '100%' }}>
