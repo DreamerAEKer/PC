@@ -103,7 +103,7 @@ export default function PrintBlankForms() {
             
             {/* Left Column (Tear-off Receipt - 35%) */}
             <div style={{ flex: '0 0 35%', paddingRight: '0.8rem', borderRight: '1px dashed #94a3b8', display: 'flex', flexDirection: 'column', fontSize: '0.75rem' }}>
-              <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '0.1rem', fontSize: '0.85rem', lineHeight: '1.2' }}>แบบฟอร์มสั่งพิมพ์ ชื่อ ที่อยู่<br/>ลงบนไปรษณียบัตร</div>
+              <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '0.1rem', fontSize: '0.85rem', lineHeight: '1.3' }}>แบบฟอร์มสั่งพิมพ์<br/>ชื่อ-ที่อยู่ ลงบนไปรษณียบัตร</div>
               <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '0.5rem', fontSize: '0.75rem' }}>ที่ {branchName}</div>
               
               <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '0.15rem', fontSize: '0.8rem', backgroundColor: '#f1f5f9', padding: '0.2rem 0', borderRadius: '4px' }}>ส่วนที่ลูกค้าเก็บไว้</div>
@@ -177,12 +177,12 @@ export default function PrintBlankForms() {
                 <div style={{ borderBottom: '1px dotted #000', height: '1.4rem', width: '100%' }}></div>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: '0.2rem', width: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-end', flex: 1, paddingRight: '0.5rem', minWidth: 0 }}>
-                  <span style={{ whiteSpace: 'nowrap' }}>รหัสไปรษณีย์:</span>
-                  <span className="line-input" style={{ flex: 1, margin: '0 0 0 0.2rem' }}></span>
-                </div>
-                
+              <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                <span style={{ whiteSpace: 'nowrap' }}>รหัสไปรษณีย์:</span>
+                <span className="line-input" style={{ flex: 1, margin: '0 0 0 0.2rem' }}></span>
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: 'auto', width: '100%' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}>
                   <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>หรือ D/ID:</span>
                   <div style={{ display: 'flex', gap: '0.15rem' }}>
