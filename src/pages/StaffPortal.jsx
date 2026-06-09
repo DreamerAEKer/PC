@@ -17,7 +17,7 @@ export default function StaffPortal() {
     return '';
   };
   const [history, setHistory] = useState([]);
-  const [scanMode, setScanMode] = useState(false);
+  const [scanMode, setScanMode] = useState('manual');
   const [branchName, setBranchName] = useState('ไปรษณีย์กลาง 10501');
   const [staffName, setStaffName] = useState('');
   const [staffPhone, setStaffPhone] = useState('');
@@ -66,7 +66,7 @@ export default function StaffPortal() {
 
   useEffect(() => {
     let scanner = null;
-    if (scanMode) {
+    if (scanMode === 'camera') {
       scanner = new Html5QrcodeScanner(
         "reader",
         { fps: 10, qrbox: {width: 250, height: 250} },
@@ -86,7 +86,7 @@ export default function StaffPortal() {
           setValue("zipcode", data.zipcode || "");
           setValue("did", data.did);
           scanner.clear();
-          setScanMode(false);
+          setScanMode('manual');
           alert("สแกนข้อมูลสำเร็จ! กรุณาตรวจสอบและกด สั่งพิมพ์");
         } catch (err) {
           alert("QR Code ไม่ถูกต้องหรือไม่ใช่ข้อมูลจากระบบนี้");
@@ -218,28 +218,102 @@ export default function StaffPortal() {
         {/* Left column: Entry */}
         <div style={{ flex: '1 1 400px' }}>
           <div className="card glass-panel">
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
               <button 
                 type="button" 
-                className={`btn ${!scanMode ? 'btn-primary' : 'btn-secondary'}`} 
-                onClick={() => setScanMode(false)}
-                style={{ flex: 1 }}
+                className={`btn ${scanMode === 'manual' ? 'btn-primary' : 'btn-secondary'}`} 
+                onClick={() => setScanMode('manual')}
+                style={{ flex: 1, padding: '0.5rem', fontSize: '0.9rem', minWidth: '100px' }}
               >
-                <Keyboard size={18} /> กรอกข้อมูล
+                <Keyboard size={16} /> พิมพ์ข้อมูลเอง
               </button>
               <button 
                 type="button" 
-                className={`btn ${scanMode ? 'btn-primary' : 'btn-secondary'}`} 
-                onClick={() => setScanMode(true)}
-                style={{ flex: 1 }}
+                className={`btn ${scanMode === 'usb' ? 'btn-primary' : 'btn-secondary'}`} 
+                onClick={() => setScanMode('usb')}
+                style={{ flex: 1, padding: '0.5rem', fontSize: '0.9rem', minWidth: '130px' }}
               >
-                <QrCode size={18} /> สแกน QR
+                <QrCode size={16} /> เครื่องสแกน USB
+              </button>
+              <button 
+                type="button" 
+                className={`btn ${scanMode === 'camera' ? 'btn-primary' : 'btn-secondary'}`} 
+                onClick={() => setScanMode('camera')}
+                style={{ flex: 1, padding: '0.5rem', fontSize: '0.9rem', minWidth: '120px' }}
+              >
+                <QrCode size={16} /> กล้องเว็บแคม
               </button>
             </div>
 
-            <div id="reader-hidden" style={{ display: 'none' }}></div>
+            <div id="reader-hidden" style={{ position: 'absolute', top: '-9999px', width: '500px', height: '500px' }}></div>
 
-            {scanMode ? (
+            {scanMode === 'usb' && (
+              <div style={{ marginBottom: '1.5rem', padding: '1.5rem', backgroundColor: '#f8fafc', border: '2px dashed var(--primary)', borderRadius: '12px', textAlign: 'center' }}>
+                <QrCode size={40} color="var(--primary)" style={{ marginBottom: '1rem' }} />
+                <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>ใช้เครื่องสแกนบาร์โค้ด (USB)</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                  คลิกที่ช่องด้านล่างให้เคอร์เซอร์กระพริบ แล้วยิง QR Code จากหน้าจอมือถือลูกค้าได้เลย
+                </p>
+                <input 
+                  type="text" 
+                  autoFocus
+                  className="form-control" 
+                  placeholder="👉 คลิกที่นี่ แล้วยิงสแกนเนอร์..." 
+                  style={{ fontSize: '1.2rem', padding: '1rem', textAlign: 'center', borderColor: 'var(--primary)', borderWidth: '2px', backgroundColor: '#fff' }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      try {
+                        const val = e.target.value.trim();
+                        if (!val) return;
+                        const data = JSON.parse(val);
+                        setValue("orderDate", data.orderDate);
+                        setValue("quantity", data.quantity);
+                        setValue("name", data.name);
+                        setValue("phone", data.phone);
+                        setValue("addressLine1", data.addressLine1 || data.address);
+                        setValue("subdistrict", data.subdistrict || "");
+                        setValue("district", data.district || "");
+                        setValue("province", data.province || "");
+                        setValue("zipcode", data.zipcode || "");
+                        setValue("did", data.did);
+                        e.target.value = '';
+                        setScanMode('manual');
+                        alert("ดึงข้อมูลสำเร็จ! กรุณาตรวจสอบแล้วกด สั่งพิมพ์");
+                      } catch (err) {
+                        alert("ข้อมูล QR Code ไม่ถูกต้อง กรุณาลองใหม่");
+                        e.target.value = '';
+                      }
+                    }
+                  }}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    if (val.length > 20 && val.startsWith('{') && val.endsWith('}')) {
+                      try {
+                        const data = JSON.parse(val);
+                        if (data.name && data.phone) {
+                          setValue("orderDate", data.orderDate);
+                          setValue("quantity", data.quantity);
+                          setValue("name", data.name);
+                          setValue("phone", data.phone);
+                          setValue("addressLine1", data.addressLine1 || data.address);
+                          setValue("subdistrict", data.subdistrict || "");
+                          setValue("district", data.district || "");
+                          setValue("province", data.province || "");
+                          setValue("zipcode", data.zipcode || "");
+                          setValue("did", data.did);
+                          e.target.value = '';
+                          setScanMode('manual');
+                          alert("ดึงข้อมูลสำเร็จ! กรุณาตรวจสอบแล้วกด สั่งพิมพ์");
+                        }
+                      } catch (err) {}
+                    }
+                  }}
+                />
+              </div>
+            )}
+
+            {scanMode === 'camera' && (
               <div>
                 <div id="reader" style={{ width: '100%', marginBottom: '1rem' }}></div>
                 <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
@@ -247,7 +321,7 @@ export default function StaffPortal() {
                   <input type="file" accept="image/*" onChange={handleFileUpload} className="form-control" style={{ marginTop: '0.5rem' }} />
                 </div>
               </div>
-            ) : null}
+            )}
 
             <form onSubmit={handleSubmit(onSubmit, onError)}>
               <div style={{ display: 'flex', gap: '1rem' }}>

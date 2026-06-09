@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import { Download, CheckCircle, Clock, Share2 } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
@@ -198,10 +198,10 @@ export default function CustomerForm() {
                 marginBottom: '1.5rem'
               }}
             >
-              <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem' }}>
-                <QRCodeSVG value={generatedData.payload} size={110} level="L" />
+              <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: '#fff', padding: '0.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <QRCodeCanvas value={generatedData.payload} size={150} level="Q" />
               </div>
-              <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.4rem', paddingRight: '130px' }}>ข้อมูลผู้รับ (สำหรับการพิมพ์)</h2>
+              <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.4rem', paddingRight: '170px' }}>ข้อมูลผู้รับ (สำหรับการพิมพ์)</h2>
               <div style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem' }}>
                 วันที่สั่งจอง: {generatedData.orderDate} | จำนวน: {generatedData.quantity} ใบ<br/>
                 รับจองโดย: G.P.O 10501
@@ -269,12 +269,11 @@ export default function CustomerForm() {
                       quantity: record.quantity,
                       name: record.name,
                       phone: record.phone,
-                      address: record.address,
-                      addressLine1: record.addressLine1,
-                      subdistrict: record.subdistrict,
-                      district: record.district,
-                      province: record.province,
-                      zipcode: record.zipcode,
+                      addressLine1: record.addressLine1 || record.address,
+                      subdistrict: record.subdistrict || '',
+                      district: record.district || '',
+                      province: record.province || '',
+                      zipcode: record.zipcode || '',
                       did: record.did
                     });
                     setGeneratedData({ ...record, payload });
