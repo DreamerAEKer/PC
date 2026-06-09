@@ -40,7 +40,11 @@ export default function StaffPortal() {
       }
     }
     if (savedHistory) {
-      setHistory(JSON.parse(savedHistory));
+      try {
+        setHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        setHistory([]);
+      }
     }
 
     const savedForm = localStorage.getItem('staffFormData');
@@ -73,8 +77,12 @@ export default function StaffPortal() {
   const [printData, setPrintData] = useState(null);
 
   const [printSettings, setPrintSettings] = useState(() => {
-    const saved = localStorage.getItem('customPrintSettings');
-    return saved ? JSON.parse(saved) : { top: 4, left: 8, fontSize: 11 };
+    try {
+      const saved = localStorage.getItem('customPrintSettings');
+      return saved ? JSON.parse(saved) : { top: 4, left: 8, fontSize: 11 };
+    } catch (e) {
+      return { top: 4, left: 8, fontSize: 11 };
+    }
   });
 
   useEffect(() => {
@@ -280,8 +288,8 @@ export default function StaffPortal() {
               height: 100vh;
               background: white;
               position: relative;
-              padding-top: 4cm;
-              padding-left: 8cm;
+              padding-top: ${printSettings.top}cm;
+              padding-left: ${printSettings.left}cm;
               padding-right: 1cm;
               overflow: hidden;
               box-sizing: border-box;
@@ -587,38 +595,38 @@ export default function StaffPortal() {
 
       {printData && (
         <div className="print-only print-area">
-          <div style={{ fontSize: '11pt', lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif' }}>
+          <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif' }}>
             {printData.did ? (
               <div style={{ display: 'flex', gap: '2rem' }}>
                 <div style={{ flex: 1.5 }}>
-                  <div style={{ fontWeight: 'bold', fontSize: '12pt', marginBottom: '0.2em' }}>
+                  <div style={{ fontWeight: 'bold', fontSize: `${printSettings.fontSize + 1}pt`, marginBottom: '0.2em' }}>
                     {printData.name}
                   </div>
-                  <div style={{ fontSize: '11pt', marginBottom: '0.5em' }}>
+                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.5em' }}>
                     โทร. {printData.phone}
                   </div>
-                  <div style={{ fontSize: '10pt', color: '#333', lineHeight: '1.4' }}>
+                  <div style={{ fontSize: `${Math.max(8, printSettings.fontSize - 1)}pt`, color: '#333', lineHeight: '1.4' }}>
                     {printData.address} {printData.zipcode}
                   </div>
                 </div>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ fontSize: '24pt', fontWeight: '900', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
+                  <div style={{ fontSize: `${printSettings.fontSize * 2}pt`, fontWeight: '900', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
                     {printData.did}
                   </div>
                 </div>
               </div>
             ) : (
               <>
-                <div style={{ fontWeight: 'bold', fontSize: '12pt', marginBottom: '0.2em' }}>
+                <div style={{ fontWeight: 'bold', fontSize: `${printSettings.fontSize + 1}pt`, marginBottom: '0.2em' }}>
                   {printData.name}
                 </div>
-                <div style={{ fontSize: '11pt', marginBottom: '0.5em' }}>
+                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.5em' }}>
                   โทร. {printData.phone}
                 </div>
-                <div style={{ fontSize: '11pt', lineHeight: '1.4' }}>
+                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4' }}>
                   {printData.address}
                 </div>
-                <div style={{ marginTop: '0.2em', fontWeight: 'bold', fontSize: '12pt', letterSpacing: '0.1em' }}>
+                <div style={{ marginTop: '0.2em', fontWeight: 'bold', fontSize: `${printSettings.fontSize + 1}pt`, letterSpacing: '0.1em' }}>
                   {printData.zipcode}
                 </div>
               </>
