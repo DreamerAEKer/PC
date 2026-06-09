@@ -1,6 +1,7 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Package, User } from 'lucide-react';
+import { version } from '../package.json';
 import CustomerForm from './pages/CustomerForm';
 import StaffPortal from './pages/StaffPortal';
 import PrintPostcard from './pages/PrintPostcard';
@@ -19,7 +20,7 @@ function Navigation() {
         <span>PostcardApp</span>
       </Link>
       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', opacity: 0.3, fontWeight: 500 }}>
-        © MrAEK 10501
+        © MrAEK 10501 v{version}
       </div>
     </header>
   );
