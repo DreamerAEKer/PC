@@ -92,6 +92,10 @@ export default function StaffPortal() {
     }
   };
 
+  const onError = () => {
+    alert("กรุณากรอกข้อมูลให้ครบถ้วนในช่องที่จำเป็นก่อนสั่งพิมพ์ครับ");
+  };
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -137,7 +141,7 @@ export default function StaffPortal() {
               </div>
             ) : null}
 
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <div className="form-group" style={{ flex: 1 }}>
                   <label className="form-label">วันที่สั่งจอง</label>
@@ -163,7 +167,7 @@ export default function StaffPortal() {
               </div>
               <div className="form-group">
                 <label className="form-label">เบอร์โทรศัพท์</label>
-                <input type="tel" className="form-control" required {...register("phone")} />
+                <input type="text" className="form-control" required {...register("phone")} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
               </div>
               <div className="form-group">
                 <label className="form-label">ที่อยู่จัดส่ง</label>

@@ -44,6 +44,10 @@ export default function CustomerForm() {
     }
   };
 
+  const onError = () => {
+    alert("กรุณากรอกข้อมูลให้ครบถ้วนในช่องที่จำเป็นก่อนทำการสร้างข้อมูลครับ");
+  };
+
   return (
     <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
       <div style={{ flex: '1 1 400px' }}>
@@ -52,7 +56,7 @@ export default function CustomerForm() {
             <CheckCircle color="var(--primary)" />
             กรอกข้อมูลเพื่อสั่งพิมพ์ไปรษณียบัตร
           </h2>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit, onError)}>
             <div className="form-group">
               <label className="form-label">วันที่สั่งจอง</label>
               <input type="date" className="form-control" required {...register("orderDate")} defaultValue={new Date().toISOString().split('T')[0]} />
@@ -76,7 +80,7 @@ export default function CustomerForm() {
             </div>
             <div className="form-group">
               <label className="form-label">เบอร์โทรศัพท์</label>
-              <input type="tel" className="form-control" required {...register("phone")} placeholder="08X-XXX-XXXX" />
+              <input type="text" className="form-control" required {...register("phone")} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
             </div>
             <div className="form-group">
               <label className="form-label">ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน, ตำบล, อำเภอ, จังหวัด)</label>
