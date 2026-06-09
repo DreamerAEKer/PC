@@ -129,19 +129,11 @@ export default function PrintBlankForms() {
               <div style={{ borderTop: '1px dotted #ccc', paddingTop: '0.4rem', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-end' }}>
                   <span style={{ whiteSpace: 'nowrap' }}>จนท:</span>
-                  {staffName ? (
-                    <span style={{ flex: 1, paddingLeft: '0.5rem', fontFamily: 'monospace', textDecoration: 'underline', textDecorationStyle: 'dotted' }}>{staffName}</span>
-                  ) : (
-                    <span className="line-input" style={{ flex: 1 }}></span>
-                  )}
+                  <span className="line-input" style={{ flex: 1, margin: '0 0 0 0.2rem', paddingLeft: '0.5rem', fontFamily: 'monospace', fontWeight: 'bold' }}>{staffName}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-end' }}>
                   <span style={{ whiteSpace: 'nowrap' }}>โทร:</span>
-                  {staffPhone ? (
-                    <span style={{ flex: 1, paddingLeft: '0.5rem', fontFamily: 'monospace', textDecoration: 'underline', textDecorationStyle: 'dotted' }}>{staffPhone}</span>
-                  ) : (
-                    <span className="line-input" style={{ flex: 1 }}></span>
-                  )}
+                  <span className="line-input" style={{ flex: 1, margin: '0 0 0 0.2rem', paddingLeft: '0.5rem', fontFamily: 'monospace', fontWeight: 'bold' }}>{staffPhone}</span>
                 </div>
               </div>
             </div>
