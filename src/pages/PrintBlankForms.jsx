@@ -33,8 +33,8 @@ export default function PrintBlankForms() {
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
-            padding: 0.5cm;
-            gap: 0.5cm;
+            padding: 1cm;
+            gap: 0;
           }
 
           @media print {
@@ -48,7 +48,7 @@ export default function PrintBlankForms() {
 
           .blank-form {
             border: 1px dashed #94a3b8;
-            padding: 1.5cm;
+            padding: 1cm 1.2cm;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -90,9 +90,12 @@ export default function PrintBlankForms() {
               <span className="line-input"></span>
             </div>
             
-            <div style={{ display: 'flex', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', marginBottom: '1rem', alignItems: 'flex-end' }}>
               <span style={{ whiteSpace: 'nowrap' }}>จำนวน (ใบ):</span>
-              <span className="line-input"></span>
+              <span className="line-input" style={{ flex: 1 }}></span>
+              <span style={{ whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>เป็นเงิน:</span>
+              <span className="line-input" style={{ flex: 1 }}></span>
+              <span style={{ whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>บาท</span>
             </div>
             
             <div style={{ display: 'flex', marginBottom: '1rem' }}>
@@ -107,8 +110,9 @@ export default function PrintBlankForms() {
             
             <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '1rem' }}>
               <span>ที่อยู่จัดส่ง:</span>
-              <div style={{ borderBottom: '1px dotted #000', height: '2rem', width: '100%' }}></div>
-              <div style={{ borderBottom: '1px dotted #000', height: '2rem', width: '100%' }}></div>
+              <div style={{ borderBottom: '1px dotted #000', height: '1.8rem', width: '100%' }}></div>
+              <div style={{ borderBottom: '1px dotted #000', height: '1.8rem', width: '100%' }}></div>
+              <div style={{ borderBottom: '1px dotted #000', height: '1.8rem', width: '100%' }}></div>
             </div>
             
             <div style={{ display: 'flex', marginBottom: '1rem' }}>
@@ -117,7 +121,7 @@ export default function PrintBlankForms() {
             </div>
             
             <div style={{ display: 'flex', marginBottom: '1rem', marginTop: 'auto' }}>
-              <span style={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>D-ID (ไปรษณีย์ไทย):</span>
+              <span style={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>D/ID (ไปรษณีย์ไทย):</span>
               <span className="line-input"></span>
             </div>
           </div>
