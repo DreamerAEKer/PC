@@ -6,7 +6,10 @@ import { Download, CheckCircle, Clock } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 
 export default function CustomerForm() {
-  const { register, handleSubmit, reset, setValue, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
+
+  const quantity = watch("quantity", 1);
+  const totalPrice = (parseInt(quantity, 10) || 0) * 3;
 
   const getFieldClass = (fieldName) => {
     if (errors[fieldName]) return 'input-error';
@@ -103,9 +106,29 @@ export default function CustomerForm() {
               <label className="form-label">ที่อยู่ D-ID (ไปรษณีย์ไทย)</label>
               <input type="text" className="form-control" {...register("did")} placeholder="ถ้ามี (ตัวเลือก)" />
             </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
-              สร้างข้อมูล / สร้างรูปภาพ
-            </button>
+            <div style={{ marginTop: '2rem' }}>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+                สร้างข้อมูล / สร้างรูปภาพ
+              </button>
+            </div>
+
+            {quantity > 0 && (
+              <div style={{
+                marginTop: '1.5rem',
+                padding: '1rem',
+                backgroundColor: '#f0fdf4',
+                border: '2px dashed #22c55e',
+                borderRadius: '12px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '0.9rem', color: '#166534', marginBottom: '0.25rem' }}>ราคาไปรษณียบัตร (ใบละ 3 บาท)</div>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 600, color: '#15803d' }}>จำนวน {quantity} ใบ</span>
+                  <span style={{ fontSize: '1.1rem', color: '#15803d' }}>=</span>
+                  <span style={{ fontSize: '1.75rem', fontWeight: 800, color: '#16a34a' }}>{totalPrice.toLocaleString()} บาท</span>
+                </div>
+              </div>
+            )}
           </form>
         </div>
       </div>

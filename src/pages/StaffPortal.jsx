@@ -6,7 +6,10 @@ import { QrCode, Keyboard, History, Printer, FileText } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 
 export default function StaffPortal() {
-  const { register, handleSubmit, setValue, reset, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
+
+  const quantity = watch("quantity", 1);
+  const totalPrice = (parseInt(quantity, 10) || 0) * 3;
 
   const getFieldClass = (fieldName) => {
     if (errors[fieldName]) return 'input-error';
@@ -214,6 +217,24 @@ export default function StaffPortal() {
                 <Printer size={20} />
                 เตรียมสั่งพิมพ์ลงไปรษณียบัตร
               </button>
+
+              {quantity > 0 && (
+                <div style={{
+                  marginTop: '1.5rem',
+                  padding: '1rem',
+                  backgroundColor: '#f0fdf4',
+                  border: '2px dashed #22c55e',
+                  borderRadius: '12px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '0.9rem', color: '#166534', marginBottom: '0.25rem' }}>ราคาไปรษณียบัตร (ใบละ 3 บาท)</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '1.1rem', fontWeight: 600, color: '#15803d' }}>จำนวน {quantity} ใบ</span>
+                    <span style={{ fontSize: '1.1rem', color: '#15803d' }}>=</span>
+                    <span style={{ fontSize: '1.75rem', fontWeight: 800, color: '#16a34a' }}>{totalPrice.toLocaleString()} บาท</span>
+                  </div>
+                </div>
+              )}
             </form>
           </div>
         </div>
