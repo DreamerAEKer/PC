@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Package, User } from 'lucide-react';
 import CustomerForm from './pages/CustomerForm';
 import StaffPortal from './pages/StaffPortal';
