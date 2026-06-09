@@ -132,6 +132,7 @@ export default function StaffPortal() {
   };
 
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [showSaveError, setShowSaveError] = useState(false);
 
   const handleBranchChange = (e) => {
     setBranchName(e.target.value);
@@ -147,6 +148,11 @@ export default function StaffPortal() {
   };
 
   const saveSettings = () => {
+    if (!staffName && !staffPhone) {
+      setShowSaveError(true);
+      setTimeout(() => setShowSaveError(false), 4000);
+      return;
+    }
     localStorage.setItem('branchName', branchName);
     localStorage.setItem('staffName', staffName);
     localStorage.setItem('staffPhone', staffPhone);
@@ -176,8 +182,8 @@ export default function StaffPortal() {
               className="form-control" 
               value={staffName} 
               onChange={handleStaffNameChange} 
-              placeholder="เว้นว่างได้"
-              style={{ width: '100px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
+              placeholder="คลิกเพื่อพิมพ์ชื่อ"
+              style={{ width: '110px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
             />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -187,7 +193,7 @@ export default function StaffPortal() {
               className="form-control" 
               value={staffPhone} 
               onChange={handleStaffPhoneChange} 
-              placeholder="เว้นว่างได้"
+              placeholder="คลิกเพื่อพิมพ์"
               style={{ width: '100px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
             />
           </div>
@@ -196,6 +202,7 @@ export default function StaffPortal() {
               บันทึก
             </button>
             {showSaveSuccess && <span style={{ color: '#16a34a', fontSize: '0.8rem', marginLeft: '0.5rem', fontWeight: 'bold' }}>✓ เซฟแล้ว</span>}
+            {showSaveError && <span style={{ color: '#dc2626', fontSize: '0.8rem', marginLeft: '0.5rem', fontWeight: 'bold' }}>❌ ยังไม่ได้พิมพ์อะไรเลยครับ!</span>}
           </div>
           
           <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border)', margin: '0 0.5rem' }}></div>
