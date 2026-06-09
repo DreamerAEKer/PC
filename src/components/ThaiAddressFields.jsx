@@ -126,16 +126,23 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
           background: 'white', border: '1px solid var(--border)', borderRadius: '8px',
           maxHeight: '200px', overflowY: 'auto', zIndex: 100, boxShadow: 'var(--shadow-lg)'
         }}>
-          {filteredData.map((item, idx) => (
-            <div key={idx} 
-                 style={{ padding: '0.75rem', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
-                 onClick={() => handleSelect(item)}
-                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              ต.{item.subDistrict} อ.{item.district} จ.{item.province} {item.zipCode}
-            </div>
-          ))}
+          {filteredData.map((item, idx) => {
+            const isBKK = item.province === 'กรุงเทพมหานคร';
+            const subTitle = isBKK ? `แขวง${item.subDistrict}` : `ต.${item.subDistrict}`;
+            const distTitle = isBKK ? `เขต${item.district}` : `อ.${item.district}`;
+            const provTitle = isBKK ? item.province : `จ.${item.province}`;
+            
+            return (
+              <div key={idx} 
+                   style={{ padding: '0.75rem', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
+                   onClick={() => handleSelect(item)}
+                   onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                   onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                {subTitle} {distTitle} {provTitle} {item.zipCode}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

@@ -27,7 +27,12 @@ export default function StaffPortal() {
   };
 
   const onSubmit = (data) => {
-    const fullAddress = `${data.addressLine1} ต.${data.subdistrict} อ.${data.district} จ.${data.province}`;
+    const isBKK = data.province === 'กรุงเทพมหานคร';
+    const subTitle = isBKK ? `แขวง${data.subdistrict}` : `ต.${data.subdistrict}`;
+    const distTitle = isBKK ? `เขต${data.district}` : `อ.${data.district}`;
+    const provTitle = isBKK ? data.province : `จ.${data.province}`;
+    
+    const fullAddress = `${data.addressLine1} ${subTitle} ${distTitle} ${provTitle}`;
     const processedData = {
       ...data,
       address: fullAddress
