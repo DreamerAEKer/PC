@@ -18,9 +18,14 @@ export default function StaffPortal() {
   };
   const [history, setHistory] = useState([]);
   const [scanMode, setScanMode] = useState(false);
+  const [branchName, setBranchName] = useState('ไปรษณีย์กลาง 10501');
   const navigate = useNavigate();
 
   useEffect(() => {
+    const savedBranch = localStorage.getItem('branchName');
+    if (savedBranch) {
+      setBranchName(savedBranch);
+    }
     const saved = localStorage.getItem('staffHistory');
     if (saved) {
       setHistory(JSON.parse(saved));
@@ -122,14 +127,32 @@ export default function StaffPortal() {
     alert("กรุณากรอกข้อมูลให้ครบถ้วนในช่องที่จำเป็นก่อนสั่งพิมพ์ครับ");
   };
 
+  const handleBranchChange = (e) => {
+    const newName = e.target.value;
+    setBranchName(newName);
+    localStorage.setItem('branchName', newName);
+  };
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h2>แดชบอร์ดเจ้าหน้าที่ ปณ.</h2>
-        <button onClick={() => navigate('/print-blank-forms')} className="btn btn-secondary">
-          <FileText size={18} />
-          พิมพ์ฟอร์มเปล่า 4 ใบ (A4)
-        </button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>สาขา:</span>
+            <input 
+              type="text" 
+              className="form-control" 
+              value={branchName} 
+              onChange={handleBranchChange} 
+              style={{ width: '220px', padding: '0.4rem 0.8rem' }} 
+            />
+          </div>
+          <button onClick={() => navigate('/print-blank-forms')} className="btn btn-secondary">
+            <FileText size={18} />
+            พิมพ์ฟอร์มเปล่า 4 ใบ (A4)
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>

@@ -4,6 +4,14 @@ import { Printer, ArrowLeft } from 'lucide-react';
 
 export default function PrintBlankForms() {
   const navigate = useNavigate();
+  const [branchName, setBranchName] = React.useState('ไปรษณีย์กลาง 10501');
+
+  React.useEffect(() => {
+    const savedBranch = localStorage.getItem('branchName');
+    if (savedBranch) {
+      setBranchName(savedBranch);
+    }
+  }, []);
 
   const handlePrint = () => {
     window.print();
@@ -83,7 +91,10 @@ export default function PrintBlankForms() {
       <div className="a4-container">
         {[1, 2, 3, 4].map((item) => (
           <div key={item} className="blank-form">
-            <h3 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>แบบฟอร์มสั่งจองและจัดส่ง</h3>
+            <h3 style={{ textAlign: 'center', marginBottom: '0.5rem' }}>แบบฟอร์มสั่งจองและจัดส่ง</h3>
+            <div style={{ textAlign: 'center', fontSize: '0.85rem', marginBottom: '1.5rem', color: 'var(--text-muted)' }}>
+              รับจองโดย: {branchName}
+            </div>
             
             <div style={{ display: 'flex', marginBottom: '1rem' }}>
               <span style={{ whiteSpace: 'nowrap' }}>วันที่สั่งจอง:</span>
