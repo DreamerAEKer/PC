@@ -59,19 +59,19 @@ export default function StaffPortal() {
     };
     const record = saveToHistory(processedData);
     
-    setPrintData(record);
-    setTimeout(() => {
-      window.print();
-      reset(); // clear form
-      setScanMode('manual');
-    }, 100);
+    flushSync(() => {
+      setPrintData(record);
+    });
+    window.print();
+    reset(); // clear form
+    setScanMode('manual');
   };
 
   const handlePrintHistory = (record) => {
-    setPrintData(record);
-    setTimeout(() => {
-      window.print();
-    }, 100);
+    flushSync(() => {
+      setPrintData(record);
+    });
+    window.print();
   };
 
   const populateFromScan = (data) => {
@@ -196,6 +196,7 @@ export default function StaffPortal() {
               position: relative;
               padding: 1.5cm 1cm 1cm 1cm;
               overflow: hidden;
+              box-sizing: border-box;
             }
           }
         `}
