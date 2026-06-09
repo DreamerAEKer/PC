@@ -222,7 +222,7 @@ export default function CustomerForm() {
                 <Share2 size={18} />
                 แชร์ไป LINE
               </button>
-            </div>>
+            </div>
           </div>
         )}
 
