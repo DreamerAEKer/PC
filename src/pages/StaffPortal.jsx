@@ -19,13 +19,17 @@ export default function StaffPortal() {
   const [history, setHistory] = useState([]);
   const [scanMode, setScanMode] = useState(false);
   const [branchName, setBranchName] = useState('ไปรษณีย์กลาง 10501');
+  const [staffName, setStaffName] = useState('');
+  const [staffPhone, setStaffPhone] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     const savedBranch = localStorage.getItem('branchName');
-    if (savedBranch) {
-      setBranchName(savedBranch);
-    }
+    if (savedBranch) setBranchName(savedBranch);
+    const savedStaffName = localStorage.getItem('staffName');
+    if (savedStaffName) setStaffName(savedStaffName);
+    const savedStaffPhone = localStorage.getItem('staffPhone');
+    if (savedStaffPhone) setStaffPhone(savedStaffPhone);
     const saved = localStorage.getItem('staffHistory');
     if (saved) {
       setHistory(JSON.parse(saved));
@@ -132,20 +136,50 @@ export default function StaffPortal() {
     setBranchName(newName);
     localStorage.setItem('branchName', newName);
   };
+  const handleStaffNameChange = (e) => {
+    setStaffName(e.target.value);
+    localStorage.setItem('staffName', e.target.value);
+  };
+  const handleStaffPhoneChange = (e) => {
+    setStaffPhone(e.target.value);
+    localStorage.setItem('staffPhone', e.target.value);
+  };
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h2>แดชบอร์ดเจ้าหน้าที่ ปณ.</h2>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>สาขา:</span>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>สาขา:</span>
             <input 
               type="text" 
               className="form-control" 
               value={branchName} 
               onChange={handleBranchChange} 
-              style={{ width: '220px', padding: '0.4rem 0.8rem' }} 
+              style={{ width: '160px', padding: '0.3rem 0.5rem', fontSize: '0.9rem' }} 
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>จนท:</span>
+            <input 
+              type="text" 
+              className="form-control" 
+              value={staffName} 
+              onChange={handleStaffNameChange} 
+              placeholder="ชื่อเจ้าหน้าที่"
+              style={{ width: '120px', padding: '0.3rem 0.5rem', fontSize: '0.9rem' }} 
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>โทร:</span>
+            <input 
+              type="text" 
+              className="form-control" 
+              value={staffPhone} 
+              onChange={handleStaffPhoneChange} 
+              placeholder="เบอร์โทร"
+              style={{ width: '120px', padding: '0.3rem 0.5rem', fontSize: '0.9rem' }} 
             />
           </div>
           <button onClick={() => navigate('/print-blank-forms')} className="btn btn-secondary">
