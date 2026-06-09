@@ -97,7 +97,7 @@ export default function PrintBlankForms() {
         </div>
       </div>
 
-      <div className="print-container" style={{ width: '29.7cm', height: '21cm', display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', margin: '0 auto', padding: 0, boxSizing: 'border-box', overflow: 'hidden' }}>
+      <div className="print-container" style={{ width: '100%', height: '98vh', display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', margin: '0 auto', padding: 0, boxSizing: 'border-box', overflow: 'hidden' }}>
         {[1, 2, 3, 4].map((item) => (
           <div key={item} className="blank-form" style={{ display: 'flex', flexDirection: 'row', padding: '0.4cm 0.6cm', border: '1px dashed #94a3b8', boxSizing: 'border-box', overflow: 'hidden' }}>
             
