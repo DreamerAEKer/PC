@@ -66,39 +66,46 @@ export default function StaffPortal() {
 
   useEffect(() => {
     let scanner = null;
-    if (scanMode === 'camera') {
-      scanner = new Html5QrcodeScanner(
-        "reader",
-        { fps: 10, qrbox: {width: 250, height: 250} },
-        /* verbose= */ false
-      );
-      scanner.render((decodedText) => {
-        try {
-          const data = JSON.parse(decodedText);
-          setValue("orderDate", data.orderDate);
-          setValue("quantity", data.quantity);
-          setValue("name", data.name);
-          setValue("phone", data.phone);
-          setValue("addressLine1", data.addressLine1 || data.address);
-          setValue("subdistrict", data.subdistrict || "");
-          setValue("district", data.district || "");
-          setValue("province", data.province || "");
-          setValue("zipcode", data.zipcode || "");
-          setValue("did", data.did);
-          scanner.clear();
-          setScanMode('manual');
-          alert("สแกนข้อมูลสำเร็จ! กรุณาตรวจสอบและกด สั่งพิมพ์");
-        } catch (err) {
-          alert("QR Code ไม่ถูกต้องหรือไม่ใช่ข้อมูลจากระบบนี้");
-        }
-      }, (error) => {
-        // Handle scan error (ignored generally)
-      });
+    try {
+      if (scanMode === 'camera') {
+        scanner = new Html5QrcodeScanner(
+          "reader",
+          { fps: 10, qrbox: {width: 250, height: 250} },
+          /* verbose= */ false
+        );
+        scanner.render((decodedText) => {
+          try {
+            const data = JSON.parse(decodedText);
+            setValue("orderDate", data.orderDate);
+            setValue("quantity", data.quantity);
+            setValue("name", data.name);
+            setValue("phone", data.phone);
+            setValue("addressLine1", data.addressLine1 || data.address);
+            setValue("subdistrict", data.subdistrict || "");
+            setValue("district", data.district || "");
+            setValue("province", data.province || "");
+            setValue("zipcode", data.zipcode || "");
+            setValue("did", data.did);
+            try { if (scanner) scanner.clear().catch(()=>{}).then(() => setScanMode('manual')); } catch(e){ setScanMode('manual'); }
+            alert("สแกนข้อมูลสำเร็จ! กรุณาตรวจสอบและกด สั่งพิมพ์");
+          } catch (err) {
+            alert("QR Code ไม่ถูกต้องหรือไม่ใช่ข้อมูลจากระบบนี้");
+          }
+        }, (error) => {
+          // Handle scan error (ignored generally)
+        });
+      }
+    } catch (err) {
+      console.error("Scanner init error:", err);
     }
 
     return () => {
-      if (scanner) {
-        scanner.clear().catch(error => console.error("Failed to clear scanner", error));
+      try {
+        if (scanner) {
+          scanner.clear().catch(error => console.error("Failed to clear scanner", error));
+        }
+      } catch (err) {
+        console.error("Scanner cleanup error:", err);
       }
     };
   }, [scanMode, setValue]);
