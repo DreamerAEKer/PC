@@ -109,12 +109,20 @@ a:hover {
 
 .form-control {
   width: 100%;
+  max-width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.2s;
   background-color: #fcfcfc;
+  -webkit-appearance: none; /* Helps with iOS styling bugs */
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 1.5rem 1rem;
+  }
 }
 
 .form-control:focus {
