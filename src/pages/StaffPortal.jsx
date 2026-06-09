@@ -95,21 +95,29 @@ export default function StaffPortal() {
       ...data,
       address: fullAddress
     };
-    const record = saveToHistory(processedData);
     
-    // Update the DOM with the print data synchronously
+    // Create the record manually so we have the ID for printing
+    const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString() };
+    
+    // Update ONLY the print data synchronously.
+    // This perfectly matches the DOM mutation of the "พิมพ์ซ้ำ" button, which we know works flawlessly.
     flushSync(() => {
-      setPrintData(record);
+      setPrintData(newRecord);
     });
     
-    // Call window.print directly (synchronously) since we bypassed async handleSubmit
+    // Print synchronously
     window.print();
     
-    // Delay the form reset so it doesn't cause a massive React re-render
-    // while Chrome is trying to snapshot the DOM for the print preview.
+    // Defer the heavy history update, form reset, and hiding the print area
+    // to avoid crashing Chrome's print preview
     setTimeout(() => {
+      const updatedHistory = [newRecord, ...history].slice(0, 50);
+      setHistory(updatedHistory);
+      localStorage.setItem('staffHistory', JSON.stringify(updatedHistory));
+      
       reset(); // clear form
       setScanMode('manual');
+      setPrintData(null); // Hide the print area from the dashboard
     }, 500);
   };
 
@@ -118,6 +126,10 @@ export default function StaffPortal() {
       setPrintData(record);
     });
     window.print();
+    
+    setTimeout(() => {
+      setPrintData(null);
+    }, 500);
   };
 
   const populateFromScan = (data) => {
@@ -240,7 +252,7 @@ export default function StaffPortal() {
               height: 10.5cm;
               background: white;
               position: relative;
-              padding: 2.5cm 1cm 1cm 2.5cm;
+              padding: 4cm 1cm 1cm 3cm;
               overflow: hidden;
               box-sizing: border-box;
             }

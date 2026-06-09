@@ -47,7 +47,7 @@ export default function PrintPostcard() {
             border: 1px solid #ccc;
             margin: 2rem auto;
             position: relative;
-            padding: 2.5cm 1cm 1cm 2.5cm;
+            padding: 4cm 1cm 1cm 3cm;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             overflow: hidden;
             box-sizing: border-box;
