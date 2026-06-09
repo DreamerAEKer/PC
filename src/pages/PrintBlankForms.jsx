@@ -1,21 +1,24 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Printer, ArrowLeft } from 'lucide-react';
 
 export default function PrintBlankForms() {
   const navigate = useNavigate();
-  const [branchName, setBranchName] = React.useState('ไปรษณีย์กลาง 10501');
-  const [staffName, setStaffName] = React.useState('');
-  const [staffPhone, setStaffPhone] = React.useState('');
+  const location = useLocation();
+  const [branchName, setBranchName] = React.useState(location.state?.branchName || 'ไปรษณีย์กลาง 10501');
+  const [staffName, setStaffName] = React.useState(location.state?.staffName || '');
+  const [staffPhone, setStaffPhone] = React.useState(location.state?.staffPhone || '');
 
   React.useEffect(() => {
-    const savedBranch = localStorage.getItem('branchName');
-    if (savedBranch) setBranchName(savedBranch);
-    const savedStaffName = localStorage.getItem('staffName');
-    if (savedStaffName) setStaffName(savedStaffName);
-    const savedStaffPhone = localStorage.getItem('staffPhone');
-    if (savedStaffPhone) setStaffPhone(savedStaffPhone);
-  }, []);
+    if (!location.state) {
+      const savedBranch = localStorage.getItem('branchName');
+      if (savedBranch) setBranchName(savedBranch);
+      const savedStaffName = localStorage.getItem('staffName');
+      if (savedStaffName) setStaffName(savedStaffName);
+      const savedStaffPhone = localStorage.getItem('staffPhone');
+      if (savedStaffPhone) setStaffPhone(savedStaffPhone);
+    }
+  }, [location.state]);
 
   const handlePrint = () => {
     window.print();
@@ -128,12 +131,16 @@ export default function PrintBlankForms() {
               
               <div style={{ borderTop: '1px dotted #ccc', paddingTop: '0.4rem', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                  <span style={{ whiteSpace: 'nowrap' }}>จนท:</span>
-                  <span className="line-input" style={{ flex: 1, margin: '0 0 0 0.2rem', paddingLeft: '0.5rem', fontFamily: 'monospace', fontWeight: 'bold' }}>{staffName}</span>
+                  <span style={{ whiteSpace: 'nowrap', marginBottom: '1px' }}>จนท:</span>
+                  <div style={{ flex: 1, marginLeft: '0.2rem', paddingLeft: '0.5rem', borderBottom: '1px dotted #000', fontFamily: 'monospace', fontWeight: 'bold', minHeight: '1.2rem', color: '#000' }}>
+                    {staffName || '\u00A0'}
+                  </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                  <span style={{ whiteSpace: 'nowrap' }}>โทร:</span>
-                  <span className="line-input" style={{ flex: 1, margin: '0 0 0 0.2rem', paddingLeft: '0.5rem', fontFamily: 'monospace', fontWeight: 'bold' }}>{staffPhone}</span>
+                  <span style={{ whiteSpace: 'nowrap', marginBottom: '1px' }}>โทร:</span>
+                  <div style={{ flex: 1, marginLeft: '0.2rem', paddingLeft: '0.5rem', borderBottom: '1px dotted #000', fontFamily: 'monospace', fontWeight: 'bold', minHeight: '1.2rem', color: '#000' }}>
+                    {staffPhone || '\u00A0'}
+                  </div>
                 </div>
               </div>
             </div>
