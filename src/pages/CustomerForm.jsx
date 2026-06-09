@@ -57,13 +57,21 @@ export default function CustomerForm() {
     alert("กรุณากรอกข้อมูลให้ครบถ้วนในช่องที่จำเป็นก่อนทำการสร้างข้อมูลครับ");
   };
 
+  const getFileName = () => {
+    if (!generatedData) return `postcard-${Date.now()}.png`;
+    // Remove characters that are not allowed in file names
+    const safeName = generatedData.name.replace(/[<>:"/\\|?*]/g, '').trim();
+    // Format: ชื่อ-สกุล_จำนวนใบ_วันที่.png
+    return `${safeName}_${generatedData.quantity}ใบ_${generatedData.orderDate}.png`;
+  };
+
   const downloadImage = async () => {
     if (cardRef.current) {
       const canvas = await html2canvas(cardRef.current, { scale: 2 });
       const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = url;
-      a.download = `postcard-${Date.now()}.png`;
+      a.download = getFileName();
       a.click();
     }
   };
@@ -76,7 +84,7 @@ export default function CustomerForm() {
         const canvas = await html2canvas(cardRef.current, { scale: 2 });
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         if (blob) {
-          const file = new File([blob], `postcard-${Date.now()}.png`, { type: 'image/png' });
+          const file = new File([blob], getFileName(), { type: 'image/png' });
           if (navigator.canShare({ files: [file] })) {
             await navigator.share({
               files: [file],
