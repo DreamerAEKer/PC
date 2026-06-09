@@ -255,7 +255,6 @@ export default function StaffPortal() {
         {`
           @media print {
             @page {
-              size: 14.8cm 10.5cm;
               margin: 0;
             }
             body {
@@ -267,13 +266,13 @@ export default function StaffPortal() {
               display: none !important;
             }
             .print-area {
-              width: 14.8cm;
-              height: 10.5cm;
+              width: 100vw;
+              height: 100vh;
               background: white;
               position: relative;
-              padding-top: 4.5cm;
-              padding-left: 5.5cm;
-              padding-right: 1cm;
+              padding-top: 45vh;
+              padding-left: 45vw;
+              padding-right: 2vw;
               overflow: hidden;
               box-sizing: border-box;
             }
@@ -557,38 +556,38 @@ export default function StaffPortal() {
 
       {printData && (
         <div className="print-only print-area">
-          <div style={{ fontSize: '14pt', lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif', paddingTop: '1em' }}>
+          <div style={{ fontSize: '11pt', lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif' }}>
             {printData.did ? (
-              <div style={{ display: 'flex', gap: '2rem', paddingLeft: '1em' }}>
+              <div style={{ display: 'flex', gap: '2rem' }}>
                 <div style={{ flex: 1.5 }}>
-                  <div style={{ fontWeight: 'bold', fontSize: '16pt', marginBottom: '0.2em' }}>
+                  <div style={{ fontWeight: 'bold', fontSize: '12pt', marginBottom: '0.2em' }}>
                     {printData.name}
                   </div>
-                  <div style={{ fontSize: '14pt', marginBottom: '0.5em' }}>
+                  <div style={{ fontSize: '11pt', marginBottom: '0.5em' }}>
                     โทร. {printData.phone}
                   </div>
-                  <div style={{ fontSize: '12pt', color: '#333', lineHeight: '1.4' }}>
+                  <div style={{ fontSize: '10pt', color: '#333', lineHeight: '1.4' }}>
                     {printData.address} {printData.zipcode}
                   </div>
                 </div>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ fontSize: '36pt', fontWeight: '900', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
+                  <div style={{ fontSize: '24pt', fontWeight: '900', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
                     {printData.did}
                   </div>
                 </div>
               </div>
             ) : (
               <>
-                <div style={{ paddingLeft: '2em', fontWeight: 'bold', fontSize: '16pt', marginBottom: '0.2em' }}>
+                <div style={{ fontWeight: 'bold', fontSize: '12pt', marginBottom: '0.2em' }}>
                   {printData.name}
                 </div>
-                <div style={{ paddingLeft: '2em', fontSize: '14pt', marginBottom: '0.5em' }}>
+                <div style={{ fontSize: '11pt', marginBottom: '0.5em' }}>
                   โทร. {printData.phone}
                 </div>
-                <div style={{ paddingLeft: '2em', fontSize: '14pt', lineHeight: '1.4' }}>
+                <div style={{ fontSize: '11pt', lineHeight: '1.4' }}>
                   {printData.address}
                 </div>
-                <div style={{ paddingLeft: '2em', marginTop: '0.2em', fontWeight: 'bold', fontSize: '18pt', letterSpacing: '0.1em' }}>
+                <div style={{ marginTop: '0.2em', fontWeight: 'bold', fontSize: '12pt', letterSpacing: '0.1em' }}>
                   {printData.zipcode}
                 </div>
               </>
