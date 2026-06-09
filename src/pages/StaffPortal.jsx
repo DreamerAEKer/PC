@@ -79,7 +79,7 @@ export default function StaffPortal() {
     let isValid = true;
     for (const field of requiredFields) {
       const val = data[field];
-      if (!val || (typeof val === 'string' && val.trim() === '') || val === '-') {
+      if (!val || (typeof val === 'string' && val.trim() === '')) {
         isValid = false;
         break;
       }
