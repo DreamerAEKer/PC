@@ -152,11 +152,11 @@ export default function PrintBlankForms() {
               
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.2rem', width: '100%' }}>
                 <span style={{ whiteSpace: 'nowrap' }}>วันที่สั่งจอง:</span>
-                <span className="line-input" style={{ flex: 1.5, margin: '0 0.2rem', minWidth: '30px' }}></span>
+                <span className="line-input" style={{ flex: 2, margin: '0 0.2rem', minWidth: '60px' }}></span>
                 <span style={{ whiteSpace: 'nowrap' }}>จำนวน:</span>
-                <span className="line-input" style={{ flex: 1, margin: '0 0.2rem', minWidth: '20px' }}></span>
-                <span style={{ whiteSpace: 'nowrap' }}>ใบ (เป็นเงิน:</span>
-                <span className="line-input" style={{ flex: 1, margin: '0 0.2rem', minWidth: '30px' }}></span>
+                <span className="line-input" style={{ flex: 1.2, margin: '0 0.2rem', minWidth: '40px' }}></span>
+                <span style={{ whiteSpace: 'nowrap' }}>ใบ (</span>
+                <span className="line-input" style={{ flex: 1.5, margin: '0 0.2rem', minWidth: '50px' }}></span>
                 <span style={{ whiteSpace: 'nowrap' }}>บาท)</span>
               </div>
               
@@ -177,7 +177,7 @@ export default function PrintBlankForms() {
                 <div style={{ borderBottom: '1px dotted #000', height: '1.4rem', width: '100%' }}></div>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', width: '55%' }}>
                 <span style={{ whiteSpace: 'nowrap' }}>รหัสไปรษณีย์:</span>
                 <span className="line-input" style={{ flex: 1, margin: '0 0 0 0.2rem' }}></span>
               </div>
