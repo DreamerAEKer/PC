@@ -93,15 +93,11 @@ export default function PrintPostcard() {
       </div>
 
       <div className="print-area">
-        <div style={{ fontSize: `${fontSize}px`, lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1em' }}>
-            <div><strong>ผู้รับ</strong></div>
-          </div>
-          
+        <div style={{ fontSize: `${fontSize}px`, lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif', paddingTop: '1em' }}>
           {data.did ? (
             <div style={{ display: 'flex', gap: '2rem', paddingLeft: '1em' }}>
               <div style={{ flex: 1.5 }}>
-                <div style={{ fontWeight: 'bold', fontSize: '1.2em', marginBottom: '0.5em' }}>
+                <div style={{ fontWeight: 'bold', fontSize: '1.2em', marginBottom: '0.2em' }}>
                   {data.name}
                 </div>
                 <div style={{ fontSize: '1em', marginBottom: '0.5em' }}>
@@ -119,17 +115,17 @@ export default function PrintPostcard() {
             </div>
           ) : (
             <>
-              <div style={{ paddingLeft: '2em', fontWeight: 'bold', fontSize: '1.2em' }}>
+              <div style={{ paddingLeft: '2em', fontWeight: 'bold', fontSize: '1.2em', marginBottom: '0.2em' }}>
                 {data.name}
               </div>
-              <div style={{ paddingLeft: '2em' }}>
+              <div style={{ paddingLeft: '2em', fontSize: '1em', marginBottom: '0.5em' }}>
+                โทร. {data.phone}
+              </div>
+              <div style={{ paddingLeft: '2em', lineHeight: '1.4' }}>
                 {data.address}
               </div>
-              <div style={{ paddingLeft: '2em', marginTop: '0.5em', fontWeight: 'bold', fontSize: '1.2em', letterSpacing: '0.1em' }}>
-                รหัสไปรษณีย์: {data.zipcode}
-              </div>
-              <div style={{ paddingLeft: '2em', marginTop: '0.5em' }}>
-                โทร. {data.phone}
+              <div style={{ paddingLeft: '2em', marginTop: '0.2em', fontWeight: 'bold', fontSize: '1.3em', letterSpacing: '0.1em' }}>
+                {data.zipcode}
               </div>
             </>
           )}
