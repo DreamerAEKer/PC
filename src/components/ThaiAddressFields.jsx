@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useThaiAddress } from 'use-thai-address';
+import { Info } from 'lucide-react';
 
 export default function ThaiAddressFields({ register, setValue, errors, defaultValues }) {
   const { filteredData, searchByField, reset } = useThaiAddress();
@@ -48,6 +49,18 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
         <label className="form-label">ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน) <span style={{color:'red'}}>*</span></label>
         <input type="text" className={`form-control ${errors.addressLine1 ? 'input-error' : ''}`} required {...register("addressLine1", { required: true })} placeholder="ระบุบ้านเลขที่ หมู่ ซอย ถนน" defaultValue={defaultValues?.addressLine1 || ''} />
         {errors.addressLine1 && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุที่อยู่</span>}
+      </div>
+
+      <div style={{ 
+        display: 'flex', gap: '0.5rem', alignItems: 'flex-start', 
+        padding: '0.75rem', backgroundColor: '#eff6ff', 
+        borderLeft: '4px solid var(--secondary)', borderRadius: '4px',
+        marginBottom: '1rem', fontSize: '0.9rem', color: '#1e3a8a'
+      }}>
+        <Info size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+        <div>
+          <strong>ตัวช่วยพิมพ์:</strong> พิมพ์ค้นหาที่ช่อง <strong>ตำบล, อำเภอ, จังหวัด หรือ รหัสไปรษณีย์</strong> ช่องใดช่องหนึ่ง ระบบจะแสดงตัวเลือก และเติมข้อมูลช่องอื่นให้อัตโนมัติ 🪄
+        </div>
       </div>
       
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
