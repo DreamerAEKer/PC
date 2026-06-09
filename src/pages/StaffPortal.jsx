@@ -72,6 +72,18 @@ export default function StaffPortal() {
 
   const [printData, setPrintData] = useState(null);
 
+  const handleDirectPrintClick = (e) => {
+    const form = e.target.closest('form');
+    if (form && form.checkValidity()) {
+      e.preventDefault(); // Stop async react-hook-form submit
+      
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      
+      onSubmit(data);
+    }
+  };
+
   const onSubmit = (data) => {
     const isBKK = data.province === 'กรุงเทพมหานคร';
     const subTitle = isBKK ? `แขวง${data.subdistrict}` : `ต.${data.subdistrict}`;
@@ -90,18 +102,15 @@ export default function StaffPortal() {
       setPrintData(record);
     });
     
-    // Yield to the browser so it can paint the print area before opening the dialog
+    // Call window.print directly (synchronously) since we bypassed async handleSubmit
+    window.print();
+    
+    // Delay the form reset so it doesn't cause a massive React re-render
+    // while Chrome is trying to snapshot the DOM for the print preview.
     setTimeout(() => {
-      window.print();
-      
-      // Delay the form reset so it doesn't cause a massive React re-render
-      // while Chrome is trying to snapshot the DOM for the print preview.
-      // (window.print is blocking in most browsers, so this runs after dialog closes)
-      setTimeout(() => {
-        reset(); // clear form
-        setScanMode('manual');
-      }, 500);
-    }, 100);
+      reset(); // clear form
+      setScanMode('manual');
+    }, 500);
   };
 
   const handlePrintHistory = (record) => {
@@ -231,7 +240,7 @@ export default function StaffPortal() {
               height: 10.5cm;
               background: white;
               position: relative;
-              padding: 1.5cm 1cm 1cm 1cm;
+              padding: 2.5cm 1cm 1cm 2.5cm;
               overflow: hidden;
               box-sizing: border-box;
             }
@@ -441,7 +450,7 @@ export default function StaffPortal() {
                     <input type="text" className="form-control" {...register("did")} />
                   </div>
                 </div>
-                <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', fontSize: '1.1rem' }}>
+                <button type="submit" onClick={handleDirectPrintClick} className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', fontSize: '1.1rem' }}>
                   <Printer size={20} />
                   บันทึกและสั่งพิมพ์ลงไปรษณียบัตร
                 </button>
