@@ -190,7 +190,7 @@ export default function StaffPortal() {
                 <input type="text" className={`form-control ${errors.phone ? 'input-error' : ''}`} required {...register("phone", { 
                   required: "กรุณาระบุเบอร์โทรศัพท์",
                   pattern: {
-                    value: /^0\d{1,2}[-\s]?\d{3}[-\s]?\d{3,4}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?$/i,
+                    value: /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i,
                     message: "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก เช่น 0812345678 หรือ 021234567 ต่อ 12)"
                   }
                 })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
