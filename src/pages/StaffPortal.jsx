@@ -73,27 +73,17 @@ export default function StaffPortal() {
   const [printData, setPrintData] = useState(null);
 
   const handleDirectPrintClick = (e) => {
-    const data = getValues();
-    const requiredFields = ['orderDate', 'quantity', 'name', 'phone', 'addressLine1', 'province', 'district', 'subdistrict', 'zipcode'];
-    
-    let isValid = true;
-    for (const field of requiredFields) {
-      const val = data[field];
-      if (!val || (typeof val === 'string' && val.trim() === '')) {
-        isValid = false;
-        break;
-      }
-    }
-    
-    const phonePattern = /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i;
-    if (data.phone && !phonePattern.test(data.phone)) {
-      isValid = false;
-    }
-
-    if (isValid) {
-      e.preventDefault();
+    const form = e.target.closest('form');
+    if (form && form.checkValidity()) {
+      e.preventDefault(); // Stop async react-hook-form submit
+      
+      // Extract fresh data directly from the DOM to avoid any async state delay
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      
       onSubmit(data);
     }
+    // If not valid, let it pass through to native submit/react-hook-form for error messages
   };
 
   const onSubmit = (data) => {
