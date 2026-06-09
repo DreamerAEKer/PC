@@ -6,7 +6,7 @@ import { Download, CheckCircle, Clock } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 
 export default function CustomerForm() {
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm({ mode: 'onBlur' });
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm({ mode: 'onChange' });
   const [generatedData, setGeneratedData] = useState(null);
   const [history, setHistory] = useState([]);
   const cardRef = useRef(null);

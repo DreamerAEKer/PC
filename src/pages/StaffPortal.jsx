@@ -6,7 +6,7 @@ import { QrCode, Keyboard, History, Printer, FileText } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 
 export default function StaffPortal() {
-  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm({ mode: 'onBlur' });
+  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm({ mode: 'onChange' });
   const [history, setHistory] = useState([]);
   const [scanMode, setScanMode] = useState(false);
   const navigate = useNavigate();
