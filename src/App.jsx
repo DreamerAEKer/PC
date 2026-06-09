@@ -18,6 +18,9 @@ function Navigation() {
         <Package size={28} />
         <span>PostcardApp</span>
       </Link>
+      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', opacity: 0.6, fontWeight: 500 }}>
+        © MrAEK 10501
+      </div>
     </header>
   );
 }
