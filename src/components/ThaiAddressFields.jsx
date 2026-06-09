@@ -43,11 +43,18 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
   const provinceReg = register("province", { required: true });
   const zipcodeReg = register("zipcode", { required: true });
 
+  const getFieldClass = (fieldName) => {
+    if (!dirtyFields || !touchedFields) return errors[fieldName] ? 'input-error' : '';
+    if (errors[fieldName]) return 'input-error';
+    if (dirtyFields[fieldName] || touchedFields[fieldName]) return 'input-success';
+    return '';
+  };
+
   return (
     <div style={{ position: 'relative' }} ref={containerRef}>
       <div className="form-group">
         <label className="form-label">ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน) <span style={{color:'red'}}>*</span></label>
-        <input type="text" className={`form-control ${errors.addressLine1 ? 'input-error' : ''}`} required {...register("addressLine1", { required: true })} placeholder="ระบุบ้านเลขที่ หมู่ ซอย ถนน" defaultValue={defaultValues?.addressLine1 || ''} />
+        <input type="text" className={`form-control ${getFieldClass('addressLine1')}`} required {...register("addressLine1", { required: true })} placeholder="ระบุบ้านเลขที่ หมู่ ซอย ถนน" defaultValue={defaultValues?.addressLine1 || ''} />
         {errors.addressLine1 && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุที่อยู่</span>}
       </div>
 
@@ -66,7 +73,7 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
         <div style={{ flex: 1 }}>
           <label className="form-label">ตำบล / แขวง <span style={{color:'red'}}>*</span></label>
-          <input type="text" className={`form-control ${errors.subdistrict ? 'input-error' : ''}`} required 
+          <input type="text" className={`form-control ${getFieldClass('subdistrict')}`} required 
             name={subdistrictReg.name}
             ref={subdistrictReg.ref}
             onBlur={subdistrictReg.onBlur}
@@ -82,7 +89,7 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
         </div>
         <div style={{ flex: 1 }}>
           <label className="form-label">อำเภอ / เขต <span style={{color:'red'}}>*</span></label>
-          <input type="text" className={`form-control ${errors.district ? 'input-error' : ''}`} required 
+          <input type="text" className={`form-control ${getFieldClass('district')}`} required 
             name={districtReg.name}
             ref={districtReg.ref}
             onBlur={districtReg.onBlur}
@@ -101,7 +108,7 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
         <div style={{ flex: 1 }}>
           <label className="form-label">จังหวัด <span style={{color:'red'}}>*</span></label>
-          <input type="text" className={`form-control ${errors.province ? 'input-error' : ''}`} required 
+          <input type="text" className={`form-control ${getFieldClass('province')}`} required 
             name={provinceReg.name}
             ref={provinceReg.ref}
             onBlur={provinceReg.onBlur}
@@ -117,7 +124,7 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
         </div>
         <div style={{ flex: 1 }}>
           <label className="form-label">รหัสไปรษณีย์ <span style={{color:'red'}}>*</span></label>
-          <input type="text" className={`form-control ${errors.zipcode ? 'input-error' : ''}`} required 
+          <input type="text" className={`form-control ${getFieldClass('zipcode')}`} required 
             name={zipcodeReg.name}
             ref={zipcodeReg.ref}
             onBlur={zipcodeReg.onBlur}

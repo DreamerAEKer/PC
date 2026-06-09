@@ -6,7 +6,13 @@ import { QrCode, Keyboard, History, Printer, FileText } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 
 export default function StaffPortal() {
-  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm({ mode: 'onChange' });
+  const { register, handleSubmit, setValue, reset, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
+
+  const getFieldClass = (fieldName) => {
+    if (errors[fieldName]) return 'input-error';
+    if (dirtyFields[fieldName] || touchedFields[fieldName]) return 'input-success';
+    return '';
+  };
   const [history, setHistory] = useState([]);
   const [scanMode, setScanMode] = useState(false);
   const navigate = useNavigate();
@@ -162,12 +168,12 @@ export default function StaffPortal() {
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <div className="form-group" style={{ flex: 1 }}>
                   <label className="form-label">วันที่สั่งจอง <span style={{color:'red'}}>*</span></label>
-                  <input type="date" className={`form-control ${errors.orderDate ? 'input-error' : ''}`} required {...register("orderDate", { required: true })} defaultValue={new Date().toISOString().split('T')[0]} />
+                  <input type="date" className={`form-control ${getFieldClass('orderDate')}`} required {...register("orderDate", { required: true })} defaultValue={new Date().toISOString().split('T')[0]} />
                   {errors.orderDate && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุวันที่</span>}
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
                   <label className="form-label">จำนวน (ใบ) <span style={{color:'red'}}>*</span></label>
-                  <input type="number" min="1" className={`form-control ${errors.quantity ? 'input-error' : ''}`} required {...register("quantity", { required: true })} defaultValue="1" list="quantity-options" placeholder="พิมพ์ตัวเลข หรือเลือกจากรายการ" />
+                  <input type="number" min="1" className={`form-control ${getFieldClass('quantity')}`} required {...register("quantity", { required: true })} defaultValue="1" list="quantity-options" placeholder="พิมพ์ตัวเลข หรือเลือกจากรายการ" />
                   <datalist id="quantity-options">
                     <option value="100" />
                     <option value="200" />
@@ -182,12 +188,12 @@ export default function StaffPortal() {
               </div>
               <div className="form-group">
                 <label className="form-label">ชื่อ-นามสกุล <span style={{color:'red'}}>*</span></label>
-                <input type="text" className={`form-control ${errors.name ? 'input-error' : ''}`} required {...register("name", { required: true })} />
+                <input type="text" className={`form-control ${getFieldClass('name')}`} required {...register("name", { required: true })} />
                 {errors.name && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุชื่อ-นามสกุล</span>}
               </div>
               <div className="form-group">
                 <label className="form-label">เบอร์โทรศัพท์ <span style={{color:'red'}}>*</span></label>
-                <input type="text" className={`form-control ${errors.phone ? 'input-error' : ''}`} required {...register("phone", { 
+                <input type="text" className={`form-control ${getFieldClass('phone')}`} required {...register("phone", { 
                   required: "กรุณาระบุเบอร์โทรศัพท์",
                   pattern: {
                     value: /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i,
@@ -196,7 +202,7 @@ export default function StaffPortal() {
                 })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
                 {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.phone.message}</span>}
               </div>
-              <ThaiAddressFields register={register} setValue={setValue} errors={errors} />
+              <ThaiAddressFields register={register} setValue={setValue} errors={errors} dirtyFields={dirtyFields} touchedFields={touchedFields} />
               
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <div className="form-group" style={{ flex: 1 }}>
