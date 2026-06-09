@@ -124,6 +124,11 @@ a:hover {
   background-color: white;
 }
 
+.input-error {
+  border-color: var(--primary) !important;
+  background-color: #fff5f5 !important;
+}
+
 .header {
   display: flex;
   justify-content: space-between;

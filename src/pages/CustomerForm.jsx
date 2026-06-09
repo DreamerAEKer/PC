@@ -5,7 +5,7 @@ import html2canvas from 'html2canvas';
 import { Download, CheckCircle, Clock } from 'lucide-react';
 
 export default function CustomerForm() {
-  const { register, handleSubmit, reset } = useForm();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({ mode: 'onBlur' });
   const [generatedData, setGeneratedData] = useState(null);
   const [history, setHistory] = useState([]);
   const cardRef = useRef(null);
@@ -30,21 +30,8 @@ export default function CustomerForm() {
     localStorage.setItem('customerHistory', JSON.stringify(updatedHistory));
   };
 
-  const downloadImage = async () => {
-    if (!cardRef.current) return;
-    try {
-      const canvas = await html2canvas(cardRef.current, { scale: 2 });
-      const image = canvas.toDataURL("image/png");
-      const link = document.createElement('a');
-      link.href = image;
-      link.download = `postcard-data-${Date.now()}.png`;
-      link.click();
-    } catch (err) {
-      console.error("Failed to generate image", err);
-    }
-  };
-
   const onError = () => {
+    // We can still show an alert, but inline errors will also be visible
     alert("กรุณากรอกข้อมูลให้ครบถ้วนในช่องที่จำเป็นก่อนทำการสร้างข้อมูลครับ");
   };
 
@@ -58,12 +45,13 @@ export default function CustomerForm() {
           </h2>
           <form onSubmit={handleSubmit(onSubmit, onError)}>
             <div className="form-group">
-              <label className="form-label">วันที่สั่งจอง</label>
-              <input type="date" className="form-control" required {...register("orderDate")} defaultValue={new Date().toISOString().split('T')[0]} />
+              <label className="form-label">วันที่สั่งจอง <span style={{color:'red'}}>*</span></label>
+              <input type="date" className={`form-control ${errors.orderDate ? 'input-error' : ''}`} required {...register("orderDate", { required: true })} defaultValue={new Date().toISOString().split('T')[0]} />
+              {errors.orderDate && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุวันที่สั่งจอง</span>}
             </div>
             <div className="form-group">
-              <label className="form-label">จำนวน (ใบ)</label>
-              <input type="number" min="1" className="form-control" required {...register("quantity")} defaultValue="1" list="quantity-options" placeholder="พิมพ์ตัวเลข หรือเลือกจากรายการ" />
+              <label className="form-label">จำนวน (ใบ) <span style={{color:'red'}}>*</span></label>
+              <input type="number" min="1" className={`form-control ${errors.quantity ? 'input-error' : ''}`} required {...register("quantity", { required: true })} defaultValue="1" list="quantity-options" placeholder="พิมพ์ตัวเลข หรือเลือกจากรายการ" />
               <datalist id="quantity-options">
                 <option value="100" />
                 <option value="200" />
@@ -73,22 +61,27 @@ export default function CustomerForm() {
                 <option value="1000" />
                 <option value="2000" />
               </datalist>
+              {errors.quantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวน</span>}
             </div>
             <div className="form-group">
-              <label className="form-label">ชื่อ-นามสกุล</label>
-              <input type="text" className="form-control" required {...register("name")} placeholder="ระบุชื่อและนามสกุล" />
+              <label className="form-label">ชื่อ-นามสกุล <span style={{color:'red'}}>*</span></label>
+              <input type="text" className={`form-control ${errors.name ? 'input-error' : ''}`} required {...register("name", { required: true })} placeholder="ระบุชื่อและนามสกุล" />
+              {errors.name && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุชื่อ-นามสกุล</span>}
             </div>
             <div className="form-group">
-              <label className="form-label">เบอร์โทรศัพท์</label>
-              <input type="text" className="form-control" required {...register("phone")} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
+              <label className="form-label">เบอร์โทรศัพท์ <span style={{color:'red'}}>*</span></label>
+              <input type="text" className={`form-control ${errors.phone ? 'input-error' : ''}`} required {...register("phone", { required: true })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
+              {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุเบอร์โทรศัพท์</span>}
             </div>
             <div className="form-group">
-              <label className="form-label">ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน, ตำบล, อำเภอ, จังหวัด)</label>
-              <textarea className="form-control" rows="3" required {...register("address")} placeholder="ระบุที่อยู่จัดส่งให้ครบถ้วน"></textarea>
+              <label className="form-label">ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน, ตำบล, อำเภอ, จังหวัด) <span style={{color:'red'}}>*</span></label>
+              <textarea className={`form-control ${errors.address ? 'input-error' : ''}`} rows="3" required {...register("address", { required: true })} placeholder="ระบุที่อยู่จัดส่งให้ครบถ้วน"></textarea>
+              {errors.address && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุที่อยู่จัดส่งให้ชัดเจน</span>}
             </div>
             <div className="form-group">
-              <label className="form-label">รหัสไปรษณีย์</label>
-              <input type="text" className="form-control" required {...register("zipcode")} placeholder="เช่น 10110" />
+              <label className="form-label">รหัสไปรษณีย์ <span style={{color:'red'}}>*</span></label>
+              <input type="text" className={`form-control ${errors.zipcode ? 'input-error' : ''}`} required {...register("zipcode", { required: true })} placeholder="เช่น 10110" />
+              {errors.zipcode && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุรหัสไปรษณีย์</span>}
             </div>
             <div className="form-group">
               <label className="form-label">ที่อยู่ D-ID (ไปรษณีย์ไทย)</label>

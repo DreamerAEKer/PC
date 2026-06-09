@@ -5,7 +5,7 @@ import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
 import { QrCode, Keyboard, History, Printer, FileText } from 'lucide-react';
 
 export default function StaffPortal() {
-  const { register, handleSubmit, setValue, reset } = useForm();
+  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm({ mode: 'onBlur' });
   const [history, setHistory] = useState([]);
   const [scanMode, setScanMode] = useState(false);
   const navigate = useNavigate();
@@ -144,12 +144,13 @@ export default function StaffPortal() {
             <form onSubmit={handleSubmit(onSubmit, onError)}>
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label className="form-label">วันที่สั่งจอง</label>
-                  <input type="date" className="form-control" required {...register("orderDate")} defaultValue={new Date().toISOString().split('T')[0]} />
+                  <label className="form-label">วันที่สั่งจอง <span style={{color:'red'}}>*</span></label>
+                  <input type="date" className={`form-control ${errors.orderDate ? 'input-error' : ''}`} required {...register("orderDate", { required: true })} defaultValue={new Date().toISOString().split('T')[0]} />
+                  {errors.orderDate && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุวันที่</span>}
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label className="form-label">จำนวน (ใบ)</label>
-                  <input type="number" min="1" className="form-control" required {...register("quantity")} defaultValue="1" list="quantity-options" placeholder="พิมพ์ตัวเลข หรือเลือกจากรายการ" />
+                  <label className="form-label">จำนวน (ใบ) <span style={{color:'red'}}>*</span></label>
+                  <input type="number" min="1" className={`form-control ${errors.quantity ? 'input-error' : ''}`} required {...register("quantity", { required: true })} defaultValue="1" list="quantity-options" placeholder="พิมพ์ตัวเลข หรือเลือกจากรายการ" />
                   <datalist id="quantity-options">
                     <option value="100" />
                     <option value="200" />
@@ -159,24 +160,29 @@ export default function StaffPortal() {
                     <option value="1000" />
                     <option value="2000" />
                   </datalist>
+                  {errors.quantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวน</span>}
                 </div>
               </div>
               <div className="form-group">
-                <label className="form-label">ชื่อ-นามสกุล</label>
-                <input type="text" className="form-control" required {...register("name")} />
+                <label className="form-label">ชื่อ-นามสกุล <span style={{color:'red'}}>*</span></label>
+                <input type="text" className={`form-control ${errors.name ? 'input-error' : ''}`} required {...register("name", { required: true })} />
+                {errors.name && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุชื่อ-นามสกุล</span>}
               </div>
               <div className="form-group">
-                <label className="form-label">เบอร์โทรศัพท์</label>
-                <input type="text" className="form-control" required {...register("phone")} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
+                <label className="form-label">เบอร์โทรศัพท์ <span style={{color:'red'}}>*</span></label>
+                <input type="text" className={`form-control ${errors.phone ? 'input-error' : ''}`} required {...register("phone", { required: true })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
+                {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุเบอร์โทรศัพท์</span>}
               </div>
               <div className="form-group">
-                <label className="form-label">ที่อยู่จัดส่ง</label>
-                <textarea className="form-control" rows="3" required {...register("address")}></textarea>
+                <label className="form-label">ที่อยู่จัดส่ง <span style={{color:'red'}}>*</span></label>
+                <textarea className={`form-control ${errors.address ? 'input-error' : ''}`} rows="3" required {...register("address", { required: true })}></textarea>
+                {errors.address && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุที่อยู่จัดส่ง</span>}
               </div>
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label className="form-label">รหัสไปรษณีย์</label>
-                  <input type="text" className="form-control" required {...register("zipcode")} />
+                  <label className="form-label">รหัสไปรษณีย์ <span style={{color:'red'}}>*</span></label>
+                  <input type="text" className={`form-control ${errors.zipcode ? 'input-error' : ''}`} required {...register("zipcode", { required: true })} />
+                  {errors.zipcode && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุรหัสไปรษณีย์</span>}
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
                   <label className="form-label">D-ID</label>
