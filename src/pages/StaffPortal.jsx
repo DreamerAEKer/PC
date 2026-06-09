@@ -188,6 +188,23 @@ export default function StaffPortal() {
     const file = e.target.files[0];
     if (!file) return;
 
+    if ('BarcodeDetector' in window) {
+      try {
+        const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+        const imageBitmap = await createImageBitmap(file);
+        const barcodes = await barcodeDetector.detect(imageBitmap);
+        if (barcodes.length > 0) {
+          const data = JSON.parse(barcodes[0].rawValue);
+          populateFromScan(data);
+          alert("อ่านรูปภาพสำเร็จ! กรุณาตรวจสอบข้อมูล");
+          return;
+        }
+      } catch (err) {
+        console.log("BarcodeDetector error:", err);
+      }
+    }
+
+    // Fallback to html5QrCode
     const html5QrCode = new Html5Qrcode("reader-hidden");
     try {
       const decodedText = await html5QrCode.scanFile(file, false);
@@ -195,7 +212,7 @@ export default function StaffPortal() {
       populateFromScan(data);
       alert("อ่านรูปภาพสำเร็จ! กรุณาตรวจสอบข้อมูล");
     } catch (err) {
-      alert("ไม่พบ QR Code ในรูปภาพนี้ หรือข้อมูลไม่ถูกต้อง");
+      alert("ไม่พบ QR Code ในรูปภาพนี้ หรือข้อมูลไม่ถูกต้อง กรุณาลองสแกนผ่านกล้องแทน");
     }
   };
 
