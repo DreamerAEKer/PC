@@ -111,9 +111,11 @@ export default function StaffPortal() {
     // Defer the heavy history update, form reset, and hiding the print area
     // to avoid crashing Chrome's print preview
     setTimeout(() => {
-      const updatedHistory = [newRecord, ...history].slice(0, 50);
-      setHistory(updatedHistory);
-      localStorage.setItem('staffHistory', JSON.stringify(updatedHistory));
+      setHistory(prevHistory => {
+        const updatedHistory = [newRecord, ...prevHistory].slice(0, 50);
+        localStorage.setItem('staffHistory', JSON.stringify(updatedHistory));
+        return updatedHistory;
+      });
       
       reset(); // clear form
       setScanMode('manual');
@@ -188,7 +190,7 @@ export default function StaffPortal() {
 
     const html5QrCode = new Html5Qrcode("reader-hidden");
     try {
-      const decodedText = await html5QrCode.scanFile(file, true);
+      const decodedText = await html5QrCode.scanFile(file, false);
       const data = JSON.parse(decodedText);
       populateFromScan(data);
       alert("อ่านรูปภาพสำเร็จ! กรุณาตรวจสอบข้อมูล");
