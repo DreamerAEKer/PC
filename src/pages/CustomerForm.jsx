@@ -57,6 +57,17 @@ export default function CustomerForm() {
     alert("กรุณากรอกข้อมูลให้ครบถ้วนในช่องที่จำเป็นก่อนทำการสร้างข้อมูลครับ");
   };
 
+  const downloadImage = async () => {
+    if (cardRef.current) {
+      const canvas = await html2canvas(cardRef.current, { scale: 2 });
+      const url = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `postcard-${Date.now()}.png`;
+      a.click();
+    }
+  };
+
   return (
     <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
       <div style={{ flex: '1 1 400px' }}>
