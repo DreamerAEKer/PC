@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
 import { QrCode, Keyboard, History, Printer, FileText } from 'lucide-react';
+import ThaiAddressFields from '../components/ThaiAddressFields';
 
 export default function StaffPortal() {
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm({ mode: 'onBlur' });
@@ -26,7 +27,12 @@ export default function StaffPortal() {
   };
 
   const onSubmit = (data) => {
-    const record = saveToHistory(data);
+    const fullAddress = `${data.addressLine1} ต.${data.subdistrict} อ.${data.district} จ.${data.province}`;
+    const processedData = {
+      ...data,
+      address: fullAddress
+    };
+    const record = saveToHistory(processedData);
     // Navigate to print with data
     navigate('/print-postcard', { state: { data: record } });
   };
@@ -50,8 +56,11 @@ export default function StaffPortal() {
           setValue("quantity", data.quantity);
           setValue("name", data.name);
           setValue("phone", data.phone);
-          setValue("address", data.address);
-          setValue("zipcode", data.zipcode);
+          setValue("addressLine1", data.addressLine1 || data.address);
+          setValue("subdistrict", data.subdistrict || "");
+          setValue("district", data.district || "");
+          setValue("province", data.province || "");
+          setValue("zipcode", data.zipcode || "");
           setValue("did", data.did);
           scanner.clear();
           setScanMode(false);
@@ -83,8 +92,11 @@ export default function StaffPortal() {
       setValue("quantity", data.quantity);
       setValue("name", data.name);
       setValue("phone", data.phone);
-      setValue("address", data.address);
-      setValue("zipcode", data.zipcode);
+      setValue("addressLine1", data.addressLine1 || data.address);
+      setValue("subdistrict", data.subdistrict || "");
+      setValue("district", data.district || "");
+      setValue("province", data.province || "");
+      setValue("zipcode", data.zipcode || "");
       setValue("did", data.did);
       alert("อ่านรูปภาพสำเร็จ! กรุณาตรวจสอบข้อมูล");
     } catch (err) {
@@ -173,17 +185,9 @@ export default function StaffPortal() {
                 <input type="text" className={`form-control ${errors.phone ? 'input-error' : ''}`} required {...register("phone", { required: true })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
                 {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุเบอร์โทรศัพท์</span>}
               </div>
-              <div className="form-group">
-                <label className="form-label">ที่อยู่จัดส่ง <span style={{color:'red'}}>*</span></label>
-                <textarea className={`form-control ${errors.address ? 'input-error' : ''}`} rows="3" required {...register("address", { required: true })}></textarea>
-                {errors.address && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุที่อยู่จัดส่ง</span>}
-              </div>
+              <ThaiAddressFields register={register} setValue={setValue} errors={errors} />
+              
               <div style={{ display: 'flex', gap: '1rem' }}>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label className="form-label">รหัสไปรษณีย์ <span style={{color:'red'}}>*</span></label>
-                  <input type="text" className={`form-control ${errors.zipcode ? 'input-error' : ''}`} required {...register("zipcode", { required: true })} />
-                  {errors.zipcode && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุรหัสไปรษณีย์</span>}
-                </div>
                 <div className="form-group" style={{ flex: 1 }}>
                   <label className="form-label">D-ID</label>
                   <input type="text" className="form-control" {...register("did")} />

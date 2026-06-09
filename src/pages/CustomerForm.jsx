@@ -3,9 +3,10 @@ import { useForm } from 'react-hook-form';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import { Download, CheckCircle, Clock } from 'lucide-react';
+import ThaiAddressFields from '../components/ThaiAddressFields';
 
 export default function CustomerForm() {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({ mode: 'onBlur' });
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm({ mode: 'onBlur' });
   const [generatedData, setGeneratedData] = useState(null);
   const [history, setHistory] = useState([]);
   const cardRef = useRef(null);
@@ -19,12 +20,19 @@ export default function CustomerForm() {
   }, []);
 
   const onSubmit = async (data) => {
+    // Process address into a single string for display and old-compatibility
+    const fullAddress = `${data.addressLine1} ต.${data.subdistrict} อ.${data.district} จ.${data.province}`;
+    const processedData = {
+      ...data,
+      address: fullAddress
+    };
+
     // Create a payload string (JSON) for the QR code
-    const payload = JSON.stringify(data);
-    setGeneratedData({ ...data, payload });
+    const payload = JSON.stringify(processedData);
+    setGeneratedData({ ...processedData, payload });
 
     // Save to history
-    const newRecord = { ...data, id: Date.now(), timestamp: new Date().toISOString() };
+    const newRecord = { ...data, address: fullAddress, id: Date.now(), timestamp: new Date().toISOString() };
     const updatedHistory = [newRecord, ...history].slice(0, 10); // Keep last 10
     setHistory(updatedHistory);
     localStorage.setItem('customerHistory', JSON.stringify(updatedHistory));
@@ -73,16 +81,7 @@ export default function CustomerForm() {
               <input type="text" className={`form-control ${errors.phone ? 'input-error' : ''}`} required {...register("phone", { required: true })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
               {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุเบอร์โทรศัพท์</span>}
             </div>
-            <div className="form-group">
-              <label className="form-label">ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน, ตำบล, อำเภอ, จังหวัด) <span style={{color:'red'}}>*</span></label>
-              <textarea className={`form-control ${errors.address ? 'input-error' : ''}`} rows="3" required {...register("address", { required: true })} placeholder="ระบุที่อยู่จัดส่งให้ครบถ้วน"></textarea>
-              {errors.address && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุที่อยู่จัดส่งให้ชัดเจน</span>}
-            </div>
-            <div className="form-group">
-              <label className="form-label">รหัสไปรษณีย์ <span style={{color:'red'}}>*</span></label>
-              <input type="text" className={`form-control ${errors.zipcode ? 'input-error' : ''}`} required {...register("zipcode", { required: true })} placeholder="เช่น 10110" />
-              {errors.zipcode && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุรหัสไปรษณีย์</span>}
-            </div>
+            <ThaiAddressFields register={register} setValue={setValue} errors={errors} />
             <div className="form-group">
               <label className="form-label">ที่อยู่ D-ID (ไปรษณีย์ไทย)</label>
               <input type="text" className="form-control" {...register("did")} placeholder="ถ้ามี (ตัวเลือก)" />
@@ -162,13 +161,25 @@ export default function CustomerForm() {
                     transition: 'background 0.2s'
                   }}
                   onClick={() => {
-                    reset(record);
+                    const recordToSet = {
+                      ...record,
+                      addressLine1: record.addressLine1 || record.address,
+                      subdistrict: record.subdistrict || '',
+                      district: record.district || '',
+                      province: record.province || '',
+                      zipcode: record.zipcode || ''
+                    };
+                    reset(recordToSet);
                     const payload = JSON.stringify({
                       orderDate: record.orderDate,
                       quantity: record.quantity,
                       name: record.name,
                       phone: record.phone,
                       address: record.address,
+                      addressLine1: record.addressLine1,
+                      subdistrict: record.subdistrict,
+                      district: record.district,
+                      province: record.province,
                       zipcode: record.zipcode,
                       did: record.did
                     });

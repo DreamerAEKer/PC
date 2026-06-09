@@ -19,7 +19,8 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-hook-form": "^7.78.0",
-    "react-router-dom": "^7.17.0"
+    "react-router-dom": "^7.17.0",
+    "use-thai-address": "^1.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
