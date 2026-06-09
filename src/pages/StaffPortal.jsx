@@ -64,6 +64,19 @@ export default function StaffPortal() {
     navigate('/print-postcard', { state: { data: record } });
   };
 
+  const populateFromScan = (data) => {
+    setValue("orderDate", data.orderDate, { shouldValidate: true });
+    setValue("quantity", data.quantity || 1, { shouldValidate: true });
+    setValue("name", data.name, { shouldValidate: true });
+    setValue("phone", data.phone, { shouldValidate: true });
+    setValue("addressLine1", data.addressLine1 || data.address || "-", { shouldValidate: true });
+    setValue("subdistrict", data.subdistrict || "-", { shouldValidate: true });
+    setValue("district", data.district || "-", { shouldValidate: true });
+    setValue("province", data.province || "-", { shouldValidate: true });
+    setValue("zipcode", data.zipcode || "-", { shouldValidate: true });
+    setValue("did", data.did || "", { shouldValidate: true });
+  };
+
   useEffect(() => {
     let scanner = null;
     try {
@@ -76,16 +89,7 @@ export default function StaffPortal() {
         scanner.render((decodedText) => {
           try {
             const data = JSON.parse(decodedText);
-            setValue("orderDate", data.orderDate);
-            setValue("quantity", data.quantity);
-            setValue("name", data.name);
-            setValue("phone", data.phone);
-            setValue("addressLine1", data.addressLine1 || data.address);
-            setValue("subdistrict", data.subdistrict || "");
-            setValue("district", data.district || "");
-            setValue("province", data.province || "");
-            setValue("zipcode", data.zipcode || "");
-            setValue("did", data.did);
+            populateFromScan(data);
             try { if (scanner) scanner.clear().catch(()=>{}).then(() => setScanMode('manual')); } catch(e){ setScanMode('manual'); }
             alert("สแกนข้อมูลสำเร็จ! กรุณาตรวจสอบและกด สั่งพิมพ์");
           } catch (err) {
@@ -118,16 +122,7 @@ export default function StaffPortal() {
     try {
       const decodedText = await html5QrCode.scanFile(file, true);
       const data = JSON.parse(decodedText);
-      setValue("orderDate", data.orderDate);
-      setValue("quantity", data.quantity);
-      setValue("name", data.name);
-      setValue("phone", data.phone);
-      setValue("addressLine1", data.addressLine1 || data.address);
-      setValue("subdistrict", data.subdistrict || "");
-      setValue("district", data.district || "");
-      setValue("province", data.province || "");
-      setValue("zipcode", data.zipcode || "");
-      setValue("did", data.did);
+      populateFromScan(data);
       alert("อ่านรูปภาพสำเร็จ! กรุณาตรวจสอบข้อมูล");
     } catch (err) {
       alert("ไม่พบ QR Code ในรูปภาพนี้ หรือข้อมูลไม่ถูกต้อง");
@@ -275,16 +270,7 @@ export default function StaffPortal() {
                         const val = e.target.value.trim();
                         if (!val) return;
                         const data = JSON.parse(val);
-                        setValue("orderDate", data.orderDate);
-                        setValue("quantity", data.quantity);
-                        setValue("name", data.name);
-                        setValue("phone", data.phone);
-                        setValue("addressLine1", data.addressLine1 || data.address);
-                        setValue("subdistrict", data.subdistrict || "");
-                        setValue("district", data.district || "");
-                        setValue("province", data.province || "");
-                        setValue("zipcode", data.zipcode || "");
-                        setValue("did", data.did);
+                        populateFromScan(data);
                         e.target.value = '';
                         setScanMode('manual');
                         alert("ดึงข้อมูลสำเร็จ! กรุณาตรวจสอบแล้วกด สั่งพิมพ์");
@@ -300,16 +286,7 @@ export default function StaffPortal() {
                       try {
                         const data = JSON.parse(val);
                         if (data.name && data.phone) {
-                          setValue("orderDate", data.orderDate);
-                          setValue("quantity", data.quantity);
-                          setValue("name", data.name);
-                          setValue("phone", data.phone);
-                          setValue("addressLine1", data.addressLine1 || data.address);
-                          setValue("subdistrict", data.subdistrict || "");
-                          setValue("district", data.district || "");
-                          setValue("province", data.province || "");
-                          setValue("zipcode", data.zipcode || "");
-                          setValue("did", data.did);
+                          populateFromScan(data);
                           e.target.value = '';
                           setScanMode('manual');
                           alert("ดึงข้อมูลสำเร็จ! กรุณาตรวจสอบแล้วกด สั่งพิมพ์");

@@ -96,25 +96,43 @@ export default function PrintPostcard() {
         <div style={{ fontSize: `${fontSize}px`, lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1em' }}>
             <div><strong>ผู้รับ</strong></div>
-            {data.did && (
-              <div style={{ border: '1px solid #000', padding: '0.2em 0.5em', fontWeight: 'bold' }}>
-                D-ID: {data.did}
-              </div>
-            )}
           </div>
           
-          <div style={{ paddingLeft: '2em', fontWeight: 'bold', fontSize: '1.2em' }}>
-            {data.name}
-          </div>
-          <div style={{ paddingLeft: '2em' }}>
-            {data.address}
-          </div>
-          <div style={{ paddingLeft: '2em', marginTop: '0.5em', fontWeight: 'bold', fontSize: '1.2em', letterSpacing: '0.1em' }}>
-            รหัสไปรษณีย์: {data.zipcode}
-          </div>
-          <div style={{ paddingLeft: '2em', marginTop: '0.5em' }}>
-            โทร. {data.phone}
-          </div>
+          {data.did ? (
+            <div style={{ display: 'flex', gap: '2rem', paddingLeft: '1em' }}>
+              <div style={{ flex: 1.5 }}>
+                <div style={{ fontWeight: 'bold', fontSize: '1.2em', marginBottom: '0.5em' }}>
+                  {data.name}
+                </div>
+                <div style={{ fontSize: '1em', marginBottom: '0.5em' }}>
+                  โทร. {data.phone}
+                </div>
+                <div style={{ fontSize: '0.85em', color: '#333', lineHeight: '1.4' }}>
+                  {data.address} {data.zipcode}
+                </div>
+              </div>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ fontSize: '3.5em', fontWeight: '900', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
+                  {data.did}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div style={{ paddingLeft: '2em', fontWeight: 'bold', fontSize: '1.2em' }}>
+                {data.name}
+              </div>
+              <div style={{ paddingLeft: '2em' }}>
+                {data.address}
+              </div>
+              <div style={{ paddingLeft: '2em', marginTop: '0.5em', fontWeight: 'bold', fontSize: '1.2em', letterSpacing: '0.1em' }}>
+                รหัสไปรษณีย์: {data.zipcode}
+              </div>
+              <div style={{ paddingLeft: '2em', marginTop: '0.5em' }}>
+                โทร. {data.phone}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>
