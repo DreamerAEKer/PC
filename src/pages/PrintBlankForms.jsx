@@ -91,9 +91,9 @@ export default function PrintBlankForms() {
       <div className="a4-container">
         {[1, 2, 3, 4].map((item) => (
           <div key={item} className="blank-form">
-            <h3 style={{ textAlign: 'center', marginBottom: '0.5rem' }}>แบบฟอร์มสั่งจองและจัดส่ง</h3>
-            <div style={{ textAlign: 'center', fontSize: '0.85rem', marginBottom: '1.5rem', color: 'var(--text-muted)' }}>
-              รับจองโดย: {branchName}
+            <h3 style={{ textAlign: 'center', marginBottom: '0.5rem', fontSize: '1rem', lineHeight: '1.4' }}>แบบฟอร์มสั่งพิมพ์ ชื่อ ที่อยู่<br/>ลงบนไปรษณียบัตร</h3>
+            <div style={{ textAlign: 'center', fontSize: '0.9rem', marginBottom: '1.5rem', color: 'var(--text-muted)', fontWeight: '500' }}>
+              ของ {branchName}
             </div>
             
             <div style={{ display: 'flex', marginBottom: '1rem' }}>
