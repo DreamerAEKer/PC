@@ -81,7 +81,6 @@ function WorldCupPortal() {
     }
   });
 
-  const [isPortrait, setIsPortrait] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMainDropdownOpen, setIsMainDropdownOpen] = useState(false);
