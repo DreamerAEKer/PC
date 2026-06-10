@@ -170,11 +170,10 @@ function WorldCupPortal() {
             }
             .print-area {
               width: ${printerMode === 'A4Center' ? '21cm' : (isPortrait ? '10.5cm' : '14.8cm')};
-              height: ${printerMode === 'A4Center' ? '29.7cm' : (isPortrait ? '14.8cm' : '10.5cm')};
+              height: ${printerMode === 'A4Center' ? '29.6cm' : (isPortrait ? '14.7cm' : '10.4cm')};
               background: white;
               position: relative !important;
               overflow: hidden;
-              page-break-after: always;
               color: black !important;
             }
           }
