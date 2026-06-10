@@ -255,8 +255,8 @@ export default function CustomerForm() {
               <input type="text" className="form-control" {...register("did")} placeholder="ถ้ามี (ตัวเลือก)" />
             </div>
             <div style={{ marginTop: '2rem' }}>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-                สร้างข้อมูล / สร้างรูปภาพ
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', fontSize: '1.1rem', fontWeight: 'bold' }}>
+                ตกลงสั่งพิมพ์
               </button>
             </div>
 
