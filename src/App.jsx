@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Package, User } from 'lucide-react';
 import { version } from '../package.json';
@@ -14,6 +14,15 @@ function Navigation() {
   
   const [clickCount, setClickCount] = useState(0);
   const clickTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    // Some apps like LINE browser might strip the #/staff hash fragment.
+    // This allows using ?page=staff as an alternative.
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('page') === 'staff' || searchParams.get('staff') === '1') {
+      navigate('/staff', { replace: true });
+    }
+  }, [navigate]);
 
   const handleSecretClick = () => {
     setClickCount((prev) => {

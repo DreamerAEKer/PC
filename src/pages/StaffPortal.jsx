@@ -41,7 +41,8 @@ export default function StaffPortal() {
     }
     if (savedHistory) {
       try {
-        setHistory(JSON.parse(savedHistory));
+        const parsed = JSON.parse(savedHistory);
+        setHistory(Array.isArray(parsed) ? parsed : []);
       } catch (e) {
         setHistory([]);
       }
@@ -51,9 +52,11 @@ export default function StaffPortal() {
     if (savedForm) {
       try {
         const data = JSON.parse(savedForm);
-        Object.keys(data).forEach(key => {
-          setValue(key, data[key]);
-        });
+        if (data && typeof data === 'object') {
+          Object.keys(data).forEach(key => {
+            setValue(key, data[key]);
+          });
+        }
       } catch (e) {}
     }
   }, [setValue]);
@@ -79,7 +82,8 @@ export default function StaffPortal() {
   const [printSettings, setPrintSettings] = useState(() => {
     try {
       const saved = localStorage.getItem('customPrintSettings');
-      return saved ? JSON.parse(saved) : { top: 4, left: 8, fontSize: 11 };
+      const parsed = saved ? JSON.parse(saved) : null;
+      return (parsed && typeof parsed === 'object') ? parsed : { top: 4, left: 8, fontSize: 11 };
     } catch (e) {
       return { top: 4, left: 8, fontSize: 11 };
     }
