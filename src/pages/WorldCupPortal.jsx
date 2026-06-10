@@ -172,14 +172,8 @@ function WorldCupPortal() {
               width: 14.8cm;
               height: 10.5cm;
               background: white;
-              position: absolute !important;
-              top: 0 !important;
-              left: 0 !important;
-              padding-top: ${wcPrintSettings.top}cm;
-              padding-left: ${wcPrintSettings.left}cm;
-              padding-right: 1cm;
+              position: relative !important;
               overflow: hidden;
-              box-sizing: border-box;
               page-break-after: always;
               color: black !important;
             }
@@ -546,10 +540,16 @@ function WorldCupPortal() {
       {/* Actual Print Area (1 page for the selected printTeam) */}
       <div className="print-only print-area">
         <div style={{ 
+          position: 'absolute',
+          top: `${wcPrintSettings.top}cm`,
+          left: `${wcPrintSettings.left}cm`,
           fontSize: `${wcPrintSettings.fontSize}pt`, 
           fontFamily: 'Sarabun, Inter, sans-serif',
           fontWeight: 'bold',
-          color: '#000'
+          color: '#000',
+          whiteSpace: 'nowrap',
+          margin: 0,
+          padding: 0
         }}>
           {printTeam}
         </div>
