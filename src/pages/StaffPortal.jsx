@@ -248,18 +248,36 @@ export default function StaffPortal() {
     }, 500);
   };
 
-  const exportHistory = () => {
+  const exportHistory = async () => {
     if (history.length === 0) {
       alert("ไม่มีประวัติการพิมพ์ให้ส่งออกครับ");
       return;
     }
     const dataStr = JSON.stringify(history, null, 2);
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `staff-history-${dateStr}.json`;
+
+    if (navigator.share && navigator.canShare) {
+      try {
+        const file = new File([dataStr], filename, { type: 'application/json' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'ประวัติข้อมูลลูกค้าจอง',
+            text: `ไฟล์ข้อมูลลูกค้าสาขา ${branchName} ประจำวันที่ ${dateStr}`
+          });
+          return;
+        }
+      } catch (err) {
+        console.warn("Share failed, falling back to download", err);
+      }
+    }
+
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-    const dateStr = new Date().toISOString().split('T')[0];
-    link.download = `staff-history-${dateStr}.json`;
+    link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
   };
