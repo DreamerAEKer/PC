@@ -521,6 +521,21 @@ export default function StaffPortal() {
             .mobile-only-hide-when-no-data.active {
               display: block !important;
             }
+            .staff-dashboard-wrapper {
+              display: flex;
+              flex-direction: column;
+            }
+            .staff-header-row {
+              display: none !important;
+            }
+            .staff-columns {
+              order: 1 !important;
+              display: flex;
+              flex-direction: column;
+            }
+            .staff-settings-container-row {
+              order: 2 !important;
+            }
           }
 
           .quick-qr-modal-overlay {
@@ -565,8 +580,8 @@ export default function StaffPortal() {
         `}
       </style>
       
-      <div className="staff-no-print">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="staff-no-print staff-dashboard-wrapper">
+        <div className="staff-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <h2>แดชบอร์ดเจ้าหน้าที่ ปณ.</h2>
           
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
@@ -677,7 +692,7 @@ export default function StaffPortal() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem', width: '100%' }}>
+        <div className="staff-settings-container-row" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem', width: '100%' }}>
           <div className="staff-settings-bar" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#fff', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)', width: '100%', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>สาขา:</span>
