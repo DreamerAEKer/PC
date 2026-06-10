@@ -48,6 +48,7 @@ export default function CustomerForm() {
 
   const [generatedData, setGeneratedData] = useState(null);
   const [history, setHistory] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -121,6 +122,7 @@ export default function CustomerForm() {
     };
     const payload = JSON.stringify(compressedData);
     setGeneratedData({ ...processedData, payload });
+    setIsModalOpen(true);
 
     // Save to history
     const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString() };
@@ -380,6 +382,7 @@ export default function CustomerForm() {
                     };
                     const payload = JSON.stringify(compressedData);
                     setGeneratedData({ ...record, payload });
+                    setIsModalOpen(true);
                   }}
                   onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                   onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -394,6 +397,112 @@ export default function CustomerForm() {
           )}
         </div>
       </div>
+
+      {/* Focused Booking Ticket Modal */}
+      {isModalOpen && generatedData && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          padding: '1rem',
+          boxSizing: 'border-box'
+        }}>
+          <div className="card glass-panel" style={{
+            width: '100%',
+            maxWidth: '420px',
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            padding: '1.5rem',
+            boxSizing: 'border-box',
+            textAlign: 'center'
+          }}>
+            <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--primary)', fontSize: '1.2rem', fontWeight: 700 }}>
+              🎟️ ตั๋วจองไปรษณียบัตร
+            </h3>
+            <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.25rem', fontWeight: 500 }}>
+              ยื่นหน้าจอนี้ให้เจ้าหน้าที่สแกนได้ทันที
+            </div>
+
+            {/* QR Code Container */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              backgroundColor: '#fff',
+              padding: '1rem',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              width: 'fit-content',
+              margin: '0 auto 1.25rem auto',
+              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+            }}>
+              <QRCodeCanvas value={generatedData.payload} size={200} level="Q" />
+            </div>
+
+            {/* Short Details */}
+            <div style={{
+              backgroundColor: '#f8fafc',
+              borderRadius: '12px',
+              padding: '1rem',
+              textAlign: 'left',
+              marginBottom: '1.5rem',
+              border: '1px solid #e2e8f0',
+              fontSize: '0.95rem',
+              lineHeight: '1.6'
+            }}>
+              <div style={{ borderBottom: '1px dashed #cbd5e1', paddingBottom: '0.5rem', marginBottom: '0.5rem', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
+                📍 รับจองโดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>ชื่อผู้รับ:</span>
+                <strong style={{ color: '#0f172a' }}>{generatedData.name}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>เบอร์โทร:</span>
+                <strong style={{ color: '#0f172a' }}>{generatedData.phone}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>จำนวนที่จอง:</span>
+                <strong style={{ color: 'var(--primary)', fontSize: '1.05rem' }}>{generatedData.quantity} ใบ</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>วันที่สั่งจอง:</span>
+                <strong style={{ color: '#0f172a' }}>{generatedData.orderDate}</strong>
+              </div>
+              {generatedData.did && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #e2e8f0', marginTop: '0.5rem', paddingTop: '0.5rem' }}>
+                  <span style={{ color: '#64748b' }}>D-ID:</span>
+                  <strong style={{ color: 'var(--secondary)' }}>{generatedData.did}</strong>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button onClick={downloadImage} className="btn btn-primary" style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.25rem', fontSize: '0.85rem' }}>
+                  <Download size={14} /> บันทึกรูปภาพ
+                </button>
+                <button onClick={shareToLine} className="btn" style={{ flex: 1, backgroundColor: '#00B900', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.25rem', border: 'none', padding: '0.5rem 0.25rem', fontSize: '0.85rem' }}>
+                  <Share2 size={14} /> แชร์ไป LINE
+                </button>
+              </div>
+              
+              <button onClick={() => setIsModalOpen(false)} className="btn btn-secondary" style={{ width: '100%', padding: '0.6rem', fontWeight: 600 }}>
+                ปิดหน้าจอนี้ (กลับไปแก้ไข)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
