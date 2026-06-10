@@ -9,8 +9,22 @@ import ThaiAddressFields from '../components/ThaiAddressFields';
 export default function StaffPortal() {
   const { register, handleSubmit, setValue, getValues, reset, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
 
-  const quantity = watch("quantity", 1);
-  const totalPrice = (parseInt(quantity, 10) || 0) * 3;
+  const selectQty = watch("selectQuantity", "100");
+  const customQty = watch("customQuantity", "");
+  const quantity = selectQty === "custom" ? (parseInt(customQty, 10) || 0) : (parseInt(selectQty, 10) || 0);
+  const totalPrice = quantity * 3;
+
+  const setQuantityFields = (qtyVal) => {
+    const presets = ["100", "200", "300", "400", "500", "1000", "2000"];
+    const qtyStr = String(qtyVal || 100);
+    if (presets.includes(qtyStr)) {
+      setValue("selectQuantity", qtyStr, { shouldValidate: true });
+      setValue("customQuantity", "", { shouldValidate: true });
+    } else {
+      setValue("selectQuantity", "custom", { shouldValidate: true });
+      setValue("customQuantity", qtyStr, { shouldValidate: true });
+    }
+  };
 
   const getFieldClass = (fieldName) => {
     if (errors[fieldName]) return 'input-error';
@@ -58,6 +72,8 @@ export default function StaffPortal() {
           });
         }
       } catch (e) {}
+    } else {
+      setQuantityFields(100);
     }
   }, [setValue]);
 
@@ -122,10 +138,18 @@ export default function StaffPortal() {
     const provTitle = isBKK ? data.province : `จ.${data.province}`;
     
     const fullAddress = `${data.addressLine1} ${subTitle} ${distTitle} ${provTitle}`;
+    
+    const resolvedQty = data.selectQuantity === "custom" ? (parseInt(data.customQuantity, 10) || 0) : (parseInt(data.selectQuantity, 10) || 0);
+
     const processedData = {
       ...data,
+      quantity: resolvedQty,
       address: fullAddress
     };
+
+    // Remove select helper fields
+    delete processedData.selectQuantity;
+    delete processedData.customQuantity;
     
     // Create the record manually so we have the ID for printing
     const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString() };
@@ -150,6 +174,7 @@ export default function StaffPortal() {
       });
       
       reset(); // clear form
+      setQuantityFields(100);
       setScanMode('manual');
       setPrintData(null); // Hide the print area from the dashboard
     }, 500);
@@ -194,7 +219,7 @@ export default function StaffPortal() {
 
   const populateFromScan = (data) => {
     setValue("orderDate", data.orderDate, { shouldValidate: true });
-    setValue("quantity", data.quantity || 1, { shouldValidate: true });
+    setQuantityFields(data.quantity || 1);
     setValue("name", data.name, { shouldValidate: true });
     setValue("phone", data.phone, { shouldValidate: true });
     setValue("addressLine1", data.addressLine1 || data.address || "-", { shouldValidate: true });
@@ -554,17 +579,37 @@ export default function StaffPortal() {
                   </div>
                   <div className="form-group" style={{ flex: 1 }}>
                     <label className="form-label">จำนวน (ใบ) <span style={{color:'red'}}>*</span></label>
-                    <input type="number" min="1" className={`form-control ${getFieldClass('quantity')}`} required {...register("quantity", { required: true })} defaultValue="1" list="quantity-options" placeholder="พิมพ์ตัวเลข หรือเลือกจากรายการ" />
-                    <datalist id="quantity-options">
-                      <option value="100" />
-                      <option value="200" />
-                      <option value="300" />
-                      <option value="400" />
-                      <option value="500" />
-                      <option value="1000" />
-                      <option value="2000" />
-                    </datalist>
-                    {errors.quantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวน</span>}
+                    <select 
+                      className="form-control" 
+                      required 
+                      {...register("selectQuantity", { required: true })}
+                      style={{ width: '100%' }}
+                    >
+                      <option value="100">100 ใบ</option>
+                      <option value="200">200 ใบ</option>
+                      <option value="300">300 ใบ</option>
+                      <option value="400">400 ใบ</option>
+                      <option value="500">500 ใบ</option>
+                      <option value="1000">1,000 ใบ</option>
+                      <option value="2000">2,000 ใบ</option>
+                      <option value="custom">ระบุค่าเอง...</option>
+                    </select>
+                    {errors.selectQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวน</span>}
+                    
+                    {selectQty === 'custom' && (
+                      <div className="form-group" style={{ marginTop: '0.5rem' }}>
+                        <label className="form-label" style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>ระบุจำนวนใบเอง <span style={{color:'red'}}>*</span></label>
+                        <input 
+                          type="number" 
+                          min="1" 
+                          className={`form-control ${getFieldClass('customQuantity')}`} 
+                          required 
+                          {...register("customQuantity", { required: true, min: 1 })} 
+                          placeholder="เช่น 150" 
+                        />
+                        {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวนอย่างน้อย 1 ใบ</span>}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="form-group">

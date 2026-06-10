@@ -8,8 +8,23 @@ import ThaiAddressFields from '../components/ThaiAddressFields';
 export default function CustomerForm() {
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
 
-  const quantity = watch("quantity", 1);
-  const totalPrice = (parseInt(quantity, 10) || 0) * 3;
+  const selectQty = watch("selectQuantity", "100");
+  const customQty = watch("customQuantity", "");
+  const quantity = selectQty === "custom" ? (parseInt(customQty, 10) || 0) : (parseInt(selectQty, 10) || 0);
+  const totalPrice = quantity * 3;
+
+  const setQuantityFields = (qtyVal) => {
+    const presets = ["100", "200", "300", "400", "500", "1000", "2000"];
+    const qtyStr = String(qtyVal || 100);
+    if (presets.includes(qtyStr)) {
+      setValue("selectQuantity", qtyStr, { shouldValidate: true });
+      setValue("customQuantity", "", { shouldValidate: true });
+    } else {
+      setValue("selectQuantity", "custom", { shouldValidate: true });
+      setValue("customQuantity", qtyStr, { shouldValidate: true });
+    }
+  };
+
   const didValue = watch("did", "");
   const isDidActive = (didValue || "").trim().length === 6;
 
@@ -37,6 +52,8 @@ export default function CustomerForm() {
           setValue(key, data[key]);
         });
       } catch (e) {}
+    } else {
+      setQuantityFields(100);
     }
   }, [setValue]);
 
@@ -60,11 +77,18 @@ export default function CustomerForm() {
       fullAddress = `${data.addressLine1 || ''} ${subTitle} ${distTitle} ${provTitle}`.replace(/\s+/g, ' ').trim();
     }
     
+    const resolvedQty = data.selectQuantity === "custom" ? (parseInt(data.customQuantity, 10) || 0) : (parseInt(data.selectQuantity, 10) || 0);
+
     const processedData = {
       ...data,
+      quantity: resolvedQty,
       address: fullAddress,
       isDidActive
     };
+
+    // Remove select helper fields from QR payload
+    delete processedData.selectQuantity;
+    delete processedData.customQuantity;
 
     // Create a payload string (JSON) for the QR code using compressed format
     const compressedData = {
@@ -83,7 +107,7 @@ export default function CustomerForm() {
     setGeneratedData({ ...processedData, payload });
 
     // Save to history
-    const newRecord = { ...data, address: fullAddress, isDidActive, id: Date.now(), timestamp: new Date().toISOString() };
+    const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString() };
     const updatedHistory = [newRecord, ...history].slice(0, 10); // Keep last 10
     setHistory(updatedHistory);
     localStorage.setItem('customerHistory', JSON.stringify(updatedHistory));
@@ -159,18 +183,38 @@ export default function CustomerForm() {
             </div>
             <div className="form-group">
               <label className="form-label">จำนวน (ใบ) <span style={{color:'red'}}>*</span></label>
-              <input type="number" min="1" className={`form-control ${getFieldClass('quantity')}`} required {...register("quantity", { required: true })} defaultValue="1" list="quantity-options" placeholder="พิมพ์ตัวเลข หรือเลือกจากรายการ" />
-              <datalist id="quantity-options">
-                <option value="100" />
-                <option value="200" />
-                <option value="300" />
-                <option value="400" />
-                <option value="500" />
-                <option value="1000" />
-                <option value="2000" />
-              </datalist>
-              {errors.quantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวน</span>}
+              <select 
+                className="form-control" 
+                required 
+                {...register("selectQuantity", { required: true })}
+                style={{ width: '100%' }}
+              >
+                <option value="100">100 ใบ</option>
+                <option value="200">200 ใบ</option>
+                <option value="300">300 ใบ</option>
+                <option value="400">400 ใบ</option>
+                <option value="500">500 ใบ</option>
+                <option value="1000">1,000 ใบ</option>
+                <option value="2000">2,000 ใบ</option>
+                <option value="custom">ระบุค่าเอง...</option>
+              </select>
+              {errors.selectQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวน</span>}
             </div>
+
+            {selectQty === 'custom' && (
+              <div className="form-group" style={{ marginTop: '0.5rem' }}>
+                <label className="form-label" style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>จำนวนที่ต้องการระบุเอง <span style={{color:'red'}}>*</span></label>
+                <input 
+                  type="number" 
+                  min="1" 
+                  className={`form-control ${getFieldClass('customQuantity')}`} 
+                  required 
+                  {...register("customQuantity", { required: true, min: 1 })} 
+                  placeholder="กรอกจำนวนใบ เช่น 150" 
+                />
+                {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวนอย่างน้อย 1 ใบ</span>}
+              </div>
+            )}
             <div className="form-group">
               <label className="form-label">ชื่อ-นามสกุล <span style={{color:'red'}}>*</span></label>
               <input type="text" className={`form-control ${getFieldClass('name')}`} required {...register("name", { required: true })} placeholder="ระบุชื่อและนามสกุล" />
@@ -305,6 +349,7 @@ export default function CustomerForm() {
                       zipcode: record.zipcode || ''
                     };
                     reset(recordToSet);
+                    setQuantityFields(record.quantity);
                     const compressedData = {
                       d: record.orderDate,
                       q: record.quantity,
