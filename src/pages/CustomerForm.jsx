@@ -299,8 +299,30 @@ export default function CustomerForm() {
                 marginBottom: '1.5rem'
               }}
             >
-              <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: '#fff', padding: '0.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <QRCodeCanvas value={generatedData.payload} size={150} level="Q" />
+              <div style={{ 
+                position: 'absolute', 
+                top: '1.5rem', 
+                right: '1.5rem', 
+                background: '#fff', 
+                padding: '0.5rem', 
+                borderRadius: '8px', 
+                border: '2px solid var(--primary)', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center',
+                boxShadow: '0 2px 8px rgba(225, 29, 72, 0.1)'
+              }}>
+                <QRCodeCanvas value={generatedData.payload} size={130} level="Q" />
+                <div style={{ 
+                  fontSize: '0.65rem', 
+                  color: 'var(--primary)', 
+                  fontWeight: 'bold', 
+                  marginTop: '0.35rem', 
+                  textAlign: 'center',
+                  lineHeight: '1'
+                }}>
+                  QR สำหรับสั่งพิมพ์
+                </div>
               </div>
               <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.4rem', paddingRight: '170px' }}>ข้อมูลผู้รับ (สำหรับการพิมพ์)</h2>
               <div style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem' }}>
@@ -435,16 +457,33 @@ export default function CustomerForm() {
             {/* QR Code Container */}
             <div style={{
               display: 'flex',
-              justifyContent: 'center',
+              flexDirection: 'column',
+              alignItems: 'center',
               backgroundColor: '#fff',
-              padding: '1rem',
+              padding: '1.25rem 1rem 1rem 1rem',
               borderRadius: '12px',
-              border: '1px solid #e2e8f0',
+              border: '2px solid var(--primary)',
               width: 'fit-content',
-              margin: '0 auto 1.25rem auto',
-              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+              margin: '1rem auto 1.25rem auto',
+              boxShadow: '0 4px 12px rgba(225, 29, 72, 0.15)',
+              position: 'relative'
             }}>
-              <QRCodeCanvas value={generatedData.payload} size={200} level="Q" />
+              <div style={{ 
+                position: 'absolute', 
+                top: '-0.75rem', 
+                backgroundColor: 'var(--primary)', 
+                color: '#fff', 
+                fontSize: '0.75rem', 
+                fontWeight: 'bold', 
+                padding: '0.15rem 0.6rem', 
+                borderRadius: '20px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}>
+                QR สำหรับสั่งพิมพ์
+              </div>
+              <div style={{ marginTop: '0.5rem' }}>
+                <QRCodeCanvas value={generatedData.payload} size={200} level="Q" />
+              </div>
             </div>
 
             {/* Short Details */}

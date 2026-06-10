@@ -600,8 +600,21 @@ export default function StaffPortal() {
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <div style={{ backgroundColor: '#fff', padding: '0.2rem', border: '1px solid #cbd5e1', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ 
+                backgroundColor: '#fff', 
+                padding: '0.4rem 0.4rem 0.2rem 0.4rem', 
+                border: '2px solid #3b82f6', 
+                borderRadius: '8px', 
+                display: 'flex', 
+                flexDirection: 'column',
+                alignItems: 'center', 
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)'
+              }}>
                 <QRCodeCanvas id="branch-qr-canvas" value={generatedCustomerUrl} size={55} level="M" />
+                <div style={{ fontSize: '0.55rem', color: '#1d4ed8', fontWeight: 'bold', marginTop: '0.2rem', whiteSpace: 'nowrap' }}>
+                  QR Staff
+                </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                 <button 
@@ -1190,16 +1203,33 @@ export default function StaffPortal() {
             
             <div style={{ 
               backgroundColor: '#fff', 
-              padding: '1rem', 
+              padding: '1.25rem 1rem 1rem 1rem', 
               borderRadius: '16px', 
               display: 'inline-flex', 
+              flexDirection: 'column',
               justifyContent: 'center', 
               alignItems: 'center',
-              border: '2px solid #f1f5f9',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05)',
-              marginBottom: '1.25rem'
+              border: '3px solid #3b82f6',
+              boxShadow: '0 10px 25px rgba(59, 130, 246, 0.15)',
+              marginBottom: '1.25rem',
+              position: 'relative'
             }}>
-              <QRCodeCanvas value={generatedCustomerUrl} size={280} level="H" includeMargin={true} />
+              <div style={{ 
+                position: 'absolute', 
+                top: '-0.75rem', 
+                backgroundColor: '#3b82f6', 
+                color: '#fff', 
+                fontSize: '0.75rem', 
+                fontWeight: 'bold', 
+                padding: '0.15rem 0.6rem', 
+                borderRadius: '20px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}>
+                QR Staff (ลิงก์ลูกค้าสแกนกรอกข้อมูล)
+              </div>
+              <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'center' }}>
+                <QRCodeCanvas value={generatedCustomerUrl} size={280} level="H" includeMargin={true} />
+              </div>
             </div>
             
             <p style={{ margin: '0 0 1.5rem 0', color: '#475569', fontSize: '0.85rem', lineHeight: '1.5', padding: '0 0.5rem' }}>
