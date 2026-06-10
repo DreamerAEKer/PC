@@ -85,14 +85,14 @@ export default function StaffPortal() {
       const parsed = saved ? JSON.parse(saved) : null;
       if (parsed && typeof parsed === 'object') {
         return {
-          top: typeof parsed.top === 'number' ? parsed.top : 4,
-          left: typeof parsed.left === 'number' ? parsed.left : 8,
-          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 11
+          top: typeof parsed.top === 'number' ? parsed.top : 4.5,
+          left: typeof parsed.left === 'number' ? parsed.left : 9.5,
+          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 5
         };
       }
-      return { top: 4, left: 8, fontSize: 11 };
+      return { top: 4.5, left: 9.5, fontSize: 5 };
     } catch (e) {
-      return { top: 4, left: 8, fontSize: 11 };
+      return { top: 4.5, left: 9.5, fontSize: 5 };
     }
   });
 
