@@ -88,6 +88,9 @@ function WorldCupPortal() {
   const [printerMode, setPrinterMode] = useState(() => {
     return localStorage.getItem('wcPrinterMode') || 'A6';
   });
+  const [isPortrait, setIsPortrait] = useState(() => {
+    return localStorage.getItem('wcIsPortrait') === 'true';
+  });
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -109,7 +112,8 @@ function WorldCupPortal() {
     localStorage.setItem('wcCustomTeamsList', JSON.stringify(customTeamsList));
     localStorage.setItem('wcPrintTeam', printTeam);
     localStorage.setItem('wcPrinterMode', printerMode);
-  }, [wcPrintSettings, selectedTeams, customTeamsList, printTeam, printerMode]);
+    localStorage.setItem('wcIsPortrait', isPortrait);
+  }, [wcPrintSettings, selectedTeams, customTeamsList, printTeam, printerMode, isPortrait]);
 
   const handlePrint = () => {
     if (!printTeam.trim()) {
@@ -152,7 +156,7 @@ function WorldCupPortal() {
         {`
           @media print {
             @page {
-              size: ${printerMode === 'A4Center' ? 'A4 portrait' : '14.8cm 10.5cm'};
+              size: ${printerMode === 'A4Center' ? 'A4 portrait' : (isPortrait ? '10.5cm 14.8cm' : '14.8cm 10.5cm')};
               margin: 0;
             }
             body {
@@ -164,8 +168,8 @@ function WorldCupPortal() {
               display: none !important;
             }
             .print-area {
-              width: ${printerMode === 'A4Center' ? '21cm' : '14.8cm'};
-              height: ${printerMode === 'A4Center' ? '29.7cm' : '10.5cm'};
+              width: ${printerMode === 'A4Center' ? '21cm' : (isPortrait ? '10.5cm' : '14.8cm')};
+              height: ${printerMode === 'A4Center' ? '29.7cm' : (isPortrait ? '14.8cm' : '10.5cm')};
               background: white;
               position: relative !important;
               overflow: hidden;
@@ -370,7 +374,7 @@ function WorldCupPortal() {
           </div>
 
           <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem', textAlign: 'center' }}>
-            ตัวอย่างพื้นที่การพิมพ์ (จำลองสัดส่วนไปรษณียบัตร 14.8 x 10.5 ซม.)
+            ตัวอย่างพื้นที่การพิมพ์ (จำลองสัดส่วนไปรษณียบัตร {isPortrait ? 'แนวตั้ง 10.5 x 14.8 ซม.' : 'แนวนอน 14.8 x 10.5 ซม.'})
           </div>
           <div style={{ 
             backgroundColor: '#e2e8f0', 
@@ -382,13 +386,13 @@ function WorldCupPortal() {
             marginBottom: '1.5rem'
           }}>
             <div style={{ 
-              width: '280px', 
-              height: '198px',
+              width: isPortrait ? '198px' : '280px', 
+              height: isPortrait ? '280px' : '198px',
               position: 'relative'
             }}>
               <div style={{
-                width: '14.8cm',
-                height: '10.5cm',
+                width: isPortrait ? '10.5cm' : '14.8cm',
+                height: isPortrait ? '14.8cm' : '10.5cm',
                 backgroundColor: 'white',
                 boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
                 transform: 'scale(0.5)',
@@ -396,16 +400,18 @@ function WorldCupPortal() {
                 position: 'absolute',
                 top: 0,
                 left: 0,
-                paddingTop: `${wcPrintSettings.top}cm`,
-                paddingLeft: `${wcPrintSettings.left}cm`,
                 boxSizing: 'border-box',
                 overflow: 'hidden'
               }}>
                 <div style={{ 
+                  position: 'absolute',
+                  top: `${wcPrintSettings.top}cm`,
+                  left: `${wcPrintSettings.left}cm`,
                   fontSize: `${wcPrintSettings.fontSize}pt`, 
                   fontFamily: 'Sarabun, Inter, sans-serif',
                   fontWeight: 'bold',
-                  color: '#000'
+                  color: '#000',
+                  whiteSpace: 'nowrap'
                 }}>
                   {printTeam || "ชื่อประเทศ"}
                 </div>
@@ -525,6 +531,30 @@ function WorldCupPortal() {
             
             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
               <h4 style={{ margin: 0, fontSize: '1rem', color: '#334155', marginBottom: '1rem' }}>
+                รูปแบบหน้าตาไปรษณียบัตร
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginBottom: '1.5rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input 
+                    type="radio" 
+                    name="isPortrait" 
+                    checked={!isPortrait} 
+                    onChange={() => setIsPortrait(false)} 
+                  />
+                  <span style={{ fontSize: '0.95rem' }}>แนวนอน (กว้าง 14.8 x สูง 10.5 ซม.)</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input 
+                    type="radio" 
+                    name="isPortrait" 
+                    checked={isPortrait} 
+                    onChange={() => setIsPortrait(true)} 
+                  />
+                  <span style={{ fontSize: '0.95rem' }}>แนวตั้ง (กว้าง 10.5 x สูง 14.8 ซม.)</span>
+                </label>
+              </div>
+
+              <h4 style={{ margin: 0, fontSize: '1rem', color: '#334155', marginBottom: '1rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
                 โหมดชดเชยพิกัดเครื่องพิมพ์
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
@@ -574,10 +604,9 @@ function WorldCupPortal() {
         {printerMode === 'A4Center' ? (
           <div style={{ 
             position: 'absolute',
-            top: `${wcPrintSettings.left}cm`,
-            left: `calc(5.25cm + 10.5cm - ${wcPrintSettings.top}cm)`,
-            transform: 'rotate(90deg)',
-            transformOrigin: '0 0',
+            top: `${wcPrintSettings.top}cm`,
+            /* If Portrait (10.5cm width), it starts at X=5.25cm on A4. If Landscape (14.8cm width), it starts at X=3.1cm on A4 */
+            left: `calc(${isPortrait ? '5.25cm' : '3.1cm'} + ${wcPrintSettings.left}cm)`,
             fontSize: `${wcPrintSettings.fontSize}pt`, 
             fontFamily: 'Sarabun, Inter, sans-serif',
             fontWeight: 'bold',
