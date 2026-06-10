@@ -84,6 +84,7 @@ function WorldCupPortal() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMainDropdownOpen, setIsMainDropdownOpen] = useState(false);
   const [mainSearchFilter, setMainSearchFilter] = useState("");
+  const [activeZoneFilter, setActiveZoneFilter] = useState("ทั้งหมด");
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -274,14 +275,47 @@ function WorldCupPortal() {
                       className="form-control"
                       style={{ marginBottom: '0.5rem' }}
                     />
+                    
+                    <div style={{ display: 'flex', gap: '0.25rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '0.5rem', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
+                      {["ทั้งหมด", "ยุโรป", "แอฟริกา", "เอเชีย", "CONCACAF", "อเมริกาใต้", "โอเชียเนีย", "อื่น ๆ"].map(zone => (
+                        <button
+                          key={zone}
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setActiveZoneFilter(zone); }}
+                          style={{
+                            padding: '0.2rem 0.6rem',
+                            fontSize: '0.75rem',
+                            borderRadius: '20px',
+                            border: '1px solid',
+                            borderColor: activeZoneFilter === zone ? '#3b82f6' : '#cbd5e1',
+                            background: activeZoneFilter === zone ? '#eff6ff' : 'white',
+                            color: activeZoneFilter === zone ? '#1d4ed8' : '#475569',
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {zone}
+                        </button>
+                      ))}
+                    </div>
+
                     <div style={{ overflowY: 'auto', flex: 1 }}>
-                      {selectedTeams.filter(t => t.toLowerCase().includes(mainSearchFilter.toLowerCase())).map(t => (
+                      {selectedTeams
+                        .filter(t => {
+                          if (activeZoneFilter === "ทั้งหมด") return true;
+                          if (activeZoneFilter === "อื่น ๆ") return !allInitialTeams.includes(t);
+                          const z = zones.find(z => z.name.includes(activeZoneFilter));
+                          return z ? z.teams.includes(t) : true;
+                        })
+                        .filter(t => t.toLowerCase().includes(mainSearchFilter.toLowerCase()))
+                        .map(t => (
                         <div 
                           key={t}
                           onClick={() => { 
                             setPrintTeam(t); 
                             setIsMainDropdownOpen(false); 
                             setMainSearchFilter(""); 
+                            setActiveZoneFilter("ทั้งหมด");
                           }}
                           style={{ padding: '0.5rem 1rem', cursor: 'pointer', borderRadius: '4px', backgroundColor: printTeam === t ? '#eff6ff' : 'transparent', fontWeight: printTeam === t ? 'bold' : 'normal' }}
                           onMouseEnter={e => { if(printTeam !== t) e.target.style.backgroundColor = '#f8fafc'; }}
@@ -290,9 +324,16 @@ function WorldCupPortal() {
                           {t}
                         </div>
                       ))}
-                      {selectedTeams.filter(t => t.toLowerCase().includes(mainSearchFilter.toLowerCase())).length === 0 && (
+                      {selectedTeams
+                        .filter(t => {
+                          if (activeZoneFilter === "ทั้งหมด") return true;
+                          if (activeZoneFilter === "อื่น ๆ") return !allInitialTeams.includes(t);
+                          const z = zones.find(z => z.name.includes(activeZoneFilter));
+                          return z ? z.teams.includes(t) : true;
+                        })
+                        .filter(t => t.toLowerCase().includes(mainSearchFilter.toLowerCase())).length === 0 && (
                         <div style={{ padding: '1rem', color: '#64748b', textAlign: 'center' }}>
-                          ไม่พบประเทศ (กรุณาไปเพิ่มใน "จัดการรายชื่อ")
+                          ไม่พบประเทศในหมวดหมู่นี้ (ตรวจสอบใน "จัดการรายชื่อ")
                         </div>
                       )}
                     </div>
