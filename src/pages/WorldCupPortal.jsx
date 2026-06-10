@@ -85,6 +85,9 @@ function WorldCupPortal() {
   const [isMainDropdownOpen, setIsMainDropdownOpen] = useState(false);
   const [mainSearchFilter, setMainSearchFilter] = useState("");
   const [activeZoneFilter, setActiveZoneFilter] = useState("ทั้งหมด");
+  const [printerMode, setPrinterMode] = useState(() => {
+    return localStorage.getItem('wcPrinterMode') || 'A6';
+  });
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -102,19 +105,11 @@ function WorldCupPortal() {
 
   useEffect(() => {
     localStorage.setItem('wcPrintSettings', JSON.stringify(wcPrintSettings));
-  }, [wcPrintSettings]);
-
-  useEffect(() => {
     localStorage.setItem('wcSelectedTeams', JSON.stringify(selectedTeams));
-  }, [selectedTeams]);
-
-  useEffect(() => {
     localStorage.setItem('wcCustomTeamsList', JSON.stringify(customTeamsList));
-  }, [customTeamsList]);
-
-  useEffect(() => {
     localStorage.setItem('wcPrintTeam', printTeam);
-  }, [printTeam]);
+    localStorage.setItem('wcPrinterMode', printerMode);
+  }, [wcPrintSettings, selectedTeams, customTeamsList, printTeam, printerMode]);
 
   const handlePrint = () => {
     if (!printTeam.trim()) {
@@ -157,7 +152,7 @@ function WorldCupPortal() {
         {`
           @media print {
             @page {
-              size: 14.8cm 10.5cm;
+              size: ${printerMode === 'A4Center' ? 'A4 portrait' : '14.8cm 10.5cm'};
               margin: 0;
             }
             body {
@@ -169,8 +164,8 @@ function WorldCupPortal() {
               display: none !important;
             }
             .print-area {
-              width: 14.8cm;
-              height: 10.5cm;
+              width: ${printerMode === 'A4Center' ? '21cm' : '14.8cm'};
+              height: ${printerMode === 'A4Center' ? '29.7cm' : '10.5cm'};
               background: white;
               position: relative !important;
               overflow: hidden;
@@ -528,6 +523,43 @@ function WorldCupPortal() {
               </div>
             </div>
             
+            <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
+              <h4 style={{ margin: 0, fontSize: '1rem', color: '#334155', marginBottom: '1rem' }}>
+                โหมดชดเชยพิกัดเครื่องพิมพ์
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input 
+                    type="radio" 
+                    name="printerMode" 
+                    checked={printerMode === 'A6'} 
+                    onChange={() => setPrinterMode('A6')} 
+                  />
+                  <span style={{ fontSize: '0.95rem' }}>โหมดปกติ (ตรงตามหน้าจอ / เครื่องพิมพ์ดึงมุม)</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input 
+                    type="radio" 
+                    name="printerMode" 
+                    style={{ marginTop: '0.25rem' }}
+                    checked={printerMode === 'A4Center'} 
+                    onChange={() => setPrinterMode('A4Center')} 
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: printerMode === 'A4Center' ? 'bold' : 'normal', color: printerMode === 'A4Center' ? '#dc2626' : 'inherit' }}>โหมดชดเชยพิกัด A4 ดึงกลาง (สำหรับเครื่องเลเซอร์)</span>
+                    <span style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>แก้ปัญหาภาพตรงบนหน้าจอ แต่พิมพ์จริงตกขอบ</span>
+                  </div>
+                </label>
+              </div>
+              {printerMode === 'A4Center' && (
+                <div style={{ marginTop: '1rem', padding: '0.8rem', background: '#fef2f2', borderLeft: '4px solid #ef4444', color: '#b91c1c', fontSize: '0.85rem', borderRadius: '4px' }}>
+                  <strong>ตั้งค่าการพิมพ์สำหรับโหมดนี้:</strong><br />
+                  1. ในหน้าต่าง Print ให้เลือก <strong>Paper Size เป็น A4</strong><br />
+                  2. ตอนสอดไปรษณียบัตร ให้เอาด้านแคบ 10.5 ซม. เข้าตรงกลางเครื่อง
+                </div>
+              )}
+            </div>
+
             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
               <button onClick={() => setIsSettingsOpen(false)} className="btn btn-primary" style={{ minWidth: '120px' }}>
                 บันทึกและปิด
@@ -539,20 +571,39 @@ function WorldCupPortal() {
 
       {/* Actual Print Area (1 page for the selected printTeam) */}
       <div className="print-only print-area">
-        <div style={{ 
-          position: 'absolute',
-          top: `${wcPrintSettings.top}cm`,
-          left: `${wcPrintSettings.left}cm`,
-          fontSize: `${wcPrintSettings.fontSize}pt`, 
-          fontFamily: 'Sarabun, Inter, sans-serif',
-          fontWeight: 'bold',
-          color: '#000',
-          whiteSpace: 'nowrap',
-          margin: 0,
-          padding: 0
-        }}>
-          {printTeam}
-        </div>
+        {printerMode === 'A4Center' ? (
+          <div style={{ 
+            position: 'absolute',
+            top: `${wcPrintSettings.left}cm`,
+            left: `calc(5.25cm + 10.5cm - ${wcPrintSettings.top}cm)`,
+            transform: 'rotate(90deg)',
+            transformOrigin: '0 0',
+            fontSize: `${wcPrintSettings.fontSize}pt`, 
+            fontFamily: 'Sarabun, Inter, sans-serif',
+            fontWeight: 'bold',
+            color: '#000',
+            whiteSpace: 'nowrap',
+            margin: 0,
+            padding: 0
+          }}>
+            {printTeam}
+          </div>
+        ) : (
+          <div style={{ 
+            position: 'absolute',
+            top: `${wcPrintSettings.top}cm`,
+            left: `${wcPrintSettings.left}cm`,
+            fontSize: `${wcPrintSettings.fontSize}pt`, 
+            fontFamily: 'Sarabun, Inter, sans-serif',
+            fontWeight: 'bold',
+            color: '#000',
+            whiteSpace: 'nowrap',
+            margin: 0,
+            padding: 0
+          }}>
+            {printTeam}
+          </div>
+        )}
       </div>
     </>
   );
