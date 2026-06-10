@@ -51,10 +51,20 @@ function Navigation() {
       </Link>
       <div 
         onClick={handleSecretClick}
-        style={{ fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.3, fontWeight: 500, cursor: 'pointer', userSelect: 'none' }}
+        style={{ 
+          fontSize: '0.7rem', 
+          color: 'var(--text-muted)', 
+          opacity: 0.3, 
+          fontWeight: 500, 
+          cursor: 'pointer', 
+          userSelect: 'none',
+          textAlign: 'right',
+          lineHeight: '1.2'
+        }}
         title="Secret Portal Entrance"
       >
-        © MrAEK 10501 v{version}
+        <div>© MrAEK 10501</div>
+        <div style={{ fontSize: '0.6rem', marginTop: '0.1rem' }}>v{version}</div>
       </div>
     </header>
   );
