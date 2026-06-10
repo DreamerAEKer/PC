@@ -36,17 +36,8 @@ export default function StaffPortal() {
   const [branchName, setBranchName] = useState('ไปรษณีย์กลาง 10501');
   const [staffName, setStaffName] = useState('');
   const [staffPhone, setStaffPhone] = useState('');
-  const [savedSettings, setSavedSettings] = useState({
-    branch: 'ไปรษณีย์กลาง 10501',
-    staffName: '',
-    staffPhone: ''
-  });
+  const [isSettingsDirty, setIsSettingsDirty] = useState(false);
   const navigate = useNavigate();
-
-  const isSettingsDirty = 
-    branchName !== savedSettings.branch ||
-    staffName !== savedSettings.staffName ||
-    staffPhone !== savedSettings.staffPhone;
 
   const hasTextToSave = (staffName && staffName.trim() !== '') || (staffPhone && staffPhone.trim() !== '');
   const shouldShowRed = hasTextToSave && isSettingsDirty;
@@ -59,11 +50,7 @@ export default function StaffPortal() {
     const savedStaffPhone = localStorage.getItem('staffPhone') || '';
     setStaffPhone(savedStaffPhone);
     
-    setSavedSettings({
-      branch: savedBranch,
-      staffName: savedStaffName,
-      staffPhone: savedStaffPhone
-    });
+
     
     let savedHistory = localStorage.getItem('staffHistory');
     if (!savedHistory) {
@@ -388,12 +375,15 @@ export default function StaffPortal() {
 
   const handleBranchChange = (e) => {
     setBranchName(e.target.value);
+    setIsSettingsDirty(true);
   };
   const handleStaffNameChange = (e) => {
     setStaffName(e.target.value);
+    setIsSettingsDirty(true);
   };
   const handleStaffPhoneChange = (e) => {
     setStaffPhone(e.target.value);
+    setIsSettingsDirty(true);
   };
 
   const saveSettings = () => {
@@ -405,11 +395,7 @@ export default function StaffPortal() {
     localStorage.setItem('branchName', branchName);
     localStorage.setItem('staffName', staffName);
     localStorage.setItem('staffPhone', staffPhone);
-    setSavedSettings({
-      branch: branchName,
-      staffName: staffName,
-      staffPhone: staffPhone
-    });
+    setIsSettingsDirty(false);
     setShowSaveSuccess(true);
     setTimeout(() => setShowSaveSuccess(false), 3000);
   };
