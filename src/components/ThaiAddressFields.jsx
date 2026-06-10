@@ -4,14 +4,14 @@ import { Info } from 'lucide-react';
 
 export default function ThaiAddressFields({ register, setValue, errors, defaultValues, dirtyFields, touchedFields, isAddressRequired = true }) {
   const { filteredData, searchByField, reset } = useThaiAddress();
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeField, setActiveField] = useState(null); // 'subdistrict', 'district', 'province', 'zipcode'
   const containerRef = useRef(null);
 
   useEffect(() => {
     // Handle click outside to close suggestions
     function handleClickOutside(event) {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setShowSuggestions(false);
+        setActiveField(null);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -23,16 +23,19 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
     setValue('district', item.district, { shouldValidate: true });
     setValue('province', item.province, { shouldValidate: true });
     setValue('zipcode', item.zipCode, { shouldValidate: true });
-    setShowSuggestions(false);
+    setActiveField(null);
     reset();
   };
 
   const handleInput = (field, value) => {
     if (value.length > 0) {
       searchByField(field, value);
-      setShowSuggestions(true);
+      if (field === 'subDistrict') setActiveField('subdistrict');
+      else if (field === 'district') setActiveField('district');
+      else if (field === 'province') setActiveField('province');
+      else if (field === 'zipCode') setActiveField('zipcode');
     } else {
-      setShowSuggestions(false);
+      setActiveField(null);
       reset();
     }
   };
@@ -50,8 +53,47 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
     return '';
   };
 
+  const renderSuggestionsDropdown = (fieldName) => {
+    if (activeField !== fieldName || !filteredData || filteredData.length === 0) return null;
+
+    return (
+      <div style={{
+        position: 'absolute',
+        top: '100%',
+        left: 0,
+        right: 0,
+        background: 'white',
+        border: '1px solid var(--border)',
+        borderRadius: '8px',
+        maxHeight: '200px',
+        overflowY: 'auto',
+        zIndex: 1000,
+        boxShadow: 'var(--shadow-lg)',
+        marginTop: '2px'
+      }}>
+        {filteredData.map((item, idx) => {
+          const isBKK = item.province === 'กรุงเทพมหานคร';
+          const subTitle = isBKK ? `แขวง${item.subDistrict}` : `ต.${item.subDistrict}`;
+          const distTitle = isBKK ? `เขต${item.district}` : `อ.${item.district}`;
+          const provTitle = isBKK ? item.province : `จ.${item.province}`;
+          
+          return (
+            <div key={idx} 
+                 style={{ padding: '0.75rem', cursor: 'pointer', borderBottom: '1px solid var(--border)', fontSize: '0.85rem', color: '#1e293b', textAlign: 'left' }}
+                 onClick={() => handleSelect(item)}
+                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              {subTitle} {distTitle} {provTitle} {item.zipCode}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
-    <div style={{ position: 'relative' }} ref={containerRef}>
+    <div ref={containerRef}>
       <div className="form-group">
         <label className="form-label">ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน) {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
         <input type="text" className={`form-control ${getFieldClass('addressLine1')}`} required={isAddressRequired} {...register("addressLine1", { required: isAddressRequired })} placeholder="ระบุบ้านเลขที่ หมู่ ซอย ถนน" defaultValue={defaultValues?.addressLine1 || ''} />
@@ -72,7 +114,7 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
       
       {/* รหัสไปรษณีย์ */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, position: 'relative' }}>
           <label className="form-label">รหัสไปรษณีย์ {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
           <input type="text" className={`form-control ${getFieldClass('zipcode')}`} required={isAddressRequired} 
             name={zipcodeReg.name}
@@ -87,12 +129,13 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
             defaultValue={defaultValues?.zipcode || ''}
           />
           {errors.zipcode && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุรหัสไปรษณีย์</span>}
+          {renderSuggestionsDropdown('zipcode')}
         </div>
       </div>
 
       {/* ตำบล / แขวง & อำเภอ / เขต */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, position: 'relative' }}>
           <label className="form-label">ตำบล / แขวง {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
           <input type="text" className={`form-control ${getFieldClass('subdistrict')}`} required={isAddressRequired} 
             name={subdistrictReg.name}
@@ -107,8 +150,9 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
             defaultValue={defaultValues?.subdistrict || ''}
           />
           {errors.subdistrict && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุตำบล</span>}
+          {renderSuggestionsDropdown('subdistrict')}
         </div>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, position: 'relative' }}>
           <label className="form-label">อำเภอ / เขต {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
           <input type="text" className={`form-control ${getFieldClass('district')}`} required={isAddressRequired} 
             name={districtReg.name}
@@ -123,12 +167,13 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
             defaultValue={defaultValues?.district || ''}
           />
           {errors.district && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุอำเภอ</span>}
+          {renderSuggestionsDropdown('district')}
         </div>
       </div>
 
       {/* จังหวัด */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, position: 'relative' }}>
           <label className="form-label">จังหวัด {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
           <input type="text" className={`form-control ${getFieldClass('province')}`} required={isAddressRequired} 
             name={provinceReg.name}
@@ -143,34 +188,9 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
             defaultValue={defaultValues?.province || ''}
           />
           {errors.province && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจังหวัด</span>}
+          {renderSuggestionsDropdown('province')}
         </div>
       </div>
-
-      {showSuggestions && filteredData && filteredData.length > 0 && (
-        <div style={{
-          position: 'absolute', top: '100%', left: 0, right: 0,
-          background: 'white', border: '1px solid var(--border)', borderRadius: '8px',
-          maxHeight: '200px', overflowY: 'auto', zIndex: 100, boxShadow: 'var(--shadow-lg)'
-        }}>
-          {filteredData.map((item, idx) => {
-            const isBKK = item.province === 'กรุงเทพมหานคร';
-            const subTitle = isBKK ? `แขวง${item.subDistrict}` : `ต.${item.subDistrict}`;
-            const distTitle = isBKK ? `เขต${item.district}` : `อ.${item.district}`;
-            const provTitle = isBKK ? item.province : `จ.${item.province}`;
-            
-            return (
-              <div key={idx} 
-                   style={{ padding: '0.75rem', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
-                   onClick={() => handleSelect(item)}
-                   onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                   onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                {subTitle} {distTitle} {provTitle} {item.zipCode}
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }
