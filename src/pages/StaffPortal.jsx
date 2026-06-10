@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
-import { QrCode, Keyboard, History, Printer, FileText, Settings } from 'lucide-react';
+import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 
 export default function StaffPortal() {
@@ -189,6 +189,58 @@ export default function StaffPortal() {
     setTimeout(() => {
       setPrintData(null);
     }, 500);
+  };
+
+  const exportHistory = () => {
+    if (history.length === 0) {
+      alert("ไม่มีประวัติการพิมพ์ให้ส่งออกครับ");
+      return;
+    }
+    const dataStr = JSON.stringify(history, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.download = `staff-history-${dateStr}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importHistory = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (Array.isArray(parsed)) {
+          setHistory(prevHistory => {
+            const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
+            const merged = [...parsed, ...safePrev];
+            const unique = [];
+            const seen = new Set();
+            for (const item of merged) {
+              if (item && item.id && !seen.has(item.id)) {
+                seen.add(item.id);
+                unique.push(item);
+              }
+            }
+            const sortedUnique = unique.sort((a, b) => b.id - a.id).slice(0, 100);
+            localStorage.setItem('staffHistory', JSON.stringify(sortedUnique));
+            return sortedUnique;
+          });
+          alert(`นำเข้าข้อมูลสำเร็จ! โหลดประวัติเพิ่มได้ ${parsed.length} รายการ`);
+        } else {
+          alert("รูปแบบไฟล์ไม่ถูกต้อง (ต้องเป็นรายการอาร์เรย์)");
+        }
+      } catch (err) {
+        alert("ไม่สามารถอ่านไฟล์ได้ กรุณาใช้ไฟล์ .json ที่ส่งออกมาจากระบบนี้เท่านั้น");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   const parseQrPayload = (payloadString) => {
@@ -823,6 +875,26 @@ export default function StaffPortal() {
                 <History size={20} />
                 ประวัติการพิมพ์ (เครื่องนี้)
               </h3>
+              {/* Export/Import Control Buttons */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                <button 
+                  onClick={exportHistory} 
+                  className="btn btn-secondary" 
+                  style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}
+                  title="ดาวน์โหลดประวัติทั้งหมดเป็นไฟล์เพื่อนำไปเปิดเครื่องอื่น"
+                >
+                  <Download size={14} /> ส่งออกข้อมูล (.json)
+                </button>
+                <label 
+                  className="btn btn-secondary" 
+                  style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', cursor: 'pointer', margin: 0 }}
+                  title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
+                >
+                  <Upload size={14} /> นำเข้าข้อมูล
+                  <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
+                </label>
+              </div>
+
               {history.length === 0 ? (
                 <p style={{ color: 'var(--text-muted)' }}>ยังไม่มีประวัติการพิมพ์</p>
               ) : (
