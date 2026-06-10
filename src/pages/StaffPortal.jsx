@@ -90,7 +90,7 @@ export default function StaffPortal() {
           fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 5,
           isNameBold: typeof parsed.isNameBold === 'boolean' ? parsed.isNameBold : true,
           isPhoneBold: typeof parsed.isPhoneBold === 'boolean' ? parsed.isPhoneBold : true,
-          didPrintMode: typeof parsed.didPrintMode === 'string' ? parsed.didPrintMode : 'did'
+          didPrintMode: (parsed.didPrintMode === 'did' || parsed.didPrintMode === 'address') ? parsed.didPrintMode : 'did'
         };
       }
       return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'did' };
@@ -166,6 +166,32 @@ export default function StaffPortal() {
     }, 500);
   };
 
+  const parseQrPayload = (payloadString) => {
+    try {
+      const raw = JSON.parse(payloadString);
+      if (raw && typeof raw === 'object') {
+        if ('n' in raw || 'p' in raw) {
+          return {
+            orderDate: raw.d || '',
+            quantity: raw.q || 1,
+            name: raw.n || '',
+            phone: raw.p || '',
+            addressLine1: raw.a || '',
+            subdistrict: raw.sd || '',
+            district: raw.dt || '',
+            province: raw.pv || '',
+            zipcode: raw.zp || '',
+            did: raw.id || ''
+          };
+        }
+        return raw;
+      }
+    } catch (e) {
+      console.error("Payload parse error:", e);
+    }
+    throw new Error("Invalid payload format");
+  };
+
   const populateFromScan = (data) => {
     setValue("orderDate", data.orderDate, { shouldValidate: true });
     setValue("quantity", data.quantity || 1, { shouldValidate: true });
@@ -190,7 +216,7 @@ export default function StaffPortal() {
         );
         scanner.render((decodedText) => {
           try {
-            const data = JSON.parse(decodedText);
+            const data = parseQrPayload(decodedText);
             populateFromScan(data);
             try { if (scanner) scanner.clear().catch(()=>{}).then(() => setScanMode('manual')); } catch(e){ setScanMode('manual'); }
             alert("สแกนข้อมูลสำเร็จ! กรุณาตรวจสอบและกด สั่งพิมพ์");
@@ -216,8 +242,7 @@ export default function StaffPortal() {
     };
   }, [scanMode, setValue]);
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
+  const handleFileDecode = async (file) => {
     if (!file) return;
 
     if ('BarcodeDetector' in window) {
@@ -226,10 +251,14 @@ export default function StaffPortal() {
         const imageBitmap = await createImageBitmap(file);
         const barcodes = await barcodeDetector.detect(imageBitmap);
         if (barcodes.length > 0) {
-          const data = JSON.parse(barcodes[0].rawValue);
-          populateFromScan(data);
-          alert("อ่านรูปภาพสำเร็จ! กรุณาตรวจสอบข้อมูล");
-          return;
+          try {
+            const data = parseQrPayload(barcodes[0].rawValue);
+            populateFromScan(data);
+            alert("อ่านรูปภาพสำเร็จ! กรุณาตรวจสอบข้อมูล");
+            return;
+          } catch (err) {
+            console.log("Barcode parsing error:", err);
+          }
         }
       } catch (err) {
         console.log("BarcodeDetector error:", err);
@@ -240,7 +269,7 @@ export default function StaffPortal() {
     const html5QrCode = new Html5Qrcode("reader-hidden");
     try {
       const decodedText = await html5QrCode.scanFile(file, false);
-      const data = JSON.parse(decodedText);
+      const data = parseQrPayload(decodedText);
       populateFromScan(data);
       alert("อ่านรูปภาพสำเร็จ! กรุณาตรวจสอบข้อมูล");
     } catch (err) {
@@ -439,7 +468,7 @@ export default function StaffPortal() {
                         try {
                           const val = e.target.value.trim();
                           if (!val) return;
-                          const data = JSON.parse(val);
+                          const data = parseQrPayload(val);
                           populateFromScan(data);
                           e.target.value = '';
                           setScanMode('manual');
@@ -452,10 +481,10 @@ export default function StaffPortal() {
                     }}
                     onChange={(e) => {
                       const val = e.target.value.trim();
-                      if (val.length > 20 && val.startsWith('{') && val.endsWith('}')) {
+                      if (val.length > 10 && val.startsWith('{') && val.endsWith('}')) {
                         try {
-                          const data = JSON.parse(val);
-                          if (data.name && data.phone) {
+                          const data = parseQrPayload(val);
+                          if (data.name || data.phone || data.did) {
                             populateFromScan(data);
                             e.target.value = '';
                             setScanMode('manual');
@@ -472,8 +501,46 @@ export default function StaffPortal() {
                 <div>
                   <div id="reader" style={{ width: '100%', marginBottom: '1rem' }}></div>
                   <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                    <strong>หรืออัปโหลดรูปภาพที่มี QR Code</strong>
-                    <input type="file" accept="image/*" onChange={handleFileUpload} className="form-control" style={{ marginTop: '0.5rem' }} />
+                    <div 
+                      onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.backgroundColor = '#eff6ff'; }}
+                      onDragLeave={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+                      onDrop={async (e) => {
+                        e.preventDefault();
+                        e.currentTarget.style.borderColor = '#cbd5e1';
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        const file = e.dataTransfer.files[0];
+                        if (file) {
+                          await handleFileDecode(file);
+                        }
+                      }}
+                      onClick={() => document.getElementById('drag-file-input').click()}
+                      style={{
+                        border: '2px dashed #cbd5e1',
+                        borderRadius: '12px',
+                        padding: '2rem 1rem',
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        marginTop: '1rem',
+                        backgroundColor: 'transparent'
+                      }}
+                    >
+                      <input 
+                        type="file" 
+                        id="drag-file-input" 
+                        accept="image/*" 
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (file) await handleFileDecode(file);
+                        }} 
+                        style={{ display: 'none' }} 
+                      />
+                      <div style={{ color: 'var(--primary)', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center' }}>
+                        <QrCode size={32} />
+                      </div>
+                      <strong style={{ display: 'block', marginBottom: '0.25rem', color: 'var(--text-main)' }}>ลากไฟล์รูปภาพ QR Code มาวางที่นี่</strong>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>หรือคลิกเพื่อเลือกไฟล์รูปภาพจากเครื่องคอมพิวเตอร์</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -590,15 +657,6 @@ export default function StaffPortal() {
                         />
                         พิมพ์ที่อยู่ปกติ (ซ่อน D-ID)
                       </label>
-                      <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                        <input 
-                          type="radio" 
-                          name="didPrintMode" 
-                          checked={printSettings.didPrintMode === 'both'} 
-                          onChange={() => setPrintSettings(p => ({...p, didPrintMode: 'both'}))} 
-                        />
-                        พิมพ์ทั้งคู่
-                      </label>
                     </div>
                   </div>
 
@@ -640,24 +698,20 @@ export default function StaffPortal() {
                         }}>
                           <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif' }}>
                             {formValues.did && printSettings.didPrintMode !== 'address' ? (
-                              <div style={{ display: 'flex', gap: '2rem' }}>
-                                <div style={{ flex: 1.5 }}>
-                                  <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
-                                    {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
-                                  </div>
-                                  <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                                    โทร. {formValues.phone || '08X-XXX-XXXX'}
-                                  </div>
-                                  {!(formValues.did && formValues.did.trim().length === 6) && (
-                                    <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3' }}>
-                                      {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}`.trim()}
-                                    </div>
-                                  )}
+                              <div>
+                                <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                                  {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
                                 </div>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
-                                    {formValues.did}
+                                <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                  โทร. {formValues.phone || '08X-XXX-XXXX'}
+                                </div>
+                                {!(formValues.did && formValues.did.trim().length === 6) && (
+                                  <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
+                                    {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}`.trim()}
                                   </div>
+                                )}
+                                <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
+                                  {formValues.did}
                                 </div>
                               </div>
                             ) : (
@@ -754,24 +808,20 @@ export default function StaffPortal() {
         <div className="print-only print-area">
           <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif' }}>
             {printData.did && printSettings.didPrintMode !== 'address' ? (
-              <div style={{ display: 'flex', gap: '2rem' }}>
-                <div style={{ flex: 1.5 }}>
-                  <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
-                    {printData.name}
-                  </div>
-                  <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                    โทร. {printData.phone}
-                  </div>
-                  {!(printData.did && printData.did.trim().length === 6) && (
-                    <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3' }}>
-                      {printData.address} {printData.zipcode}
-                    </div>
-                  )}
+              <div>
+                <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                  {printData.name}
                 </div>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
-                    {printData.did}
+                <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                  โทร. {printData.phone}
+                </div>
+                {!(printData.did && printData.did.trim().length === 6) && (
+                  <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
+                    {printData.address} {printData.zipcode}
                   </div>
+                )}
+                <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
+                  {printData.did}
                 </div>
               </div>
             ) : (

@@ -113,24 +113,20 @@ export default function PrintPostcard() {
       <div className="print-area">
         <div style={{ fontSize: `${fontSize}px`, lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif', paddingTop: '1em' }}>
           {data.did && printSettings.didPrintMode !== 'address' ? (
-            <div style={{ display: 'flex', gap: '2rem', paddingLeft: '1em' }}>
-              <div style={{ flex: 1.5 }}>
-                <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: '1.2em', marginBottom: '0.2em' }}>
-                  {data.name}
-                </div>
-                <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: '1em', marginBottom: '0.5em' }}>
-                  โทร. {data.phone}
-                </div>
-                {!(data.did && data.did.trim().length === 6) && (
-                  <div style={{ fontSize: '0.85em', color: '#333', lineHeight: '1.4' }}>
-                    {data.address} {data.zipcode}
-                  </div>
-                )}
+            <div style={{ paddingLeft: '2em' }}>
+              <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: '1.2em', marginBottom: '0.2em' }}>
+                {data.name}
               </div>
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ fontSize: '3.5em', fontWeight: '900', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
-                  {data.did}
+              <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: '1em', marginBottom: '0.5em' }}>
+                โทร. {data.phone}
+              </div>
+              {!(data.did && data.did.trim().length === 6) && (
+                <div style={{ fontSize: '0.85em', color: '#333', lineHeight: '1.4', marginBottom: '0.5em' }}>
+                  {data.address} {data.zipcode}
                 </div>
+              )}
+              <div style={{ fontSize: '2em', fontWeight: '900', letterSpacing: '0.05em', color: '#000', marginTop: '0.5em' }}>
+                {data.did}
               </div>
             </div>
           ) : (

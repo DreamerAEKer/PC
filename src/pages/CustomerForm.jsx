@@ -66,8 +66,20 @@ export default function CustomerForm() {
       isDidActive
     };
 
-    // Create a payload string (JSON) for the QR code
-    const payload = JSON.stringify(processedData);
+    // Create a payload string (JSON) for the QR code using compressed format
+    const compressedData = {
+      d: processedData.orderDate,
+      q: processedData.quantity,
+      n: processedData.name,
+      p: processedData.phone,
+      a: processedData.addressLine1 || '',
+      sd: processedData.subdistrict || '',
+      dt: processedData.district || '',
+      pv: processedData.province || '',
+      zp: processedData.zipcode || '',
+      id: processedData.did || ''
+    };
+    const payload = JSON.stringify(compressedData);
     setGeneratedData({ ...processedData, payload });
 
     // Save to history
@@ -293,18 +305,19 @@ export default function CustomerForm() {
                       zipcode: record.zipcode || ''
                     };
                     reset(recordToSet);
-                    const payload = JSON.stringify({
-                      orderDate: record.orderDate,
-                      quantity: record.quantity,
-                      name: record.name,
-                      phone: record.phone,
-                      addressLine1: record.addressLine1 || record.address,
-                      subdistrict: record.subdistrict || '',
-                      district: record.district || '',
-                      province: record.province || '',
-                      zipcode: record.zipcode || '',
-                      did: record.did
-                    });
+                    const compressedData = {
+                      d: record.orderDate,
+                      q: record.quantity,
+                      n: record.name,
+                      p: record.phone,
+                      a: record.addressLine1 || record.address || '',
+                      sd: record.subdistrict || '',
+                      dt: record.district || '',
+                      pv: record.province || '',
+                      zp: record.zipcode || '',
+                      id: record.did || ''
+                    };
+                    const payload = JSON.stringify(compressedData);
                     setGeneratedData({ ...record, payload });
                   }}
                   onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
