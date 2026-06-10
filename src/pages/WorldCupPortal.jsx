@@ -82,6 +82,22 @@ function WorldCupPortal() {
   });
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isMainDropdownOpen, setIsMainDropdownOpen] = useState(false);
+  const [mainSearchFilter, setMainSearchFilter] = useState("");
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const container = document.getElementById('country-dropdown-container');
+      if (container && !container.contains(event.target)) {
+        setIsMainDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('wcPrintSettings', JSON.stringify(wcPrintSettings));
@@ -237,18 +253,52 @@ function WorldCupPortal() {
           <div style={{ marginBottom: '2rem' }}>
             <label className="form-label" style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '0.75rem' }}>ระบุประเทศที่จะพิมพ์ (1 ประเทศ)</label>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <input 
-                type="text" 
-                list="favorite-teams" 
-                value={printTeam}
-                onChange={(e) => setPrintTeam(e.target.value)}
-                className="form-control"
-                placeholder="พิมพ์ชื่อประเทศ หรือกดเลือก..."
-                style={{ fontSize: '1.1rem', padding: '0.8rem 1rem' }}
-              />
-              <datalist id="favorite-teams">
-                {selectedTeams.map(t => <option key={t} value={t} />)}
-              </datalist>
+              <div style={{ position: 'relative', flex: 1 }} id="country-dropdown-container">
+                <div 
+                  className="form-control" 
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', background: 'white', fontSize: '1.1rem', padding: '0.8rem 1rem' }}
+                  onClick={() => setIsMainDropdownOpen(!isMainDropdownOpen)}
+                >
+                  <span style={{ color: printTeam ? '#000' : '#64748b' }}>{printTeam || "คลิกเพื่อเลือกประเทศ..."}</span>
+                  <span style={{ fontSize: '0.8rem' }}>▼</span>
+                </div>
+                
+                {isMainDropdownOpen && (
+                  <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px', background: 'white', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: 'var(--shadow-lg)', zIndex: 10, padding: '0.5rem', maxHeight: '300px', display: 'flex', flexDirection: 'column' }}>
+                    <input 
+                      type="text"
+                      autoFocus
+                      placeholder="พิมพ์ค้นหาชื่อประเทศ..."
+                      value={mainSearchFilter}
+                      onChange={e => setMainSearchFilter(e.target.value)}
+                      className="form-control"
+                      style={{ marginBottom: '0.5rem' }}
+                    />
+                    <div style={{ overflowY: 'auto', flex: 1 }}>
+                      {selectedTeams.filter(t => t.toLowerCase().includes(mainSearchFilter.toLowerCase())).map(t => (
+                        <div 
+                          key={t}
+                          onClick={() => { 
+                            setPrintTeam(t); 
+                            setIsMainDropdownOpen(false); 
+                            setMainSearchFilter(""); 
+                          }}
+                          style={{ padding: '0.5rem 1rem', cursor: 'pointer', borderRadius: '4px', backgroundColor: printTeam === t ? '#eff6ff' : 'transparent', fontWeight: printTeam === t ? 'bold' : 'normal' }}
+                          onMouseEnter={e => { if(printTeam !== t) e.target.style.backgroundColor = '#f8fafc'; }}
+                          onMouseLeave={e => { if(printTeam !== t) e.target.style.backgroundColor = 'transparent'; }}
+                        >
+                          {t}
+                        </div>
+                      ))}
+                      {selectedTeams.filter(t => t.toLowerCase().includes(mainSearchFilter.toLowerCase())).length === 0 && (
+                        <div style={{ padding: '1rem', color: '#64748b', textAlign: 'center' }}>
+                          ไม่พบประเทศ (กรุณาไปเพิ่มใน "จัดการรายชื่อ")
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               <button 
                 type="button" 
                 onClick={() => setIsSettingsOpen(true)} 
