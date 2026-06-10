@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useThaiAddress } from 'use-thai-address';
 import { Info } from 'lucide-react';
 
-export default function ThaiAddressFields({ register, setValue, errors, defaultValues, dirtyFields, touchedFields }) {
+export default function ThaiAddressFields({ register, setValue, errors, defaultValues, dirtyFields, touchedFields, isAddressRequired = true }) {
   const { filteredData, searchByField, reset } = useThaiAddress();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const containerRef = useRef(null);
@@ -38,10 +38,10 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
   };
 
   // Setup register handlers manually so we can intercept onChange
-  const subdistrictReg = register("subdistrict", { required: true });
-  const districtReg = register("district", { required: true });
-  const provinceReg = register("province", { required: true });
-  const zipcodeReg = register("zipcode", { required: true });
+  const subdistrictReg = register("subdistrict", { required: isAddressRequired });
+  const districtReg = register("district", { required: isAddressRequired });
+  const provinceReg = register("province", { required: isAddressRequired });
+  const zipcodeReg = register("zipcode", { required: isAddressRequired });
 
   const getFieldClass = (fieldName) => {
     if (!dirtyFields || !touchedFields) return errors[fieldName] ? 'input-error' : '';
@@ -53,8 +53,8 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
   return (
     <div style={{ position: 'relative' }} ref={containerRef}>
       <div className="form-group">
-        <label className="form-label">ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน) <span style={{color:'red'}}>*</span></label>
-        <input type="text" className={`form-control ${getFieldClass('addressLine1')}`} required {...register("addressLine1", { required: true })} placeholder="ระบุบ้านเลขที่ หมู่ ซอย ถนน" defaultValue={defaultValues?.addressLine1 || ''} />
+        <label className="form-label">ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน) {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
+        <input type="text" className={`form-control ${getFieldClass('addressLine1')}`} required={isAddressRequired} {...register("addressLine1", { required: isAddressRequired })} placeholder="ระบุบ้านเลขที่ หมู่ ซอย ถนน" defaultValue={defaultValues?.addressLine1 || ''} />
         {errors.addressLine1 && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุที่อยู่</span>}
       </div>
 
@@ -72,8 +72,8 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
       
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
         <div style={{ flex: 1 }}>
-          <label className="form-label">ตำบล / แขวง <span style={{color:'red'}}>*</span></label>
-          <input type="text" className={`form-control ${getFieldClass('subdistrict')}`} required 
+          <label className="form-label">ตำบล / แขวง {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
+          <input type="text" className={`form-control ${getFieldClass('subdistrict')}`} required={isAddressRequired} 
             name={subdistrictReg.name}
             ref={subdistrictReg.ref}
             onBlur={subdistrictReg.onBlur}
@@ -88,8 +88,8 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
           {errors.subdistrict && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุตำบล</span>}
         </div>
         <div style={{ flex: 1 }}>
-          <label className="form-label">อำเภอ / เขต <span style={{color:'red'}}>*</span></label>
-          <input type="text" className={`form-control ${getFieldClass('district')}`} required 
+          <label className="form-label">อำเภอ / เขต {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
+          <input type="text" className={`form-control ${getFieldClass('district')}`} required={isAddressRequired} 
             name={districtReg.name}
             ref={districtReg.ref}
             onBlur={districtReg.onBlur}
@@ -107,8 +107,8 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
 
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
         <div style={{ flex: 1 }}>
-          <label className="form-label">จังหวัด <span style={{color:'red'}}>*</span></label>
-          <input type="text" className={`form-control ${getFieldClass('province')}`} required 
+          <label className="form-label">จังหวัด {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
+          <input type="text" className={`form-control ${getFieldClass('province')}`} required={isAddressRequired} 
             name={provinceReg.name}
             ref={provinceReg.ref}
             onBlur={provinceReg.onBlur}
@@ -123,8 +123,8 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
           {errors.province && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจังหวัด</span>}
         </div>
         <div style={{ flex: 1 }}>
-          <label className="form-label">รหัสไปรษณีย์ <span style={{color:'red'}}>*</span></label>
-          <input type="text" className={`form-control ${getFieldClass('zipcode')}`} required 
+          <label className="form-label">รหัสไปรษณีย์ {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
+          <input type="text" className={`form-control ${getFieldClass('zipcode')}`} required={isAddressRequired} 
             name={zipcodeReg.name}
             ref={zipcodeReg.ref}
             onBlur={zipcodeReg.onBlur}

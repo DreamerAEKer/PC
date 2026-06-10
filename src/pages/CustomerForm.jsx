@@ -10,6 +10,8 @@ export default function CustomerForm() {
 
   const quantity = watch("quantity", 1);
   const totalPrice = (parseInt(quantity, 10) || 0) * 3;
+  const didValue = watch("did", "");
+  const isDidActive = (didValue || "").trim().length === 6;
 
   const getFieldClass = (fieldName) => {
     if (errors[fieldName]) return 'input-error';
@@ -47,16 +49,21 @@ export default function CustomerForm() {
   }, [formValues]);
 
   const onSubmit = async (data) => {
-    // Process address into a single string for display and old-compatibility
-    const isBKK = data.province === 'กรุงเทพมหานคร';
-    const subTitle = isBKK ? `แขวง${data.subdistrict}` : `ต.${data.subdistrict}`;
-    const distTitle = isBKK ? `เขต${data.district}` : `อ.${data.district}`;
-    const provTitle = isBKK ? data.province : `จ.${data.province}`;
+    const isDidActive = data.did && data.did.trim().length === 6;
+    let fullAddress = "";
+    if (!isDidActive) {
+      // Process address into a single string for display and old-compatibility
+      const isBKK = data.province === 'กรุงเทพมหานคร';
+      const subTitle = isBKK ? `แขวง${data.subdistrict}` : `ต.${data.subdistrict}`;
+      const distTitle = isBKK ? `เขต${data.district}` : `อ.${data.district}`;
+      const provTitle = isBKK ? data.province : `จ.${data.province}`;
+      fullAddress = `${data.addressLine1} ${subTitle} ${distTitle} ${provTitle}`;
+    }
     
-    const fullAddress = `${data.addressLine1} ${subTitle} ${distTitle} ${provTitle}`;
     const processedData = {
       ...data,
-      address: fullAddress
+      address: fullAddress,
+      isDidActive
     };
 
     // Create a payload string (JSON) for the QR code
@@ -64,7 +71,7 @@ export default function CustomerForm() {
     setGeneratedData({ ...processedData, payload });
 
     // Save to history
-    const newRecord = { ...data, address: fullAddress, id: Date.now(), timestamp: new Date().toISOString() };
+    const newRecord = { ...data, address: fullAddress, isDidActive, id: Date.now(), timestamp: new Date().toISOString() };
     const updatedHistory = [newRecord, ...history].slice(0, 10); // Keep last 10
     setHistory(updatedHistory);
     localStorage.setItem('customerHistory', JSON.stringify(updatedHistory));
@@ -95,7 +102,9 @@ export default function CustomerForm() {
   };
 
   const shareToLine = async () => {
-    const textToShare = `ข้อมูลผู้รับ\nชื่อ: ${generatedData.name}\nเบอร์โทร: ${generatedData.phone}\nที่อยู่: ${generatedData.address} ${generatedData.zipcode}${generatedData.did ? `\nD-ID: ${generatedData.did}` : ''}`;
+    const textToShare = generatedData.isDidActive
+      ? `ข้อมูลผู้รับ\nชื่อ: ${generatedData.name}\nเบอร์โทร: ${generatedData.phone}\nD-ID: ${generatedData.did}`
+      : `ข้อมูลผู้รับ\nชื่อ: ${generatedData.name}\nเบอร์โทร: ${generatedData.phone}\nที่อยู่: ${generatedData.address} ${generatedData.zipcode}${generatedData.did ? `\nD-ID: ${generatedData.did}` : ''}`;
     
     if (navigator.canShare && cardRef.current) {
       try {
@@ -166,7 +175,7 @@ export default function CustomerForm() {
               })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
               {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.phone.message}</span>}
             </div>
-            <ThaiAddressFields register={register} setValue={setValue} errors={errors} dirtyFields={dirtyFields} touchedFields={touchedFields} />
+            <ThaiAddressFields register={register} setValue={setValue} errors={errors} dirtyFields={dirtyFields} touchedFields={touchedFields} isAddressRequired={!isDidActive} />
             <div className="form-group">
               <label className="form-label">ที่อยู่ D-ID (ไปรษณีย์ไทย)</label>
               <input type="text" className="form-control" {...register("did")} placeholder="ถ้ามี (ตัวเลือก)" />
@@ -230,9 +239,11 @@ export default function CustomerForm() {
               <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
                 เบอร์โทร: {generatedData.phone}
               </div>
-              <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem', lineHeight: '1.6' }}>
-                ที่อยู่: {generatedData.address} {generatedData.zipcode}
-              </div>
+              {!generatedData.isDidActive && (
+                <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem', lineHeight: '1.6' }}>
+                  ที่อยู่: {generatedData.address} {generatedData.zipcode}
+                </div>
+              )}
               {generatedData.did && (
                 <div style={{ fontSize: '1.1rem', marginTop: '1rem', padding: '0.5rem', background: '#f8fafc', borderLeft: '4px solid var(--secondary)' }}>
                   <strong>D-ID:</strong> {generatedData.did}
