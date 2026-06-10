@@ -33,6 +33,19 @@ export default function CustomerForm() {
     if (dirtyFields[fieldName] || touchedFields[fieldName]) return 'input-success';
     return '';
   };
+  const getBranchFromUrl = () => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const branchParam = params.get('branch') || params.get('b');
+      if (branchParam) {
+        return decodeURIComponent(branchParam).trim();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return "ไปรษณีย์กลาง 10501";
+  };
+
   const [generatedData, setGeneratedData] = useState(null);
   const [history, setHistory] = useState([]);
   const cardRef = useRef(null);
@@ -79,11 +92,14 @@ export default function CustomerForm() {
     
     const resolvedQty = data.selectQuantity === "custom" ? (parseInt(data.customQuantity, 10) || 0) : (parseInt(data.selectQuantity, 10) || 0);
 
+    const currentBranch = getBranchFromUrl();
+
     const processedData = {
       ...data,
       quantity: resolvedQty,
       address: fullAddress,
-      isDidActive
+      isDidActive,
+      branch: currentBranch
     };
 
     // Remove select helper fields from QR payload
@@ -287,7 +303,7 @@ export default function CustomerForm() {
               <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.4rem', paddingRight: '170px' }}>ข้อมูลผู้รับ (สำหรับการพิมพ์)</h2>
               <div style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem' }}>
                 วันที่สั่งจอง: {generatedData.orderDate} | จำนวน: {generatedData.quantity} ใบ<br/>
-                รับจองโดย: G.P.O 10501
+                รับจองโดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
               </div>
               <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: '600' }}>
                 ชื่อ: {generatedData.name}

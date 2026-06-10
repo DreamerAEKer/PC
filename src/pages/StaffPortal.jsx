@@ -378,6 +378,19 @@ export default function StaffPortal() {
           </div>
         </div>
 
+        <div style={{ 
+          backgroundColor: '#eff6ff', 
+          borderLeft: '4px solid #3b82f6', 
+          padding: '0.75rem 1rem', 
+          borderRadius: '8px', 
+          marginBottom: '1.5rem', 
+          fontSize: '0.85rem', 
+          color: '#1e3a8a',
+          lineHeight: '1.5'
+        }}>
+          💡 <strong>เคล็ดลับสำหรับสาขา:</strong> สามารถพิมพ์ QR Code หรือส่งลิงก์ระบบของลูกค้าโดยต่อท้าย URL ด้วย <code>?branch=ชื่อสาขาของคุณ</code> (เช่น <code>?branch=ปณ.เชียงใหม่</code> หรือ <code>?b=ปณ.เชียงใหม่</code>) เพื่อให้ใบจองบนมือถือของลูกค้าแสดงชื่อสาขาของท่านโดยอัตโนมัติ (ค่าเริ่มต้นคือ ไปรษณีย์กลาง 10501)
+        </div>
+
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#fff', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
