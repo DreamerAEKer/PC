@@ -713,6 +713,80 @@ export default function StaffPortal() {
           </div>
         </div>
 
+        <div className="staff-settings-container-row" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem', width: '100%' }}>
+          <div className="staff-settings-bar" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#fff', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)', width: '100%', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>สาขา:</span>
+              <input 
+                type="text" 
+                className="form-control" 
+                value={branchName} 
+                onChange={handleBranchChange} 
+                style={{ width: '150px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>จนท:</span>
+              <input 
+                type="text" 
+                className="form-control" 
+                value={staffName} 
+                onChange={handleStaffNameChange} 
+                placeholder="คลิกเพื่อพิมพ์ชื่อ"
+                style={{ width: '110px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>โทร:</span>
+              <input 
+                type="text" 
+                className="form-control" 
+                value={staffPhone} 
+                onChange={handleStaffPhoneChange} 
+                placeholder="คลิกเพื่อพิมพ์"
+                style={{ width: '100px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <button 
+                onClick={saveSettings} 
+                className="btn" 
+                style={{ 
+                  padding: '0.3rem 0.8rem', 
+                  fontSize: '0.85rem', 
+                  marginLeft: '0.25rem',
+                  backgroundColor: shouldShowRed ? 'var(--primary)' : '#fff', 
+                  color: shouldShowRed ? '#fff' : '#475569', 
+                  border: shouldShowRed ? '1px solid var(--primary)' : '1px solid #cbd5e1',
+                  fontWeight: shouldShowRed ? '700' : '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {showSaveSuccess ? 'บันทึกแล้ว' : 'บันทึก'}
+              </button>
+            </div>
+            
+            <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border)', margin: '0 0.5rem' }}></div>
+            
+            <button 
+              onClick={() => navigate('/print-blank-forms', { state: { branchName, staffName, staffPhone } })} 
+              className="btn" 
+              style={{ 
+                padding: '0.4rem 0.8rem', 
+                fontSize: '0.85rem', 
+                border: '2px solid var(--primary)', 
+                color: 'var(--primary)', 
+                backgroundColor: '#fff',
+                fontWeight: '700'
+              }}
+            >
+              <FileText size={16} />
+              พิมพ์ฟอร์มเปล่า 4 ใบ
+            </button>
+          </div>
+        </div>
+
         <div className="staff-tip-banner" style={{ 
           backgroundColor: '#eff6ff', 
           borderLeft: '4px solid #3b82f6', 
@@ -790,80 +864,6 @@ export default function StaffPortal() {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="staff-settings-container-row" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem', width: '100%' }}>
-          <div className="staff-settings-bar" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#fff', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)', width: '100%', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>สาขา:</span>
-              <input 
-                type="text" 
-                className="form-control" 
-                value={branchName} 
-                onChange={handleBranchChange} 
-                style={{ width: '150px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
-              />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>จนท:</span>
-              <input 
-                type="text" 
-                className="form-control" 
-                value={staffName} 
-                onChange={handleStaffNameChange} 
-                placeholder="คลิกเพื่อพิมพ์ชื่อ"
-                style={{ width: '110px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
-              />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>โทร:</span>
-              <input 
-                type="text" 
-                className="form-control" 
-                value={staffPhone} 
-                onChange={handleStaffPhoneChange} 
-                placeholder="คลิกเพื่อพิมพ์"
-                style={{ width: '100px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
-              />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <button 
-                onClick={saveSettings} 
-                className="btn" 
-                style={{ 
-                  padding: '0.3rem 0.8rem', 
-                  fontSize: '0.85rem', 
-                  marginLeft: '0.25rem',
-                  backgroundColor: shouldShowRed ? 'var(--primary)' : '#fff', 
-                  color: shouldShowRed ? '#fff' : '#475569', 
-                  border: shouldShowRed ? '1px solid var(--primary)' : '1px solid #cbd5e1',
-                  fontWeight: shouldShowRed ? '700' : '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                {showSaveSuccess ? 'บันทึกแล้ว' : 'บันทึก'}
-              </button>
-            </div>
-            
-            <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border)', margin: '0 0.5rem' }}></div>
-            
-            <button 
-              onClick={() => navigate('/print-blank-forms', { state: { branchName, staffName, staffPhone } })} 
-              className="btn" 
-              style={{ 
-                padding: '0.4rem 0.8rem', 
-                fontSize: '0.85rem', 
-                border: '2px solid var(--primary)', 
-                color: 'var(--primary)', 
-                backgroundColor: '#fff',
-                fontWeight: '700'
-              }}
-            >
-              <FileText size={16} />
-              พิมพ์ฟอร์มเปล่า 4 ใบ
-            </button>
           </div>
         </div>
 
