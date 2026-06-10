@@ -172,13 +172,16 @@ function WorldCupPortal() {
               width: 14.8cm;
               height: 10.5cm;
               background: white;
-              position: relative;
+              position: absolute !important;
+              top: 0 !important;
+              left: 0 !important;
               padding-top: ${wcPrintSettings.top}cm;
               padding-left: ${wcPrintSettings.left}cm;
               padding-right: 1cm;
               overflow: hidden;
               box-sizing: border-box;
               page-break-after: always;
+              color: black !important;
             }
           }
           
