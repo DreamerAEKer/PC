@@ -59,6 +59,7 @@ function WorldCupPortal() {
     }
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
   const [customTeam, setCustomTeam] = useState("");
   const [customTeamsList, setCustomTeamsList] = useState(() => {
     try {
@@ -165,6 +166,17 @@ function WorldCupPortal() {
                 <CheckSquare size={20} className="text-primary" /> เลือกประเทศที่จะพิมพ์
               </h3>
               
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+                <input 
+                  type="text" 
+                  value={searchTerm} 
+                  onChange={(e) => setSearchTerm(e.target.value)} 
+                  placeholder="ค้นหาชื่อประเทศ..." 
+                  className="form-control"
+                  style={{ flex: 1 }}
+                />
+              </div>
+              
               <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                 <button type="button" onClick={() => setSelectedTeams([...allInitialTeams, ...customTeamsList])} className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
                   เลือกทั้งหมด 48 ทีม
@@ -174,17 +186,20 @@ function WorldCupPortal() {
                 </button>
               </div>
 
-              {zones.map(zone => (
-                <div key={zone.name} style={{ marginBottom: '2rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', paddingBottom: '0.25rem', borderBottom: '1px solid #e2e8f0' }}>
-                    <h4 style={{ margin: 0, fontSize: '1rem', color: '#334155' }}>{zone.name}</h4>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button onClick={() => selectZone(zone.teams)} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>เลือกโซนนี้</button>
-                      <button onClick={() => deselectZone(zone.teams)} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>เอาโซนนี้ออก</button>
+              {zones.map(zone => {
+                const filteredTeams = zone.teams.filter(t => t.toLowerCase().includes(searchTerm.toLowerCase()));
+                if (filteredTeams.length === 0) return null;
+                return (
+                  <div key={zone.name} style={{ marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', paddingBottom: '0.25rem', borderBottom: '1px solid #e2e8f0' }}>
+                      <h4 style={{ margin: 0, fontSize: '1rem', color: '#334155' }}>{zone.name}</h4>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button onClick={() => selectZone(filteredTeams)} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>เลือกโซนนี้</button>
+                        <button onClick={() => deselectZone(filteredTeams)} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>เอาโซนนี้ออก</button>
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.5rem' }}>
-                    {zone.teams.map(team => (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.5rem' }}>
+                      {filteredTeams.map(team => (
                       <label key={team} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.4rem', backgroundColor: selectedTeams.includes(team) ? '#eff6ff' : '#f8fafc', border: `1px solid ${selectedTeams.includes(team) ? '#bfdbfe' : '#e2e8f0'}`, borderRadius: '4px', transition: 'all 0.2s' }}>
                         <input 
                           type="checkbox" 
@@ -204,9 +219,9 @@ function WorldCupPortal() {
                   พิมพ์ระบุชื่อประเทศเอง
                 </h4>
                 
-                {customTeamsList.length > 0 && (
+                {customTeamsList.filter(t => t.toLowerCase().includes(searchTerm.toLowerCase())).length > 0 && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.5rem', marginBottom: '1rem' }}>
-                    {customTeamsList.map(team => (
+                    {customTeamsList.filter(t => t.toLowerCase().includes(searchTerm.toLowerCase())).map(team => (
                       <label key={team} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.4rem', backgroundColor: selectedTeams.includes(team) ? '#eff6ff' : '#f8fafc', border: `1px solid ${selectedTeams.includes(team) ? '#bfdbfe' : '#e2e8f0'}`, borderRadius: '4px', transition: 'all 0.2s' }}>
                         <input 
                           type="checkbox" 
