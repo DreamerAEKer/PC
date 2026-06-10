@@ -89,12 +89,13 @@ export default function StaffPortal() {
           left: typeof parsed.left === 'number' ? parsed.left : 9.5,
           fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 5,
           isNameBold: typeof parsed.isNameBold === 'boolean' ? parsed.isNameBold : true,
-          isPhoneBold: typeof parsed.isPhoneBold === 'boolean' ? parsed.isPhoneBold : true
+          isPhoneBold: typeof parsed.isPhoneBold === 'boolean' ? parsed.isPhoneBold : true,
+          didPrintMode: typeof parsed.didPrintMode === 'string' ? parsed.didPrintMode : 'did'
         };
       }
-      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true };
+      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'did' };
     } catch (e) {
-      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true };
+      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'did' };
     }
   });
 
@@ -568,6 +569,39 @@ export default function StaffPortal() {
                     </div>
                   </div>
 
+                  <div style={{ width: '100%', borderTop: '1px solid #e2e8f0', marginTop: '1rem', paddingTop: '1rem' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.5rem', color: '#475569' }}>รูปแบบกรณีมี D-ID และที่อยู่:</label>
+                    <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                      <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+                        <input 
+                          type="radio" 
+                          name="didPrintMode" 
+                          checked={printSettings.didPrintMode === 'did'} 
+                          onChange={() => setPrintSettings(p => ({...p, didPrintMode: 'did'}))} 
+                        />
+                        พิมพ์ D-ID (ซ่อนที่อยู่ปกติ)
+                      </label>
+                      <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+                        <input 
+                          type="radio" 
+                          name="didPrintMode" 
+                          checked={printSettings.didPrintMode === 'address'} 
+                          onChange={() => setPrintSettings(p => ({...p, didPrintMode: 'address'}))} 
+                        />
+                        พิมพ์ที่อยู่ปกติ (ซ่อน D-ID)
+                      </label>
+                      <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+                        <input 
+                          type="radio" 
+                          name="didPrintMode" 
+                          checked={printSettings.didPrintMode === 'both'} 
+                          onChange={() => setPrintSettings(p => ({...p, didPrintMode: 'both'}))} 
+                        />
+                        พิมพ์ทั้งคู่
+                      </label>
+                    </div>
+                  </div>
+
                   {/* Live Preview Section */}
                   <div style={{ marginTop: '1.5rem' }}>
                     <h5 style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.5rem' }}>ตัวอย่างพื้นที่การพิมพ์ (จำลองสัดส่วนไปรษณียบัตร 14.8 x 10.5 ซม.)</h5>
@@ -605,7 +639,7 @@ export default function StaffPortal() {
                           overflow: 'hidden'
                         }}>
                           <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif' }}>
-                            {formValues.did ? (
+                            {formValues.did && printSettings.didPrintMode !== 'address' ? (
                               <div style={{ display: 'flex', gap: '2rem' }}>
                                 <div style={{ flex: 1.5 }}>
                                   <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
@@ -614,7 +648,7 @@ export default function StaffPortal() {
                                   <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
                                     โทร. {formValues.phone || '08X-XXX-XXXX'}
                                   </div>
-                                  {!(formValues.did && formValues.did.trim().length === 6) && (
+                                  {(printSettings.didPrintMode === 'both' || !(formValues.did && formValues.did.trim().length === 6)) && (
                                     <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3' }}>
                                       {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}`.trim()}
                                     </div>
@@ -719,7 +753,7 @@ export default function StaffPortal() {
       {printData && (
         <div className="print-only print-area">
           <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif' }}>
-            {printData.did ? (
+            {printData.did && printSettings.didPrintMode !== 'address' ? (
               <div style={{ display: 'flex', gap: '2rem' }}>
                 <div style={{ flex: 1.5 }}>
                   <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
@@ -728,7 +762,7 @@ export default function StaffPortal() {
                   <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
                     โทร. {printData.phone}
                   </div>
-                  {!(printData.did && printData.did.trim().length === 6) && (
+                  {(printSettings.didPrintMode === 'both' || !(printData.did && printData.did.trim().length === 6)) && (
                     <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3' }}>
                       {printData.address} {printData.zipcode}
                     </div>

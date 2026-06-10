@@ -51,13 +51,13 @@ export default function CustomerForm() {
   const onSubmit = async (data) => {
     const isDidActive = data.did && data.did.trim().length === 6;
     let fullAddress = "";
-    if (!isDidActive) {
+    if (data.addressLine1 || data.subdistrict || data.district || data.province) {
       // Process address into a single string for display and old-compatibility
       const isBKK = data.province === 'กรุงเทพมหานคร';
-      const subTitle = isBKK ? `แขวง${data.subdistrict}` : `ต.${data.subdistrict}`;
-      const distTitle = isBKK ? `เขต${data.district}` : `อ.${data.district}`;
-      const provTitle = isBKK ? data.province : `จ.${data.province}`;
-      fullAddress = `${data.addressLine1} ${subTitle} ${distTitle} ${provTitle}`;
+      const subTitle = isBKK ? (data.subdistrict ? `แขวง${data.subdistrict}` : '') : (data.subdistrict ? `ต.${data.subdistrict}` : '');
+      const distTitle = isBKK ? (data.district ? `เขต${data.district}` : '') : (data.district ? `อ.${data.district}` : '');
+      const provTitle = isBKK ? (data.province || '') : (data.province ? `จ.${data.province}` : '');
+      fullAddress = `${data.addressLine1 || ''} ${subTitle} ${distTitle} ${provTitle}`.replace(/\s+/g, ' ').trim();
     }
     
     const processedData = {
@@ -239,7 +239,7 @@ export default function CustomerForm() {
               <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
                 เบอร์โทร: {generatedData.phone}
               </div>
-              {!generatedData.isDidActive && (
+              {generatedData.address && (
                 <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem', lineHeight: '1.6' }}>
                   ที่อยู่: {generatedData.address} {generatedData.zipcode}
                 </div>
