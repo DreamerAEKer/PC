@@ -139,6 +139,58 @@ export default function StaffPortal() {
     }
   };
 
+  const handleSaveOnlyClick = (e) => {
+    const form = e.target.closest('form');
+    if (form && form.checkValidity()) {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      
+      onSubmitSaveOnly(data);
+    } else if (form) {
+      form.reportValidity();
+    }
+  };
+
+  const onSubmitSaveOnly = (data) => {
+    const isBKK = data.province === 'กรุงเทพมหานคร';
+    const subTitle = isBKK ? `แขวง${data.subdistrict}` : `ต.${data.subdistrict}`;
+    const distTitle = isBKK ? `เขต${data.district}` : `อ.${data.district}`;
+    const provTitle = isBKK ? data.province : `จ.${data.province}`;
+    
+    const fullAddress = `${data.addressLine1} ${subTitle} ${distTitle} ${provTitle}`;
+    const resolvedQty = data.selectQuantity === "custom" ? (parseInt(data.customQuantity, 10) || 0) : (parseInt(data.selectQuantity, 10) || 0);
+
+    const processedData = {
+      ...data,
+      quantity: resolvedQty,
+      address: fullAddress
+    };
+
+    delete processedData.selectQuantity;
+    delete processedData.customQuantity;
+    
+    const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString() };
+    
+    setHistory(prevHistory => {
+      const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
+      const updatedHistory = [newRecord, ...safeHistory].slice(0, 50);
+      localStorage.setItem('staffHistory', JSON.stringify(updatedHistory));
+      return updatedHistory;
+    });
+    
+    reset(); // clear form
+    setQuantityFields(100);
+    setHasActiveData(false);
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      setScanMode('camera');
+    } else {
+      setScanMode('manual');
+    }
+    alert("บันทึกข้อมูลลูกค้าเข้าระบบสำเร็จ (ไม่ได้สั่งพิมพ์)");
+  };
+
   const onSubmit = (data) => {
     const isBKK = data.province === 'กรุงเทพมหานคร';
     const subTitle = isBKK ? `แขวง${data.subdistrict}` : `ต.${data.subdistrict}`;
@@ -996,10 +1048,25 @@ export default function StaffPortal() {
                     <input type="text" className="form-control" {...register("did")} />
                   </div>
                 </div>
-                <button type="submit" onClick={handleDirectPrintClick} className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', fontSize: '1.1rem' }}>
-                  <Printer size={20} />
-                  บันทึกและสั่งพิมพ์ลงไปรษณียบัตร
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+                  <button 
+                    type="submit" 
+                    onClick={handleDirectPrintClick} 
+                    className="btn btn-primary" 
+                    style={{ width: '100%', fontSize: '1.05rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', margin: 0, padding: '0.65rem' }}
+                  >
+                    <Printer size={18} />
+                    บันทึกและสั่งพิมพ์
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={handleSaveOnlyClick} 
+                    className="btn" 
+                    style={{ width: '100%', fontSize: '1.05rem', fontWeight: 'bold', border: '2px solid #3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', margin: 0, padding: '0.65rem', cursor: 'pointer' }}
+                  >
+                    💾 บันทึกข้อมูลเข้าระบบ (ไม่พิมพ์)
+                  </button>
+                </div>
 
                 <div className="print-settings-panel" style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#475569' }}>
