@@ -212,7 +212,8 @@ function WorldCupPortal() {
                     ))}
                   </div>
                 </div>
-              ))}
+                );
+              })}
 
               <div style={{ marginBottom: '1.5rem' }}>
                 <h4 style={{ margin: 0, fontSize: '1rem', color: '#334155', marginBottom: '0.75rem', paddingBottom: '0.25rem', borderBottom: '1px solid #e2e8f0' }}>
