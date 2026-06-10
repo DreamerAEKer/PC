@@ -272,6 +272,8 @@ function WorldCupPortal() {
                     <input 
                       type="text"
                       autoFocus
+                      autoComplete="off"
+                      spellCheck="false"
                       placeholder="พิมพ์ค้นหาชื่อประเทศ..."
                       value={mainSearchFilter}
                       onChange={e => setMainSearchFilter(e.target.value)}
