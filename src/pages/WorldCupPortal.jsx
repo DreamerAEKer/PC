@@ -238,16 +238,11 @@ function WorldCupPortal() {
 
       {/* Main Screen */}
       <div className="wc-no-print container" style={{ maxWidth: '700px', paddingTop: '2rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <Link to="/staff" className="btn btn-secondary">
-              <ChevronLeft size={20} /> กลับ
-            </Link>
-            <h2 style={{ margin: 0, fontSize: '1.5rem', color: '#1e293b' }}>ฟุตบอลโลก 2026</h2>
-          </div>
-          <div style={{ fontSize: '0.85rem', color: '#64748b', backgroundColor: '#f1f5f9', padding: '0.25rem 0.5rem', borderRadius: '4px' }}>
-            v1.11.15
-          </div>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', alignItems: 'center' }}>
+          <Link to="/staff" className="btn btn-secondary">
+            <ChevronLeft size={20} /> กลับ
+          </Link>
+          <h2 style={{ margin: 0, fontSize: '1.5rem', color: '#1e293b' }}>ฟุตบอลโลก 2026</h2>
         </div>
 
         <div className="card glass-panel">
