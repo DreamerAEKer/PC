@@ -183,11 +183,7 @@ export default function StaffPortal() {
     reset(); // clear form
     setQuantityFields(100);
     setHasActiveData(false);
-    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
-      setScanMode('camera');
-    } else {
-      setScanMode('manual');
-    }
+    setScanMode('manual');
     alert("บันทึกข้อมูลลูกค้าเข้าระบบสำเร็จ (ไม่ได้สั่งพิมพ์)");
   };
 
@@ -236,11 +232,7 @@ export default function StaffPortal() {
       reset(); // clear form
       setQuantityFields(100);
       setHasActiveData(false);
-      if (typeof window !== 'undefined' && window.innerWidth <= 768) {
-        setScanMode('camera');
-      } else {
-        setScanMode('manual');
-      }
+      setScanMode('manual');
       setPrintData(null); // Hide the print area from the dashboard
     }, 500);
   };
@@ -975,6 +967,7 @@ export default function StaffPortal() {
                         reset();
                         setQuantityFields(100);
                         setHasActiveData(false);
+                        setScanMode('manual');
                       }} 
                       className="btn" 
                       style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', border: '1px solid #ef4444', color: '#dc2626', backgroundColor: '#fef2f2', cursor: 'pointer', margin: 0 }}
