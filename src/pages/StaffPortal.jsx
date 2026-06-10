@@ -535,6 +535,84 @@ export default function StaffPortal() {
                       <input type="range" min="8" max="24" step="1" value={printSettings.fontSize} onChange={(e) => setPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
                     </div>
                   </div>
+
+                  {/* Live Preview Section */}
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <h5 style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.5rem' }}>ตัวอย่างพื้นที่การพิมพ์ (จำลองสัดส่วนไปรษณียบัตร 14.8 x 10.5 ซม.)</h5>
+                    <div style={{ 
+                      width: '100%', 
+                      maxWidth: '400px', 
+                      margin: '0 auto', 
+                      backgroundColor: '#e2e8f0', 
+                      padding: '1rem', 
+                      borderRadius: '8px',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{ 
+                        /* 14.8cm = 559px, 10.5cm = 396px. At scale(0.5): 279.5px x 198px */
+                        width: '280px', 
+                        height: '198px',
+                        position: 'relative'
+                      }}>
+                        <div style={{
+                          width: '14.8cm',
+                          height: '10.5cm',
+                          backgroundColor: 'white',
+                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          transform: 'scale(0.5)',
+                          transformOrigin: 'top left',
+                          paddingTop: `${printSettings.top}cm`,
+                          paddingLeft: `${printSettings.left}cm`,
+                          paddingRight: '1cm',
+                          boxSizing: 'border-box',
+                          overflow: 'hidden'
+                        }}>
+                          <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif' }}>
+                            {formValues.did ? (
+                              <div style={{ display: 'flex', gap: '2rem' }}>
+                                <div style={{ flex: 1.5 }}>
+                                  <div style={{ fontWeight: 'bold', fontSize: `${printSettings.fontSize + 1}pt`, marginBottom: '0.2em' }}>
+                                    {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
+                                  </div>
+                                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.5em' }}>
+                                    โทร. {formValues.phone || '08X-XXX-XXXX'}
+                                  </div>
+                                  <div style={{ fontSize: `${Math.max(8, printSettings.fontSize - 1)}pt`, color: '#333', lineHeight: '1.4' }}>
+                                    {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}`.trim()}
+                                  </div>
+                                </div>
+                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <div style={{ fontSize: `${printSettings.fontSize * 2}pt`, fontWeight: '900', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
+                                    {formValues.did}
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div style={{ fontWeight: 'bold', fontSize: `${printSettings.fontSize + 1}pt`, marginBottom: '0.2em' }}>
+                                  {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
+                                </div>
+                                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.5em' }}>
+                                  โทร. {formValues.phone || '08X-XXX-XXXX'}
+                                </div>
+                                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4' }}>
+                                  {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''}`.trim()}
+                                </div>
+                                <div style={{ marginTop: '0.2em', fontWeight: 'bold', fontSize: `${printSettings.fontSize + 1}pt`, letterSpacing: '0.1em' }}>
+                                  {formValues.zipcode || 'XXXXX'}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {quantity > 0 && (
