@@ -34,12 +34,23 @@ export default function StaffPortal() {
   };
   const [history, setHistory] = useState([]);
   const [scanMode, setScanMode] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768 ? 'camera' : 'manual');
+  const [cameraActive, setCameraActive] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
   const [hasActiveData, setHasActiveData] = useState(false);
   const [branchName, setBranchName] = useState('ไปรษณีย์กลาง 10501');
   const [staffName, setStaffName] = useState('');
   const [staffPhone, setStaffPhone] = useState('');
   const [isSettingsDirty, setIsSettingsDirty] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (scanMode !== 'camera') {
+      setCameraActive(false);
+    } else {
+      if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+        setCameraActive(true);
+      }
+    }
+  }, [scanMode]);
 
   const hasTextToSave = (staffName && staffName.trim() !== '') || (staffPhone && staffPhone.trim() !== '');
   const shouldShowRed = hasTextToSave && isSettingsDirty;
@@ -362,7 +373,7 @@ export default function StaffPortal() {
     let qrCodeInstance = null;
     let isMounted = true;
 
-    if (scanMode === 'camera') {
+    if (scanMode === 'camera' && cameraActive) {
       const timer = setTimeout(() => {
         if (!isMounted) return;
         const element = document.getElementById("reader");
@@ -414,7 +425,7 @@ export default function StaffPortal() {
         }
       };
     }
-  }, [scanMode]);
+  }, [scanMode, cameraActive]);
 
   const handleFileDecode = async (file) => {
     if (!file) return;
@@ -868,7 +879,42 @@ export default function StaffPortal() {
               {(scanMode === 'camera' || scanMode === 'usb') && (
                 <div>
                   {/* Camera Scanner View */}
-                  <div id="reader" style={{ width: '100%', marginBottom: '1rem' }}></div>
+                  <div id="reader" style={{ width: '100%', marginBottom: '1rem', display: cameraActive ? 'block' : 'none' }}></div>
+
+                  {/* Camera Activation Button / Placeholder on Desktop */}
+                  {!cameraActive && (
+                    <div className="camera-placeholder-desktop" style={{
+                      width: '100%',
+                      aspectRatio: '4/3',
+                      maxHeight: '350px',
+                      backgroundColor: '#f8fafc',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '1rem',
+                      color: 'var(--text-main)',
+                      marginBottom: '1rem',
+                      border: '2px dashed #cbd5e1',
+                      padding: '2rem',
+                      textAlign: 'center'
+                    }}>
+                      <QrCode size={48} style={{ color: 'var(--primary)', opacity: 0.8 }} />
+                      <div>
+                        <div style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '0.25rem' }}>กล้องยังไม่ได้เปิดใช้งาน</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>บนคอมพิวเตอร์สามารถใช้เครื่องยิงบาร์โค้ดได้ทันที หรือคลิกด้านล่างเพื่อเปิดกล้อง</div>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => setCameraActive(true)}
+                        style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', fontSize: '0.9rem', cursor: 'pointer' }}
+                      >
+                        📷 เปิดกล้องสแกน QR Code
+                      </button>
+                    </div>
+                  )}
                   
                   {/* USB Scanner Input View (Hidden on mobile via class 'usb-scanner-box') */}
                   <div className="usb-scanner-box" style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f8fafc', border: '2px dashed var(--primary)', borderRadius: '12px', textAlign: 'center' }}>
