@@ -647,7 +647,7 @@ export default function StaffPortal() {
               }}>
                 <QRCodeCanvas id="branch-qr-canvas" value={generatedCustomerUrl} size={55} level="M" />
                 <div style={{ fontSize: '0.55rem', color: '#1d4ed8', fontWeight: 'bold', marginTop: '0.2rem', whiteSpace: 'nowrap' }}>
-                  QR Staff
+                  QR Customer
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -1300,7 +1300,7 @@ export default function StaffPortal() {
                 borderRadius: '20px',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
               }}>
-                QR Staff (ลิงก์ลูกค้าสแกนกรอกข้อมูล)
+                QR Customer (ลิงก์สำหรับลูกค้าสแกน)
               </div>
               <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'center' }}>
                 <QRCodeCanvas value={generatedCustomerUrl} size={280} level="H" includeMargin={true} />
