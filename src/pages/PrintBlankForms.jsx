@@ -30,7 +30,7 @@ export default function PrintBlankForms() {
         {`
           @media print {
             @page {
-              size: A4 landscape;
+              size: 297mm 210mm; /* A4 Landscape dimensions */
               margin: 0.5cm;
             }
             body {
@@ -179,7 +179,10 @@ export default function PrintBlankForms() {
                 <span className="line-input" style={{ flex: 1, margin: '0 0 0 0.2rem' }}></span>
               </div>
               
-              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: 'auto', width: '100%' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', width: '100%' }}>
+                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '500' }}>
+                  {branchName}
+                </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}>
                   <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>หรือ D/ID:</span>
                   <div style={{ display: 'flex', gap: '0.15rem' }}>
