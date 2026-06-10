@@ -1247,12 +1247,14 @@ export default function StaffPortal() {
                     >
                       <div>
                         <div style={{ fontWeight: '600', color: 'var(--text-main)' }}>{record.name}</div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-                          {record.phone && <div>โทร: {record.phone}</div>}
-                          {record.quantity !== undefined && <div>จำนวนที่พิมพ์: {record.quantity} ใบ</div>}
-                          <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.1rem' }}>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          {record.phone && <span>โทร: {record.phone}</span>}
+                          {record.phone && <span style={{ color: '#cbd5e1' }}>|</span>}
+                          {record.quantity !== undefined && <span>จำนวนที่พิมพ์: {record.quantity} ใบ</span>}
+                          {record.quantity !== undefined && <span style={{ color: '#cbd5e1' }}>|</span>}
+                          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
                             {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
-                          </div>
+                          </span>
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
