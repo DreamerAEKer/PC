@@ -39,13 +39,13 @@ function WorldCupPortal() {
       if (parsed && typeof parsed === 'object') {
         return {
           top: typeof parsed.top === 'number' ? parsed.top : 5.5,
-          left: typeof parsed.left === 'number' ? parsed.left : 8.5,
+          left: typeof parsed.left === 'number' ? parsed.left : 8,
           fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 6
         };
       }
-      return { top: 5.5, left: 8.5, fontSize: 6 };
+      return { top: 5.5, left: 8, fontSize: 6 };
     } catch (e) {
-      return { top: 5.5, left: 8.5, fontSize: 6 };
+      return { top: 5.5, left: 8, fontSize: 6 };
     }
   });
 
@@ -86,9 +86,6 @@ function WorldCupPortal() {
   const [isMainDropdownOpen, setIsMainDropdownOpen] = useState(false);
   const [mainSearchFilter, setMainSearchFilter] = useState("");
   const [activeZoneFilter, setActiveZoneFilter] = useState("ทั้งหมด");
-  const [printerMode, setPrinterMode] = useState(() => {
-    return localStorage.getItem('wcPrinterMode') || 'A4Center';
-  });
   const [isPortrait, setIsPortrait] = useState(() => {
     return localStorage.getItem('wcIsPortrait') === 'true';
   });
@@ -112,9 +109,8 @@ function WorldCupPortal() {
     localStorage.setItem('wcSelectedTeams', JSON.stringify(selectedTeams));
     localStorage.setItem('wcCustomTeamsList', JSON.stringify(customTeamsList));
     localStorage.setItem('wcPrintTeam', printTeam);
-    localStorage.setItem('wcPrinterMode', printerMode);
     localStorage.setItem('wcIsPortrait', isPortrait);
-  }, [wcPrintSettings, selectedTeams, customTeamsList, printTeam, printerMode, isPortrait]);
+  }, [wcPrintSettings, selectedTeams, customTeamsList, printTeam, isPortrait]);
 
   const handlePrint = () => {
     if (!printTeam.trim()) {
@@ -157,7 +153,7 @@ function WorldCupPortal() {
         {`
           @media print {
             @page {
-              size: ${printerMode === 'A4Center' ? 'A4 portrait' : (isPortrait ? '10.5cm 14.8cm' : '14.8cm 10.5cm')};
+              size: ${isPortrait ? '10.5cm 14.8cm' : '14.8cm 10.5cm'};
               margin: 0;
             }
             body {
@@ -169,8 +165,8 @@ function WorldCupPortal() {
               display: none !important;
             }
             .print-area {
-              width: ${printerMode === 'A4Center' ? '21cm' : (isPortrait ? '10.5cm' : '14.8cm')};
-              height: ${printerMode === 'A4Center' ? '29.6cm' : (isPortrait ? '14.7cm' : '10.4cm')};
+              width: ${isPortrait ? '10.5cm' : '14.8cm'};
+              height: ${isPortrait ? '14.7cm' : '10.4cm'};
               background: white;
               position: relative !important;
               overflow: hidden;
@@ -389,26 +385,10 @@ function WorldCupPortal() {
               
               <div style={{ flex: 1, minWidth: '250px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155', margin: 0 }}>โหมดชดเชยพิกัดเครื่องพิมพ์</label>
                   <button type="button" onClick={() => setIsGuideOpen(true)} style={{ background: 'none', border: 'none', padding: 0, color: '#3b82f6', cursor: 'pointer', display: 'flex', alignItems: 'center' }} title="ดูรูปคู่มือการป้อนกระดาษ">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    <span style={{ fontSize: '0.75rem', marginLeft: '0.2rem', textDecoration: 'underline' }}>ดูรูปตัวอย่าง</span>
+                    <span style={{ fontSize: '0.75rem', marginLeft: '0.2rem', textDecoration: 'underline' }}>ดูรูปตัวอย่างการป้อนกระดาษเข้าเครื่อง</span>
                   </button>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                    <input type="radio" name="main_printerMode" checked={printerMode === 'A6'} onChange={() => setPrinterMode('A6')} style={{ marginTop: '0.2rem' }} />
-                    <div>
-                      <div>โหมดปกติ (ตรงตามหน้าจอ / เครื่องพิมพ์ดึงมุม)</div>
-                    </div>
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                    <input type="radio" name="main_printerMode" checked={printerMode === 'A4Center'} onChange={() => setPrinterMode('A4Center')} style={{ marginTop: '0.2rem' }} />
-                    <div>
-                      <div>โหมดชดเชยพิกัด A4 ดึงกลาง (ดึงกระดาษเข้าตรงกลาง)</div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>แก้ปัญหาภาพตรงบนหน้าจอ แต่พิมพ์จริงตกขอบ</div>
-                    </div>
-                  </label>
                 </div>
               </div>
             </div>
@@ -429,19 +409,19 @@ function WorldCupPortal() {
                 
                 <div style={{ padding: '1.5rem' }}>
                   <h4 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>แบบที่ 1: ใส่ช่องด้านบน/หลัง (เช่น Canon PIXMA iP2700)</h4>
-                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดกระดาษลงไป <strong>แนวนอน</strong> ตรงกลาง โดยมีตัวบีบทั้งซ้ายและขวา <br/><strong>บนเว็บให้เลือก:</strong> แนวนอน + โหมดชดเชย A4 ดึงกลาง</p>
+                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดกระดาษลงไป <strong>แนวนอน</strong> ตรงกลาง โดยมีตัวบีบทั้งซ้ายและขวา <br/><strong>บนเว็บให้เลือก:</strong> แนวนอน</p>
                   <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', marginBottom: '2rem', textAlign: 'center', background: '#f8fafc' }}>
                     <img src="./guide_ip2700.png" alt="การป้อนกระดาษแนวนอน Canon iP2700" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
                   </div>
 
                   <h4 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>แบบที่ 2: ป้อนมือด้านหน้า (เช่น Brother Laser)</h4>
-                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดกระดาษ <strong>แนวนอน</strong> เข้าช่องหน้าตรงกลาง โดยมีตัวบีบซ้ายและขวา <br/><strong>บนเว็บให้เลือก:</strong> แนวนอน + โหมดชดเชย A4 ดึงกลาง</p>
+                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดกระดาษ <strong>แนวนอน</strong> เข้าช่องหน้าตรงกลาง โดยมีตัวบีบซ้ายและขวา <br/><strong>บนเว็บให้เลือก:</strong> แนวนอน</p>
                   <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', textAlign: 'center', background: '#f8fafc' }}>
                     <img src="./guide_brother.png" alt="การป้อนกระดาษแนวนอน Brother Laser" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
                   </div>
                   
                   <div style={{ marginTop: '2rem', padding: '1rem', background: '#eff6ff', borderRadius: '8px', fontSize: '0.85rem', color: '#1e3a8a' }}>
-                    <strong>คำแนะนำ:</strong> ไดร์เวอร์เครื่องพิมพ์ (ในหน้าต่าง Print ของ Chrome) ไม่ว่าจะปริ้นเครื่องไหน แนะนำให้สอดกระดาษแบบไหน ก็ให้ตั้งหน้าเว็บให้ตรงกัน (แนวนอน/แนวตั้ง) และเลือก <strong>โหมดชดเชย A4 ดึงกลาง</strong> ไว้เสมอครับ (เพราะทั้งสองเครื่องดึงตรงกลางเหมือนกัน)
+                    <strong>คำแนะนำ:</strong> ไดร์เวอร์เครื่องพิมพ์ (ในหน้าต่าง Print ของ Chrome) แนะนำให้ตั้งขนาดกระดาษ (Paper Size) เป็น A6 หรือขนาดใกล้เคียง (14.8x10.5 ซม.) ครับ
                   </div>
                 </div>
               </div>
@@ -617,23 +597,6 @@ function WorldCupPortal() {
 
       {/* Actual Print Area (1 page for the selected printTeam) */}
       <div className="print-only print-area">
-        {printerMode === 'A4Center' ? (
-          <div style={{ 
-            position: 'absolute',
-            top: `${wcPrintSettings.top}cm`,
-            /* If Portrait (10.5cm width), it starts at X=5.25cm on A4. If Landscape (14.8cm width), it starts at X=3.1cm on A4 */
-            left: `calc(${isPortrait ? '5.25cm' : '3.1cm'} + ${wcPrintSettings.left}cm)`,
-            fontSize: `${wcPrintSettings.fontSize}pt`, 
-            fontFamily: 'Sarabun, Inter, sans-serif',
-            fontWeight: 'bold',
-            color: '#000',
-            whiteSpace: 'nowrap',
-            margin: 0,
-            padding: 0
-          }}>
-            {printTeam}
-          </div>
-        ) : (
           <div style={{ 
             position: 'absolute',
             top: `${wcPrintSettings.top}cm`,
@@ -648,7 +611,6 @@ function WorldCupPortal() {
           }}>
             {printTeam}
           </div>
-        )}
       </div>
     </>
   );
