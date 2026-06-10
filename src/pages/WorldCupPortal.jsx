@@ -39,13 +39,13 @@ function WorldCupPortal() {
       if (parsed && typeof parsed === 'object') {
         return {
           top: typeof parsed.top === 'number' ? parsed.top : 5.5,
-          left: typeof parsed.left === 'number' ? parsed.left : 1.5,
-          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 16
+          left: typeof parsed.left === 'number' ? parsed.left : 8.5,
+          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 6
         };
       }
-      return { top: 5.5, left: 1.5, fontSize: 16 };
+      return { top: 5.5, left: 8.5, fontSize: 6 };
     } catch (e) {
-      return { top: 5.5, left: 1.5, fontSize: 16 };
+      return { top: 5.5, left: 8.5, fontSize: 6 };
     }
   });
 
@@ -87,7 +87,7 @@ function WorldCupPortal() {
   const [mainSearchFilter, setMainSearchFilter] = useState("");
   const [activeZoneFilter, setActiveZoneFilter] = useState("ทั้งหมด");
   const [printerMode, setPrinterMode] = useState(() => {
-    return localStorage.getItem('wcPrinterMode') || 'A6';
+    return localStorage.getItem('wcPrinterMode') || 'A4Center';
   });
   const [isPortrait, setIsPortrait] = useState(() => {
     return localStorage.getItem('wcIsPortrait') === 'true';
