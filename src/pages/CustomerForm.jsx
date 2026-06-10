@@ -228,16 +228,26 @@ export default function CustomerForm() {
             </div>
 
             {selectQty === 'custom' && (
-              <div className="form-group" style={{ marginTop: '0.5rem' }}>
-                <label className="form-label" style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>จำนวนที่ต้องการระบุเอง <span style={{color:'red'}}>*</span></label>
-                <input 
-                  type="number" 
-                  min="1" 
-                  className={`form-control ${getFieldClass('customQuantity')}`} 
-                  required 
-                  {...register("customQuantity", { required: true, min: 1 })} 
-                  placeholder="กรอกจำนวนใบ เช่น 150" 
-                />
+              <div className="form-group" style={{ 
+                marginTop: '0.75rem', 
+                padding: '0.75rem', 
+                backgroundColor: '#fff1f2', 
+                border: '2px solid #fecdd3', 
+                borderRadius: '8px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#e11d48' }}>โปรดระบุจำนวน</span>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    className={`form-control ${getFieldClass('customQuantity')}`} 
+                    required 
+                    {...register("customQuantity", { required: true, min: 1 })} 
+                    placeholder="เช่น 150" 
+                    style={{ width: '110px', display: 'inline-block', margin: 0, textAlign: 'center', borderColor: '#e11d48', borderWidth: '2px' }}
+                  />
+                  <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#e11d48' }}>ฉบับ <span style={{color:'red'}}>*</span></span>
+                </div>
                 {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวนอย่างน้อย 1 ใบ</span>}
               </div>
             )}
