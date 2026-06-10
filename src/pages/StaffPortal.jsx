@@ -83,7 +83,14 @@ export default function StaffPortal() {
     try {
       const saved = localStorage.getItem('customPrintSettings');
       const parsed = saved ? JSON.parse(saved) : null;
-      return (parsed && typeof parsed === 'object') ? parsed : { top: 4, left: 8, fontSize: 11 };
+      if (parsed && typeof parsed === 'object') {
+        return {
+          top: typeof parsed.top === 'number' ? parsed.top : 4,
+          left: typeof parsed.left === 'number' ? parsed.left : 8,
+          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 11
+        };
+      }
+      return { top: 4, left: 8, fontSize: 11 };
     } catch (e) {
       return { top: 4, left: 8, fontSize: 11 };
     }
