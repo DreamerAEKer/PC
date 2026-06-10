@@ -371,6 +371,41 @@ function WorldCupPortal() {
                 <input type="range" min="4" max="36" step="1" value={wcPrintSettings.fontSize} onChange={(e) => setWcPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
               </div>
             </div>
+
+            <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0', display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.8rem', color: '#334155' }}>รูปแบบไปรษณียบัตร</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    <input type="radio" name="main_isPortrait" checked={!isPortrait} onChange={() => setIsPortrait(false)} />
+                    แนวนอน (14.8 x 10.5 ซม.)
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    <input type="radio" name="main_isPortrait" checked={isPortrait} onChange={() => setIsPortrait(true)} />
+                    แนวตั้ง (10.5 x 14.8 ซม.)
+                  </label>
+                </div>
+              </div>
+              
+              <div style={{ flex: 1, minWidth: '250px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.8rem', color: '#334155' }}>โหมดชดเชยพิกัดเครื่องพิมพ์</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    <input type="radio" name="main_printerMode" checked={printerMode === 'A6'} onChange={() => setPrinterMode('A6')} style={{ marginTop: '0.2rem' }} />
+                    <div>
+                      <div>โหมดปกติ (ตรงตามหน้าจอ / เครื่องพิมพ์ดึงมุม)</div>
+                    </div>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    <input type="radio" name="main_printerMode" checked={printerMode === 'A4Center'} onChange={() => setPrinterMode('A4Center')} style={{ marginTop: '0.2rem' }} />
+                    <div>
+                      <div>โหมดชดเชยพิกัด A4 ดึงกลาง (สำหรับเครื่องเลเซอร์)</div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>แก้ปัญหาภาพตรงบนหน้าจอ แต่พิมพ์จริงตกขอบ</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem', textAlign: 'center' }}>
@@ -529,66 +564,7 @@ function WorldCupPortal() {
               </div>
             </div>
             
-            <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
-              <h4 style={{ margin: 0, fontSize: '1rem', color: '#334155', marginBottom: '1rem' }}>
-                รูปแบบหน้าตาไปรษณียบัตร
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginBottom: '1.5rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input 
-                    type="radio" 
-                    name="isPortrait" 
-                    checked={!isPortrait} 
-                    onChange={() => setIsPortrait(false)} 
-                  />
-                  <span style={{ fontSize: '0.95rem' }}>แนวนอน (กว้าง 14.8 x สูง 10.5 ซม.)</span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input 
-                    type="radio" 
-                    name="isPortrait" 
-                    checked={isPortrait} 
-                    onChange={() => setIsPortrait(true)} 
-                  />
-                  <span style={{ fontSize: '0.95rem' }}>แนวตั้ง (กว้าง 10.5 x สูง 14.8 ซม.)</span>
-                </label>
-              </div>
 
-              <h4 style={{ margin: 0, fontSize: '1rem', color: '#334155', marginBottom: '1rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
-                โหมดชดเชยพิกัดเครื่องพิมพ์
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input 
-                    type="radio" 
-                    name="printerMode" 
-                    checked={printerMode === 'A6'} 
-                    onChange={() => setPrinterMode('A6')} 
-                  />
-                  <span style={{ fontSize: '0.95rem' }}>โหมดปกติ (ตรงตามหน้าจอ / เครื่องพิมพ์ดึงมุม)</span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input 
-                    type="radio" 
-                    name="printerMode" 
-                    style={{ marginTop: '0.25rem' }}
-                    checked={printerMode === 'A4Center'} 
-                    onChange={() => setPrinterMode('A4Center')} 
-                  />
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '0.95rem', fontWeight: printerMode === 'A4Center' ? 'bold' : 'normal', color: printerMode === 'A4Center' ? '#dc2626' : 'inherit' }}>โหมดชดเชยพิกัด A4 ดึงกลาง (สำหรับเครื่องเลเซอร์)</span>
-                    <span style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>แก้ปัญหาภาพตรงบนหน้าจอ แต่พิมพ์จริงตกขอบ</span>
-                  </div>
-                </label>
-              </div>
-              {printerMode === 'A4Center' && (
-                <div style={{ marginTop: '1rem', padding: '0.8rem', background: '#fef2f2', borderLeft: '4px solid #ef4444', color: '#b91c1c', fontSize: '0.85rem', borderRadius: '4px' }}>
-                  <strong>ตั้งค่าการพิมพ์สำหรับโหมดนี้:</strong><br />
-                  1. ในหน้าต่าง Print ให้เลือก <strong>Paper Size เป็น A4</strong><br />
-                  2. ตอนสอดไปรษณียบัตร ให้เอาด้านแคบ 10.5 ซม. เข้าตรงกลางเครื่อง
-                </div>
-              )}
-            </div>
 
             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
               <button onClick={() => setIsSettingsOpen(false)} className="btn btn-primary" style={{ minWidth: '120px' }}>
