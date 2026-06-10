@@ -70,6 +70,27 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
         </div>
       </div>
       
+      {/* รหัสไปรษณีย์ */}
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
+        <div style={{ flex: 1 }}>
+          <label className="form-label">รหัสไปรษณีย์ {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
+          <input type="text" className={`form-control ${getFieldClass('zipcode')}`} required={isAddressRequired} 
+            name={zipcodeReg.name}
+            ref={zipcodeReg.ref}
+            onBlur={zipcodeReg.onBlur}
+            onChange={(e) => {
+              zipcodeReg.onChange(e);
+              handleInput('zipCode', e.target.value);
+            }}
+            autoComplete="off"
+            placeholder="รหัสไปรษณีย์"
+            defaultValue={defaultValues?.zipcode || ''}
+          />
+          {errors.zipcode && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุรหัสไปรษณีย์</span>}
+        </div>
+      </div>
+
+      {/* ตำบล / แขวง & อำเภอ / เขต */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
         <div style={{ flex: 1 }}>
           <label className="form-label">ตำบล / แขวง {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
@@ -105,6 +126,7 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
         </div>
       </div>
 
+      {/* จังหวัด */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
         <div style={{ flex: 1 }}>
           <label className="form-label">จังหวัด {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
@@ -121,22 +143,6 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
             defaultValue={defaultValues?.province || ''}
           />
           {errors.province && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจังหวัด</span>}
-        </div>
-        <div style={{ flex: 1 }}>
-          <label className="form-label">รหัสไปรษณีย์ {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
-          <input type="text" className={`form-control ${getFieldClass('zipcode')}`} required={isAddressRequired} 
-            name={zipcodeReg.name}
-            ref={zipcodeReg.ref}
-            onBlur={zipcodeReg.onBlur}
-            onChange={(e) => {
-              zipcodeReg.onChange(e);
-              handleInput('zipCode', e.target.value);
-            }}
-            autoComplete="off"
-            placeholder="รหัสไปรษณีย์"
-            defaultValue={defaultValues?.zipcode || ''}
-          />
-          {errors.zipcode && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุรหัสไปรษณีย์</span>}
         </div>
       </div>
 

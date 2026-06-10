@@ -4,6 +4,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import { Download, CheckCircle, Clock, Share2 } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
+import DidBoxInput from '../components/DidBoxInput';
 
 export default function CustomerForm() {
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
@@ -27,6 +28,13 @@ export default function CustomerForm() {
 
   const didValue = watch("did", "");
   const isDidActive = (didValue || "").trim().length === 6;
+  const [showDidInput, setShowDidInput] = useState(false);
+
+  useEffect(() => {
+    if (didValue && didValue.trim().length > 0) {
+      setShowDidInput(true);
+    }
+  }, [didValue]);
 
   const getFieldClass = (fieldName) => {
     if (errors[fieldName]) return 'input-error';
@@ -249,11 +257,48 @@ export default function CustomerForm() {
               })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
               {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.phone.message}</span>}
             </div>
-            <ThaiAddressFields register={register} setValue={setValue} errors={errors} dirtyFields={dirtyFields} touchedFields={touchedFields} isAddressRequired={!isDidActive} />
-            <div className="form-group">
-              <label className="form-label">ที่อยู่ D-ID (ไปรษณีย์ไทย)</label>
-              <input type="text" className="form-control" {...register("did")} placeholder="ถ้ามี (ตัวเลือก)" />
+            {/* D-ID toggle button row and box inputs */}
+            <input type="hidden" {...register("did")} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 'bold' }}>ที่อยู่ D-ID (ไปรษณีย์ไทย):</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextState = !showDidInput;
+                    setShowDidInput(nextState);
+                    if (!nextState) {
+                      setValue("did", "", { shouldValidate: true, shouldDirty: true });
+                    }
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '8px',
+                    border: showDidInput ? '2px solid #3b82f6' : '1px solid #cbd5e1',
+                    backgroundColor: '#fff',
+                    cursor: 'pointer',
+                    boxShadow: showDidInput ? '0 2px 8px rgba(59, 130, 246, 0.15)' : 'none',
+                    transition: 'all 0.2s',
+                    fontFamily: 'system-ui, -apple-system, sans-serif'
+                  }}
+                >
+                  <span style={{ color: '#003399', fontWeight: '800', fontSize: '1rem' }}>D</span>
+                  <span style={{ color: '#e11d48', fontWeight: '800', fontSize: '1rem' }}>/ID</span>
+                </button>
+              </div>
+
+              {showDidInput && (
+                <DidBoxInput 
+                  value={didValue} 
+                  onChange={(val) => setValue("did", val, { shouldValidate: true, shouldDirty: true })} 
+                />
+              )}
             </div>
+
+            <ThaiAddressFields register={register} setValue={setValue} errors={errors} dirtyFields={dirtyFields} touchedFields={touchedFields} isAddressRequired={!isDidActive} />
             <div style={{ marginTop: '2rem' }}>
               <button type="submit" className="btn btn-primary" style={{ width: '100%', fontSize: '1.1rem', fontWeight: 'bold' }}>
                 ตกลงสั่งพิมพ์
