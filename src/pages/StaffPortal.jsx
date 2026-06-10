@@ -533,7 +533,7 @@ export default function StaffPortal() {
                     </div>
                     <div style={{ flex: 1, minWidth: '150px' }}>
                       <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขนาดตัวอักษร: {printSettings.fontSize}</label>
-                      <input type="range" min="8" max="24" step="1" value={printSettings.fontSize} onChange={(e) => setPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
+                      <input type="range" min="4" max="24" step="1" value={printSettings.fontSize} onChange={(e) => setPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
                     </div>
                   </div>
 
@@ -573,38 +573,38 @@ export default function StaffPortal() {
                           boxSizing: 'border-box',
                           overflow: 'hidden'
                         }}>
-                          <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif' }}>
+                          <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif' }}>
                             {formValues.did ? (
                               <div style={{ display: 'flex', gap: '2rem' }}>
                                 <div style={{ flex: 1.5 }}>
-                                  <div style={{ fontWeight: 'bold', fontSize: `${printSettings.fontSize + 1}pt`, marginBottom: '0.2em' }}>
+                                  <div style={{ fontWeight: '600', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                                     {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
                                   </div>
-                                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.5em' }}>
+                                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
                                     โทร. {formValues.phone || '08X-XXX-XXXX'}
                                   </div>
-                                  <div style={{ fontSize: `${Math.max(8, printSettings.fontSize - 1)}pt`, color: '#333', lineHeight: '1.4' }}>
+                                  <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3' }}>
                                     {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}`.trim()}
                                   </div>
                                 </div>
                                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <div style={{ fontSize: `${printSettings.fontSize * 2}pt`, fontWeight: '900', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
+                                  <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
                                     {formValues.did}
                                   </div>
                                 </div>
                               </div>
                             ) : (
                               <>
-                                <div style={{ fontWeight: 'bold', fontSize: `${printSettings.fontSize + 1}pt`, marginBottom: '0.2em' }}>
+                                <div style={{ fontWeight: '600', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                                   {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
                                 </div>
-                                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.5em' }}>
+                                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
                                   โทร. {formValues.phone || '08X-XXX-XXXX'}
                                 </div>
-                                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4' }}>
+                                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
                                   {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''}`.trim()}
                                 </div>
-                                <div style={{ marginTop: '0.2em', fontWeight: 'bold', fontSize: `${printSettings.fontSize + 1}pt`, letterSpacing: '0.1em' }}>
+                                <div style={{ marginTop: '0.2em', fontWeight: 'bold', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
                                   {formValues.zipcode || 'XXXXX'}
                                 </div>
                               </>
@@ -685,38 +685,38 @@ export default function StaffPortal() {
 
       {printData && (
         <div className="print-only print-area">
-          <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif' }}>
+          <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif' }}>
             {printData.did ? (
               <div style={{ display: 'flex', gap: '2rem' }}>
                 <div style={{ flex: 1.5 }}>
-                  <div style={{ fontWeight: 'bold', fontSize: `${printSettings.fontSize + 1}pt`, marginBottom: '0.2em' }}>
+                  <div style={{ fontWeight: '600', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                     {printData.name}
                   </div>
-                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.5em' }}>
+                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
                     โทร. {printData.phone}
                   </div>
-                  <div style={{ fontSize: `${Math.max(8, printSettings.fontSize - 1)}pt`, color: '#333', lineHeight: '1.4' }}>
+                  <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3' }}>
                     {printData.address} {printData.zipcode}
                   </div>
                 </div>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ fontSize: `${printSettings.fontSize * 2}pt`, fontWeight: '900', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
+                  <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
                     {printData.did}
                   </div>
                 </div>
               </div>
             ) : (
               <>
-                <div style={{ fontWeight: 'bold', fontSize: `${printSettings.fontSize + 1}pt`, marginBottom: '0.2em' }}>
+                <div style={{ fontWeight: '600', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                   {printData.name}
                 </div>
-                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.5em' }}>
+                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
                   โทร. {printData.phone}
                 </div>
-                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4' }}>
+                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
                   {printData.address}
                 </div>
-                <div style={{ marginTop: '0.2em', fontWeight: 'bold', fontSize: `${printSettings.fontSize + 1}pt`, letterSpacing: '0.1em' }}>
+                <div style={{ marginTop: '0.2em', fontWeight: 'bold', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
                   {printData.zipcode}
                 </div>
               </>
