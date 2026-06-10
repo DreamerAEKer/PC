@@ -429,15 +429,15 @@ function WorldCupPortal() {
                 
                 <div style={{ padding: '1.5rem' }}>
                   <h4 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>แบบที่ 1: ใส่ช่องด้านบน/หลัง (เช่น Canon PIXMA iP2700)</h4>
-                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดกระดาษลงไปแนวนอนตรงกลาง โดยมีตัวบีบทั้งซ้ายและขวา <br/><strong>บนเว็บให้เลือก:</strong> แนวนอน + โหมดชดเชย A4 ดึงกลาง</p>
+                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดกระดาษลงไป <strong>แนวนอน</strong> ตรงกลาง โดยมีตัวบีบทั้งซ้ายและขวา <br/><strong>บนเว็บให้เลือก:</strong> แนวนอน + โหมดชดเชย A4 ดึงกลาง</p>
                   <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', marginBottom: '2rem', textAlign: 'center', background: '#f8fafc' }}>
                     <img src="./guide_ip2700.png" alt="การป้อนกระดาษแนวนอน Canon iP2700" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
                   </div>
 
                   <h4 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>แบบที่ 2: ป้อนมือด้านหน้า (เช่น Brother Laser)</h4>
-                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดกระดาษแนวตั้งเข้าช่องหน้าตรงกลาง โดยมีตัวบีบซ้ายและขวา <br/><strong>บนเว็บให้เลือก:</strong> แนวตั้ง + โหมดชดเชย A4 ดึงกลาง</p>
+                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดกระดาษ <strong>แนวนอน</strong> เข้าช่องหน้าตรงกลาง โดยมีตัวบีบซ้ายและขวา <br/><strong>บนเว็บให้เลือก:</strong> แนวนอน + โหมดชดเชย A4 ดึงกลาง</p>
                   <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', textAlign: 'center', background: '#f8fafc' }}>
-                    <img src="./guide_portrait.png" alt="การป้อนกระดาษแนวตั้ง Brother Laser" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
+                    <img src="./guide_brother.png" alt="การป้อนกระดาษแนวนอน Brother Laser" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
                   </div>
                   
                   <div style={{ marginTop: '2rem', padding: '1rem', background: '#eff6ff', borderRadius: '8px', fontSize: '0.85rem', color: '#1e3a8a' }}>
