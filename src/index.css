@@ -201,3 +201,9 @@ a:hover {
     padding: 0;
   }
 }
+
+@media screen {
+  .print-only {
+    display: none;
+  }
+}

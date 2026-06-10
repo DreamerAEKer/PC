@@ -1,13 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Settings, Printer, CheckSquare, Square, ChevronLeft } from 'lucide-react';
+import { Settings, Printer, CheckSquare, ChevronLeft } from 'lucide-react';
 
-const defaultTeams = [
-  "อาร์เจนตินา", "บราซิล", "ฝรั่งเศส", "อังกฤษ", "สเปน", 
-  "เยอรมนี", "โปรตุเกส", "อิตาลี", "เนเธอร์แลนด์", "เบลเยียม", 
-  "โครเอเชีย", "อุรุกวัย", "โคลอมเบีย", "เม็กซิโก", "สหรัฐอเมริกา",
-  "ญี่ปุ่น", "เกาหลีใต้", "เซเนกัล", "โมร็อกโก", "สวิตเซอร์แลนด์"
+const zones = [
+  {
+    name: "โซนยุโรป (UEFA - 16 ทีม)",
+    teams: ["อังกฤษ", "ฝรั่งเศส", "โครเอเชีย", "โปรตุเกส", "เยอรมนี", "เนเธอร์แลนด์", "เบลเยียม", "ออสเตรีย", "สวิตเซอร์แลนด์", "สเปน", "สกอตแลนด์", "ตุรกี", "สวีเดน", "สาธารณรัฐเช็ก", "นอร์เวย์", "บอสเนีย"]
+  },
+  {
+    name: "โซนแอฟริกา (CAF - 10 ทีม)",
+    teams: ["โมร็อกโก", "ตูนิเซีย", "อียิปต์", "แอลจีเรีย", "กานา", "เคปเวิร์ด", "แอฟริกาใต้", "ไอวอรีโคสต์", "เซเนกัล", "ดีอาร์ คองโก"]
+  },
+  {
+    name: "โซนเอเชีย (AFC - 9 ทีม)",
+    teams: ["ญี่ปุ่น", "อิหร่าน", "เกาหลีใต้", "อุซเบกิสถาน", "จอร์แดน", "ออสเตรเลีย", "กาตาร์", "ซาอุดีอาระเบีย", "อิรัก"]
+  },
+  {
+    name: "โซนอเมริกาเหนือ อเมริกากลาง และแคริบเบียน (CONCACAF - 6 ทีม)",
+    teams: ["แคนาดา", "เม็กซิโก", "สหรัฐอเมริกา", "ปานามา", "คอสตาริกา", "จาเมกา"]
+  },
+  {
+    name: "โซนอเมริกาใต้ (CONMEBOL - 6 ทีม)",
+    teams: ["บราซิล", "อาร์เจนตินา", "อุรุกวัย", "โคลอมเบีย", "เอกวาดอร์", "ปารากวัย"]
+  },
+  {
+    name: "โซนโอเชียเนีย (OFC - 1 ทีม)",
+    teams: ["นิวซีแลนด์"]
+  }
 ];
+
+const allInitialTeams = zones.flatMap(z => z.teams);
 
 function WorldCupPortal() {
   const [wcPrintSettings, setWcPrintSettings] = useState(() => {
@@ -27,9 +49,9 @@ function WorldCupPortal() {
     }
   });
 
-  const [selectedTeams, setSelectedTeams] = useState(defaultTeams);
+  const [selectedTeams, setSelectedTeams] = useState(allInitialTeams);
   const [customTeam, setCustomTeam] = useState("");
-  const [teamsList, setTeamsList] = useState(defaultTeams);
+  const [customTeamsList, setCustomTeamsList] = useState([]);
 
   useEffect(() => {
     localStorage.setItem('wcPrintSettings', JSON.stringify(wcPrintSettings));
@@ -51,11 +73,23 @@ function WorldCupPortal() {
 
   const addCustomTeam = (e) => {
     e.preventDefault();
-    if (customTeam.trim() && !teamsList.includes(customTeam.trim())) {
-      setTeamsList([...teamsList, customTeam.trim()]);
+    if (customTeam.trim() && !allInitialTeams.includes(customTeam.trim()) && !customTeamsList.includes(customTeam.trim())) {
+      setCustomTeamsList([...customTeamsList, customTeam.trim()]);
       setSelectedTeams([...selectedTeams, customTeam.trim()]);
       setCustomTeam("");
     }
+  };
+
+  const selectZone = (teams) => {
+    setSelectedTeams(prev => {
+      const set = new Set(prev);
+      teams.forEach(t => set.add(t));
+      return Array.from(set);
+    });
+  };
+
+  const deselectZone = (teams) => {
+    setSelectedTeams(prev => prev.filter(t => !teams.includes(t)));
   };
 
   return (
@@ -107,39 +141,73 @@ function WorldCupPortal() {
               </h3>
               
               <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                <button type="button" onClick={() => setSelectedTeams(teamsList)} className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
-                  เลือกทั้งหมด
+                <button type="button" onClick={() => setSelectedTeams([...allInitialTeams, ...customTeamsList])} className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+                  เลือกทั้งหมด 48 ทีม
                 </button>
                 <button type="button" onClick={() => setSelectedTeams([])} className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
                   ไม่เลือกเลย
                 </button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                {teamsList.map(team => (
-                  <label key={team} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem', backgroundColor: selectedTeams.includes(team) ? '#eff6ff' : '#f8fafc', border: `1px solid ${selectedTeams.includes(team) ? '#bfdbfe' : '#e2e8f0'}`, borderRadius: '6px', transition: 'all 0.2s' }}>
-                    <input 
-                      type="checkbox" 
-                      checked={selectedTeams.includes(team)} 
-                      onChange={() => toggleTeam(team)} 
-                      style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                    />
-                    <span style={{ fontSize: '0.95rem' }}>{team}</span>
-                  </label>
-                ))}
+              {zones.map(zone => (
+                <div key={zone.name} style={{ marginBottom: '2rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', paddingBottom: '0.25rem', borderBottom: '1px solid #e2e8f0' }}>
+                    <h4 style={{ margin: 0, fontSize: '1rem', color: '#334155' }}>{zone.name}</h4>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button onClick={() => selectZone(zone.teams)} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>เลือกโซนนี้</button>
+                      <button onClick={() => deselectZone(zone.teams)} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>เอาโซนนี้ออก</button>
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.5rem' }}>
+                    {zone.teams.map(team => (
+                      <label key={team} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.4rem', backgroundColor: selectedTeams.includes(team) ? '#eff6ff' : '#f8fafc', border: `1px solid ${selectedTeams.includes(team) ? '#bfdbfe' : '#e2e8f0'}`, borderRadius: '4px', transition: 'all 0.2s' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedTeams.includes(team)} 
+                          onChange={() => toggleTeam(team)} 
+                          style={{ width: '14px', height: '14px', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '0.9rem' }}>{team}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h4 style={{ margin: 0, fontSize: '1rem', color: '#334155', marginBottom: '0.75rem', paddingBottom: '0.25rem', borderBottom: '1px solid #e2e8f0' }}>
+                  พิมพ์ระบุชื่อประเทศเอง
+                </h4>
+                
+                {customTeamsList.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.5rem', marginBottom: '1rem' }}>
+                    {customTeamsList.map(team => (
+                      <label key={team} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.4rem', backgroundColor: selectedTeams.includes(team) ? '#eff6ff' : '#f8fafc', border: `1px solid ${selectedTeams.includes(team) ? '#bfdbfe' : '#e2e8f0'}`, borderRadius: '4px', transition: 'all 0.2s' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedTeams.includes(team)} 
+                          onChange={() => toggleTeam(team)} 
+                          style={{ width: '14px', height: '14px', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '0.9rem' }}>{team}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+
+                <form onSubmit={addCustomTeam} style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input 
+                    type="text" 
+                    value={customTeam} 
+                    onChange={(e) => setCustomTeam(e.target.value)} 
+                    placeholder="พิมพ์ชื่อประเทศที่ต้องการเพิ่ม..." 
+                    className="form-control"
+                    style={{ flex: 1 }}
+                  />
+                  <button type="submit" className="btn btn-secondary">เพิ่ม</button>
+                </form>
               </div>
 
-              <form onSubmit={addCustomTeam} style={{ display: 'flex', gap: '0.5rem' }}>
-                <input 
-                  type="text" 
-                  value={customTeam} 
-                  onChange={(e) => setCustomTeam(e.target.value)} 
-                  placeholder="เพิ่มชื่อประเทศอื่นๆ..." 
-                  className="form-control"
-                  style={{ flex: 1 }}
-                />
-                <button type="submit" className="btn btn-secondary">เพิ่ม</button>
-              </form>
             </div>
           </div>
 
