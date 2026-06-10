@@ -416,6 +416,44 @@ export default function StaffPortal() {
               box-sizing: border-box;
             }
           }
+
+          @media (max-width: 768px) {
+            .staff-tip-banner {
+              display: none !important;
+            }
+            .print-settings-panel {
+              display: none !important;
+            }
+            .staff-settings-bar {
+              flex-direction: column !important;
+              align-items: stretch !important;
+              gap: 0.5rem !important;
+              padding: 0.75rem !important;
+              width: 100% !important;
+            }
+            .staff-settings-bar > div {
+              width: 100% !important;
+              justify-content: space-between !important;
+              flex-wrap: wrap !important;
+            }
+            .staff-settings-bar input {
+              flex: 1 !important;
+              max-width: none !important;
+              width: auto !important;
+            }
+            .staff-settings-bar button {
+              width: 100% !important;
+              margin-left: 0 !important;
+              margin-top: 0.25rem !important;
+            }
+            .staff-settings-bar > button {
+              width: 100% !important;
+            }
+            .staff-columns {
+              flex-direction: column !important;
+              gap: 1.5rem !important;
+            }
+          }
         `}
       </style>
       
@@ -430,7 +468,7 @@ export default function StaffPortal() {
           </div>
         </div>
 
-        <div style={{ 
+        <div className="staff-tip-banner" style={{ 
           backgroundColor: '#eff6ff', 
           borderLeft: '4px solid #3b82f6', 
           padding: '0.75rem 1rem', 
@@ -440,11 +478,11 @@ export default function StaffPortal() {
           color: '#1e3a8a',
           lineHeight: '1.5'
         }}>
-          💡 <strong>เคล็ดลับสำหรับสาขา:</strong> สามารถพิมพ์ QR Code หรือส่งลิงก์ระบบของลูกค้าโดยต่อท้าย URL ด้วย <code>?branch=ชื่อสาขาของคุณ</code> (เช่น <code>?branch=ปณ.เชียงใหม่</code> หรือ <code>?b=ปณ.เชียงใหม่</code>) เพื่อให้ใบจองบนมือถือของลูกค้าแสดงชื่อสาขาของท่านโดยอัตโนมัติ (ค่าเริ่มต้นคือ ไปรษณีย์กลาง 10501)
+          💡 <strong>เคล็ดลับสำหรับสาขา:</strong> สามารถพิมพ์ QR Code หรือส่งลิงก์ระบบของลูกค้าโดยต่อท้าย URL ด้วย <code>?branch=ชื่อสาขาของคุณ</code> (เช่น <code>?branch=ปณ.เชียงใหม่</code> หรือ <code>?b=ปณ.เชียงใหม่</code>) เพื่อให้ใบจองบนมือถือ of ลูกค้าแสดงชื่อสาขาของท่านโดยอัตโนมัติ (ค่าเริ่มต้นคือ ไปรษณีย์กลาง 10501)
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#fff', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem', width: '100%' }}>
+          <div className="staff-settings-bar" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#fff', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)', width: '100%', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>สาขา:</span>
               <input 
@@ -505,7 +543,7 @@ export default function StaffPortal() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+        <div className="staff-columns" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           {/* Left column: Entry */}
           <div style={{ flex: '1 1 400px' }}>
             <div className="card glass-panel">
@@ -706,7 +744,7 @@ export default function StaffPortal() {
                   บันทึกและสั่งพิมพ์ลงไปรษณียบัตร
                 </button>
 
-                <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div className="print-settings-panel" style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#475569' }}>
                     <Settings size={16} />
                     ตั้งค่าตำแหน่งและขนาดการพิมพ์ (ปรับแต่งเอง)
