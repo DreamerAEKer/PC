@@ -9,6 +9,23 @@ export default function PrintPostcard() {
   
   const [fontSize, setFontSize] = useState(14); // default 14px
 
+  const printSettings = (() => {
+    try {
+      const saved = localStorage.getItem('customPrintSettings');
+      const parsed = saved ? JSON.parse(saved) : null;
+      if (parsed && typeof parsed === 'object') {
+        return {
+          didPrintMode: typeof parsed.didPrintMode === 'string' ? parsed.didPrintMode : 'did',
+          isNameBold: typeof parsed.isNameBold === 'boolean' ? parsed.isNameBold : true,
+          isPhoneBold: typeof parsed.isPhoneBold === 'boolean' ? parsed.isPhoneBold : true,
+        };
+      }
+      return { didPrintMode: 'did', isNameBold: true, isPhoneBold: true };
+    } catch (e) {
+      return { didPrintMode: 'did', isNameBold: true, isPhoneBold: true };
+    }
+  })();
+
   if (!data) {
     return (
       <div className="container" style={{ textAlign: 'center', marginTop: '3rem' }}>
@@ -95,18 +112,20 @@ export default function PrintPostcard() {
 
       <div className="print-area">
         <div style={{ fontSize: `${fontSize}px`, lineHeight: '1.6', fontFamily: 'Sarabun, Inter, sans-serif', paddingTop: '1em' }}>
-          {data.did ? (
+          {data.did && printSettings.didPrintMode !== 'address' ? (
             <div style={{ display: 'flex', gap: '2rem', paddingLeft: '1em' }}>
               <div style={{ flex: 1.5 }}>
-                <div style={{ fontWeight: 'bold', fontSize: '1.2em', marginBottom: '0.2em' }}>
+                <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: '1.2em', marginBottom: '0.2em' }}>
                   {data.name}
                 </div>
-                <div style={{ fontSize: '1em', marginBottom: '0.5em' }}>
+                <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: '1em', marginBottom: '0.5em' }}>
                   โทร. {data.phone}
                 </div>
-                <div style={{ fontSize: '0.85em', color: '#333', lineHeight: '1.4' }}>
-                  {data.address} {data.zipcode}
-                </div>
+                {!(data.did && data.did.trim().length === 6) && (
+                  <div style={{ fontSize: '0.85em', color: '#333', lineHeight: '1.4' }}>
+                    {data.address} {data.zipcode}
+                  </div>
+                )}
               </div>
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ fontSize: '3.5em', fontWeight: '900', letterSpacing: '0.05em', textAlign: 'center', color: '#000' }}>
@@ -116,10 +135,10 @@ export default function PrintPostcard() {
             </div>
           ) : (
             <>
-              <div style={{ paddingLeft: '2em', fontWeight: 'bold', fontSize: '1.2em', marginBottom: '0.2em' }}>
+              <div style={{ paddingLeft: '2em', fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: '1.2em', marginBottom: '0.2em' }}>
                 {data.name}
               </div>
-              <div style={{ paddingLeft: '2em', fontSize: '1em', marginBottom: '0.5em' }}>
+              <div style={{ paddingLeft: '2em', fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: '1em', marginBottom: '0.5em' }}>
                 โทร. {data.phone}
               </div>
               <div style={{ paddingLeft: '2em', lineHeight: '1.4' }}>

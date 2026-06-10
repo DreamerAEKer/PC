@@ -648,7 +648,7 @@ export default function StaffPortal() {
                                   <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
                                     โทร. {formValues.phone || '08X-XXX-XXXX'}
                                   </div>
-                                  {(printSettings.didPrintMode === 'both' || !(formValues.did && formValues.did.trim().length === 6)) && (
+                                  {!(formValues.did && formValues.did.trim().length === 6) && (
                                     <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3' }}>
                                       {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}`.trim()}
                                     </div>
@@ -762,7 +762,7 @@ export default function StaffPortal() {
                   <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
                     โทร. {printData.phone}
                   </div>
-                  {(printSettings.didPrintMode === 'both' || !(printData.did && printData.did.trim().length === 6)) && (
+                  {!(printData.did && printData.did.trim().length === 6) && (
                     <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3' }}>
                       {printData.address} {printData.zipcode}
                     </div>
