@@ -417,7 +417,7 @@ function WorldCupPortal() {
                   </div>
 
                   <h4 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>แบบที่ 2: ป้อนมือด้านหน้า (เช่น Brother Laser)</h4>
-                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>จัดวางทิศทางของกระดาษ ในแนวตั้ง ตามล็อดกระดาษ ขนาด A6 ตามตัวอย่างในรูปภาพ  โดยหงายด้านว่างขึ้นบน และจำกัดการใส่สูงสุดไม่เกิน 100 ฉบับ<br/><strong>บนเว็บให้เลือก:</strong> แนวตั้ง</p>
+                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>จัดวางทิศทางของกระดาษ ในแนวตั้ง ตามล็อดกระดาษ ขนาด A6 ตามตัวอย่างในรูปภาพ  โดยหงายด้านว่างขึ้นบน และจำกัดการใส่สูงสุดไม่เกิน 100 ฉบับ<br/><strong>บนเว็บให้เลือก:</strong> แนวนอน</p>
                   <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', textAlign: 'center', background: '#f8fafc' }}>
                     <img src="./guide_brother.png" alt="การป้อนกระดาษแนวตั้ง Brother Laser" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
                   </div>
