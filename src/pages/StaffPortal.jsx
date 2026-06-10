@@ -33,7 +33,8 @@ export default function StaffPortal() {
     return '';
   };
   const [history, setHistory] = useState([]);
-  const [scanMode, setScanMode] = useState('manual');
+  const [scanMode, setScanMode] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768 ? 'camera' : 'manual');
+  const [hasActiveData, setHasActiveData] = useState(false);
   const [branchName, setBranchName] = useState('ไปรษณีย์กลาง 10501');
   const [staffName, setStaffName] = useState('');
   const [staffPhone, setStaffPhone] = useState('');
@@ -182,7 +183,12 @@ export default function StaffPortal() {
       
       reset(); // clear form
       setQuantityFields(100);
-      setScanMode('manual');
+      setHasActiveData(false);
+      if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+        setScanMode('camera');
+      } else {
+        setScanMode('manual');
+      }
       setPrintData(null); // Hide the print area from the dashboard
     }, 500);
   };
@@ -287,50 +293,66 @@ export default function StaffPortal() {
     setValue("province", data.province || "-", { shouldValidate: true });
     setValue("zipcode", data.zipcode || "-", { shouldValidate: true });
     setValue("did", data.did || "", { shouldValidate: true });
+    setHasActiveData(true);
   };
 
   useEffect(() => {
-    let scanner = null;
-    try {
-      if (scanMode === 'camera') {
-        scanner = new Html5QrcodeScanner(
-          "reader",
-          { 
-            fps: 10, 
-            qrbox: {width: 250, height: 250},
-            videoConstraints: {
-              facingMode: "environment"
-            }
-          },
-          /* verbose= */ false
-        );
-        scanner.render((decodedText) => {
-          try {
-            const data = parseQrPayload(decodedText);
-            populateFromScan(data);
-            try { if (scanner) scanner.clear().catch(()=>{}).then(() => setScanMode('manual')); } catch(e){ setScanMode('manual'); }
-            alert("สแกนข้อมูลสำเร็จ! กรุณาตรวจสอบและกด สั่งพิมพ์");
-          } catch (err) {
-            alert("QR Code ไม่ถูกต้องหรือไม่ใช่ข้อมูลจากระบบนี้");
-          }
-        }, (error) => {
-          // Handle scan error (ignored generally)
-        });
-      }
-    } catch (err) {
-      console.error("Scanner init error:", err);
-    }
+    let qrCodeInstance = null;
+    let isMounted = true;
 
-    return () => {
-      try {
-        if (scanner) {
-          scanner.clear().catch(error => console.error("Failed to clear scanner", error));
+    if (scanMode === 'camera') {
+      const timer = setTimeout(() => {
+        if (!isMounted) return;
+        const element = document.getElementById("reader");
+        if (!element) return;
+
+        try {
+          qrCodeInstance = new Html5Qrcode("reader");
+          qrCodeInstance.start(
+            { facingMode: "environment" },
+            {
+              fps: 10,
+              qrbox: { width: 250, height: 250 }
+            },
+            (decodedText) => {
+              try {
+                const data = parseQrPayload(decodedText);
+                populateFromScan(data);
+                
+                if (qrCodeInstance && qrCodeInstance.isScanning) {
+                  qrCodeInstance.stop().catch(() => {}).then(() => {
+                    setScanMode('manual');
+                  });
+                } else {
+                  setScanMode('manual');
+                }
+                alert("สแกนข้อมูลสำเร็จ! กรุณาตรวจสอบและกด สั่งพิมพ์");
+              } catch (err) {
+                alert("QR Code ไม่ถูกต้องหรือไม่ใช่ข้อมูลจากระบบนี้");
+              }
+            },
+            (errorMessage) => {
+              // Ignore scanning trace errors
+            }
+          ).catch((err) => {
+            console.error("Failed to start scanner:", err);
+          });
+        } catch (e) {
+          console.error("Scanner init error:", e);
         }
-      } catch (err) {
-        console.error("Scanner cleanup error:", err);
-      }
-    };
-  }, [scanMode, setValue]);
+      }, 150);
+
+      return () => {
+        clearTimeout(timer);
+        isMounted = false;
+        if (qrCodeInstance) {
+          if (qrCodeInstance.isScanning) {
+            qrCodeInstance.stop().catch((e) => console.error("Stop failed", e));
+          }
+        }
+      };
+    }
+  }, [scanMode]);
 
   const handleFileDecode = async (file) => {
     if (!file) return;
@@ -493,6 +515,12 @@ export default function StaffPortal() {
             .drag-drop-box {
               display: none !important;
             }
+            .mobile-only-hide-when-no-data {
+              display: none !important;
+            }
+            .mobile-only-hide-when-no-data.active {
+              display: block !important;
+            }
           }
 
           .quick-qr-modal-overlay {
@@ -527,6 +555,12 @@ export default function StaffPortal() {
           @keyframes scaleIn {
             from { transform: scale(0.9) translateY(10px); opacity: 0; }
             to { transform: scale(1) translateY(0); opacity: 1; }
+          }
+          #reader video {
+            border-radius: 12px;
+            width: 100% !important;
+            height: auto !important;
+            object-fit: cover;
           }
         `}
       </style>
@@ -853,7 +887,35 @@ export default function StaffPortal() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit(onSubmit, onError)}>
+              <form onSubmit={handleSubmit(onSubmit, onError)} className={`mobile-only-hide-when-no-data ${hasActiveData ? 'active' : ''}`}>
+                {hasActiveData && (
+                  <div style={{
+                    backgroundColor: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    borderRadius: '8px',
+                    padding: '0.75rem',
+                    marginBottom: '1rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <span style={{ fontSize: '0.9rem', color: '#1e3a8a', fontWeight: 'bold' }}>
+                      ✏️ กำลังแก้ไขข้อมูลลูกค้าที่เลือก/สแกน
+                    </span>
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        reset();
+                        setQuantityFields(100);
+                        setHasActiveData(false);
+                      }} 
+                      className="btn" 
+                      style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', border: '1px solid #ef4444', color: '#dc2626', backgroundColor: '#fef2f2', cursor: 'pointer', margin: 0 }}
+                    >
+                      ยกเลิก
+                    </button>
+                  </div>
+                )}
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <div className="form-group" style={{ flex: 1 }}>
                     <label className="form-label">วันที่สั่งจอง <span style={{color:'red'}}>*</span></label>
@@ -1136,13 +1198,26 @@ export default function StaffPortal() {
                           {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
-                      <button 
-                        onClick={() => handlePrintHistory(record)} 
-                        className="btn btn-secondary" 
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
-                      >
-                        <Printer size={16} /> พิมพ์ซ้ำ
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        <button 
+                          onClick={() => handlePrintHistory(record)} 
+                          className="btn btn-secondary" 
+                          style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.2rem', margin: 0 }}
+                        >
+                          <Printer size={12} /> พิมพ์ซ้ำ
+                        </button>
+                        <button 
+                          onClick={() => {
+                            populateFromScan(record);
+                            // Scroll to form on mobile
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }} 
+                          className="btn" 
+                          style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.2rem', margin: 0, cursor: 'pointer' }}
+                        >
+                          ✏️ แก้ไข
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
