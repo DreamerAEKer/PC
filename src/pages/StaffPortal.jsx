@@ -858,7 +858,7 @@ export default function StaffPortal() {
                 >
                   <QrCode size={16} />
                   <span style={{ textAlign: 'left', lineHeight: '1.1', fontSize: '0.8rem' }}>
-                    สแกน QR Code<br />เพื่อรับข้อมูล
+                    สแกน QR Code<br />และรับข้อมูลสั่งพิมพ์
                   </span>
                 </button>
               </div>
