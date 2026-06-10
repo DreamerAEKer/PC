@@ -411,7 +411,7 @@ function WorldCupPortal() {
                 
                 <div style={{ padding: '1.5rem' }}>
                   <h4 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>แบบที่ 1: ใส่ช่องด้านบน/หลัง (เช่น Canon PIXMA iP2700)</h4>
-                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดกระดาษ <strong>แนวนอน</strong> ลงไปตรงกลาง <strong>(หันหน้าที่มีลายพิมพ์เข้าหาตัว และเอาด้านที่มีรหัสไปรษณีย์ 10900 ทิ่มลงไปในเครื่อง / ตีลังกากลับหัว)</strong> เพื่อให้พิมพ์ลงในช่องว่างใต้คำว่า "แชมป์คือ" พอดี<br/><strong>บนเว็บให้เลือก:</strong> แนวนอน</p>
+                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดกระดาษ <strong>แนวนอน</strong> ลงไปตรงกลาง <strong>(หันหน้าที่มีลายพิมพ์เข้าหาตัว และเอาด้านที่มีรหัสไปรษณีย์ 10900 ทิ่มลงไปในเครื่อง)</strong> เพื่อให้พิมพ์ลงในช่องว่างใต้คำว่า "แชมป์คือ" พอดี<br/><strong>บนเว็บให้เลือก:</strong> แนวนอน</p>
                   <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', marginBottom: '2rem', textAlign: 'center', background: '#f8fafc' }}>
                     <img src="./guide_ip2700.png" alt="การป้อนกระดาษแนวตั้ง Canon iP2700" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
                   </div>
