@@ -388,7 +388,7 @@ export default function StaffPortal() {
                 } else {
                   setScanMode('manual');
                 }
-                alert("สแกนข้อมูลสำเร็จ! กรุณาตรวจสอบและกด สั่งพิมพ์");
+                alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
               } catch (err) {
                 alert("QR Code ไม่ถูกต้องหรือไม่ใช่ข้อมูลจากระบบนี้");
               }
@@ -428,7 +428,7 @@ export default function StaffPortal() {
           try {
             const data = parseQrPayload(barcodes[0].rawValue);
             populateFromScan(data);
-            alert("อ่านรูปภาพสำเร็จ! กรุณาตรวจสอบข้อมูล");
+            alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
             return;
           } catch (err) {
             console.log("Barcode parsing error:", err);
@@ -445,7 +445,7 @@ export default function StaffPortal() {
       const decodedText = await html5QrCode.scanFile(file, false);
       const data = parseQrPayload(decodedText);
       populateFromScan(data);
-      alert("อ่านรูปภาพสำเร็จ! กรุณาตรวจสอบข้อมูล");
+      alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
     } catch (err) {
       alert("ไม่พบ QR Code ในรูปภาพนี้ หรือข้อมูลไม่ถูกต้อง กรุณาลองสแกนผ่านกล้องแทน");
     }
@@ -894,7 +894,7 @@ export default function StaffPortal() {
                             populateFromScan(data);
                             e.target.value = '';
                             setScanMode('manual');
-                            alert("ดึงข้อมูลสำเร็จ! กรุณาตรวจสอบแล้วกด สั่งพิมพ์");
+                            alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
                           } catch (err) {
                             alert("ข้อมูล QR Code ไม่ถูกต้อง กรุณาลองใหม่");
                             e.target.value = '';
@@ -910,7 +910,7 @@ export default function StaffPortal() {
                               populateFromScan(data);
                               e.target.value = '';
                               setScanMode('manual');
-                              alert("ดึงข้อมูลสำเร็จ! กรุณาตรวจสอบแล้วกด สั่งพิมพ์");
+                              alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
                             }
                           } catch (err) {}
                         }
