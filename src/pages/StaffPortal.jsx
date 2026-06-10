@@ -288,7 +288,13 @@ export default function StaffPortal() {
       if (scanMode === 'camera') {
         scanner = new Html5QrcodeScanner(
           "reader",
-          { fps: 10, qrbox: {width: 250, height: 250} },
+          { 
+            fps: 10, 
+            qrbox: {width: 250, height: 250},
+            videoConstraints: {
+              facingMode: "environment"
+            }
+          },
           /* verbose= */ false
         );
         scanner.render((decodedText) => {
@@ -461,7 +467,28 @@ export default function StaffPortal() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <h2>แดชบอร์ดเจ้าหน้าที่ ปณ.</h2>
           
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <label 
+              className="btn btn-secondary" 
+              style={{ 
+                padding: '0.5rem 1rem', 
+                fontSize: '0.9rem', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem', 
+                cursor: 'pointer', 
+                margin: 0, 
+                borderColor: '#22c55e', 
+                color: '#15803d', 
+                backgroundColor: '#f0fdf4', 
+                fontWeight: 'bold',
+                boxShadow: '0 2px 4px rgba(34, 197, 94, 0.15)'
+              }}
+              title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
+            >
+              <Upload size={16} /> นำเข้าข้อมูลลูกค้า (.json)
+              <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
+            </label>
             <Link to="/worldcup" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff' }}>
               <span role="img" aria-label="soccer">⚽</span> ทายผลบอลโลก 2026
             </Link>
@@ -570,7 +597,7 @@ export default function StaffPortal() {
                   onClick={() => setScanMode('camera')}
                   style={{ flex: 1, padding: '0.5rem', fontSize: '0.9rem', minWidth: '120px' }}
                 >
-                  <QrCode size={16} /> นำเข้าข้อมูล
+                  <QrCode size={16} /> สแกน QR ด้วยกล้อง
                 </button>
               </div>
 
