@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Settings, Printer, CheckSquare, ChevronLeft } from 'lucide-react';
+import { Settings, Printer, CheckSquare, ChevronLeft, X, List } from 'lucide-react';
 
 const zones = [
   {
@@ -71,6 +71,18 @@ function WorldCupPortal() {
     }
   });
 
+  const [printTeam, setPrintTeam] = useState(() => {
+    try {
+      const saved = localStorage.getItem('wcPrintTeam');
+      if (saved) return saved;
+      return "อาร์เจนตินา";
+    } catch (e) {
+      return "อาร์เจนตินา";
+    }
+  });
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
   useEffect(() => {
     localStorage.setItem('wcPrintSettings', JSON.stringify(wcPrintSettings));
   }, [wcPrintSettings]);
@@ -83,9 +95,13 @@ function WorldCupPortal() {
     localStorage.setItem('wcCustomTeamsList', JSON.stringify(customTeamsList));
   }, [customTeamsList]);
 
+  useEffect(() => {
+    localStorage.setItem('wcPrintTeam', printTeam);
+  }, [printTeam]);
+
   const handlePrint = () => {
-    if (selectedTeams.length === 0) {
-      alert("กรุณาเลือกอย่างน้อย 1 ประเทศ");
+    if (!printTeam.trim()) {
+      alert("กรุณาระบุประเทศที่ต้องการพิมพ์ 1 ประเทศ");
       return;
     }
     window.print();
@@ -148,36 +164,208 @@ function WorldCupPortal() {
               page-break-after: always;
             }
           }
+          
+          /* Modal Styles */
+          .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+          }
+          .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+          }
+          .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+          }
+          .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+          }
+          .modal-close {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #64748b;
+            padding: 0.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+          }
+          .modal-close:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+          }
         `}
       </style>
 
-      <div className="wc-no-print">
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+      {/* Main Screen */}
+      <div className="wc-no-print container" style={{ maxWidth: '700px', paddingTop: '2rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', alignItems: 'center' }}>
           <Link to="/staff" className="btn btn-secondary">
-            <ChevronLeft size={20} /> กลับหน้าพิมพ์จ่าหน้า
+            <ChevronLeft size={20} /> กลับ
           </Link>
-          <div style={{ flex: 1 }}></div>
+          <h2 style={{ margin: 0, fontSize: '1.5rem', color: '#1e293b' }}>ฟุตบอลโลก 2026</h2>
         </div>
 
-        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 500px' }}>
-            <div className="card">
-              <h3 style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <CheckSquare size={20} className="text-primary" /> เลือกประเทศที่จะพิมพ์
+        <div className="card glass-panel">
+          
+          <div style={{ marginBottom: '2rem' }}>
+            <label className="form-label" style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '0.75rem' }}>ระบุประเทศที่จะพิมพ์ (1 ประเทศ)</label>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input 
+                type="text" 
+                list="favorite-teams" 
+                value={printTeam}
+                onChange={(e) => setPrintTeam(e.target.value)}
+                className="form-control"
+                placeholder="พิมพ์ชื่อประเทศ หรือกดเลือก..."
+                style={{ fontSize: '1.1rem', padding: '0.8rem 1rem' }}
+              />
+              <datalist id="favorite-teams">
+                {selectedTeams.map(t => <option key={t} value={t} />)}
+              </datalist>
+              <button 
+                type="button" 
+                onClick={() => setIsSettingsOpen(true)} 
+                className="btn btn-secondary"
+                title="จัดการรายชื่อประเทศที่ชื่นชอบ"
+              >
+                <List size={22} /> จัดการรายชื่อ
+              </button>
+            </div>
+            <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#64748b' }}>
+              สามารถพิมพ์ค้นหาได้เลย ระบบจะแสดงเฉพาะประเทศที่คุณได้ตั้งค่าเลือกไว้
+            </div>
+          </div>
+
+          <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', fontWeight: 600 }}>
+              <Settings size={18} /> ตั้งค่าตำแหน่งการพิมพ์ (อ้างอิงจากกรอบ "แชมป์คือ")
+            </div>
+            
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+              <div style={{ flex: 1, minWidth: '120px' }}>
+                <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับลง (ซม.): {wcPrintSettings.top}</label>
+                <input type="range" min="0" max="10" step="0.5" value={wcPrintSettings.top} onChange={(e) => setWcPrintSettings(p => ({...p, top: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+              </div>
+              <div style={{ flex: 1, minWidth: '120px' }}>
+                <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับขวา (ซม.): {wcPrintSettings.left}</label>
+                <input type="range" min="0" max="15" step="0.5" value={wcPrintSettings.left} onChange={(e) => setWcPrintSettings(p => ({...p, left: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+              </div>
+              <div style={{ flex: 1, minWidth: '120px' }}>
+                <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขนาดตัวอักษร: {wcPrintSettings.fontSize}</label>
+                <input type="range" min="4" max="36" step="1" value={wcPrintSettings.fontSize} onChange={(e) => setWcPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem', textAlign: 'center' }}>
+            ตัวอย่างพื้นที่การพิมพ์ (จำลองสัดส่วนไปรษณียบัตร 14.8 x 10.5 ซม.)
+          </div>
+          <div style={{ 
+            backgroundColor: '#e2e8f0', 
+            padding: '1.5rem', 
+            borderRadius: '8px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: '1.5rem'
+          }}>
+            <div style={{ 
+              width: '280px', 
+              height: '198px',
+              position: 'relative'
+            }}>
+              <div style={{
+                width: '14.8cm',
+                height: '10.5cm',
+                backgroundColor: 'white',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                transform: 'scale(0.5)',
+                transformOrigin: 'top left',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                paddingTop: `${wcPrintSettings.top}cm`,
+                paddingLeft: `${wcPrintSettings.left}cm`,
+                boxSizing: 'border-box',
+                overflow: 'hidden'
+              }}>
+                <div style={{ 
+                  fontSize: `${wcPrintSettings.fontSize}pt`, 
+                  fontFamily: 'Sarabun, Inter, sans-serif',
+                  fontWeight: 'bold',
+                  color: '#000'
+                }}>
+                  {printTeam || "ชื่อประเทศ"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            onClick={handlePrint}
+            className="btn btn-primary" 
+            style={{ width: '100%', fontSize: '1.2rem', padding: '1rem', backgroundColor: '#dc2626' }}
+            disabled={!printTeam.trim()}
+          >
+            <Printer size={24} /> พิมพ์ "{printTeam || "..."}"
+          </button>
+        </div>
+      </div>
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <div className="wc-no-print modal-overlay" onClick={() => setIsSettingsOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#1e293b' }}>
+                <CheckSquare size={24} className="text-primary" /> จัดการรายชื่อประเทศที่จะให้เลือกได้
               </h3>
-              
+              <button className="modal-close" onClick={() => setIsSettingsOpen(false)}>
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="modal-body">
               <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center' }}>
                 <input 
                   type="text" 
                   value={searchTerm} 
                   onChange={(e) => setSearchTerm(e.target.value)} 
-                  placeholder="ค้นหาชื่อประเทศ..." 
+                  placeholder="ค้นหาชื่อประเทศในรายการนี้..." 
                   className="form-control"
                   style={{ flex: 1 }}
                 />
               </div>
               
-              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
                 <button type="button" onClick={() => setSelectedTeams([...allInitialTeams, ...customTeamsList])} className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
                   เลือกทั้งหมด 48 ทีม
                 </button>
@@ -205,9 +393,9 @@ function WorldCupPortal() {
                           type="checkbox" 
                           checked={selectedTeams.includes(team)} 
                           onChange={() => toggleTeam(team)} 
-                          style={{ width: '14px', height: '14px', cursor: 'pointer' }}
+                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                         />
-                        <span style={{ fontSize: '0.9rem' }}>{team}</span>
+                        <span style={{ fontSize: '0.95rem' }}>{team}</span>
                       </label>
                     ))}
                   </div>
@@ -215,7 +403,7 @@ function WorldCupPortal() {
                 );
               })}
 
-              <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{ marginBottom: '1rem', marginTop: '1rem' }}>
                 <h4 style={{ margin: 0, fontSize: '1rem', color: '#334155', marginBottom: '0.75rem', paddingBottom: '0.25rem', borderBottom: '1px solid #e2e8f0' }}>
                   พิมพ์ระบุชื่อประเทศเอง
                 </h4>
@@ -228,9 +416,9 @@ function WorldCupPortal() {
                           type="checkbox" 
                           checked={selectedTeams.includes(team)} 
                           onChange={() => toggleTeam(team)} 
-                          style={{ width: '14px', height: '14px', cursor: 'pointer' }}
+                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                         />
-                        <span style={{ fontSize: '0.9rem' }}>{team}</span>
+                        <span style={{ fontSize: '0.95rem' }}>{team}</span>
                       </label>
                     ))}
                   </div>
@@ -245,106 +433,31 @@ function WorldCupPortal() {
                     className="form-control"
                     style={{ flex: 1 }}
                   />
-                  <button type="submit" className="btn btn-secondary">เพิ่ม</button>
+                  <button type="submit" className="btn btn-secondary">เพิ่มเข้าในรายการ</button>
                 </form>
               </div>
-
             </div>
-          </div>
-
-          <div style={{ flex: '1 1 400px' }}>
-            <div className="card glass-panel" style={{ position: 'sticky', top: '1rem' }}>
-              <button 
-                type="button" 
-                onClick={handlePrint}
-                className="btn btn-primary" 
-                style={{ width: '100%', marginBottom: '1.5rem', fontSize: '1.1rem', padding: '1rem', backgroundColor: '#dc2626' }}
-              >
-                <Printer size={20} /> พิมพ์ {selectedTeams.length} ประเทศ
+            
+            <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
+              <button onClick={() => setIsSettingsOpen(false)} className="btn btn-primary" style={{ minWidth: '120px' }}>
+                บันทึกและปิด
               </button>
-
-              <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', fontWeight: 600 }}>
-                  <Settings size={18} /> ตั้งค่าตำแหน่งการพิมพ์ (อ้างอิงจากกรอบ "แชมป์คือ")
-                </div>
-                
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                  <div style={{ flex: 1, minWidth: '120px' }}>
-                    <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับลง (ซม.): {wcPrintSettings.top}</label>
-                    <input type="range" min="0" max="10" step="0.5" value={wcPrintSettings.top} onChange={(e) => setWcPrintSettings(p => ({...p, top: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: '120px' }}>
-                    <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับขวา (ซม.): {wcPrintSettings.left}</label>
-                    <input type="range" min="0" max="15" step="0.5" value={wcPrintSettings.left} onChange={(e) => setWcPrintSettings(p => ({...p, left: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: '120px' }}>
-                    <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขนาดตัวอักษร: {wcPrintSettings.fontSize}</label>
-                    <input type="range" min="4" max="36" step="1" value={wcPrintSettings.fontSize} onChange={(e) => setWcPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem', textAlign: 'center' }}>
-                ตัวอย่างพื้นที่การพิมพ์ (จำลองสัดส่วนไปรษณียบัตร 14.8 x 10.5 ซม.)
-              </div>
-              <div style={{ 
-                backgroundColor: '#e2e8f0', 
-                padding: '1rem', 
-                borderRadius: '8px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}>
-                <div style={{ 
-                  /* 14.8cm = 559px, 10.5cm = 396px. At scale(0.5): 279.5px x 198px */
-                  width: '280px', 
-                  height: '198px',
-                  position: 'relative'
-                }}>
-                  <div style={{
-                    width: '14.8cm',
-                    height: '10.5cm',
-                    backgroundColor: 'white',
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                    transform: 'scale(0.5)',
-                    transformOrigin: 'top left',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    paddingTop: `${wcPrintSettings.top}cm`,
-                    paddingLeft: `${wcPrintSettings.left}cm`,
-                    boxSizing: 'border-box',
-                    overflow: 'hidden'
-                  }}>
-                    <div style={{ 
-                      fontSize: `${wcPrintSettings.fontSize}pt`, 
-                      fontFamily: 'Sarabun, Inter, sans-serif',
-                      fontWeight: 'bold',
-                      color: '#000'
-                    }}>
-                      {selectedTeams.length > 0 ? selectedTeams[0] : "ชื่อประเทศ"}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Actual Print Area (1 page for the selected printTeam) */}
+      <div className="print-only print-area">
+        <div style={{ 
+          fontSize: `${wcPrintSettings.fontSize}pt`, 
+          fontFamily: 'Sarabun, Inter, sans-serif',
+          fontWeight: 'bold',
+          color: '#000'
+        }}>
+          {printTeam}
         </div>
       </div>
-
-      {selectedTeams.map((team, index) => (
-        <div key={index} className="print-only print-area">
-          <div style={{ 
-            fontSize: `${wcPrintSettings.fontSize}pt`, 
-            fontFamily: 'Sarabun, Inter, sans-serif',
-            fontWeight: 'bold',
-            color: '#000'
-          }}>
-            {team}
-          </div>
-        </div>
-      ))}
     </>
   );
 }
