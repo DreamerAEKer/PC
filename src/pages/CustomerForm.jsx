@@ -329,7 +329,7 @@ export default function CustomerForm() {
       <div style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {generatedData && (
           <div className="card" style={{ background: '#fff', border: '2px dashed var(--primary)' }}>
-            <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>ภาพสำหรับส่งให้ไปรษณีย์</h3>
+            <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>สำหรับส่งให้ เจ้าหน้าที่ไปรษณีย์</h3>
             
             {/* The actual card to be converted to Image */}
             <div 
