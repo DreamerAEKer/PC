@@ -49,13 +49,38 @@ function WorldCupPortal() {
     }
   });
 
-  const [selectedTeams, setSelectedTeams] = useState(allInitialTeams);
+  const [selectedTeams, setSelectedTeams] = useState(() => {
+    try {
+      const saved = localStorage.getItem('wcSelectedTeams');
+      if (saved) return JSON.parse(saved);
+      return allInitialTeams;
+    } catch (e) {
+      return allInitialTeams;
+    }
+  });
+
   const [customTeam, setCustomTeam] = useState("");
-  const [customTeamsList, setCustomTeamsList] = useState([]);
+  const [customTeamsList, setCustomTeamsList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('wcCustomTeamsList');
+      if (saved) return JSON.parse(saved);
+      return [];
+    } catch (e) {
+      return [];
+    }
+  });
 
   useEffect(() => {
     localStorage.setItem('wcPrintSettings', JSON.stringify(wcPrintSettings));
   }, [wcPrintSettings]);
+
+  useEffect(() => {
+    localStorage.setItem('wcSelectedTeams', JSON.stringify(selectedTeams));
+  }, [selectedTeams]);
+
+  useEffect(() => {
+    localStorage.setItem('wcCustomTeamsList', JSON.stringify(customTeamsList));
+  }, [customTeamsList]);
 
   const handlePrint = () => {
     if (selectedTeams.length === 0) {
