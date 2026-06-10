@@ -81,6 +81,8 @@ function WorldCupPortal() {
     }
   });
 
+  const [isPortrait, setIsPortrait] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMainDropdownOpen, setIsMainDropdownOpen] = useState(false);
   const [mainSearchFilter, setMainSearchFilter] = useState("");
@@ -388,7 +390,13 @@ function WorldCupPortal() {
               </div>
               
               <div style={{ flex: 1, minWidth: '250px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.8rem', color: '#334155' }}>โหมดชดเชยพิกัดเครื่องพิมพ์</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155', margin: 0 }}>โหมดชดเชยพิกัดเครื่องพิมพ์</label>
+                  <button type="button" onClick={() => setIsGuideOpen(true)} style={{ background: 'none', border: 'none', padding: 0, color: '#3b82f6', cursor: 'pointer', display: 'flex', alignItems: 'center' }} title="ดูรูปคู่มือการป้อนกระดาษ">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    <span style={{ fontSize: '0.75rem', marginLeft: '0.2rem', textDecoration: 'underline' }}>ดูรูปตัวอย่าง</span>
+                  </button>
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                     <input type="radio" name="main_printerMode" checked={printerMode === 'A6'} onChange={() => setPrinterMode('A6')} style={{ marginTop: '0.2rem' }} />
@@ -399,7 +407,7 @@ function WorldCupPortal() {
                   <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                     <input type="radio" name="main_printerMode" checked={printerMode === 'A4Center'} onChange={() => setPrinterMode('A4Center')} style={{ marginTop: '0.2rem' }} />
                     <div>
-                      <div>โหมดชดเชยพิกัด A4 ดึงกลาง (สำหรับเครื่องเลเซอร์)</div>
+                      <div>โหมดชดเชยพิกัด A4 ดึงกลาง (ดึงกระดาษเข้าตรงกลาง)</div>
                       <div style={{ fontSize: '0.75rem', color: '#64748b' }}>แก้ปัญหาภาพตรงบนหน้าจอ แต่พิมพ์จริงตกขอบ</div>
                     </div>
                   </label>
@@ -407,6 +415,40 @@ function WorldCupPortal() {
               </div>
             </div>
           </div>
+
+          {/* Guide Modal */}
+          {isGuideOpen && (
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '1rem' }}>
+              <div style={{ backgroundColor: 'white', borderRadius: '12px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', boxShadow: 'var(--shadow-xl)' }}>
+                <div style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: 'white', zIndex: 10 }}>
+                  <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    คู่มือการป้อนกระดาษ
+                  </h3>
+                  <button onClick={() => setIsGuideOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '0.5rem' }}>
+                    ✕
+                  </button>
+                </div>
+                
+                <div style={{ padding: '1.5rem' }}>
+                  <h4 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>แบบที่ 1: ป้อนแนวนอน</h4>
+                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดด้านยาว 14.8 ซม. เข้าเครื่อง <br/><strong>บนเว็บให้เลือก:</strong> แนวนอน + โหมดชดเชย A4 ดึงกลาง (หรือโหมดปกติถ้าเครื่องดึงขวา)</p>
+                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', marginBottom: '2rem', textAlign: 'center', background: '#f8fafc' }}>
+                    <img src="./guide_landscape.png" alt="การป้อนกระดาษแนวนอน" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
+                  </div>
+
+                  <h4 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>แบบที่ 2: ป้อนแนวตั้ง</h4>
+                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดด้านสั้น 10.5 ซม. เข้าเครื่อง <br/><strong>บนเว็บให้เลือก:</strong> แนวตั้ง + โหมดชดเชย A4 ดึงกลาง</p>
+                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', textAlign: 'center', background: '#f8fafc' }}>
+                    <img src="./guide_portrait.png" alt="การป้อนกระดาษแนวตั้ง" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
+                  </div>
+                  
+                  <div style={{ marginTop: '2rem', padding: '1rem', background: '#eff6ff', borderRadius: '8px', fontSize: '0.85rem', color: '#1e3a8a' }}>
+                    <strong>คำแนะนำ:</strong> ไดร์เวอร์เครื่องพิมพ์ (ในหน้าต่าง Print) แนะนำให้ตั้งขนาดกระดาษ (Paper Size) ให้ตรงกับความเป็นจริง เช่น A6 หรือ Custom 14.8x10.5 ซม. จะทำให้ปริ้นง่ายที่สุดครับ
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem', textAlign: 'center' }}>
             ตัวอย่างพื้นที่การพิมพ์ (จำลองสัดส่วนไปรษณียบัตร {isPortrait ? 'แนวตั้ง 10.5 x 14.8 ซม.' : 'แนวนอน 14.8 x 10.5 ซม.'})
