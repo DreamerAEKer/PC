@@ -1365,7 +1365,7 @@ export default function StaffPortal() {
               }}
             >
               <FileText size={16} />
-              พิมพ์ฟอร์มเปล่า 4 ใบ
+              แบบพิมพ์ สั่งพิมพ์ไปรษณียบัตร
             </button>
           </div>
         </div>
