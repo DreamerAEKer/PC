@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
 import { QrCode, Keyboard, History, Printer, FileText, Settings } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
@@ -313,6 +313,15 @@ export default function StaffPortal() {
       <div className="staff-no-print">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <h2>แดชบอร์ดเจ้าหน้าที่ ปณ.</h2>
+          
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <Link to="/worldcup" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff' }}>
+              <span role="img" aria-label="soccer">⚽</span> ทายผลบอลโลก 2026
+            </Link>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#fff', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>สาขา:</span>
