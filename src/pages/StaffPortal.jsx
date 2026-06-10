@@ -48,6 +48,9 @@ export default function StaffPortal() {
     staffName !== savedSettings.staffName ||
     staffPhone !== savedSettings.staffPhone;
 
+  const hasTextToSave = (staffName && staffName.trim() !== '') || (staffPhone && staffPhone.trim() !== '');
+  const shouldShowRed = hasTextToSave && isSettingsDirty;
+
   useEffect(() => {
     const savedBranch = localStorage.getItem('branchName') || 'ไปรษณีย์กลาง 10501';
     setBranchName(savedBranch);
@@ -574,10 +577,10 @@ export default function StaffPortal() {
                   padding: '0.3rem 0.8rem', 
                   fontSize: '0.85rem', 
                   marginLeft: '0.25rem',
-                  backgroundColor: isSettingsDirty ? 'var(--primary)' : '#fff', 
-                  color: isSettingsDirty ? '#fff' : '#475569', 
-                  border: isSettingsDirty ? '1px solid var(--primary)' : '1px solid #cbd5e1',
-                  fontWeight: isSettingsDirty ? '700' : '500',
+                  backgroundColor: shouldShowRed ? 'var(--primary)' : '#fff', 
+                  color: shouldShowRed ? '#fff' : '#475569', 
+                  border: shouldShowRed ? '1px solid var(--primary)' : '1px solid #cbd5e1',
+                  fontWeight: shouldShowRed ? '700' : '500',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease'
                 }}
