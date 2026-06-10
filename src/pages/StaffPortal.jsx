@@ -964,7 +964,7 @@ export default function StaffPortal() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit(onSubmit, onError)} className={`mobile-only-hide-when-no-data ${hasActiveData ? 'active' : ''}`}>
+              <form onSubmit={handleSubmit(onSubmit, onError)} className={`mobile-only-hide-when-no-data ${(hasActiveData || scanMode === 'manual') ? 'active' : ''}`}>
                 {hasActiveData && (
                   <div style={{
                     backgroundColor: '#eff6ff',
