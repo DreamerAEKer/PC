@@ -36,15 +36,31 @@ export default function StaffPortal() {
   const [branchName, setBranchName] = useState('ไปรษณีย์กลาง 10501');
   const [staffName, setStaffName] = useState('');
   const [staffPhone, setStaffPhone] = useState('');
+  const [savedSettings, setSavedSettings] = useState({
+    branch: 'ไปรษณีย์กลาง 10501',
+    staffName: '',
+    staffPhone: ''
+  });
   const navigate = useNavigate();
 
+  const isSettingsDirty = 
+    branchName !== savedSettings.branch ||
+    staffName !== savedSettings.staffName ||
+    staffPhone !== savedSettings.staffPhone;
+
   useEffect(() => {
-    const savedBranch = localStorage.getItem('branchName');
-    if (savedBranch) setBranchName(savedBranch);
-    const savedStaffName = localStorage.getItem('staffName');
-    if (savedStaffName) setStaffName(savedStaffName);
-    const savedStaffPhone = localStorage.getItem('staffPhone');
-    if (savedStaffPhone) setStaffPhone(savedStaffPhone);
+    const savedBranch = localStorage.getItem('branchName') || 'ไปรษณีย์กลาง 10501';
+    setBranchName(savedBranch);
+    const savedStaffName = localStorage.getItem('staffName') || '';
+    setStaffName(savedStaffName);
+    const savedStaffPhone = localStorage.getItem('staffPhone') || '';
+    setStaffPhone(savedStaffPhone);
+    
+    setSavedSettings({
+      branch: savedBranch,
+      staffName: savedStaffName,
+      staffPhone: savedStaffPhone
+    });
     
     let savedHistory = localStorage.getItem('staffHistory');
     if (!savedHistory) {
@@ -369,15 +385,12 @@ export default function StaffPortal() {
 
   const handleBranchChange = (e) => {
     setBranchName(e.target.value);
-    localStorage.setItem('branchName', e.target.value);
   };
   const handleStaffNameChange = (e) => {
     setStaffName(e.target.value);
-    localStorage.setItem('staffName', e.target.value);
   };
   const handleStaffPhoneChange = (e) => {
     setStaffPhone(e.target.value);
-    localStorage.setItem('staffPhone', e.target.value);
   };
 
   const saveSettings = () => {
@@ -389,6 +402,11 @@ export default function StaffPortal() {
     localStorage.setItem('branchName', branchName);
     localStorage.setItem('staffName', staffName);
     localStorage.setItem('staffPhone', staffPhone);
+    setSavedSettings({
+      branch: branchName,
+      staffName: staffName,
+      staffPhone: staffPhone
+    });
     setShowSaveSuccess(true);
     setTimeout(() => setShowSaveSuccess(false), 3000);
   };
@@ -556,11 +574,12 @@ export default function StaffPortal() {
                   padding: '0.3rem 0.8rem', 
                   fontSize: '0.85rem', 
                   marginLeft: '0.25rem',
-                  backgroundColor: '#fff', 
-                  color: '#475569', 
-                  border: '1px solid #cbd5e1',
-                  fontWeight: '500',
-                  cursor: 'pointer'
+                  backgroundColor: isSettingsDirty ? 'var(--primary)' : '#fff', 
+                  color: isSettingsDirty ? '#fff' : '#475569', 
+                  border: isSettingsDirty ? '1px solid var(--primary)' : '1px solid #cbd5e1',
+                  fontWeight: isSettingsDirty ? '700' : '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
                 }}
               >
                 {showSaveSuccess ? 'บันทึกแล้ว' : 'บันทึก'}
