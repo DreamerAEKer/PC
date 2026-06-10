@@ -52,6 +52,34 @@ export default function StaffPortal() {
     }
   }, [scanMode]);
 
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if (scanMode !== 'camera') return;
+      
+      const activeEl = document.activeElement;
+      if (activeEl && (
+        activeEl.tagName === 'INPUT' || 
+        activeEl.tagName === 'TEXTAREA' || 
+        activeEl.isContentEditable
+      )) {
+        if (activeEl.id === 'usb-scanner-input') {
+          return;
+        }
+        return;
+      }
+      
+      const usbInput = document.getElementById("usb-scanner-input");
+      if (usbInput) {
+        usbInput.focus();
+      }
+    };
+    
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, [scanMode]);
+
   const hasTextToSave = (staffName && staffName.trim() !== '') || (staffPhone && staffPhone.trim() !== '');
   const shouldShowRed = hasTextToSave && isSettingsDirty;
 
@@ -880,39 +908,76 @@ export default function StaffPortal() {
                 <div>
                   {/* Camera Scanner View */}
                   <div id="reader" style={{ width: '100%', marginBottom: '1rem', display: cameraActive ? 'block' : 'none' }}></div>
-
-                  {/* Camera Activation Button / Placeholder on Desktop */}
-                  {!cameraActive && (
-                    <div className="camera-placeholder-desktop" style={{
-                      width: '100%',
-                      aspectRatio: '4/3',
-                      maxHeight: '350px',
-                      backgroundColor: '#f8fafc',
-                      borderRadius: '12px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '1rem',
-                      color: 'var(--text-main)',
-                      marginBottom: '1rem',
-                      border: '2px dashed #cbd5e1',
-                      padding: '2rem',
-                      textAlign: 'center'
-                    }}>
-                      <QrCode size={48} style={{ color: 'var(--primary)', opacity: 0.8 }} />
-                      <div>
-                        <div style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '0.25rem' }}>กล้องยังไม่ได้เปิดใช้งาน</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>บนคอมพิวเตอร์สามารถใช้เครื่องยิงบาร์โค้ดได้ทันที หรือคลิกด้านล่างเพื่อเปิดกล้อง</div>
-                      </div>
+                  {cameraActive && (
+                    <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
                       <button
                         type="button"
-                        className="btn btn-primary"
-                        onClick={() => setCameraActive(true)}
-                        style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', fontSize: '0.9rem', cursor: 'pointer' }}
+                        className="btn btn-secondary"
+                        onClick={() => setCameraActive(false)}
+                        style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', cursor: 'pointer' }}
                       >
-                        📷 เปิดกล้องสแกน QR Code
+                        ❌ ปิดกล้องสแกน
                       </button>
+                    </div>
+                  )}
+
+                  {/* Drag and drop image upload (Shown at top in place of camera placeholder on desktop when camera is inactive, hidden on mobile via CSS class 'drag-drop-box') */}
+                  {!cameraActive && (
+                    <div className="drag-drop-box" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                      <div 
+                        onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.backgroundColor = '#eff6ff'; }}
+                        onDragLeave={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+                        onDrop={async (e) => {
+                          e.preventDefault();
+                          e.currentTarget.style.borderColor = '#cbd5e1';
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          const file = e.dataTransfer.files[0];
+                          if (file) {
+                            await handleFileDecode(file);
+                          }
+                        }}
+                        onClick={() => document.getElementById('drag-file-input').click()}
+                        style={{
+                          border: '2px dashed #cbd5e1',
+                          borderRadius: '12px',
+                          padding: '2.5rem 1rem',
+                          textAlign: 'center',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          backgroundColor: '#f8fafc'
+                        }}
+                      >
+                        <input 
+                          type="file" 
+                          id="drag-file-input" 
+                          accept="image/*" 
+                          onChange={async (e) => {
+                            const file = e.target.files[0];
+                            if (file) await handleFileDecode(file);
+                          }} 
+                          style={{ display: 'none' }} 
+                        />
+                        <div style={{ color: 'var(--primary)', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center' }}>
+                          <QrCode size={32} />
+                        </div>
+                        <strong style={{ display: 'block', marginBottom: '0.25rem', color: 'var(--text-main)' }}>ลากไฟล์รูปภาพ QR Code มาวางที่นี่</strong>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>หรือคลิกเพื่อเลือกไฟล์รูปภาพจากเครื่องคอมพิวเตอร์</span>
+                        
+                        {/* Option to start webcam on desktop */}
+                        <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'center' }}>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCameraActive(true);
+                            }}
+                            style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', borderRadius: '6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                          >
+                            📷 เปิดกล้องสแกนเนอร์
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
                   
@@ -921,11 +986,12 @@ export default function StaffPortal() {
                     <div style={{ marginBottom: '0.75rem' }}>
                       <strong style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>🔌 ใช้เครื่องสแกนบาร์โค้ด (USB)</strong>
                       <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                        คลิกที่ช่องด้านล่างแล้วยิงเครื่องสแกนเนอร์ได้เลย
+                        ยิงเครื่องสแกนเนอร์ได้ทันทีโดยไม่ต้องคลิก (หรือคลิกที่ช่องด้านล่างเพื่อยิง)
                       </div>
                     </div>
                     <input 
                       type="text" 
+                      id="usb-scanner-input"
                       autoFocus
                       className="form-control" 
                       placeholder="👉 คลิกตรงนี้ แล้วยิงสแกนเนอร์..." 
@@ -962,50 +1028,6 @@ export default function StaffPortal() {
                         }
                       }}
                     />
-                  </div>
-
-                  {/* Drag and drop image upload (Hidden on mobile via class 'drag-drop-box') */}
-                  <div className="drag-drop-box" style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                    <div 
-                      onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.backgroundColor = '#eff6ff'; }}
-                      onDragLeave={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.backgroundColor = 'transparent'; }}
-                      onDrop={async (e) => {
-                        e.preventDefault();
-                        e.currentTarget.style.borderColor = '#cbd5e1';
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                        const file = e.dataTransfer.files[0];
-                        if (file) {
-                          await handleFileDecode(file);
-                        }
-                      }}
-                      onClick={() => document.getElementById('drag-file-input').click()}
-                      style={{
-                        border: '2px dashed #cbd5e1',
-                        borderRadius: '12px',
-                        padding: '2rem 1rem',
-                        textAlign: 'center',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        marginTop: '1rem',
-                        backgroundColor: 'transparent'
-                      }}
-                    >
-                      <input 
-                        type="file" 
-                        id="drag-file-input" 
-                        accept="image/*" 
-                        onChange={async (e) => {
-                          const file = e.target.files[0];
-                          if (file) await handleFileDecode(file);
-                        }} 
-                        style={{ display: 'none' }} 
-                      />
-                      <div style={{ color: 'var(--primary)', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center' }}>
-                        <QrCode size={32} />
-                      </div>
-                      <strong style={{ display: 'block', marginBottom: '0.25rem', color: 'var(--text-main)' }}>ลากไฟล์รูปภาพ QR Code มาวางที่นี่</strong>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>หรือคลิกเพื่อเลือกไฟล์รูปภาพจากเครื่องคอมพิวเตอร์</span>
-                    </div>
                   </div>
                 </div>
               )}
