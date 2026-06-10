@@ -276,7 +276,7 @@ function WorldCupPortal() {
                       style={{ marginBottom: '0.5rem' }}
                     />
                     
-                    <div style={{ display: 'flex', gap: '0.25rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '0.5rem', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '0.4rem', paddingBottom: '0.5rem', marginBottom: '0.5rem', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
                       {["ทั้งหมด", "ยุโรป", "แอฟริกา", "เอเชีย", "CONCACAF", "อเมริกาใต้", "โอเชียเนีย", "อื่น ๆ"].map(zone => (
                         <button
                           key={zone}
