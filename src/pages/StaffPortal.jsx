@@ -88,12 +88,13 @@ export default function StaffPortal() {
           top: typeof parsed.top === 'number' ? parsed.top : 4.5,
           left: typeof parsed.left === 'number' ? parsed.left : 9.5,
           fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 5,
-          isBold: typeof parsed.isBold === 'boolean' ? parsed.isBold : true
+          isNameBold: typeof parsed.isNameBold === 'boolean' ? parsed.isNameBold : true,
+          isPhoneBold: typeof parsed.isPhoneBold === 'boolean' ? parsed.isPhoneBold : true
         };
       }
-      return { top: 4.5, left: 9.5, fontSize: 5, isBold: true };
+      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true };
     } catch (e) {
-      return { top: 4.5, left: 9.5, fontSize: 5, isBold: true };
+      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true };
     }
   });
 
@@ -545,15 +546,24 @@ export default function StaffPortal() {
                       <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขนาดตัวอักษร: {printSettings.fontSize}</label>
                       <input type="range" min="4" max="24" step="1" value={printSettings.fontSize} onChange={(e) => setPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
                     </div>
-                    <div style={{ flex: 1, minWidth: '150px', display: 'flex', alignItems: 'flex-end' }}>
-                      <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+                    <div style={{ flex: 1, minWidth: '150px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: '0.25rem' }}>
+                      <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                         <input 
                           type="checkbox" 
-                          checked={printSettings.isBold} 
-                          onChange={(e) => setPrintSettings(p => ({...p, isBold: e.target.checked}))} 
+                          checked={printSettings.isNameBold} 
+                          onChange={(e) => setPrintSettings(p => ({...p, isNameBold: e.target.checked}))} 
                           style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                         />
-                        ชื่อและเบอร์โทรตัวหนา
+                        ชื่อ-นามสกุล ตัวหนา
+                      </label>
+                      <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={printSettings.isPhoneBold} 
+                          onChange={(e) => setPrintSettings(p => ({...p, isPhoneBold: e.target.checked}))} 
+                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                        />
+                        เบอร์โทร ตัวหนา
                       </label>
                     </div>
                   </div>
@@ -598,10 +608,10 @@ export default function StaffPortal() {
                             {formValues.did ? (
                               <div style={{ display: 'flex', gap: '2rem' }}>
                                 <div style={{ flex: 1.5 }}>
-                                  <div style={{ fontWeight: printSettings.isBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                                  <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                                     {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
                                   </div>
-                                  <div style={{ fontWeight: printSettings.isBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                  <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
                                     โทร. {formValues.phone || '08X-XXX-XXXX'}
                                   </div>
                                   <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3' }}>
@@ -616,16 +626,16 @@ export default function StaffPortal() {
                               </div>
                             ) : (
                               <>
-                                <div style={{ fontWeight: printSettings.isBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                                <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                                   {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
                                 </div>
-                                <div style={{ fontWeight: printSettings.isBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
                                   โทร. {formValues.phone || '08X-XXX-XXXX'}
                                 </div>
                                 <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
                                   {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''}`.trim()}
                                 </div>
-                                <div style={{ marginTop: '0.2em', fontWeight: printSettings.isBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
+                                <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
                                   {formValues.zipcode || 'XXXXX'}
                                 </div>
                               </>
@@ -710,10 +720,10 @@ export default function StaffPortal() {
             {printData.did ? (
               <div style={{ display: 'flex', gap: '2rem' }}>
                 <div style={{ flex: 1.5 }}>
-                  <div style={{ fontWeight: printSettings.isBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                  <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                     {printData.name}
                   </div>
-                  <div style={{ fontWeight: printSettings.isBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                  <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
                     โทร. {printData.phone}
                   </div>
                   <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3' }}>
@@ -728,16 +738,16 @@ export default function StaffPortal() {
               </div>
             ) : (
               <>
-                <div style={{ fontWeight: printSettings.isBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                   {printData.name}
                 </div>
-                <div style={{ fontWeight: printSettings.isBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
                   โทร. {printData.phone}
                 </div>
                 <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
                   {printData.address}
                 </div>
-                <div style={{ marginTop: '0.2em', fontWeight: printSettings.isBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
+                <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
                   {printData.zipcode}
                 </div>
               </>
