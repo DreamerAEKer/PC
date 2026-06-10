@@ -702,8 +702,8 @@ export default function StaffPortal() {
                                 <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                                   {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
                                 </div>
-                                <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                                  โทร. {formValues.phone || '08X-XXX-XXXX'}
+                                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                  โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
                                 </div>
                                 {!(formValues.did && formValues.did.trim().length === 6) && (
                                   <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
@@ -719,8 +719,8 @@ export default function StaffPortal() {
                                 <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                                   {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
                                 </div>
-                                <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                                  โทร. {formValues.phone || '08X-XXX-XXXX'}
+                                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                  โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
                                 </div>
                                 <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
                                   {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''}`.trim()}
@@ -812,8 +812,8 @@ export default function StaffPortal() {
                 <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                   {printData.name}
                 </div>
-                <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                  โทร. {printData.phone}
+                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                  โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printData.phone}</span>
                 </div>
                 {!(printData.did && printData.did.trim().length === 6) && (
                   <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
@@ -829,8 +829,8 @@ export default function StaffPortal() {
                 <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                   {printData.name}
                 </div>
-                <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                  โทร. {printData.phone}
+                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                  โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printData.phone}</span>
                 </div>
                 <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
                   {printData.address}

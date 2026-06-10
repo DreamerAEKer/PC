@@ -117,8 +117,8 @@ export default function PrintPostcard() {
               <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: '1.2em', marginBottom: '0.2em' }}>
                 {data.name}
               </div>
-              <div style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: '1em', marginBottom: '0.5em' }}>
-                โทร. {data.phone}
+              <div style={{ fontSize: '1em', marginBottom: '0.5em' }}>
+                โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{data.phone}</span>
               </div>
               {!(data.did && data.did.trim().length === 6) && (
                 <div style={{ fontSize: '0.85em', color: '#333', lineHeight: '1.4', marginBottom: '0.5em' }}>
@@ -134,8 +134,8 @@ export default function PrintPostcard() {
               <div style={{ paddingLeft: '2em', fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: '1.2em', marginBottom: '0.2em' }}>
                 {data.name}
               </div>
-              <div style={{ paddingLeft: '2em', fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal', fontSize: '1em', marginBottom: '0.5em' }}>
-                โทร. {data.phone}
+              <div style={{ paddingLeft: '2em', fontSize: '1em', marginBottom: '0.5em' }}>
+                โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{data.phone}</span>
               </div>
               <div style={{ paddingLeft: '2em', lineHeight: '1.4' }}>
                 {data.address}
