@@ -1247,8 +1247,12 @@ export default function StaffPortal() {
                     >
                       <div>
                         <div style={{ fontWeight: '600', color: 'var(--text-main)' }}>{record.name}</div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                          {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                          {record.phone && <div>โทร: {record.phone}</div>}
+                          {record.quantity !== undefined && <div>จำนวนที่พิมพ์: {record.quantity} ใบ</div>}
+                          <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.1rem' }}>
+                            {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
