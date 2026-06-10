@@ -429,20 +429,20 @@ function WorldCupPortal() {
                 </div>
                 
                 <div style={{ padding: '1.5rem' }}>
-                  <h4 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>แบบที่ 1: ป้อนแนวนอน</h4>
-                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดด้านยาว 14.8 ซม. เข้าเครื่อง <br/><strong>บนเว็บให้เลือก:</strong> แนวนอน + โหมดชดเชย A4 ดึงกลาง (หรือโหมดปกติถ้าเครื่องดึงขวา)</p>
+                  <h4 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>แบบที่ 1: ใส่ช่องด้านบน/หลัง (เช่น Canon PIXMA iP2700)</h4>
+                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดกระดาษลงไปแนวนอนตรงกลาง โดยมีตัวบีบทั้งซ้ายและขวา <br/><strong>บนเว็บให้เลือก:</strong> แนวนอน + โหมดชดเชย A4 ดึงกลาง</p>
                   <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', marginBottom: '2rem', textAlign: 'center', background: '#f8fafc' }}>
-                    <img src="./guide_landscape.png" alt="การป้อนกระดาษแนวนอน" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
+                    <img src="./guide_ip2700.png" alt="การป้อนกระดาษแนวนอน Canon iP2700" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
                   </div>
 
-                  <h4 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>แบบที่ 2: ป้อนแนวตั้ง</h4>
-                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดด้านสั้น 10.5 ซม. เข้าเครื่อง <br/><strong>บนเว็บให้เลือก:</strong> แนวตั้ง + โหมดชดเชย A4 ดึงกลาง</p>
+                  <h4 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>แบบที่ 2: ป้อนมือด้านหน้า (เช่น Brother Laser)</h4>
+                  <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>สอดกระดาษแนวตั้งเข้าช่องหน้าตรงกลาง โดยมีตัวบีบซ้ายและขวา <br/><strong>บนเว็บให้เลือก:</strong> แนวตั้ง + โหมดชดเชย A4 ดึงกลาง</p>
                   <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', textAlign: 'center', background: '#f8fafc' }}>
-                    <img src="./guide_portrait.png" alt="การป้อนกระดาษแนวตั้ง" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
+                    <img src="./guide_portrait.png" alt="การป้อนกระดาษแนวตั้ง Brother Laser" style={{ maxWidth: '100%', height: 'auto', maxHeight: '200px' }} />
                   </div>
                   
                   <div style={{ marginTop: '2rem', padding: '1rem', background: '#eff6ff', borderRadius: '8px', fontSize: '0.85rem', color: '#1e3a8a' }}>
-                    <strong>คำแนะนำ:</strong> ไดร์เวอร์เครื่องพิมพ์ (ในหน้าต่าง Print) แนะนำให้ตั้งขนาดกระดาษ (Paper Size) ให้ตรงกับความเป็นจริง เช่น A6 หรือ Custom 14.8x10.5 ซม. จะทำให้ปริ้นง่ายที่สุดครับ
+                    <strong>คำแนะนำ:</strong> ไดร์เวอร์เครื่องพิมพ์ (ในหน้าต่าง Print ของ Chrome) ไม่ว่าจะปริ้นเครื่องไหน แนะนำให้สอดกระดาษแบบไหน ก็ให้ตั้งหน้าเว็บให้ตรงกัน (แนวนอน/แนวตั้ง) และเลือก <strong>โหมดชดเชย A4 ดึงกลาง</strong> ไว้เสมอครับ (เพราะทั้งสองเครื่องดึงตรงกลางเหมือนกัน)
                   </div>
                 </div>
               </div>
