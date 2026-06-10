@@ -5,6 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
 import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
+import { QRCodeCanvas } from 'qrcode.react';
 
 export default function StaffPortal() {
   const { register, handleSubmit, setValue, getValues, reset, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
@@ -386,6 +387,26 @@ export default function StaffPortal() {
     setIsSettingsDirty(true);
   };
 
+  const [isUrlCopied, setIsUrlCopied] = useState(false);
+  const [showQuickQrModal, setShowQuickQrModal] = useState(false);
+  const generatedCustomerUrl = `${window.location.origin}${window.location.pathname}?branch=${encodeURIComponent(branchName)}`;
+
+  const copyGeneratedUrl = () => {
+    navigator.clipboard.writeText(generatedCustomerUrl);
+    setIsUrlCopied(true);
+    setTimeout(() => setIsUrlCopied(false), 2000);
+  };
+
+  const downloadBranchQr = () => {
+    const canvas = document.getElementById('branch-qr-canvas');
+    if (!canvas) return;
+    const url = canvas.toDataURL("image/png");
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `qr-customer-${branchName || 'branch'}.png`;
+    link.click();
+  };
+
   const saveSettings = () => {
     if (!staffName && !staffPhone) {
       setShowSaveError(true);
@@ -473,6 +494,40 @@ export default function StaffPortal() {
               display: none !important;
             }
           }
+
+          .quick-qr-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.2s ease-out;
+          }
+          .quick-qr-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            width: 90%;
+            max-width: 440px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            position: relative;
+            animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          @keyframes scaleIn {
+            from { transform: scale(0.9) translateY(10px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+          }
         `}
       </style>
       
@@ -511,14 +566,68 @@ export default function StaffPortal() {
         <div className="staff-tip-banner" style={{ 
           backgroundColor: '#eff6ff', 
           borderLeft: '4px solid #3b82f6', 
-          padding: '0.75rem 1rem', 
+          padding: '1rem', 
           borderRadius: '8px', 
           marginBottom: '1.5rem', 
           fontSize: '0.85rem', 
           color: '#1e3a8a',
           lineHeight: '1.5'
         }}>
-          💡 <strong>เคล็ดลับสำหรับสาขา:</strong> สามารถพิมพ์ QR Code หรือส่งลิงก์ระบบของลูกค้าโดยต่อท้าย URL ด้วย <code>?branch=ชื่อสาขาของคุณ</code> (เช่น <code>?branch=ปณ.เชียงใหม่</code> หรือ <code>?b=ปณ.เชียงใหม่</code>) เพื่อให้ใบจองบนมือถือ of ลูกค้าแสดงชื่อสาขาของท่านโดยอัตโนมัติ (ค่าเริ่มต้นคือ ไปรษณีย์กลาง 10501)
+          <div>
+            💡 <strong>เคล็ดลับสำหรับสาขา:</strong> ลูกค้าสามารถกรอกข้อมูลล่วงหน้าจากบ้านได้ โดยท่านสามารถส่งลิงก์ระบบของลูกค้าที่มีชื่อสาขาของท่านต่อท้ายโดยอัตโนมัติ เพื่อให้เมื่อลูกค้ากดบันทึก ข้อมูลใบสั่งจองจะผูกกับรหัสสาขาของท่านทันที
+          </div>
+          
+          <div style={{ 
+            marginTop: '0.75rem', 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: '1rem', 
+            alignItems: 'center', 
+            backgroundColor: '#fff', 
+            padding: '0.75rem', 
+            borderRadius: '6px', 
+            border: '1px solid #bfdbfe' 
+          }}>
+            <div style={{ flex: '1 1 300px' }}>
+              <div style={{ fontWeight: 'bold', color: '#1e3a8a', fontSize: '0.8rem', marginBottom: '0.25rem' }}>🔗 ลิงก์สำหรับส่งให้ลูกค้าจองของสาขา:</div>
+              <input 
+                type="text" 
+                readOnly 
+                value={generatedCustomerUrl} 
+                style={{ width: '100%', padding: '0.35rem 0.5rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1', backgroundColor: '#f8fafc' }} 
+                onClick={(e) => e.target.select()}
+              />
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <div style={{ backgroundColor: '#fff', padding: '0.2rem', border: '1px solid #cbd5e1', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <QRCodeCanvas id="branch-qr-canvas" value={generatedCustomerUrl} size={55} level="M" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <button 
+                  onClick={copyGeneratedUrl} 
+                  className="btn" 
+                  style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', border: '1px solid #3b82f6', color: '#1d4ed8', backgroundColor: isUrlCopied ? '#eff6ff' : '#fff', fontWeight: 'bold', margin: 0, cursor: 'pointer' }}
+                >
+                  {isUrlCopied ? '✓ คัดลอกแล้ว' : 'คัดลอกลิงก์'}
+                </button>
+                <button 
+                  onClick={downloadBranchQr} 
+                  className="btn" 
+                  style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', border: '1px solid #16a34a', color: '#15803d', backgroundColor: '#f0fdf4', fontWeight: 'bold', margin: 0, cursor: 'pointer' }}
+                >
+                  โหลดไฟล์ QR (.png)
+                </button>
+                <button 
+                  onClick={() => setShowQuickQrModal(true)} 
+                  className="btn" 
+                  style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', border: '1px solid #e11d48', color: '#e11d48', backgroundColor: '#fff1f2', fontWeight: 'bold', margin: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}
+                >
+                  ⚡ สแกนด่วนบนจอ
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem', width: '100%' }}>
@@ -1066,6 +1175,44 @@ export default function StaffPortal() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+      {showQuickQrModal && (
+        <div className="quick-qr-modal-overlay" onClick={() => setShowQuickQrModal(false)}>
+          <div className="quick-qr-modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 'bold' }}>
+              📲 สแกน QR เพื่อกรอกข้อมูล
+            </h3>
+            <p style={{ margin: '0 0 1.25rem 0', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+              สาขา: <strong style={{ color: 'var(--primary)' }}>{branchName}</strong>
+            </p>
+            
+            <div style={{ 
+              backgroundColor: '#fff', 
+              padding: '1rem', 
+              borderRadius: '16px', 
+              display: 'inline-flex', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              border: '2px solid #f1f5f9',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05)',
+              marginBottom: '1.25rem'
+            }}>
+              <QRCodeCanvas value={generatedCustomerUrl} size={280} level="H" includeMargin={true} />
+            </div>
+            
+            <p style={{ margin: '0 0 1.5rem 0', color: '#475569', fontSize: '0.85rem', lineHeight: '1.5', padding: '0 0.5rem' }}>
+              ให้ลูกค้าใช้โทรศัพท์มือถือสแกน QR Code นี้เพื่อเข้าสู่ระบบลงทะเบียนผู้รับ และสั่งจองได้สะดวกรวดเร็วจากมือถือตัวเอง
+            </p>
+            
+            <button 
+              onClick={() => setShowQuickQrModal(false)}
+              className="btn btn-primary"
+              style={{ width: '100%', padding: '0.6rem 1rem', fontSize: '0.95rem', borderRadius: '10px' }}
+            >
+              ปิดหน้าต่างนี้
+            </button>
           </div>
         </div>
       )}
