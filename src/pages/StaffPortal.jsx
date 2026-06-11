@@ -476,19 +476,78 @@ export default function StaffPortal() {
               fps: 10,
               qrbox: { width: 250, height: 250 }
             },
+
             (decodedText) => {
               try {
-                const data = parseQrPayload(decodedText);
-                populateFromScan(data);
-                
-                if (qrCodeInstance && qrCodeInstance.isScanning) {
-                  qrCodeInstance.stop().catch(() => {}).then(() => {
-                    setScanMode('manual');
+                const parsed = JSON.parse(decodedText);
+                if (parsed && parsed.isBulk && Array.isArray(parsed.records)) {
+                  // Bulk import scanned QR Code
+                  const newRecords = parsed.records.map(raw => {
+                    const mappedSubBookings = (raw.s || []).map((sub, sIdx) => ({
+                      id: Date.now() + Math.random() + sIdx,
+                      name: sub.n || '',
+                      phone: sub.p || '',
+                      quantity: sub.q || 20,
+                      useMainAddress: sub.m === 1,
+                      address: sub.a || ''
+                    }));
+                    return {
+                      id: Date.now() + Math.random(),
+                      timestamp: new Date().toISOString(),
+                      orderDate: raw.d || '',
+                      quantity: raw.q || 1,
+                      name: raw.n || '',
+                      phone: raw.p || '',
+                      addressLine1: raw.a || '',
+                      address: raw.a || '',
+                      subdistrict: raw.sd || '',
+                      district: raw.dt || '',
+                      province: raw.pv || '',
+                      zipcode: raw.zp || '',
+                      did: raw.id || '',
+                      isAdvancedMode: mappedSubBookings.length > 0,
+                      subBookings: mappedSubBookings
+                    };
                   });
+                  
+                  setHistory(prevHistory => {
+                    const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
+                    const merged = [...newRecords, ...safePrev];
+                    const unique = [];
+                    const seen = new Set();
+                    for (const item of merged) {
+                      const key = `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
+                      if (!seen.has(key)) {
+                        seen.add(key);
+                        unique.push(item);
+                      }
+                    }
+                    const sorted = unique.sort((a, b) => b.id - a.id).slice(0, 100);
+                    localStorage.setItem('staffHistory', JSON.stringify(sorted));
+                    return sorted;
+                  });
+                  
+                  if (qrCodeInstance && qrCodeInstance.isScanning) {
+                    qrCodeInstance.stop().catch(() => {}).then(() => {
+                      setScanMode('manual');
+                    });
+                  } else {
+                    setScanMode('manual');
+                  }
+                  alert(`นำเข้าข้อมูลกลุ่มสำเร็จ! นำเข้ารายชื่อสั่งจอง ${newRecords.length} รายการแล้ว`);
                 } else {
-                  setScanMode('manual');
+                  // Single import
+                  const data = parseQrPayload(decodedText);
+                  populateFromScan(data);
+                  if (qrCodeInstance && qrCodeInstance.isScanning) {
+                    qrCodeInstance.stop().catch(() => {}).then(() => {
+                      setScanMode('manual');
+                    });
+                  } else {
+                    setScanMode('manual');
+                  }
+                  alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
                 }
-                alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
               } catch (err) {
                 alert("QR Code ไม่ถูกต้องหรือไม่ใช่ข้อมูลจากระบบนี้");
               }
@@ -523,13 +582,67 @@ export default function StaffPortal() {
       try {
         const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
         const imageBitmap = await createImageBitmap(file);
+
         const barcodes = await barcodeDetector.detect(imageBitmap);
         if (barcodes.length > 0) {
           try {
-            const data = parseQrPayload(barcodes[0].rawValue);
-            populateFromScan(data);
-            alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
-            return;
+            const decodedText = barcodes[0].rawValue;
+            const parsed = JSON.parse(decodedText);
+            if (parsed && parsed.isBulk && Array.isArray(parsed.records)) {
+              // Bulk import
+              const newRecords = parsed.records.map(raw => {
+                const mappedSubBookings = (raw.s || []).map((sub, sIdx) => ({
+                  id: Date.now() + Math.random() + sIdx,
+                  name: sub.n || '',
+                  phone: sub.p || '',
+                  quantity: sub.q || 20,
+                  useMainAddress: sub.m === 1,
+                  address: sub.a || ''
+                }));
+                return {
+                  id: Date.now() + Math.random(),
+                  timestamp: new Date().toISOString(),
+                  orderDate: raw.d || '',
+                  quantity: raw.q || 1,
+                  name: raw.n || '',
+                  phone: raw.p || '',
+                  addressLine1: raw.a || '',
+                  address: raw.a || '',
+                  subdistrict: raw.sd || '',
+                  district: raw.dt || '',
+                  province: raw.pv || '',
+                  zipcode: raw.zp || '',
+                  did: raw.id || '',
+                  isAdvancedMode: mappedSubBookings.length > 0,
+                  subBookings: mappedSubBookings
+                };
+              });
+
+              setHistory(prevHistory => {
+                const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
+                const merged = [...newRecords, ...safePrev];
+                const unique = [];
+                const seen = new Set();
+                for (const item of merged) {
+                  const key = `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
+                  if (!seen.has(key)) {
+                    seen.add(key);
+                    unique.push(item);
+                  }
+                }
+                const sorted = unique.sort((a, b) => b.id - a.id).slice(0, 100);
+                localStorage.setItem('staffHistory', JSON.stringify(sorted));
+                return sorted;
+              });
+
+              alert(`นำเข้าข้อมูลกลุ่มสำเร็จ! นำเข้ารายชื่อสั่งจอง ${newRecords.length} รายการแล้ว`);
+              return;
+            } else {
+              const data = parseQrPayload(decodedText);
+              populateFromScan(data);
+              alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
+              return;
+            }
           } catch (err) {
             console.log("Barcode parsing error:", err);
           }
@@ -543,9 +656,66 @@ export default function StaffPortal() {
     const html5QrCode = new Html5Qrcode("reader-hidden");
     try {
       const decodedText = await html5QrCode.scanFile(file, false);
-      const data = parseQrPayload(decodedText);
-      populateFromScan(data);
-      alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
+      try {
+        const parsed = JSON.parse(decodedText);
+        if (parsed && parsed.isBulk && Array.isArray(parsed.records)) {
+          // Bulk import
+          const newRecords = parsed.records.map(raw => {
+            const mappedSubBookings = (raw.s || []).map((sub, sIdx) => ({
+              id: Date.now() + Math.random() + sIdx,
+              name: sub.n || '',
+              phone: sub.p || '',
+              quantity: sub.q || 20,
+              useMainAddress: sub.m === 1,
+              address: sub.a || ''
+            }));
+            return {
+              id: Date.now() + Math.random(),
+              timestamp: new Date().toISOString(),
+              orderDate: raw.d || '',
+              quantity: raw.q || 1,
+              name: raw.n || '',
+              phone: raw.p || '',
+              addressLine1: raw.a || '',
+              address: raw.a || '',
+              subdistrict: raw.sd || '',
+              district: raw.dt || '',
+              province: raw.pv || '',
+              zipcode: raw.zp || '',
+              did: raw.id || '',
+              isAdvancedMode: mappedSubBookings.length > 0,
+              subBookings: mappedSubBookings
+            };
+          });
+
+          setHistory(prevHistory => {
+            const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
+            const merged = [...newRecords, ...safePrev];
+            const unique = [];
+            const seen = new Set();
+            for (const item of merged) {
+              const key = `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
+              if (!seen.has(key)) {
+                seen.add(key);
+                unique.push(item);
+              }
+            }
+            const sorted = unique.sort((a, b) => b.id - a.id).slice(0, 100);
+            localStorage.setItem('staffHistory', JSON.stringify(sorted));
+            return sorted;
+          });
+
+          alert(`นำเข้าข้อมูลกลุ่มสำเร็จ! นำเข้ารายชื่อสั่งจอง ${newRecords.length} รายการแล้ว`);
+        } else {
+          const data = parseQrPayload(decodedText);
+          populateFromScan(data);
+          alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
+        }
+      } catch (e) {
+        const data = parseQrPayload(decodedText);
+        populateFromScan(data);
+        alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
+      }
     } catch (err) {
       alert("ไม่พบ QR Code ในรูปภาพนี้ หรือข้อมูลไม่ถูกต้อง กรุณาลองสแกนผ่านกล้องแทน");
     }

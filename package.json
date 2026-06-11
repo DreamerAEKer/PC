@@ -1,7 +1,7 @@
 {
   "name": "pc",
   "private": true,
-  "version": "1.11.98",
+  "version": "1.13.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

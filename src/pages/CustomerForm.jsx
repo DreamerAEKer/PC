@@ -1138,25 +1138,55 @@ export default function CustomerForm() {
                   );
                 };
 
-                const handleSendToPost = () => {
+                 const handleSendToPost = () => {
                   if (selectedIds.length === 0) {
                     alert("กรุณาเลือกข้อมูลที่ต้องการส่งอย่างน้อย 1 รายการ");
                     return;
                   }
+                  
                   const selectedRecords = history.filter(r => selectedIds.includes(r.id));
                   
-                  // Send to StaffPortal/postoffice by saving to staffHistory!
-                  let staffHistory = [];
-                  try {
-                    const saved = localStorage.getItem('staffHistory');
-                    if (saved) staffHistory = JSON.parse(saved);
-                  } catch(e) {}
-
-                  // Merge without duplicates based on order date + name + quantity + timestamp
-                  const updatedStaffHistory = [...selectedRecords, ...staffHistory].slice(0, 100);
-                  localStorage.setItem('staffHistory', JSON.stringify(updatedStaffHistory));
-
-                  showToast(`📤 ส่งข้อมูล ${selectedRecords.length} รายการไปยังไปรษณีย์เรียบร้อยแล้ว!`);
+                  // Construct a combined QR code payload containing multiple records
+                  const combinedData = {
+                    isBulk: true,
+                    records: selectedRecords.map(record => ({
+                      d: record.orderDate,
+                      q: record.quantity,
+                      n: record.name,
+                      p: record.phone,
+                      a: record.addressLine1 || record.address || '',
+                      sd: record.subdistrict || '',
+                      dt: record.district || '',
+                      pv: record.province || '',
+                      zp: record.zipcode || '',
+                      id: record.did || '',
+                      s: record.subBookings ? record.subBookings.map(sub => ({
+                        n: sub.name,
+                        p: sub.phone,
+                        q: sub.quantity,
+                        m: sub.useMainAddress ? 1 : 0,
+                        a: sub.address
+                      })) : []
+                    }))
+                  };
+                  
+                  const payload = JSON.stringify(combinedData);
+                  
+                  // Mock a generatedData object for the ticket modal
+                  const totalQty = selectedRecords.reduce((sum, r) => sum + r.quantity, 0);
+                  const bulkGenerated = {
+                    name: `รายการจองกลุ่ม (${selectedRecords.length} รายการ)`,
+                    phone: `${selectedRecords.length} รายชื่อ`,
+                    quantity: totalQty,
+                    orderDate: new Date().toISOString().split('T')[0],
+                    branch: selectedRecords[0]?.branch || 'ไปรษณีย์กลาง 10501',
+                    payload: payload,
+                    isBulk: true,
+                    selectedRecordsCount: selectedRecords.length
+                  };
+                  
+                  setGeneratedData(bulkGenerated);
+                  setIsModalOpen(true);
                   setSelectedIds([]);
                 };
 
@@ -1274,9 +1304,56 @@ export default function CustomerForm() {
                             setIsModalOpen(true);
                           }}
                         >
-                          <div style={{ fontWeight: '500' }}>{record.name}</div>
-                          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                            {new Date(record.timestamp).toLocaleDateString('th-TH')} - {record.quantity} ใบ
+                          <div style={{ fontWeight: '500', color: '#0f172a' }}>{record.name}</div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                            📅 {new Date(record.timestamp).toLocaleDateString('th-TH')} — 📦 <strong>{record.quantity} ใบ</strong>
+                          </div>
+                          
+                          {/* Expanded Quick Details */}
+                          <div style={{ fontSize: '0.8rem', color: '#475569', marginTop: '0.35rem', borderTop: '1px dashed #e2e8f0', paddingTop: '0.35rem' }}>
+                            📞 เบอร์: {record.phone}
+                            {record.did && <span style={{ marginLeft: '0.5rem', padding: '0.1rem 0.35rem', backgroundColor: '#eff6ff', color: '#1d4ed8', borderRadius: '4px', fontWeight: 'bold' }}>D-ID: {record.did}</span>}
+                            {record.address && (
+                              <div style={{ 
+                                textOverflow: 'ellipsis', 
+                                overflow: 'hidden', 
+                                whiteSpace: 'nowrap', 
+                                color: '#64748b',
+                                marginTop: '0.15rem' 
+                              }}>
+                                📍 ที่อยู่: {record.address}
+                              </div>
+                            )}
+                            {record.isAdvancedMode && record.subBookings && record.subBookings.length > 0 && (
+                              <div style={{ 
+                                marginTop: '0.5rem', 
+                                padding: '0.4rem 0.6rem', 
+                                backgroundColor: '#fffbeb', 
+                                border: '1px solid #fde047', 
+                                borderRadius: '6px',
+                                color: '#b45309',
+                                fontSize: '0.75rem',
+                                lineHeight: '1.4'
+                              }}>
+                                <strong style={{ display: 'block', marginBottom: '0.2rem' }}>👥 รายชื่อย่อย ({record.subBookings.length} ท่าน):</strong>
+                                {(() => {
+                                  const subSumVal = record.subBookings.reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 0), 0);
+                                  const mainQtyVal = record.quantity - subSumVal;
+                                  return (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                                      {mainQtyVal > 0 && (
+                                        <div>• {record.name} (หลัก) — {mainQtyVal} ใบ</div>
+                                      )}
+                                      {record.subBookings.map((sub, sIdx) => (
+                                        <div key={sub.id || sIdx}>
+                                          • {sub.name} — {sub.quantity} ใบ
+                                        </div>
+                                      ))}
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
