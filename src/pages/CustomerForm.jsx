@@ -1148,10 +1148,7 @@ export default function CustomerForm() {
                     return;
                   }
                   
-                  if (selectedIds.length > 2) {
-                    alert("⚠️ ส่งออกข้อมูลได้ทีละ 2 ข้อมูลครับ");
-                    return;
-                  }
+
                   
                   // Save selected records to state to display them as a sequence of single QR codes
                   setBulkRecords(selectedRecords);
