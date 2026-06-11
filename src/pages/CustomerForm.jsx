@@ -229,6 +229,15 @@ export default function CustomerForm() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <style>{`
+        .modal-tab-bar::-webkit-scrollbar {
+          display: none;
+        }
+        .modal-tab-bar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+        }
+      `}</style>
       {/* Non-clickable Banner */}
       <div 
         style={{ 
@@ -745,7 +754,7 @@ export default function CustomerForm() {
             </div>
 
             {/* Tabs Selector */}
-            <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '1rem', backgroundColor: '#f1f5f9', padding: '0.25rem', borderRadius: '8px' }}>
+            <div className="modal-tab-bar" style={{ display: 'flex', gap: '0.25rem', marginBottom: '1rem', backgroundColor: '#f1f5f9', padding: '0.25rem', borderRadius: '8px', overflowX: 'auto' }}>
               <button
                 type="button"
                 onClick={() => setRulesActiveTab(0)}
@@ -806,15 +815,15 @@ export default function CustomerForm() {
             </div>
 
             {/* Tab Contents */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               {rulesActiveTab === 0 && (
-                <img src="rules_2.jpg" alt="รายการของรางวัล" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                <img src="rules_2.jpg" alt="รายการของรางวัล" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
               )}
               {rulesActiveTab === 1 && (
-                <img src="rules_1.jpg" alt="FAQ และ เงื่อนไข" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                <img src="rules_1.jpg" alt="FAQ และ เงื่อนไข" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
               )}
               {rulesActiveTab === 2 && (
-                <img src="rules_3.jpg" alt="วิธีเขียนที่ถูกต้อง" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                <img src="rules_3.jpg" alt="วิธีเขียนที่ถูกต้อง" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
               )}
             </div>
 
@@ -876,7 +885,7 @@ export default function CustomerForm() {
             </div>
 
             {/* Tabs Selector */}
-            <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '1rem', backgroundColor: '#f1f5f9', padding: '0.25rem', borderRadius: '8px', overflowX: 'auto' }}>
+            <div className="modal-tab-bar" style={{ display: 'flex', gap: '0.25rem', marginBottom: '1rem', backgroundColor: '#f1f5f9', padding: '0.25rem', borderRadius: '8px', overflowX: 'auto' }}>
               <button
                 type="button"
                 onClick={() => setGuideActiveTab(0)}
@@ -980,21 +989,21 @@ export default function CustomerForm() {
             </div>
 
             {/* Tab Contents */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               {guideActiveTab === 0 && (
-                <img src="guide_step1.jpg" alt="ภาพรวม 4 ขั้นตอน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                <img src="guide_step1.jpg" alt="ภาพรวม 4 ขั้นตอน" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
               )}
               {guideActiveTab === 1 && (
-                <img src="guide_step2.jpg" alt="ขั้นตอนโหลดและลงทะเบียน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                <img src="guide_step2.jpg" alt="ขั้นตอนโหลดและลงทะเบียน" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
               )}
               {guideActiveTab === 2 && (
-                <img src="guide_step3.jpg" alt="ขั้นตอนคลิกเมนูโหวต" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                <img src="guide_step3.jpg" alt="ขั้นตอนคลิกเมนูโหวต" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
               )}
               {guideActiveTab === 3 && (
-                <img src="guide_step4.jpg" alt="ขั้นตอนการเลือกประเทศและจำนวน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                <img src="guide_step4.jpg" alt="ขั้นตอนการเลือกประเทศและจำนวน" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
               )}
               {guideActiveTab === 4 && (
-                <img src="guide_step5.jpg" alt="ขั้นตอนรอร่วมลุ้นโชค" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                <img src="guide_step5.jpg" alt="ขั้นตอนรอร่วมลุ้นโชค" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
               )}
             </div>
 
