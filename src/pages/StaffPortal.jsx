@@ -59,9 +59,9 @@ export default function StaffPortal() {
   const [swipedItemId, setSwipedItemId] = useState(null);
   const navigate = useNavigate();
 
-  // Re-check count stats
   const [targetScanCount, setTargetScanCount] = useState(0);
   const [currentScanCount, setCurrentScanCount] = useState(0);
+  const [scannedIndexes, setScannedIndexes] = useState([]);
 
   const toggleSelectAll = () => {
     if (selectedIds.length === history.length) {
@@ -450,7 +450,9 @@ export default function StaffPortal() {
             district: raw.dt || '',
             province: raw.pv || '',
             zipcode: raw.zp || '',
-            did: raw.id || ''
+            did: raw.id || '',
+            idx: raw.idx,
+            tot: raw.tot
           };
         }
         return raw;
@@ -556,7 +558,59 @@ export default function StaffPortal() {
                   // Single import
                   const data = parseQrPayload(decodedText);
                   
-                  if (targetScanCount > 0) {
+                  // Auto-detect bulk sequence QR codes
+                  const isBulkSequence = data.tot !== undefined && data.tot > 1;
+                  
+                  if (isBulkSequence) {
+                    const idx = data.idx || 1;
+                    const tot = data.tot;
+                    
+                    let currentScanned = [...scannedIndexes];
+                    if (targetScanCount !== tot) {
+                      currentScanned = [idx];
+                      setTargetScanCount(tot);
+                      setScannedIndexes([idx]);
+                    } else {
+                      if (currentScanned.includes(idx)) {
+                        alert(`⚠️ QR ลำดับที่ ${idx} / ${tot} นี้ถูกสแกนไปแล้วครับ`);
+                        return;
+                      }
+                      currentScanned.push(idx);
+                      setScannedIndexes(currentScanned);
+                    }
+                    
+                    const newRecord = { 
+                      ...data, 
+                      id: Date.now() + Math.random(), 
+                      timestamp: new Date().toISOString() 
+                    };
+                    setHistory(prevHistory => {
+                      const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
+                      const exists = safeHistory.some(r => r.name === newRecord.name && r.phone === newRecord.phone && r.quantity === newRecord.quantity);
+                      if (exists) return safeHistory;
+                      const updatedHistory = [newRecord, ...safeHistory].slice(0, 100);
+                      localStorage.setItem('staffHistory', JSON.stringify(updatedHistory));
+                      return updatedHistory;
+                    });
+                    
+                    const scannedCount = currentScanned.length;
+                    if (scannedCount >= tot) {
+                      alert(`🎉 สแกนนำเข้าครบถ้วนทั้งหมดแล้ว! (${scannedCount} / ${tot} รายการ)`);
+                      if (qrCodeInstance && qrCodeInstance.isScanning) {
+                        qrCodeInstance.stop().catch(() => {}).then(() => {
+                          setScanMode('manual');
+                          setTargetScanCount(0);
+                          setScannedIndexes([]);
+                        });
+                      } else {
+                        setScanMode('manual');
+                        setTargetScanCount(0);
+                        setScannedIndexes([]);
+                      }
+                    } else {
+                      alert(`✅ สแกน QR ลำดับที่ ${idx} สำเร็จ!\n(เหลืออีก ${tot - scannedCount} รายการที่ต้องสแกน)`);
+                    }
+                  } else if (targetScanCount > 0) {
                     // Automatically save to history when scanning sequentially
                     const newRecord = { 
                       ...data, 

@@ -300,6 +300,8 @@ export default function CustomerForm() {
       pv: processedData.province || '',
       zp: processedData.zipcode || '',
       id: processedData.did || '',
+      idx: 1,
+      tot: 1,
       s: processedSubBookings.map(sub => ({
         n: sub.name,
         p: sub.phone,
@@ -1184,6 +1186,8 @@ export default function CustomerForm() {
                     pv: firstRecord.province || '',
                     zp: firstRecord.zipcode || '',
                     id: firstRecord.did || '',
+                    idx: 1,
+                    tot: selectedRecords.length,
                     s: firstRecord.subBookings ? firstRecord.subBookings.map(sub => ({
                       n: sub.name,
                       p: sub.phone,
@@ -1517,7 +1521,7 @@ export default function CustomerForm() {
                   borderRadius: '20px',
                   boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}>
-                  {bulkRecords.length > 0 ? `QR ลำดับที่ ${bulkIndex + 1}` : 'QR สำหรับสั่งพิมพ์'}
+                  {bulkRecords.length > 0 ? `QR ลำดับที่ ${bulkIndex + 1} / ทั้งหมด ${bulkRecords.length}` : 'QR สำหรับสั่งพิมพ์'}
                 </div>
                 <div style={{ marginTop: '0.5rem' }}>
                   <QRCodeCanvas value={generatedData.payload} size={200} level="Q" />
@@ -1620,6 +1624,8 @@ export default function CustomerForm() {
                       pv: prevRec.province || '',
                       zp: prevRec.zipcode || '',
                       id: prevRec.did || '',
+                      idx: prevIdx + 1,
+                      tot: bulkRecords.length,
                       s: prevRec.subBookings ? prevRec.subBookings.map(sub => ({
                         n: sub.name,
                         p: sub.phone,
@@ -1661,6 +1667,8 @@ export default function CustomerForm() {
                       pv: nextRec.province || '',
                       zp: nextRec.zipcode || '',
                       id: nextRec.did || '',
+                      idx: nextIdx + 1,
+                      tot: bulkRecords.length,
                       s: nextRec.subBookings ? nextRec.subBookings.map(sub => ({
                         n: sub.name,
                         p: sub.phone,
