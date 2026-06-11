@@ -12,6 +12,8 @@ export default function CustomerForm() {
 
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [rulesActiveTab, setRulesActiveTab] = useState(0);
+  const [showGuideModal, setShowGuideModal] = useState(false);
+  const [guideActiveTab, setGuideActiveTab] = useState(0);
 
   const selectQty = watch("selectQuantity", "100");
   const customQty = watch("customQuantity", "");
@@ -251,30 +253,56 @@ export default function CustomerForm() {
               <CheckCircle color="var(--primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
               <span>กรอกข้อมูลเพื่อสั่งพิมพ์ไปรษณียบัตร</span>
             </h2>
-            <button
-              type="button"
-              onClick={() => setShowRulesModal(true)}
-              className="btn"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                borderColor: '#e11d48',
-                color: '#e11d48',
-                backgroundColor: '#fff1f2',
-                fontWeight: 'bold',
-                fontSize: '0.8rem',
-                padding: '0.35rem 0.75rem',
-                margin: 0,
-                cursor: 'pointer',
-                borderRadius: '8px',
-                border: '1.5px solid #fecdd3',
-                whiteSpace: 'nowrap',
-                flexShrink: 0
-              }}
-            >
-              🏆 กติกาการลุ้นโชค
-            </button>
+            <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setShowRulesModal(true)}
+                className="btn"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  borderColor: '#e11d48',
+                  color: '#e11d48',
+                  backgroundColor: '#fff1f2',
+                  fontWeight: 'bold',
+                  fontSize: '0.8rem',
+                  padding: '0.35rem 0.75rem',
+                  margin: 0,
+                  cursor: 'pointer',
+                  borderRadius: '8px',
+                  border: '1.5px solid #fecdd3',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
+                }}
+              >
+                🏆 กติกาการลุ้นโชค
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowGuideModal(true)}
+                className="btn"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  borderColor: '#3b82f6',
+                  color: '#1d4ed8',
+                  backgroundColor: '#eff6ff',
+                  fontWeight: 'bold',
+                  fontSize: '0.8rem',
+                  padding: '0.35rem 0.75rem',
+                  margin: 0,
+                  cursor: 'pointer',
+                  borderRadius: '8px',
+                  border: '1.5px solid #bfdbfe',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
+                }}
+              >
+                📱 วิธีโหวตผ่านแอป
+              </button>
+            </div>
           </div>
           <form onSubmit={handleSubmit(onSubmit, onError)}>
             <div className="form-group">
@@ -795,6 +823,186 @@ export default function CustomerForm() {
                 type="button" 
                 className="btn btn-secondary" 
                 onClick={() => setShowRulesModal(false)}
+                style={{ width: '100%', padding: '0.6rem', fontWeight: 600, cursor: 'pointer' }}
+              >
+                ปิดหน้าจอนี้
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Guide Modal */}
+      {showGuideModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999,
+          padding: '1rem',
+          boxSizing: 'border-box'
+        }} onClick={() => setShowGuideModal(false)}>
+          <div className="card glass-panel" style={{
+            width: '100%',
+            maxWidth: '650px',
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            padding: '1.5rem',
+            boxSizing: 'border-box',
+            textAlign: 'center',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column'
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: 'var(--secondary)', fontSize: '1.25rem', fontWeight: 700 }}>
+                📱 ขั้นตอนโหวตเชียร์บอลโลกผ่านแอป Prompt Post
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setShowGuideModal(false)}
+                style={{ border: 'none', background: 'none', fontSize: '1.25rem', cursor: 'pointer', color: '#64748b' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Tabs Selector */}
+            <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '1rem', backgroundColor: '#f1f5f9', padding: '0.25rem', borderRadius: '8px', overflowX: 'auto' }}>
+              <button
+                type="button"
+                onClick={() => setGuideActiveTab(0)}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  fontSize: '0.8rem',
+                  margin: 0,
+                  borderRadius: '6px',
+                  backgroundColor: guideActiveTab === 0 ? '#fff' : 'transparent',
+                  color: guideActiveTab === 0 ? 'var(--secondary)' : '#475569',
+                  border: 'none',
+                  fontWeight: guideActiveTab === 0 ? 'bold' : 'normal',
+                  boxShadow: guideActiveTab === 0 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                ⚽ ภาพรวม (4 Steps)
+              </button>
+              <button
+                type="button"
+                onClick={() => setGuideActiveTab(1)}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  fontSize: '0.8rem',
+                  margin: 0,
+                  borderRadius: '6px',
+                  backgroundColor: guideActiveTab === 1 ? '#fff' : 'transparent',
+                  color: guideActiveTab === 1 ? 'var(--secondary)' : '#475569',
+                  border: 'none',
+                  fontWeight: guideActiveTab === 1 ? 'bold' : 'normal',
+                  boxShadow: guideActiveTab === 1 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                1. โหลด & สมัคร
+              </button>
+              <button
+                type="button"
+                onClick={() => setGuideActiveTab(2)}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  fontSize: '0.8rem',
+                  margin: 0,
+                  borderRadius: '6px',
+                  backgroundColor: guideActiveTab === 2 ? '#fff' : 'transparent',
+                  color: guideActiveTab === 2 ? 'var(--secondary)' : '#475569',
+                  border: 'none',
+                  fontWeight: guideActiveTab === 2 ? 'bold' : 'normal',
+                  boxShadow: guideActiveTab === 2 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                2. เข้าเมนูโหวต
+              </button>
+              <button
+                type="button"
+                onClick={() => setGuideActiveTab(3)}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  fontSize: '0.8rem',
+                  margin: 0,
+                  borderRadius: '6px',
+                  backgroundColor: guideActiveTab === 3 ? '#fff' : 'transparent',
+                  color: guideActiveTab === 3 ? 'var(--secondary)' : '#475569',
+                  border: 'none',
+                  fontWeight: guideActiveTab === 3 ? 'bold' : 'normal',
+                  boxShadow: guideActiveTab === 3 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                3. เลือกทีม & จำนวน
+              </button>
+              <button
+                type="button"
+                onClick={() => setGuideActiveTab(4)}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  fontSize: '0.8rem',
+                  margin: 0,
+                  borderRadius: '6px',
+                  backgroundColor: guideActiveTab === 4 ? '#fff' : 'transparent',
+                  color: guideActiveTab === 4 ? 'var(--secondary)' : '#475569',
+                  border: 'none',
+                  fontWeight: guideActiveTab === 4 ? 'bold' : 'normal',
+                  boxShadow: guideActiveTab === 4 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                4. รอลุ้นโชคใหญ่
+              </button>
+            </div>
+
+            {/* Tab Contents */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+              {guideActiveTab === 0 && (
+                <img src="guide_step1.jpg" alt="ภาพรวม 4 ขั้นตอน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+              )}
+              {guideActiveTab === 1 && (
+                <img src="guide_step2.jpg" alt="ขั้นตอนโหลดและลงทะเบียน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+              )}
+              {guideActiveTab === 2 && (
+                <img src="guide_step3.jpg" alt="ขั้นตอนคลิกเมนูโหวต" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+              )}
+              {guideActiveTab === 3 && (
+                <img src="guide_step4.jpg" alt="ขั้นตอนการเลือกประเทศและจำนวน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+              )}
+              {guideActiveTab === 4 && (
+                <img src="guide_step5.jpg" alt="ขั้นตอนรอร่วมลุ้นโชค" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+              )}
+            </div>
+
+            <div style={{ marginTop: '1.25rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0' }}>
+              <button 
+                type="button" 
+                className="btn btn-secondary" 
+                onClick={() => setShowGuideModal(false)}
                 style={{ width: '100%', padding: '0.6rem', fontWeight: 600, cursor: 'pointer' }}
               >
                 ปิดหน้าจอนี้
