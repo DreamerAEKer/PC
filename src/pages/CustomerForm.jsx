@@ -1123,52 +1123,218 @@ export default function CustomerForm() {
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>ยังไม่มีประวัติการกรอกข้อมูล</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {history.map((record) => (
-                <div 
-                  key={record.id} 
-                  style={{ 
-                    padding: '0.75rem', 
-                    border: '1px solid var(--border)', 
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'background 0.2s'
-                  }}
-                  onClick={() => {
-                    const recordToSet = {
-                      ...record,
-                      addressLine1: record.addressLine1 || record.address,
-                      subdistrict: record.subdistrict || '',
-                      district: record.district || '',
-                      province: record.province || '',
-                      zipcode: record.zipcode || ''
-                    };
-                    reset(recordToSet);
-                    setQuantityFields(record.quantity);
-                    const compressedData = {
-                      d: record.orderDate,
-                      q: record.quantity,
-                      n: record.name,
-                      p: record.phone,
-                      a: record.addressLine1 || record.address || '',
-                      sd: record.subdistrict || '',
-                      dt: record.district || '',
-                      pv: record.province || '',
-                      zp: record.zipcode || '',
-                      id: record.did || ''
-                    };
-                    const payload = JSON.stringify(compressedData);
-                    setGeneratedData({ ...record, payload });
-                    setIsModalOpen(true);
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <div style={{ fontWeight: '500' }}>{record.name}</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    {new Date(record.timestamp).toLocaleDateString('th-TH')} - {record.quantity} ใบ
-                  </div>
-                </div>
-              ))}
+              {/* Send Selected Button */}
+              {(() => {
+                const [selectedIds, setSelectedIds] = useState([]);
+                const [longPressRecord, setLongPressRecord] = useState(null);
+                const [showDeleteModal, setShowDeleteModal] = useState(false);
+                const pressTimerRef = useRef(null);
+
+                const handleSelectToggle = (id, e) => {
+                  e.stopPropagation();
+                  setSelectedIds(prev =>
+                    prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+                  );
+                };
+
+                const handleSendToPost = () => {
+                  if (selectedIds.length === 0) {
+                    alert("กรุณาเลือกข้อมูลที่ต้องการส่งอย่างน้อย 1 รายการ");
+                    return;
+                  }
+                  const selectedRecords = history.filter(r => selectedIds.includes(r.id));
+                  
+                  // Send to StaffPortal/postoffice by saving to staffHistory!
+                  let staffHistory = [];
+                  try {
+                    const saved = localStorage.getItem('staffHistory');
+                    if (saved) staffHistory = JSON.parse(saved);
+                  } catch(e) {}
+
+                  // Merge without duplicates based on order date + name + quantity + timestamp
+                  const updatedStaffHistory = [...selectedRecords, ...staffHistory].slice(0, 100);
+                  localStorage.setItem('staffHistory', JSON.stringify(updatedStaffHistory));
+
+                  showToast(`📤 ส่งข้อมูล ${selectedRecords.length} รายการไปยังไปรษณีย์เรียบร้อยแล้ว!`);
+                  setSelectedIds([]);
+                };
+
+                const startHistoryLongPress = (record) => {
+                  if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
+                  pressTimerRef.current = setTimeout(() => {
+                    setLongPressRecord(record);
+                    setShowDeleteModal(true);
+                  }, 5000); // 5 seconds long press
+                };
+
+                const cancelHistoryLongPress = () => {
+                  if (pressTimerRef.current) {
+                    clearTimeout(pressTimerRef.current);
+                    pressTimerRef.current = null;
+                  }
+                };
+
+                const executeDelete = () => {
+                  if (longPressRecord) {
+                    const updated = history.filter(r => r.id !== longPressRecord.id);
+                    setHistory(updated);
+                    localStorage.setItem('customerHistory', JSON.stringify(updated));
+                    setSelectedIds(prev => prev.filter(id => id !== longPressRecord.id));
+                    showToast("🗑️ ลบข้อมูลเรียบร้อยแล้ว");
+                  }
+                  setShowDeleteModal(false);
+                  setLongPressRecord(null);
+                };
+
+                return (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleSendToPost}
+                      className="btn btn-primary"
+                      style={{
+                        width: '100%',
+                        marginBottom: '0.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        border: 'none',
+                        boxShadow: '0 4px 6px rgba(16, 185, 129, 0.2)'
+                      }}
+                    >
+                      📤 ส่งข้อมูลที่เลือกให้ไปรษณีย์ ({selectedIds.length})
+                    </button>
+
+                    {history.map((record) => (
+                      <div 
+                        key={record.id} 
+                        style={{ 
+                          padding: '0.75rem', 
+                          border: '1px solid var(--border)', 
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          transition: 'background 0.2s',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          position: 'relative',
+                          userSelect: 'none',
+                          WebkitUserSelect: 'none',
+                          WebkitTouchCallout: 'none'
+                        }}
+                        onMouseDown={() => startHistoryLongPress(record)}
+                        onMouseUp={cancelHistoryLongPress}
+                        onMouseLeave={cancelHistoryLongPress}
+                        onTouchStart={() => startHistoryLongPress(record)}
+                        onTouchEnd={cancelHistoryLongPress}
+                        onClick={() => {
+                          const recordToSet = {
+                            ...record,
+                            addressLine1: record.addressLine1 || record.address,
+                            subdistrict: record.subdistrict || '',
+                            district: record.district || '',
+                            province: record.province || '',
+                            zipcode: record.zipcode || ''
+                          };
+                          reset(recordToSet);
+                          setQuantityFields(record.quantity);
+                          const compressedData = {
+                            d: record.orderDate,
+                            q: record.quantity,
+                            n: record.name,
+                            p: record.phone,
+                            a: record.addressLine1 || record.address || '',
+                            sd: record.subdistrict || '',
+                            dt: record.district || '',
+                            pv: record.province || '',
+                            zp: record.zipcode || '',
+                            id: record.did || ''
+                          };
+                          const payload = JSON.stringify(compressedData);
+                          setGeneratedData({ ...record, payload });
+                          setIsModalOpen(true);
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(record.id)}
+                          onChange={(e) => handleSelectToggle(record.id, e)}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: '500' }}>{record.name}</div>
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                            {new Date(record.timestamp).toLocaleDateString('th-TH')} - {record.quantity} ใบ
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && longPressRecord && (
+                      <div style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(15, 23, 42, 0.75)',
+                        backdropFilter: 'blur(8px)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 10000,
+                        padding: '1rem',
+                        boxSizing: 'border-box'
+                      }}>
+                        <div className="card glass-panel" style={{
+                          width: '100%',
+                          maxWidth: '360px',
+                          backgroundColor: '#ffffff',
+                          borderRadius: '16px',
+                          padding: '1.5rem',
+                          boxSizing: 'border-box',
+                          textAlign: 'center',
+                          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+                        }}>
+                          <h3 style={{ margin: '0 0 1rem 0', color: '#dc2626', fontSize: '1.2rem', fontWeight: 700 }}>
+                            🗑️ ยืนยันการลบข้อมูล?
+                          </h3>
+                          <p style={{ fontSize: '0.95rem', color: '#475569', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+                            คุณต้องการลบข้อมูลของ <strong>{longPressRecord.name}</strong> ใช่หรือไม่?
+                          </p>
+                          <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowDeleteModal(false);
+                                setLongPressRecord(null);
+                              }}
+                              className="btn btn-secondary"
+                              style={{ flex: 1 }}
+                            >
+                              ยกเลิก
+                            </button>
+                            <button
+                              type="button"
+                              onClick={executeDelete}
+                              className="btn btn-primary"
+                              style={{ flex: 1, backgroundColor: '#dc2626', borderColor: '#dc2626' }}
+                            >
+                              ใช่, ลบข้อมูล
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )}
         </div>
