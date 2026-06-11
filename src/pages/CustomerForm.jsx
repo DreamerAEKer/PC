@@ -107,8 +107,15 @@ export default function CustomerForm() {
       try {
         const data = JSON.parse(savedForm);
         Object.keys(data).forEach(key => {
-          setValue(key, data[key]);
+          if (key === 'customQuantity' && (!data[key] || String(data[key]).trim() === '')) {
+            setValue(key, "100");
+          } else {
+            setValue(key, data[key]);
+          }
         });
+        if (!data.hasOwnProperty('customQuantity') || !data.customQuantity || String(data.customQuantity).trim() === '') {
+          setValue("customQuantity", "100");
+        }
       } catch (e) {}
     } else {
       setQuantityFields(100);
