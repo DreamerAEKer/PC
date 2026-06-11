@@ -975,11 +975,11 @@ export default function CustomerForm() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', marginBottom: '0.35rem' }}>2. เข้าเมนูโหวต</span>
-                  <img src="guide_step3.jpg" alt="ขั้นตอนคลิกเมนูโหวต" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }} />
+                  <img src="guide_step5.jpg" alt="ขั้นตอนคลิกเมนูโหวต" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', marginBottom: '0.35rem' }}>3. เลือกทีม & จำนวน</span>
-                  <img src="guide_step5.jpg" alt="ขั้นตอนการเลือกประเทศและจำนวน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }} />
+                  <img src="guide_step3.jpg" alt="ขั้นตอนการเลือกประเทศและจำนวน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', marginBottom: '0.35rem' }}>4. รอลุ้นโชคใหญ่</span>
