@@ -359,44 +359,47 @@ export default function CustomerForm() {
               <label className="form-label">จำนวน (ใบ) <span style={{color:'red'}}>*</span></label>
               
               <div style={{ 
-                padding: '1rem', 
-                backgroundColor: '#f8fafc', 
-                border: '1.5px solid #cbd5e1', 
-                borderRadius: '10px',
+                padding: '1.25rem', 
+                background: 'linear-gradient(135deg, #fffdf6 0%, #fffbeb 100%)', 
+                border: '2px solid #eab308', 
+                borderRadius: '12px',
+                boxShadow: '0 4px 15px rgba(234, 179, 8, 0.08)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.85rem'
+                gap: '1rem'
               }}>
                 {/* Input and labels row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#475569', whiteSpace: 'nowrap' }}>ระบุจำนวน:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#854d0e', whiteSpace: 'nowrap' }}>โปรดระบุจำนวน:</span>
                   <input 
                     type="number" 
                     min="50" 
                     className={`form-control ${getFieldClass('customQuantity')}`} 
                     required 
                     {...register("customQuantity", { required: true, min: 50 })} 
-                    placeholder="เช่น 150" 
+                    placeholder="เช่น 100" 
                     style={{ 
-                      width: '100px', 
+                      width: '105px', 
                       display: 'inline-block', 
                       margin: 0, 
                       padding: '0.4rem 0.5rem', 
                       textAlign: 'center', 
-                      borderColor: '#cbd5e1', 
-                      borderWidth: '1.5px', 
-                      fontSize: '0.95rem',
-                      color: '#0f172a',
+                      borderColor: '#eab308', 
+                      borderWidth: '2px', 
+                      fontSize: '1rem',
+                      fontWeight: 'bold',
+                      color: '#78350f',
                       backgroundColor: '#ffffff',
-                      borderRadius: '6px'
+                      borderRadius: '8px',
+                      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)'
                     }}
                   />
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#475569', whiteSpace: 'nowrap' }}>ใบ <span style={{color:'red'}}>*</span></span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#854d0e', whiteSpace: 'nowrap' }}>ใบ <span style={{color:'red'}}>*</span></span>
                 </div>
 
                 {/* Quick preset buttons */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#64748b' }}>หรือเลือกจำนวนด่วน:</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#a16207' }}>หรือเลือกจำนวนด่วน:</span>
                   <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     {["100", "200", "300", "400", "500", "1000", "2000"].map((preset) => {
                       const presetVal = parseInt(preset, 10);
@@ -411,24 +414,27 @@ export default function CustomerForm() {
                             padding: '0.4rem 0.8rem',
                             minWidth: '65px',
                             fontSize: '0.85rem',
-                            fontWeight: '600',
-                            color: isActive ? '#ffffff' : '#475569',
-                            backgroundColor: isActive ? 'var(--primary)' : '#ffffff',
-                            border: isActive ? '1.5px solid var(--primary)' : '1.5px solid #cbd5e1',
-                            borderRadius: '6px',
+                            fontWeight: 'bold',
+                            color: isActive ? '#ffffff' : '#854d0e',
+                            background: isActive 
+                              ? 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)' 
+                              : '#ffffff',
+                            border: isActive ? '1.5px solid #a16207' : '1.5px solid #fef08a',
+                            borderRadius: '8px',
                             cursor: 'pointer',
-                            transition: 'all 0.15s ease'
+                            transition: 'all 0.15s ease',
+                            boxShadow: isActive ? '0 2px 5px rgba(202,138,4,0.3)' : 'none'
                           }}
                           onMouseOver={(e) => {
                             if (!isActive) {
-                              e.currentTarget.style.backgroundColor = '#f1f5f9';
-                              e.currentTarget.style.borderColor = '#94a3b8';
+                              e.currentTarget.style.backgroundColor = '#fffbeb';
+                              e.currentTarget.style.borderColor = '#eab308';
                             }
                           }}
                           onMouseOut={(e) => {
                             if (!isActive) {
                               e.currentTarget.style.backgroundColor = '#ffffff';
-                              e.currentTarget.style.borderColor = '#cbd5e1';
+                              e.currentTarget.style.borderColor = '#fef08a';
                             }
                           }}
                         >
@@ -436,6 +442,41 @@ export default function CustomerForm() {
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+
+                {/* Visual pile of gold bars (3D structured look) */}
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  gap: '0.4rem',
+                  padding: '0.5rem 0.75rem',
+                  background: 'rgba(251, 191, 36, 0.06)',
+                  borderRadius: '10px',
+                  border: '1.5px dashed #eab308'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#a16207' }}>🏆 จำนวนทองแท่งสะสม (ตามยอดสั่งซื้อ):</span>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#ca8a04' }}>{Math.max(1, Math.floor(quantity / 100))} แท่ง</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', alignItems: 'center', minHeight: '18px' }}>
+                    {Array.from({ length: Math.min(20, Math.max(1, Math.floor(quantity / 100))) }).map((_, idx) => (
+                      <div 
+                        key={idx} 
+                        style={{
+                          width: '32px',
+                          height: '11px',
+                          background: 'linear-gradient(135deg, #ffe066 0%, #f5b041 50%, #d35400 100%)',
+                          border: '1px solid #b7950b',
+                          borderRadius: '2px',
+                          boxShadow: '1px 1px 2px rgba(0,0,0,0.15)',
+                          transform: 'skewX(-15deg)',
+                          display: 'inline-block'
+                        }}
+                        title={`ทองแท่งที่ ${idx + 1}`}
+                      />
+                    ))}
+                    {quantity >= 2100 && <span style={{ fontSize: '0.75rem', color: '#a16207', fontWeight: 'bold' }}>+ มากกว่านี้</span>}
                   </div>
                 </div>
 
