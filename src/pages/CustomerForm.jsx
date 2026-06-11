@@ -237,7 +237,31 @@ export default function CustomerForm() {
           -ms-overflow-style: none;  /* IE and Edge */
           scrollbar-width: none;  /* Firefox */
         }
-        @media (max-width: 640px) {
+        @keyframes floatGold {
+          0% {
+            transform: translateY(15px) rotate(0deg) scale(0.7);
+            opacity: 0;
+          }
+          30% {
+            opacity: 0.5;
+          }
+          70% {
+            opacity: 0.5;
+          }
+          100% {
+            transform: translateY(-40px) rotate(25deg) scale(1.1);
+            opacity: 0;
+          }
+        }
+        .floating-gold-item {
+          position: absolute;
+          pointer-events: none;
+          animation: floatGold 4s infinite ease-in-out;
+          font-size: 1.4rem;
+          line-height: 1;
+          z-index: 1;
+        }
+        @media (max-width: 768px) {
           .card-header-responsive {
             flex-direction: column !important;
             align-items: stretch !important;
@@ -364,13 +388,22 @@ export default function CustomerForm() {
             {selectQty === 'custom' && (
               <div className="form-group" style={{ 
                 marginTop: '0.75rem', 
-                padding: '0.75rem', 
-                backgroundColor: '#fff1f2', 
-                border: '2px solid #fecdd3', 
-                borderRadius: '8px'
+                padding: '1rem', 
+                background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', 
+                border: '2.5px solid #d97706', 
+                borderRadius: '12px',
+                boxShadow: '0 4px 15px rgba(217, 119, 6, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+                position: 'relative',
+                overflow: 'hidden'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start' }}>
-                  <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#e11d48', whiteSpace: 'nowrap' }}>โปรดระบุจำนวน</span>
+                {/* Floating gold pieces background */}
+                <span className="floating-gold-item" style={{ left: '10%', bottom: '10%', animationDelay: '0s' }}>🪙</span>
+                <span className="floating-gold-item" style={{ left: '30%', bottom: '5%', animationDelay: '1.5s', fontSize: '1.2rem' }}>✨</span>
+                <span className="floating-gold-item" style={{ right: '15%', bottom: '8%', animationDelay: '0.8s' }}>🪙</span>
+                <span className="floating-gold-item" style={{ right: '35%', bottom: '12%', animationDelay: '2.3s', fontSize: '1.1rem' }}>✨</span>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifyContent: 'flex-start', position: 'relative', zIndex: 2 }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#92400e', whiteSpace: 'nowrap', textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}>โปรดระบุจำนวน</span>
                   <input 
                     type="number" 
                     min="50" 
@@ -378,11 +411,25 @@ export default function CustomerForm() {
                     required 
                     {...register("customQuantity", { required: true, min: 50 })} 
                     placeholder="เช่น 150" 
-                    style={{ width: '85px', display: 'inline-block', margin: 0, padding: '0.35rem 0.5rem', textAlign: 'center', borderColor: '#e11d48', borderWidth: '2px', fontSize: '0.95rem' }}
+                    style={{ 
+                      width: '95px', 
+                      display: 'inline-block', 
+                      margin: 0, 
+                      padding: '0.4rem 0.5rem', 
+                      textAlign: 'center', 
+                      borderColor: '#d97706', 
+                      borderWidth: '2px', 
+                      fontSize: '1rem',
+                      fontWeight: 'bold',
+                      color: '#78350f',
+                      backgroundColor: '#ffffff',
+                      borderRadius: '8px',
+                      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)'
+                    }}
                   />
-                  <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#e11d48', whiteSpace: 'nowrap' }}>ใบ <span style={{color:'red'}}>*</span></span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#92400e', whiteSpace: 'nowrap', textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}>ใบ <span style={{color:'red'}}>*</span></span>
                 </div>
-                {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
+                {errors.customQuantity && <span style={{ color: '#b45309', fontSize: '0.85rem', display: 'block', marginTop: '0.5rem', fontWeight: 600, position: 'relative', zIndex: 2 }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
               </div>
             )}
             <div className="form-group">
