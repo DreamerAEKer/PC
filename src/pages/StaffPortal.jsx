@@ -62,6 +62,7 @@ export default function StaffPortal() {
   const [targetScanCount, setTargetScanCount] = useState(0);
   const [currentScanCount, setCurrentScanCount] = useState(0);
   const [scannedIndexes, setScannedIndexes] = useState([]);
+  const [pendingScannedRecords, setPendingScannedRecords] = useState([]);
 
   const toggleSelectAll = () => {
     if (selectedIds.length === history.length) {
@@ -570,6 +571,13 @@ export default function StaffPortal() {
                       currentScanned = [idx];
                       setTargetScanCount(tot);
                       setScannedIndexes([idx]);
+                      
+                      const newRecord = { 
+                        ...data, 
+                        id: Date.now() + Math.random(), 
+                        timestamp: new Date().toISOString() 
+                      };
+                      setPendingScannedRecords([newRecord]);
                     } else {
                       if (currentScanned.includes(idx)) {
                         alert(`⚠️ QR ลำดับที่ ${idx} / ${tot} นี้ถูกสแกนไปแล้วครับ`);
@@ -577,35 +585,53 @@ export default function StaffPortal() {
                       }
                       currentScanned.push(idx);
                       setScannedIndexes(currentScanned);
+                      
+                      const newRecord = { 
+                        ...data, 
+                        id: Date.now() + Math.random(), 
+                        timestamp: new Date().toISOString() 
+                      };
+                      setPendingScannedRecords(prev => [...prev, newRecord]);
                     }
-                    
-                    const newRecord = { 
-                      ...data, 
-                      id: Date.now() + Math.random(), 
-                      timestamp: new Date().toISOString() 
-                    };
-                    setHistory(prevHistory => {
-                      const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
-                      const exists = safeHistory.some(r => r.name === newRecord.name && r.phone === newRecord.phone && r.quantity === newRecord.quantity);
-                      if (exists) return safeHistory;
-                      const updatedHistory = [newRecord, ...safeHistory].slice(0, 100);
-                      localStorage.setItem('staffHistory', JSON.stringify(updatedHistory));
-                      return updatedHistory;
-                    });
                     
                     const scannedCount = currentScanned.length;
                     if (scannedCount >= tot) {
                       alert(`🎉 สแกนนำเข้าครบถ้วนทั้งหมดแล้ว! (${scannedCount} / ${tot} รายการ)`);
+                      
+                      setHistory(prevHistory => {
+                        const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
+                        const nextScannedList = [...pendingScannedRecords, { 
+                          ...data, 
+                          id: Date.now() + Math.random(), 
+                          timestamp: new Date().toISOString() 
+                        }];
+                        const uniqueMerged = [...nextScannedList, ...safeHistory];
+                        const unique = [];
+                        const seen = new Set();
+                        for (const item of uniqueMerged) {
+                          const key = `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
+                          if (!seen.has(key)) {
+                            seen.add(key);
+                            unique.push(item);
+                          }
+                        }
+                        const sorted = unique.sort((a, b) => b.id - a.id).slice(0, 100);
+                        localStorage.setItem('staffHistory', JSON.stringify(sorted));
+                        return sorted;
+                      });
+                      
                       if (qrCodeInstance && qrCodeInstance.isScanning) {
                         qrCodeInstance.stop().catch(() => {}).then(() => {
                           setScanMode('manual');
                           setTargetScanCount(0);
                           setScannedIndexes([]);
+                          setPendingScannedRecords([]);
                         });
                       } else {
                         setScanMode('manual');
                         setTargetScanCount(0);
                         setScannedIndexes([]);
+                        setPendingScannedRecords([]);
                       }
                     } else {
                       alert(`✅ สแกน QR ลำดับที่ ${idx} สำเร็จ!\n(เหลืออีก ${tot - scannedCount} รายการที่ต้องสแกน)`);
@@ -894,6 +920,39 @@ export default function StaffPortal() {
       if (swipedItemId === id) {
         setSwipedItemId(null);
       }
+    }
+  };
+
+  const handleSavePendingScansEarly = () => {
+    if (pendingScannedRecords.length === 0) {
+      alert("ยังไม่มีรายการที่สแกนสำเร็จครับ");
+      return;
+    }
+    
+    if (window.confirm(`บันทึกข้อมูลเฉพาะที่สแกนไปแล้วจำนวน ${pendingScannedRecords.length} รายการใช่หรือไม่?`)) {
+      setHistory(prevHistory => {
+        const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
+        const uniqueMerged = [...pendingScannedRecords, ...safeHistory];
+        const unique = [];
+        const seen = new Set();
+        for (const item of uniqueMerged) {
+          const key = `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(item);
+          }
+        }
+        const sorted = unique.sort((a, b) => b.id - a.id).slice(0, 100);
+        localStorage.setItem('staffHistory', JSON.stringify(sorted));
+        return sorted;
+      });
+      
+      alert(`💾 บันทึกรายการที่สแกนแล้วจำนวน ${pendingScannedRecords.length} รายการสำเร็จ!`);
+      
+      setScanMode('manual');
+      setTargetScanCount(0);
+      setScannedIndexes([]);
+      setPendingScannedRecords([]);
     }
   };
 
@@ -1428,69 +1487,71 @@ export default function StaffPortal() {
 
               <div id="reader-hidden" style={{ position: 'absolute', top: '-9999px', width: '500px', height: '500px' }}></div>
 
-              {(scanMode === 'camera' || scanMode === 'usb') && (
-                <div className="mobile-only-scan-helper" style={{ marginBottom: '1.25rem' }}>
-                  {/* Target Scan Selector */}
-                  <div style={{
-                    backgroundColor: '#fffbeb',
-                    border: '1.5px solid #fde047',
-                    borderRadius: '12px',
-                    padding: '0.75rem',
-                    marginBottom: '1rem',
-                    textAlign: 'left'
-                  }}>
-                    <strong style={{ fontSize: '0.85rem', color: '#b45309', display: 'block', marginBottom: '0.5rem' }}>
-                      📋 ตัวช่วยรับข้อมูลเป็นกลุ่ม (สแกนต่อเนื่อง):
-                    </strong>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '0.8rem', color: '#78350f' }}>จำนวนรายการที่จองร่วมกัน:</span>
-                      <select 
-                        value={targetScanCount}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value, 10) || 0;
-                          setTargetScanCount(val);
-                          setCurrentScanCount(0);
-                        }}
-                        style={{
-                          padding: '0.25rem 0.5rem',
-                          fontSize: '0.85rem',
-                          borderRadius: '6px',
-                          borderColor: '#fde047',
-                          backgroundColor: '#fff',
-                          fontWeight: 'bold',
-                          color: '#b45309',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <option value="0">สแกนเดี่ยว (สแกนทีละใบ)</option>
-                        <option value="2">2 รายการ</option>
-                        <option value="3">3 รายการ</option>
-                        <option value="4">4 รายการ</option>
-                        <option value="5">5 รายการ</option>
-                        <option value="10">10 รายการ</option>
-                      </select>
-                    </div>
-                    {targetScanCount > 0 && (
-                      <div style={{ 
-                        marginTop: '0.5rem', 
-                        fontSize: '0.85rem', 
-                        fontWeight: 'bold',
-                        color: currentScanCount >= targetScanCount ? '#16a34a' : '#d97706',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                      }}>
-                        <span>สถานะการสแกน:</span>
-                        <span style={{ 
-                          backgroundColor: currentScanCount >= targetScanCount ? '#dcfce7' : '#fef3c7', 
-                          padding: '0.15rem 0.5rem', 
-                          borderRadius: '20px' 
-                        }}>
-                          {currentScanCount} / {targetScanCount} รายการ
-                        </span>
-                      </div>
-                    )}
+              {scanMode === 'camera' && targetScanCount > 1 && (
+                <div style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1.5px solid #cbd5e1',
+                  borderRadius: '12px',
+                  padding: '1rem',
+                  marginBottom: '1.25rem',
+                  textAlign: 'left',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                }}>
+                  <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#1e293b', marginBottom: '0.75rem' }}>
+                    📥 กำลังนำเข้าออเดอร์ของลูกค้า ({scannedIndexes.length} / {targetScanCount})
                   </div>
+                  
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                    {Array.from({ length: targetScanCount }, (_, i) => {
+                      const idx = i + 1;
+                      const isScanned = scannedIndexes.includes(idx);
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.85rem',
+                            fontWeight: 'bold',
+                            backgroundColor: isScanned ? '#22c55e' : '#ef4444',
+                            color: '#fff',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                            transition: 'background-color 0.3s ease'
+                          }}
+                        >
+                          {idx}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleSavePendingScansEarly}
+                    className="btn"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.85rem',
+                      fontWeight: 'bold',
+                      color: '#1e293b',
+                      backgroundColor: '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.35rem',
+                      margin: 0
+                    }}
+                  >
+                    💾 บันทึกเท่าที่สแกนแล้ว ({scannedIndexes.length} รายการ)
+                  </button>
                 </div>
               )}
 
