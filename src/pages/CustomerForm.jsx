@@ -362,171 +362,143 @@ export default function CustomerForm() {
             </div>
             <div className="form-group">
               <label className="form-label">จำนวน (ใบ) <span style={{color:'red'}}>*</span></label>
-              
-              <div style={{ 
-                padding: '1.25rem', 
-                background: 'linear-gradient(135deg, #fffdf6 0%, #fffbeb 100%)', 
-                border: '2px solid #eab308', 
-                borderRadius: '12px',
-                boxShadow: '0 4px 15px rgba(234, 179, 8, 0.08)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
-                {/* Input and labels row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#854d0e', whiteSpace: 'nowrap' }}>โปรดระบุจำนวน:</span>
-                  <input 
-                    type="number" 
-                    min="50" 
-                    className={`form-control ${getFieldClass('customQuantity')}`} 
-                    required 
-                    {...register("customQuantity", { required: true, min: 50 })} 
-                    placeholder="เช่น 100" 
-                    style={{ 
-                      width: '105px', 
-                      display: 'inline-block', 
-                      margin: 0, 
-                      padding: '0.4rem 0.5rem', 
-                      textAlign: 'center', 
-                      borderColor: '#eab308', 
-                      borderWidth: '2px', 
-                      fontSize: '1rem',
-                      fontWeight: 'bold',
-                      color: '#78350f',
-                      backgroundColor: '#ffffff',
-                      borderRadius: '8px',
-                      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)'
-                    }}
-                  />
-                  <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#854d0e', whiteSpace: 'nowrap' }}>ใบ <span style={{color:'red'}}>*</span></span>
-                </div>
+              <select 
+                className="form-control" 
+                required 
+                {...register("selectQuantity", { required: true })}
+                style={{ width: '100%' }}
+              >
+                <option value="100">100 ใบ</option>
+                <option value="200">200 ใบ</option>
+                <option value="300">300 ใบ</option>
+                <option value="400">400 ใบ</option>
+                <option value="500">500 ใบ</option>
+                <option value="1000">1,000 ใบ</option>
+                <option value="2000">2,000 ใบ</option>
+                <option value="custom">ระบุค่าเอง...</option>
+              </select>
+              {errors.selectQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวน</span>}
+            </div>
 
-                {/* Quick preset buttons */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#a16207' }}>หรือเลือกจำนวนด่วน:</span>
-                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                    {["100", "200", "300", "400", "500", "1000", "2000"].map((preset) => {
-                      const presetVal = parseInt(preset, 10);
-                      const isActive = quantity === presetVal;
-
-                      return (
-                        <button
-                          key={preset}
-                          type="button"
-                          onClick={() => setQuantityFields(preset)}
-                          style={{
-                            padding: '0.4rem 0.8rem',
-                            minWidth: '65px',
-                            fontSize: '0.85rem',
-                            fontWeight: 'bold',
-                            color: isActive ? '#ffffff' : '#854d0e',
-                            background: isActive 
-                              ? 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)' 
-                              : '#ffffff',
-                            border: isActive ? '1.5px solid #a16207' : '1.5px solid #fef08a',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                            boxShadow: isActive ? '0 2px 5px rgba(202,138,4,0.3)' : 'none'
-                          }}
-                          onMouseOver={(e) => {
-                            if (!isActive) {
-                              e.currentTarget.style.backgroundColor = '#fffbeb';
-                              e.currentTarget.style.borderColor = '#eab308';
-                            }
-                          }}
-                          onMouseOut={(e) => {
-                            if (!isActive) {
-                              e.currentTarget.style.backgroundColor = '#ffffff';
-                              e.currentTarget.style.borderColor = '#fef08a';
-                            }
-                          }}
-                        >
-                          {preset}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Visual Gold Bar Ticket Opportunity (Conceptual & Animated) */}
+            {selectQty === 'custom' && (
+              <div className="form-group">
                 <div style={{ 
-                  display: 'flex', 
+                  padding: '1.25rem', 
+                  background: 'linear-gradient(135deg, #fffdf6 0%, #fffbeb 100%)', 
+                  border: '2px solid #eab308', 
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 15px rgba(234, 179, 8, 0.08)',
+                  display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.5rem',
-                  padding: '0.75rem 1rem',
-                  background: 'rgba(251, 191, 36, 0.04)',
-                  borderRadius: '10px',
-                  border: '1.5px dashed #eab308',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  overflow: 'hidden'
+                  gap: '1rem'
                 }}>
-                  {(() => {
-                    const glowRadius = Math.min(25, 4 + (quantity / 100) * 1.1);
-                    const glowOpacity = Math.min(0.9, 0.3 + (quantity / 100) * 0.03);
-                    const starsCount = Math.min(8, Math.max(1, Math.floor(quantity / 250)));
-                    
-                    return (
-                      <>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#a16207', marginBottom: '0.25rem', zIndex: 2 }}>
-                          ✨ เพิ่มโอกาสลุ้นโชคทองคำก้อนใหญ่ (สั่งพิมพ์ {quantity} ใบ)
-                        </span>
-                        
-                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '45px', width: '100%' }}>
-                          {/* Floating Sparkles around the gold bar */}
-                          {Array.from({ length: starsCount }).map((_, idx) => (
-                            <span 
-                              key={idx} 
-                              style={{ 
-                                position: 'absolute',
-                                fontSize: '1rem',
-                                animation: 'floatGold 3s infinite ease-in-out',
-                                animationDelay: `${idx * 0.3}s`,
-                                left: `${25 + (idx * 12) % 50}%`,
-                                bottom: `${10 + (idx * 7) % 30}px`,
-                                pointerEvents: 'none',
-                                zIndex: 1
+                  {/* Input and labels row */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#854d0e', whiteSpace: 'nowrap' }}>โปรดระบุจำนวน:</span>
+                    <input 
+                      type="number" 
+                      min="50" 
+                      className={`form-control ${getFieldClass('customQuantity')}`} 
+                      required 
+                      {...register("customQuantity", { required: true, min: 50 })} 
+                      placeholder="เช่น 100" 
+                      style={{ 
+                        width: '105px', 
+                        display: 'inline-block', 
+                        margin: 0, 
+                        padding: '0.4rem 0.5rem', 
+                        textAlign: 'center', 
+                        borderColor: '#eab308', 
+                        borderWidth: '2px', 
+                        fontSize: '1rem',
+                        fontWeight: 'bold',
+                        color: '#78350f',
+                        backgroundColor: '#ffffff',
+                        borderRadius: '8px',
+                        boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)'
+                      }}
+                    />
+                    <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#854d0e', whiteSpace: 'nowrap' }}>ใบ <span style={{color:'red'}}>*</span></span>
+                  </div>
+
+                  {/* Visual Gold Bar Ticket Opportunity (Conceptual & Animated) */}
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    gap: '0.5rem',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(251, 191, 36, 0.04)',
+                    borderRadius: '10px',
+                    border: '1.5px dashed #eab308',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    {(() => {
+                      const glowRadius = Math.min(25, 4 + (quantity / 100) * 1.1);
+                      const glowOpacity = Math.min(0.9, 0.3 + (quantity / 100) * 0.03);
+                      const starsCount = Math.min(8, Math.max(1, Math.floor(quantity / 250)));
+                      
+                      return (
+                        <>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#a16207', marginBottom: '0.25rem', zIndex: 2 }}>
+                            ✨ เพิ่มโอกาสลุ้นโชคทองคำก้อนใหญ่ (สั่งพิมพ์ {quantity} ใบ)
+                          </span>
+                          
+                          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '45px', width: '100%' }}>
+                            {/* Floating Sparkles around the gold bar */}
+                            {Array.from({ length: starsCount }).map((_, idx) => (
+                              <span 
+                                key={idx} 
+                                style={{ 
+                                  position: 'absolute',
+                                  fontSize: '1rem',
+                                  animation: 'floatGold 3s infinite ease-in-out',
+                                  animationDelay: `${idx * 0.3}s`,
+                                  left: `${25 + (idx * 12) % 50}%`,
+                                  bottom: `${10 + (idx * 7) % 30}px`,
+                                  pointerEvents: 'none',
+                                  zIndex: 1
+                                }}
+                              >
+                                  ✨
+                              </span>
+                            ))}
+                            
+                            {/* The single, glowing 3D Gold Bar */}
+                            <div 
+                              style={{
+                                width: '75px',
+                                height: '24px',
+                                background: 'linear-gradient(135deg, #ffe666 0%, #f5b041 50%, #d35400 100%)',
+                                border: '1.5px solid #b7950b',
+                                borderRadius: '4px',
+                                boxShadow: '0 4px 10px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.4)',
+                                filter: `drop-shadow(0 0 ${glowRadius}px rgba(234, 179, 8, ${glowOpacity}))`,
+                                transform: 'skewX(-15deg)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                zIndex: 2,
+                                transition: 'all 0.3s ease',
+                                animation: quantity >= 500 ? 'pulseGold 2s infinite ease-in-out' : 'none'
                               }}
                             >
-                              ✨
-                            </span>
-                          ))}
-                          
-                          {/* The single, glowing 3D Gold Bar */}
-                          <div 
-                            style={{
-                              width: '75px',
-                              height: '24px',
-                              background: 'linear-gradient(135deg, #ffe666 0%, #f5b041 50%, #d35400 100%)',
-                              border: '1.5px solid #b7950b',
-                              borderRadius: '4px',
-                              boxShadow: '0 4px 10px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.4)',
-                              filter: `drop-shadow(0 0 ${glowRadius}px rgba(234, 179, 8, ${glowOpacity}))`,
-                              transform: 'skewX(-15deg)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              zIndex: 2,
-                              transition: 'all 0.3s ease',
-                              animation: quantity >= 500 ? 'pulseGold 2s infinite ease-in-out' : 'none'
-                            }}
-                          >
-                            <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#ffffff', textShadow: '1px 1px 2px rgba(0,0,0,0.6)', transform: 'skewX(15deg)' }}>
-                              GOLD
-                            </span>
+                              <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#ffffff', textShadow: '1px 1px 2px rgba(0,0,0,0.6)', transform: 'skewX(15deg)' }}>
+                                GOLD
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
+                        </>
+                      );
+                    })()}
+                  </div>
 
-                {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem', fontWeight: 600 }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
+                  {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem', fontWeight: 600 }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
+                </div>
               </div>
-            </div>
+            )}
             <div className="form-group">
               <label className="form-label">ชื่อ-นามสกุล <span style={{color:'red'}}>*</span></label>
               <input type="text" className={`form-control ${getFieldClass('name')}`} required {...register("name", { required: true })} placeholder="ระบุชื่อและนามสกุล" />
