@@ -678,7 +678,7 @@ export default function CustomerForm() {
                             setIsTyping(false);
                           }, 650);
                         }}
-                        placeholder="เช่น 12000" 
+                        placeholder="เช่น 100" 
                         style={{ 
                           width: '155px', 
                           display: 'inline-block', 
