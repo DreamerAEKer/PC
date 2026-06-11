@@ -1,11 +1,13 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Printer, ArrowLeft } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 
 export default function PrintBlankForms() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [branchName, setBranchName] = React.useState(location.state?.branchName || 'ไปรษณีย์กลาง 10501');
+  const [branchName, setBranchName] = React.useState(location.state?.branchName || 'ไปรษณีย์กลาง');
+  const [branchCode, setBranchCode] = React.useState(location.state?.branchCode || '10501');
   const [staffName, setStaffName] = React.useState(location.state?.staffName || '');
   const [staffPhone, setStaffPhone] = React.useState(location.state?.staffPhone || '');
 
@@ -13,12 +15,16 @@ export default function PrintBlankForms() {
     if (!location.state) {
       const savedBranch = localStorage.getItem('branchName');
       if (savedBranch) setBranchName(savedBranch);
+      const savedCode = localStorage.getItem('branchCode');
+      if (savedCode) setBranchCode(savedCode);
       const savedStaffName = localStorage.getItem('staffName');
       if (savedStaffName) setStaffName(savedStaffName);
       const savedStaffPhone = localStorage.getItem('staffPhone');
       if (savedStaffPhone) setStaffPhone(savedStaffPhone);
     }
   }, [location.state]);
+
+  const generatedCustomerUrl = `${window.location.origin}${window.location.pathname}?branch=${encodeURIComponent(branchCode)}`;
 
   const handlePrint = () => {
     window.print();
@@ -107,7 +113,7 @@ export default function PrintBlankForms() {
             {/* Left Column (Tear-off Receipt - 35%) */}
             <div style={{ flex: '0 0 35%', paddingRight: '0.8rem', borderRight: '1px dashed #94a3b8', display: 'flex', flexDirection: 'column', fontSize: '0.75rem' }}>
               <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '0.1rem', fontSize: '0.85rem', lineHeight: '1.3' }}>แบบฟอร์มสั่งพิมพ์<br/>ชื่อ-ที่อยู่ ลงบนไปรษณียบัตร</div>
-              <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '0.5rem', fontSize: '0.75rem' }}>ที่ {branchName}</div>
+              <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '0.5rem', fontSize: '0.75rem' }}>ที่ {branchName} {branchCode}</div>
               
               <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '0.15rem', fontSize: '0.8rem', backgroundColor: '#f1f5f9', padding: '0.2rem 0', borderRadius: '4px' }}>ส่วนที่ลูกค้าเก็บไว้</div>
               
@@ -180,8 +186,12 @@ export default function PrintBlankForms() {
               </div>
               
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', width: '100%' }}>
-                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '500' }}>
-                  {branchName}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <QRCodeCanvas value={generatedCustomerUrl} size={42} level="M" />
+                  <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
+                    <span style={{ fontSize: '0.55rem', fontWeight: 'bold', color: 'var(--primary)' }}>สแกนจองคิว</span>
+                    <span style={{ fontSize: '0.65rem', color: '#0f172a', fontWeight: 'bold' }}>{branchName} {branchCode}</span>
+                  </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}>
                   <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>หรือ D/ID:</span>

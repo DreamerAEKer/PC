@@ -1427,7 +1427,7 @@ export default function StaffPortal() {
             <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border)', margin: '0 0.5rem' }}></div>
             
             <button 
-              onClick={() => navigate('/print-blank-forms', { state: { branchName: `${branchName} ${branchCode}`.trim(), staffName, staffPhone } })} 
+              onClick={() => navigate('/print-blank-forms', { state: { branchName, branchCode, staffName, staffPhone } })} 
               className="btn" 
               style={{ 
                 padding: '0.4rem 0.8rem', 
