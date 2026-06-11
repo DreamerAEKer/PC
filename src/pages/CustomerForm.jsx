@@ -1215,7 +1215,6 @@ export default function CustomerForm() {
                           padding: '0.75rem', 
                           border: '1px solid var(--border)', 
                           borderRadius: '8px',
-                          cursor: 'pointer',
                           transition: 'background 0.2s',
                           display: 'flex',
                           alignItems: 'center',
@@ -1230,44 +1229,51 @@ export default function CustomerForm() {
                         onMouseLeave={cancelHistoryLongPress}
                         onTouchStart={() => startHistoryLongPress(record)}
                         onTouchEnd={cancelHistoryLongPress}
-                        onClick={() => {
-                          const recordToSet = {
-                            ...record,
-                            addressLine1: record.addressLine1 || record.address,
-                            subdistrict: record.subdistrict || '',
-                            district: record.district || '',
-                            province: record.province || '',
-                            zipcode: record.zipcode || ''
-                          };
-                          reset(recordToSet);
-                          setQuantityFields(record.quantity);
-                          const compressedData = {
-                            d: record.orderDate,
-                            q: record.quantity,
-                            n: record.name,
-                            p: record.phone,
-                            a: record.addressLine1 || record.address || '',
-                            sd: record.subdistrict || '',
-                            dt: record.district || '',
-                            pv: record.province || '',
-                            zp: record.zipcode || '',
-                            id: record.did || ''
-                          };
-                          const payload = JSON.stringify(compressedData);
-                          setGeneratedData({ ...record, payload });
-                          setIsModalOpen(true);
-                        }}
                         onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                         onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.includes(record.id)}
-                          onChange={(e) => handleSelectToggle(record.id, e)}
-                          onClick={(e) => e.stopPropagation()}
-                          style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                        />
-                        <div style={{ flex: 1 }}>
+                        <div 
+                          onClick={(e) => handleSelectToggle(record.id, e)} 
+                          style={{ display: 'flex', alignItems: 'center', padding: '0.25rem', cursor: 'pointer' }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(record.id)}
+                            onChange={() => {}} // Controlled by onClick wrapper
+                            style={{ width: '18px', height: '18px', cursor: 'pointer', margin: 0 }}
+                          />
+                        </div>
+                        
+                        <div 
+                          style={{ flex: 1, cursor: 'pointer' }}
+                          onClick={() => {
+                            const recordToSet = {
+                              ...record,
+                              addressLine1: record.addressLine1 || record.address,
+                              subdistrict: record.subdistrict || '',
+                              district: record.district || '',
+                              province: record.province || '',
+                              zipcode: record.zipcode || ''
+                            };
+                            reset(recordToSet);
+                            setQuantityFields(record.quantity);
+                            const compressedData = {
+                              d: record.orderDate,
+                              q: record.quantity,
+                              n: record.name,
+                              p: record.phone,
+                              a: record.addressLine1 || record.address || '',
+                              sd: record.subdistrict || '',
+                              dt: record.district || '',
+                              pv: record.province || '',
+                              zp: record.zipcode || '',
+                              id: record.did || ''
+                            };
+                            const payload = JSON.stringify(compressedData);
+                            setGeneratedData({ ...record, payload });
+                            setIsModalOpen(true);
+                          }}
+                        >
                           <div style={{ fontWeight: '500' }}>{record.name}</div>
                           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                             {new Date(record.timestamp).toLocaleDateString('th-TH')} - {record.quantity} ใบ
