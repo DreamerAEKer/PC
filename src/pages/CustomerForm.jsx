@@ -8,7 +8,13 @@ import DidBoxInput from '../components/DidBoxInput';
 import { useThaiAddress } from 'use-thai-address';
 
 export default function CustomerForm() {
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ 
+    mode: 'onChange',
+    defaultValues: {
+      customQuantity: "100",
+      orderDate: new Date().toISOString().split('T')[0]
+    }
+  });
 
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [rulesActiveTab, setRulesActiveTab] = useState(0);
@@ -18,21 +24,12 @@ export default function CustomerForm() {
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
 
-  const selectQty = watch("selectQuantity", "100");
   const customQty = watch("customQuantity", "100");
-  const quantity = selectQty === 'custom' ? (parseInt(customQty, 10) || 0) : (parseInt(selectQty, 10) || 0);
+  const quantity = parseInt(customQty, 10) || 0;
   const totalPrice = quantity * 3;
 
   const setQuantityFields = (qtyVal) => {
-    const qtyStr = String(qtyVal || 100);
-    const presets = ["100", "200", "300", "400", "500", "1000", "2000"];
-    if (presets.includes(qtyStr)) {
-      setValue("selectQuantity", qtyStr, { shouldValidate: true, shouldDirty: true });
-      setValue("customQuantity", qtyStr, { shouldValidate: true, shouldDirty: true });
-    } else {
-      setValue("selectQuantity", "custom", { shouldValidate: true, shouldDirty: true });
-      setValue("customQuantity", qtyStr, { shouldValidate: true, shouldDirty: true });
-    }
+    setValue("customQuantity", String(qtyVal || 100), { shouldValidate: true, shouldDirty: true });
   };
 
   const didValue = watch("did", "");
@@ -138,7 +135,7 @@ export default function CustomerForm() {
       fullAddress = `${data.addressLine1 || ''} ${subTitle} ${distTitle} ${provTitle}`.replace(/\s+/g, ' ').trim();
     }
     
-    const resolvedQty = data.selectQuantity === 'custom' ? (parseInt(data.customQuantity, 10) || 0) : (parseInt(data.selectQuantity, 10) || 0);
+    const resolvedQty = parseInt(data.customQuantity, 10) || 0;
 
     const processedData = {
       ...data,
@@ -149,7 +146,6 @@ export default function CustomerForm() {
     };
 
     // Remove select helper fields from QR payload
-    delete processedData.selectQuantity;
     delete processedData.customQuantity;
 
     // Create a payload string (JSON) for the QR code using compressed format
