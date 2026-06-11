@@ -7,6 +7,7 @@ import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Uploa
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import { QRCodeCanvas } from 'qrcode.react';
+import { useThaiAddress } from 'use-thai-address';
 
 export default function StaffPortal() {
   const { register, handleSubmit, setValue, getValues, reset, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
@@ -46,11 +47,27 @@ export default function StaffPortal() {
     }
   }, [didValue]);
   const [hasActiveData, setHasActiveData] = useState(false);
-  const [branchName, setBranchName] = useState('ไปรษณีย์กลาง 10501');
+  const [branchName, setBranchName] = useState('ไปรษณีย์กลาง');
+  const [branchCode, setBranchCode] = useState('10501');
   const [staffName, setStaffName] = useState('');
   const [staffPhone, setStaffPhone] = useState('');
   const [isSettingsDirty, setIsSettingsDirty] = useState(false);
   const navigate = useNavigate();
+
+  const { filteredData, searchByField } = useThaiAddress();
+
+  useEffect(() => {
+    if (branchCode && branchCode.length === 5 && filteredData && filteredData.length > 0) {
+      const item = filteredData[0];
+      if (item && item.district) {
+        let name = `ไปรษณีย์${item.district}`;
+        if (branchCode === '10501') {
+          name = 'ไปรษณีย์กลาง';
+        }
+        setBranchName(name);
+      }
+    }
+  }, [filteredData, branchCode]);
 
   useEffect(() => {
     if (scanMode !== 'camera') {
@@ -94,8 +111,21 @@ export default function StaffPortal() {
   const shouldShowRed = hasTextToSave && isSettingsDirty;
 
   useEffect(() => {
-    const savedBranch = localStorage.getItem('branchName') || 'ไปรษณีย์กลาง 10501';
-    setBranchName(savedBranch);
+    const savedBranch = localStorage.getItem('branchName') || 'ไปรษณีย์กลาง';
+    const savedCode = localStorage.getItem('branchCode');
+    if (savedCode) {
+      setBranchCode(savedCode);
+      setBranchName(savedBranch);
+    } else {
+      // Backward compatibility: parse if it contains a 5-digit number
+      const match = savedBranch.match(/\d{5}/);
+      if (match) {
+        setBranchCode(match[0]);
+        setBranchName(savedBranch.replace(match[0], '').trim());
+      } else {
+        setBranchName(savedBranch);
+      }
+    }
     const savedStaffName = localStorage.getItem('staffName') || '';
     setStaffName(savedStaffName);
     const savedStaffPhone = localStorage.getItem('staffPhone') || '';
@@ -511,6 +541,23 @@ export default function StaffPortal() {
     setBranchName(e.target.value);
     setIsSettingsDirty(true);
   };
+  const handleBranchCodeChange = (e) => {
+    const val = e.target.value.trim();
+    setBranchCode(val);
+    setIsSettingsDirty(true);
+    if (/^\d{5}$/.test(val)) {
+      try {
+        const savedMappings = JSON.parse(localStorage.getItem('customBranchMappings') || '{}');
+        if (savedMappings[val]) {
+          setBranchName(savedMappings[val]);
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      searchByField('zipCode', val);
+    }
+  };
   const handleStaffNameChange = (e) => {
     setStaffName(e.target.value);
     setIsSettingsDirty(true);
@@ -523,14 +570,6 @@ export default function StaffPortal() {
   const [isUrlCopied, setIsUrlCopied] = useState(false);
   const [showQuickQrModal, setShowQuickQrModal] = useState(false);
   
-  // Helper to get 5-digit branch code, or fallback to the full typed name
-  const getBranchCode = (name) => {
-    if (!name) return '';
-    const match = name.match(/\d{5}/);
-    return match ? match[0] : name;
-  };
-
-  const branchCode = getBranchCode(branchName);
   const generatedCustomerUrl = `${window.location.origin}${window.location.pathname}?branch=${encodeURIComponent(branchCode)}`;
 
   const copyGeneratedUrl = () => {
@@ -550,12 +589,26 @@ export default function StaffPortal() {
   };
 
   const saveSettings = () => {
+    if (!branchCode || branchCode.trim().length < 5) {
+      alert('กรุณากรอกรหัสที่ทำการอย่างน้อย 5 ตัวอักษรครับ');
+      return;
+    }
     if (!staffName && !staffPhone) {
       setShowSaveError(true);
       setTimeout(() => setShowSaveError(false), 4000);
       return;
     }
+    
+    try {
+      const savedMappings = JSON.parse(localStorage.getItem('customBranchMappings') || '{}');
+      savedMappings[branchCode] = branchName;
+      localStorage.setItem('customBranchMappings', JSON.stringify(savedMappings));
+    } catch (err) {
+      console.error(err);
+    }
+
     localStorage.setItem('branchName', branchName);
+    localStorage.setItem('branchCode', branchCode);
     localStorage.setItem('staffName', staffName);
     localStorage.setItem('staffPhone', staffPhone);
     setIsSettingsDirty(false);
@@ -1307,14 +1360,26 @@ export default function StaffPortal() {
         {/* Section 2 & 1 moved to the bottom of the page */}
         <div className="staff-settings-container-row" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '2rem', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem', width: '100%' }}>
           <div className="staff-settings-bar" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#fff', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)', width: '100%', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flex: '1 1 auto', minWidth: '150px', maxWidth: '280px' }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>สาขา:</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flex: '1.5 1 auto', minWidth: '130px', maxWidth: '220px' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>ชื่อที่ทำการ:</span>
               <input 
                 type="text" 
                 className="form-control" 
                 value={branchName} 
                 onChange={handleBranchChange} 
+                placeholder="เช่น ไปรษณีย์กลาง"
                 style={{ width: '100%', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flex: '1 1 auto', minWidth: '95px', maxWidth: '140px' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>รหัส:</span>
+              <input 
+                type="text" 
+                className="form-control" 
+                value={branchCode} 
+                onChange={handleBranchCodeChange} 
+                placeholder="5 หลัก"
+                style={{ width: '100%', padding: '0.3rem 0.5rem', fontSize: '0.85rem', borderColor: (!branchCode || branchCode.length < 5) ? 'var(--primary)' : 'var(--border)' }} 
               />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flex: '1 1 auto', minWidth: '110px', maxWidth: '200px' }}>
@@ -1362,7 +1427,7 @@ export default function StaffPortal() {
             <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border)', margin: '0 0.5rem' }}></div>
             
             <button 
-              onClick={() => navigate('/print-blank-forms', { state: { branchName, staffName, staffPhone } })} 
+              onClick={() => navigate('/print-blank-forms', { state: { branchName: `${branchName} ${branchCode}`.trim(), staffName, staffPhone } })} 
               className="btn" 
               style={{ 
                 padding: '0.4rem 0.8rem', 
@@ -1506,7 +1571,7 @@ export default function StaffPortal() {
               📲 สแกน QR เพื่อกรอกข้อมูล
             </h3>
             <p style={{ margin: '0 0 1.25rem 0', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-              สาขา: <strong style={{ color: 'var(--primary)' }}>{branchName}</strong>
+              สาขา: <strong style={{ color: 'var(--primary)' }}>{branchName} {branchCode}</strong>
             </p>
             
             <div style={{ 

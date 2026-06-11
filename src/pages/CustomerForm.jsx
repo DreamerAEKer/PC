@@ -5,6 +5,7 @@ import html2canvas from 'html2canvas';
 import { Download, CheckCircle, Clock, Share2 } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
+import { useThaiAddress } from 'use-thai-address';
 
 export default function CustomerForm() {
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
@@ -54,6 +55,36 @@ export default function CustomerForm() {
     return "ไปรษณีย์กลาง 10501";
   };
 
+  const { filteredData, searchByField } = useThaiAddress();
+  const [resolvedBranchDisplay, setResolvedBranchDisplay] = useState('ไปรษณีย์กลาง 10501');
+
+  useEffect(() => {
+    const branchParam = getBranchFromUrl();
+    if (branchParam) {
+      if (/^\d{5}$/.test(branchParam)) {
+        searchByField('zipCode', branchParam);
+      } else {
+        setResolvedBranchDisplay(branchParam);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const branchParam = getBranchFromUrl();
+    if (branchParam && /^\d{5}$/.test(branchParam) && filteredData && filteredData.length > 0) {
+      const item = filteredData[0];
+      if (item && item.district) {
+        let name = `ไปรษณีย์${item.district}`;
+        if (branchParam === '10501') {
+          name = 'ไปรษณีย์กลาง';
+        }
+        setResolvedBranchDisplay(`${name} ${branchParam}`);
+      } else {
+        setResolvedBranchDisplay(branchParam);
+      }
+    }
+  }, [filteredData]);
+
   const [generatedData, setGeneratedData] = useState(null);
   const [history, setHistory] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -101,14 +132,12 @@ export default function CustomerForm() {
     
     const resolvedQty = data.selectQuantity === "custom" ? (parseInt(data.customQuantity, 10) || 0) : (parseInt(data.selectQuantity, 10) || 0);
 
-    const currentBranch = getBranchFromUrl();
-
     const processedData = {
       ...data,
       quantity: resolvedQty,
       address: fullAddress,
       isDidActive,
-      branch: currentBranch
+      branch: resolvedBranchDisplay
     };
 
     // Remove select helper fields from QR payload
