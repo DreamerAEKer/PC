@@ -95,7 +95,7 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
   return (
     <div ref={containerRef}>
       <div className="form-group">
-        <label className="form-label" {...onAddressLabelEvents} style={{ cursor: onAddressLabelEvents ? 'pointer' : 'default', userSelect: 'none' }}>ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน) {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
+        <label className="form-label" {...onAddressLabelEvents} style={{ cursor: onAddressLabelEvents ? 'pointer' : 'default', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน) {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
         {hintText && (
           <div style={{ fontSize: '0.75rem', color: '#a16207', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             {hintText}

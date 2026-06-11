@@ -362,6 +362,14 @@ export default function CustomerForm() {
           from { opacity: 0; transform: translateX(-50%) translateY(12px); }
           to   { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
+        .no-callout {
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          user-select: none;
+          -webkit-touch-callout: none;
+          -webkit-tap-highlight-color: transparent;
+        }
         @keyframes floatGold {
           0% {
             transform: translateY(15px) rotate(0deg) scale(0.7);
@@ -674,13 +682,14 @@ export default function CustomerForm() {
             </div>
             <div className="form-group">
               <label 
-                className="form-label"
+                className="form-label no-callout"
                 onMouseDown={startLongPress} 
                 onMouseUp={cancelLongPress} 
                 onMouseLeave={cancelLongPress} 
                 onTouchStart={startLongPress} 
                 onTouchEnd={cancelLongPress}
-                style={{ cursor: 'pointer', userSelect: 'none' }}
+                onContextMenu={(e) => e.preventDefault()}
+                style={{ cursor: 'pointer', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
               >
                 ชื่อ-นามสกุล <span style={{color:'red'}}>*</span>
               </label>
@@ -751,7 +760,8 @@ export default function CustomerForm() {
                 onMouseUp: cancelLongPress,
                 onMouseLeave: cancelLongPress,
                 onTouchStart: startLongPress,
-                onTouchEnd: cancelLongPress
+                onTouchEnd: cancelLongPress,
+                onContextMenu: (e) => e.preventDefault()
               }}
             />
 
