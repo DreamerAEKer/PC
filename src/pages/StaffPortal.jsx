@@ -742,6 +742,162 @@ export default function StaffPortal() {
     }
   };
 
+  const handleMultipleImagesImport = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    let successCount = 0;
+    let failCount = 0;
+    const decodedRecords = [];
+
+    const decodeSingleImage = async (file) => {
+      let decodedText = '';
+      if ('BarcodeDetector' in window) {
+        try {
+          const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+          const imageBitmap = await createImageBitmap(file);
+          const barcodes = await barcodeDetector.detect(imageBitmap);
+          if (barcodes.length > 0) {
+            decodedText = barcodes[0].rawValue;
+          }
+        } catch (err) {
+          console.log("BarcodeDetector error:", err);
+        }
+      }
+
+      if (!decodedText) {
+        try {
+          const html5QrCode = new Html5Qrcode("reader-hidden");
+          decodedText = await html5QrCode.scanFile(file, false);
+        } catch (err) {
+          console.error("html5QrCode decode error:", err);
+        }
+      }
+
+      return decodedText;
+    };
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      try {
+        const decodedText = await decodeSingleImage(file);
+        if (decodedText) {
+          const parsed = JSON.parse(decodedText);
+          
+          if (parsed && parsed.b === 1 && Array.isArray(parsed.r)) {
+            parsed.r.forEach((raw, sIdx) => {
+              const mappedSubBookings = (raw.s || []).map((sub, subIdx) => ({
+                id: Date.now() + Math.random() + sIdx + subIdx,
+                name: sub.n || '',
+                phone: sub.p || '',
+                quantity: sub.q || 20,
+                useMainAddress: sub.m === 1,
+                address: sub.a || ''
+              }));
+              decodedRecords.push({
+                id: Date.now() + Math.random() + sIdx,
+                timestamp: new Date().toISOString(),
+                orderDate: raw.d || new Date().toISOString().split('T')[0],
+                quantity: raw.q || 1,
+                name: raw.n || '',
+                phone: raw.p || '',
+                addressLine1: raw.a || '',
+                address: raw.a || '',
+                subdistrict: raw.sd || '',
+                district: raw.dt || '',
+                province: raw.pv || '',
+                zipcode: raw.zp || '',
+                did: raw.id || '',
+                isAdvancedMode: mappedSubBookings.length > 0,
+                subBookings: mappedSubBookings
+              });
+            });
+            successCount++;
+          } else {
+            const singleData = parseQrPayload(decodedText);
+            
+            const prefixSubdist = singleData.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.';
+            const prefixDist = singleData.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.';
+            const prefixProv = singleData.province === 'กรุงเทพมหานคร' ? '' : 'จ.';
+            
+            const parts = [
+              singleData.addressLine1 || '',
+              singleData.subdistrict ? `${prefixSubdist}${singleData.subdistrict}` : '',
+              singleData.district ? `${prefixDist}${singleData.district}` : '',
+              singleData.province ? `${prefixProv}${singleData.province}` : ''
+            ].filter(Boolean);
+            const fullAddress = parts.join(' ');
+
+            const mappedSubBookings = (singleData.subBookings || []).map((sub, sIdx) => ({
+              id: Date.now() + Math.random() + sIdx,
+              name: sub.name || sub.n || '',
+              phone: sub.phone || sub.p || '',
+              quantity: sub.quantity || sub.q || 20,
+              useMainAddress: sub.useMainAddress || sub.m === 1,
+              address: sub.address || sub.a || ''
+            }));
+
+            decodedRecords.push({
+              id: Date.now() + Math.random() + i,
+              timestamp: new Date().toISOString(),
+              orderDate: singleData.orderDate || new Date().toISOString().split('T')[0],
+              quantity: singleData.quantity || 100,
+              name: singleData.name || '',
+              phone: singleData.phone || '',
+              addressLine1: singleData.addressLine1 || '',
+              address: fullAddress,
+              subdistrict: singleData.subdistrict || '',
+              district: singleData.district || '',
+              province: singleData.province || '',
+              zipcode: singleData.zipcode || '',
+              did: singleData.did || '',
+              isAdvancedMode: mappedSubBookings.length > 0,
+              subBookings: mappedSubBookings
+            });
+            successCount++;
+          }
+        } else {
+          failCount++;
+        }
+      } catch (err) {
+        console.error("Error processing file index " + i, err);
+        failCount++;
+      }
+    }
+
+    if (decodedRecords.length > 0) {
+      setHistory(prevHistory => {
+        const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
+        const merged = [...decodedRecords, ...safePrev];
+        const unique = [];
+        const seen = new Set();
+        for (const item of merged) {
+          const key = `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(item);
+          }
+        }
+        const sorted = unique.sort((a, b) => b.id - a.id).slice(0, 100);
+        localStorage.setItem('staffHistory', JSON.stringify(sorted));
+        return sorted;
+      });
+
+      const importedIds = decodedRecords.map(item => item.id);
+      setSelectedIds(importedIds);
+
+      alert(`นำเข้าสำเร็จ ${successCount} ไฟล์! (แปลงเป็นรายการสั่งจองได้ ${decodedRecords.length} รายการและเลือกไว้ให้แล้ว) ${failCount > 0 ? `| ล้มเหลว ${failCount} ไฟล์` : ''}`);
+
+      setTimeout(() => {
+        document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    } else {
+      alert("ไม่พบ QR Code หรือข้อมูลไม่ถูกต้องในรูปภาพที่เลือกทั้งหมดครับ");
+    }
+
+    e.target.value = '';
+  };
+
   const onError = () => {
     alert("กรุณากรอกข้อมูลให้ครบถ้วนในช่องที่จำเป็นก่อนสั่งพิมพ์ครับ");
   };
@@ -1112,6 +1268,43 @@ export default function StaffPortal() {
 
               {(scanMode === 'camera' || scanMode === 'usb') && (
                 <div>
+                  {/* Multiple Image Import Button (Visible on both mobile & desktop) */}
+                  <div style={{ marginBottom: '1.25rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('mobile-image-import-input').click()}
+                      className="btn"
+                      style={{
+                        width: '100%',
+                        padding: '0.65rem 1rem',
+                        fontSize: '0.9rem',
+                        fontWeight: 'bold',
+                        color: '#1d4ed8',
+                        backgroundColor: '#eff6ff',
+                        border: '2px dashed #3b82f6',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 8px rgba(59, 130, 246, 0.08)',
+                        margin: 0
+                      }}
+                    >
+                      <Upload size={18} />
+                      📥 นำเข้าด้วยภาพถ่าย QR Code (เลือกได้หลายรูป)
+                    </button>
+                    <input
+                      type="file"
+                      id="mobile-image-import-input"
+                      multiple
+                      accept="image/*"
+                      onChange={handleMultipleImagesImport}
+                      style={{ display: 'none' }}
+                    />
+                  </div>
+
                   {/* Camera Scanner View */}
                   <div id="reader" style={{ width: '100%', marginBottom: '1rem', display: cameraActive ? 'block' : 'none' }}></div>
                   {cameraActive && (
