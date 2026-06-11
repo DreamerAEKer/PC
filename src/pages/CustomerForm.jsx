@@ -4,6 +4,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import { Download, CheckCircle, Clock, Share2 } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
+import SubAddressFields from '../components/SubAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import { useThaiAddress } from 'use-thai-address';
 
@@ -37,27 +38,17 @@ export default function CustomerForm() {
     toastTimerRef.current = setTimeout(() => setToastMsg(null), 3000);
   };
 
-  const startLongPress = (type) => {
+  const startLongPress = () => {
     if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
     longPressTimerRef.current = setTimeout(() => {
-      if (type === 'address') {
-        // Long-press address: always OPEN advanced mode (or keep open), then scroll to section
-        setIsAdvancedMode(true);
-        showToast('📦 เปิดโหมดระบุที่อยู่แยกสำหรับผู้รับย่อยแล้ว! ติ๊ก "ใช้ที่อยู่เดียวกัน" หรือระบุใหม่ได้ในแต่ละรายชื่อ');
-        setTimeout(() => {
-          advancedSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      } else {
-        // Long-press name: toggle advanced mode
-        setIsAdvancedMode(prev => {
-          const next = !prev;
-          showToast(next
-            ? '👥 เปิดโหมดระบุชื่อผู้รับย่อยแล้ว! กด "เพิ่มชื่อผู้รับย่อย" ด้านล่างได้เลย'
-            : '🔒 ปิดโหมดผู้รับย่อยแล้ว (ข้อมูลที่กรอกไว้จะหายไป)'
-          );
-          return next;
-        });
-      }
+      setIsAdvancedMode(prev => {
+        const next = !prev;
+        showToast(next
+          ? '👥 เปิดโหมดรายชื่อย่อยแล้ว กด "เพิ่มรายชื่อย่อย" ด้านล่างได้เลย'
+          : '🔒 ปิดโหมดรายชื่อย่อยแล้ว'
+        );
+        return next;
+      });
     }, 3000);
   };
 
@@ -209,19 +200,32 @@ export default function CustomerForm() {
       for (let i = 0; i < subBookings.length; i++) {
         const sub = subBookings[i];
         if (!sub.name.trim() || !sub.phone.trim()) {
-          alert(`กรุณากรอกชื่อและเบอร์โทรศัพท์ของผู้รับย่อยคนที่ ${i + 1} ให้ครบถ้วนด้วยครับ`);
+          alert(`กรุณากรอกชื่อและเบอร์โทรศัพท์ของรายชื่อย่อยที่ ${i + 1} ให้ครบถ้วนด้วยครับ`);
           return;
         }
         if (sub.quantity < 20) {
-          alert(`ขออภัยครับ: จำนวนขั้นต่ำของผู้รับย่อยคนที่ ${i + 1} ต้องไม่น้อยกว่า 20 ใบ`);
+          alert(`ขออภัยครับ: จำนวนขั้นต่ำของรายชื่อย่อยที่ ${i + 1} ต้องไม่น้อยกว่า 20 ใบ`);
           return;
         }
-        if (!sub.useMainAddress && !sub.address.trim()) {
-          alert(`กรุณากรอกที่อยู่สำหรับผู้รับย่อยคนที่ ${i + 1} หรือติ๊กเลือกใช้ที่อยู่หลักครับ`);
+        if (!sub.useMainAddress && !(sub.addressLine1 || '').trim()) {
+          alert(`กรุณากรอกที่อยู่สำหรับรายชื่อย่อยที่ ${i + 1} หรือติ๊กเลือกใช้ที่อยู่เดียวกันครับ`);
           return;
         }
       }
     }
+
+    // Compose structured sub-booking addresses into display strings
+    const processedSubBookings = isAdvancedMode ? subBookings.map(sub => {
+      const subIsBKK = sub.province === 'กรุงเทพมหานคร';
+      const subAddr = sub.useMainAddress ? '' : [
+        sub.addressLine1,
+        subIsBKK ? (sub.subdistrict ? `แขวง${sub.subdistrict}` : '') : (sub.subdistrict ? `ต.${sub.subdistrict}` : ''),
+        subIsBKK ? (sub.district ? `เขต${sub.district}` : '') : (sub.district ? `อ.${sub.district}` : ''),
+        subIsBKK ? (sub.province || '') : (sub.province ? `จ.${sub.province}` : ''),
+        sub.zipcode || ''
+      ].filter(s => s && s.trim()).join(' ');
+      return { ...sub, address: subAddr };
+    }) : [];
 
     const processedData = {
       ...data,
@@ -230,7 +234,7 @@ export default function CustomerForm() {
       isDidActive,
       branch: resolvedBranchDisplay,
       isAdvancedMode,
-      subBookings: isAdvancedMode ? subBookings : []
+      subBookings: processedSubBookings
     };
 
     // Remove select helper fields from QR payload
@@ -248,13 +252,13 @@ export default function CustomerForm() {
       pv: processedData.province || '',
       zp: processedData.zipcode || '',
       id: processedData.did || '',
-      s: isAdvancedMode ? subBookings.map(sub => ({
+      s: processedSubBookings.map(sub => ({
         n: sub.name,
         p: sub.phone,
         q: sub.quantity,
         m: sub.useMainAddress ? 1 : 0,
-        a: sub.useMainAddress ? '' : sub.address
-      })) : []
+        a: sub.address
+      }))
     };
     const payload = JSON.stringify(compressedData);
     setGeneratedData({ ...processedData, payload });
@@ -648,20 +652,15 @@ export default function CustomerForm() {
             <div className="form-group">
               <label 
                 className="form-label"
-                onMouseDown={() => startLongPress('name')} 
+                onMouseDown={startLongPress} 
                 onMouseUp={cancelLongPress} 
                 onMouseLeave={cancelLongPress} 
-                onTouchStart={() => startLongPress('name')} 
+                onTouchStart={startLongPress} 
                 onTouchEnd={cancelLongPress}
                 style={{ cursor: 'pointer', userSelect: 'none' }}
               >
                 ชื่อ-นามสกุล <span style={{color:'red'}}>*</span>
               </label>
-              {!isAdvancedMode && (
-                <div style={{ fontSize: '0.75rem', color: '#a16207', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  💡 กดค้าง 3 วิ เพื่อเปิดโหมดระบุชื่อผู้รับย่อย (กรณีสั่ง 1 ออเดอร์ แต่พิมพ์หลายชื่อ)
-                </div>
-              )}
               <input type="text" className={`form-control ${getFieldClass('name')}`} required {...register("name", { required: true })} placeholder="ระบุชื่อและนามสกุล" />
               {errors.name && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุชื่อ-นามสกุล</span>}
             </div>
@@ -724,12 +723,11 @@ export default function CustomerForm() {
               dirtyFields={dirtyFields} 
               touchedFields={touchedFields} 
               isAddressRequired={!isDidActive}
-              hintText={!isAdvancedMode ? '💡 กดค้าง 3 วิ เพื่อเพิ่มที่อยู่แยกสำหรับผู้รับย่อย' : null}
               onAddressLabelEvents={{
-                onMouseDown: () => startLongPress('address'),
+                onMouseDown: startLongPress,
                 onMouseUp: cancelLongPress,
                 onMouseLeave: cancelLongPress,
-                onTouchStart: () => startLongPress('address'),
+                onTouchStart: startLongPress,
                 onTouchEnd: cancelLongPress
               }}
             />
@@ -763,7 +761,7 @@ export default function CustomerForm() {
                   <span>📦 รวมทั้งหมด: {quantity} ใบ</span>
                   <span>✅ แบ่งแล้ว: {subSum} ใบ</span>
                   <span style={{ color: mainQty < 20 && mainQty > 0 ? '#dc2626' : '#16a34a' }}>
-                    👤 ผู้รับหลักคงเหลือ: {mainQty} ใบ
+                    👤 รายชื่อหลักคงเหลือ: {mainQty} ใบ
                     {mainQty < 20 && mainQty > 0 && ' ⚠️'}
                   </span>
                 </div>
@@ -793,10 +791,10 @@ export default function CustomerForm() {
                         fontSize: '0.85rem'
                       }}
                     >
-                      ❌ ลบผู้รับย่อย
+                      ❌ ลบรายชื่อย่อย
                     </button>
                     
-                    <h4 style={{ fontSize: '0.9rem', color: '#b45309', marginBottom: '0.75rem', fontWeight: 'bold' }}>ผู้รับย่อยคนที่ {idx + 1}</h4>
+                    <h4 style={{ fontSize: '0.9rem', color: '#b45309', marginBottom: '0.75rem', fontWeight: 'bold' }}>รายชื่อย่อยที่ {idx + 1}</h4>
                     
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                       <div>
@@ -857,26 +855,19 @@ export default function CustomerForm() {
                               setSubBookings(updated);
                             }}
                           />
-                          ใช้ที่อยู่เดียวกับผู้รับหลัก
+                          ใช้ที่อยู่เดียวกับรายชื่อหลัก
                         </label>
                       </div>
                     </div>
 
                     {!sub.useMainAddress && (
-                      <div style={{ marginTop: '0.75rem' }}>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '0.25rem', color: '#78350f' }}>ที่อยู่ย่อยแบบละเอียด <span style={{color:'red'}}>*</span></label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          style={{ padding: '0.45rem 0.6rem', fontSize: '0.9rem', borderColor: '#fde047' }}
-                          value={sub.address}
-                          onChange={(e) => {
-                            const updated = subBookings.map(s => s.id === sub.id ? { ...s, address: e.target.value } : s);
-                            setSubBookings(updated);
-                          }}
-                          placeholder="ระบุบ้านเลขที่, หมู่, ถนน, ตำบล, อำเภอ, จังหวัด"
-                        />
-                      </div>
+                      <SubAddressFields
+                        value={{ addressLine1: sub.addressLine1, subdistrict: sub.subdistrict, district: sub.district, province: sub.province, zipcode: sub.zipcode }}
+                        onChange={(updatedAddr) => {
+                          const updated = subBookings.map(s => s.id === sub.id ? { ...s, ...updatedAddr } : s);
+                          setSubBookings(updated);
+                        }}
+                      />
                     )}
                   </div>
                 ))}
@@ -890,7 +881,11 @@ export default function CustomerForm() {
                       phone: '',
                       quantity: 20,
                       useMainAddress: true,
-                      address: ''
+                      addressLine1: '',
+                      subdistrict: '',
+                      district: '',
+                      province: '',
+                      zipcode: ''
                     }]);
                   }}
                   className="btn"
@@ -905,7 +900,7 @@ export default function CustomerForm() {
                   }}
                   disabled={subSum >= quantity}
                 >
-                  ➕ เพิ่มชื่อ/ที่อยู่ผู้รับย่อย
+                  ➕ เพิ่มรายชื่อย่อย
                 </button>
               </div>
             )}
@@ -1037,7 +1032,7 @@ export default function CustomerForm() {
                   textAlign: 'left'
                 }}>
                   <div style={{ fontWeight: 'bold', color: '#b45309', borderBottom: '1.5px dashed #fde047', paddingBottom: '0.35rem', marginBottom: '0.5rem' }}>
-                    📋 รายละเอียดการพิมพ์แยกรายชื่อผู้รับย่อย:
+                    📋 รายละเอียดการพิมพ์แยกรายชื่อย่อย:
                   </div>
                   {(() => {
                     const subSumVal = generatedData.subBookings.reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 0), 0);
