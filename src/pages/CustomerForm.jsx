@@ -955,10 +955,24 @@ export default function CustomerForm() {
 
             {/* Combined Steps Layout */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0', display: 'flex', flexDirection: 'column', gap: '1.25rem', alignItems: 'center' }}>
-              {/* Top Overview Image */}
-              <div style={{ width: '100%', maxWidth: '280px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: 'var(--secondary)', marginBottom: '0.35rem' }}>⚽ ภาพรวม 4 ขั้นตอน</span>
-                <img src="guide_step4.jpg" alt="ภาพรวม 4 ขั้นตอน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
+              {/* Top Pair Overview/Rounds Images */}
+              <div style={{ 
+                display: 'flex', 
+                gap: '1rem', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                width: '100%', 
+                maxWidth: '560px',
+                flexWrap: 'wrap'
+              }}>
+                <div style={{ flex: '1 1 240px', maxWidth: '280px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: 'var(--secondary)', marginBottom: '0.35rem' }}>⚽ ภาพรวม 4 ขั้นตอน</span>
+                  <img src="guide_step4.jpg" alt="ภาพรวม 4 ขั้นตอน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
+                </div>
+                <div style={{ flex: '1 1 240px', maxWidth: '280px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: 'var(--secondary)', marginBottom: '0.35rem' }}>🎁 ลุ้นรับโชค 2 รอบใหญ่</span>
+                  <img src="guide_rounds.jpg" alt="ลุ้นรับโชค 2 รอบใหญ่" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
+                </div>
               </div>
               
               {/* 2x2 Grid for Step Detail Images */}
