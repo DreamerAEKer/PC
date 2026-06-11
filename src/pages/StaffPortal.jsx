@@ -493,8 +493,15 @@ export default function StaffPortal() {
           qrCodeInstance.start(
             { facingMode: "environment" },
             {
-              fps: 10,
-              qrbox: { width: 250, height: 250 }
+              fps: 25,
+              qrbox: (viewfinderWidth, viewfinderHeight) => {
+                const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                const qrboxSize = Math.floor(minEdge * 0.75);
+                return { width: qrboxSize, height: qrboxSize };
+              },
+              experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true
+              }
             },
 
             (decodedText) => {
