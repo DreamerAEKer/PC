@@ -405,38 +405,93 @@ export default function CustomerForm() {
                   <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#92400e', whiteSpace: 'nowrap', textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}>ใบ <span style={{color:'red'}}>*</span></span>
                 </div>
 
-                {/* Quick preset buttons */}
-                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', position: 'relative', zIndex: 2 }}>
-                  {["100", "200", "300", "400", "500", "1000", "2000"].map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => setQuantityFields(preset)}
-                      style={{
-                        padding: '0.35rem 0.65rem',
-                        fontSize: '0.8rem',
-                        fontWeight: 'bold',
-                        color: quantity === parseInt(preset, 10) ? '#ffffff' : '#92400e',
-                        backgroundColor: quantity === parseInt(preset, 10) ? '#d97706' : '#fffbeb',
-                        border: '1.5px solid #d97706',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                        boxShadow: quantity === parseInt(preset, 10) ? '0 2px 5px rgba(217,119,6,0.3)' : 'none'
-                      }}
-                      onMouseOver={(e) => {
-                        if (quantity !== parseInt(preset, 10)) {
-                          e.currentTarget.style.backgroundColor = '#fef3c7';
-                        }
-                      }}
-                      onMouseOut={(e) => {
-                        if (quantity !== parseInt(preset, 10)) {
-                          e.currentTarget.style.backgroundColor = '#fffbeb';
-                        }
+                {/* Quick preset buttons (Gold bar styled with progressive scaling) */}
+                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', position: 'relative', zIndex: 2, alignItems: 'center' }}>
+                  {["100", "200", "300", "400", "500", "1000", "2000"].map((preset) => {
+                    const presetVal = parseInt(preset, 10);
+                    // Progressive scaling based on preset value
+                    let scale = 0.92;
+                    if (presetVal === 200) scale = 0.96;
+                    else if (presetVal === 300) scale = 1.0;
+                    else if (presetVal === 400) scale = 1.03;
+                    else if (presetVal === 500) scale = 1.06;
+                    else if (presetVal === 1000) scale = 1.12;
+                    else if (presetVal === 2000) scale = 1.18;
+
+                    const isActive = quantity === presetVal;
+
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setQuantityFields(preset)}
+                        style={{
+                          padding: '0.35rem 0.65rem',
+                          fontSize: '0.8rem',
+                          fontWeight: 'bold',
+                          color: isActive ? '#ffffff' : '#92400e',
+                          background: isActive 
+                            ? 'linear-gradient(135deg, #fef08a 0%, #eab308 50%, #ca8a04 100%)' 
+                            : 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+                          border: isActive ? '2px solid #a16207' : '1.5px solid #d97706',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          transform: `scale(${scale}) ${isActive ? 'translateY(-2px)' : 'none'}`,
+                          boxShadow: isActive 
+                            ? '0 4px 8px rgba(217, 119, 6, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.5)' 
+                            : '0 1px 3px rgba(0, 0, 0, 0.05)',
+                          transition: 'all 0.15s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.15rem'
+                        }}
+                        onMouseOver={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.background = 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)';
+                          }
+                        }}
+                        onMouseOut={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.background = 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)';
+                          }
+                        }}
+                      >
+                        <span>🪙</span>
+                        <span>{preset}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Visual pile of gold bars/coins */}
+                <div style={{ 
+                  display: 'flex', 
+                  gap: '0.2rem', 
+                  flexWrap: 'wrap', 
+                  alignItems: 'center', 
+                  justifyContent: 'flex-start',
+                  minHeight: '24px',
+                  padding: '0.35rem 0.5rem',
+                  background: 'rgba(251, 191, 36, 0.12)',
+                  borderRadius: '8px',
+                  border: '1px dashed #d97706',
+                  position: 'relative',
+                  zIndex: 2
+                }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#92400e', marginRight: '0.25rem' }}>กองรางวัลของคุณ:</span>
+                  {Array.from({ length: Math.min(15, Math.max(1, Math.floor(quantity / 100))) }).map((_, idx) => (
+                    <span 
+                      key={idx} 
+                      style={{ 
+                        display: 'inline-block',
+                        fontSize: '1.1rem',
+                        animation: 'floatGold 3s infinite ease-in-out',
+                        animationDelay: `${idx * 0.1}s`,
+                        lineHeight: 1
                       }}
                     >
-                      {preset}
-                    </button>
+                      🪙
+                    </span>
                   ))}
                 </div>
 
