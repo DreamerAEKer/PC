@@ -522,7 +522,16 @@ export default function StaffPortal() {
 
   const [isUrlCopied, setIsUrlCopied] = useState(false);
   const [showQuickQrModal, setShowQuickQrModal] = useState(false);
-  const generatedCustomerUrl = `${window.location.origin}${window.location.pathname}?branch=${encodeURIComponent(branchName)}`;
+  
+  // Helper to get 5-digit branch code, or fallback to the full typed name
+  const getBranchCode = (name) => {
+    if (!name) return '';
+    const match = name.match(/\d{5}/);
+    return match ? match[0] : name;
+  };
+
+  const branchCode = getBranchCode(branchName);
+  const generatedCustomerUrl = `${window.location.origin}${window.location.pathname}?branch=${encodeURIComponent(branchCode)}`;
 
   const copyGeneratedUrl = () => {
     navigator.clipboard.writeText(generatedCustomerUrl);
@@ -536,7 +545,7 @@ export default function StaffPortal() {
     const url = canvas.toDataURL("image/png");
     const link = document.createElement('a');
     link.href = url;
-    link.download = `qr-customer-${branchName || 'branch'}.png`;
+    link.download = `qr-customer-${branchCode || 'branch'}.png`;
     link.click();
   };
 
@@ -1298,17 +1307,17 @@ export default function StaffPortal() {
         {/* Section 2 & 1 moved to the bottom of the page */}
         <div className="staff-settings-container-row" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '2rem', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem', width: '100%' }}>
           <div className="staff-settings-bar" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#fff', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)', width: '100%', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flex: '1 1 auto', minWidth: '150px', maxWidth: '280px' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>สาขา:</span>
               <input 
                 type="text" 
                 className="form-control" 
                 value={branchName} 
                 onChange={handleBranchChange} 
-                style={{ width: '150px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
+                style={{ width: '100%', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
               />
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flex: '1 1 auto', minWidth: '110px', maxWidth: '200px' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>จนท:</span>
               <input 
                 type="text" 
@@ -1316,10 +1325,10 @@ export default function StaffPortal() {
                 value={staffName} 
                 onChange={handleStaffNameChange} 
                 placeholder="คลิกเพื่อพิมพ์ชื่อ"
-                style={{ width: '110px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
+                style={{ width: '100%', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
               />
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flex: '1 1 auto', minWidth: '100px', maxWidth: '160px' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>โทร:</span>
               <input 
                 type="text" 
@@ -1327,7 +1336,7 @@ export default function StaffPortal() {
                 value={staffPhone} 
                 onChange={handleStaffPhoneChange} 
                 placeholder="คลิกเพื่อพิมพ์"
-                style={{ width: '100px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
+                style={{ width: '100%', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} 
               />
             </div>
             <div style={{ display: 'flex', alignItems: 'center' }}>
