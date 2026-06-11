@@ -24,9 +24,56 @@ export default function CustomerForm() {
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
 
+  const [isAdvancedMode, setIsAdvancedMode] = useState(false);
+  const [subBookings, setSubBookings] = useState([]);
+  const longPressTimerRef = useRef(null);
+  const advancedSectionRef = useRef(null);
+  const [toastMsg, setToastMsg] = useState(null);
+  const toastTimerRef = useRef(null);
+
+  const showToast = (msg) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToastMsg(msg);
+    toastTimerRef.current = setTimeout(() => setToastMsg(null), 3000);
+  };
+
+  const startLongPress = (type) => {
+    if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = setTimeout(() => {
+      if (type === 'address') {
+        // Long-press address: always OPEN advanced mode (or keep open), then scroll to section
+        setIsAdvancedMode(true);
+        showToast('📦 เปิดโหมดระบุที่อยู่แยกสำหรับผู้รับย่อยแล้ว! ติ๊ก "ใช้ที่อยู่เดียวกัน" หรือระบุใหม่ได้ในแต่ละรายชื่อ');
+        setTimeout(() => {
+          advancedSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      } else {
+        // Long-press name: toggle advanced mode
+        setIsAdvancedMode(prev => {
+          const next = !prev;
+          showToast(next
+            ? '👥 เปิดโหมดระบุชื่อผู้รับย่อยแล้ว! กด "เพิ่มชื่อผู้รับย่อย" ด้านล่างได้เลย'
+            : '🔒 ปิดโหมดผู้รับย่อยแล้ว (ข้อมูลที่กรอกไว้จะหายไป)'
+          );
+          return next;
+        });
+      }
+    }, 3000);
+  };
+
+  const cancelLongPress = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
   const customQty = watch("customQuantity", "100");
   const quantity = parseInt(customQty, 10) || 0;
   const totalPrice = quantity * 3;
+
+  const subSum = subBookings.reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 0), 0);
+  const mainQty = Math.max(0, quantity - subSum);
 
   const setQuantityFields = (qtyVal) => {
     setValue("customQuantity", String(qtyVal || 100), { shouldValidate: true, shouldDirty: true });
@@ -144,12 +191,46 @@ export default function CustomerForm() {
     
     const resolvedQty = parseInt(data.customQuantity, 10) || 0;
 
+    // Advanced mode validations
+    if (isAdvancedMode && subBookings.length > 0) {
+      const subSumVal = subBookings.reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 0), 0);
+      const mainQtyVal = resolvedQty - subSumVal;
+      
+      if (subSumVal > resolvedQty) {
+        alert("ขออภัยครับ: จำนวนที่ระบุให้ผู้รับย่อยรวมกัน เกินกว่าจำนวนสั่งซื้อทั้งหมดที่คุณกรอกไว้");
+        return;
+      }
+      
+      if (mainQtyVal < 20 && mainQtyVal > 0) {
+        alert("ขออภัยครับ: จำนวนที่เหลือสำหรับผู้รับหลัก ต้องไม่น้อยกว่า 20 ใบ (หรือหักออกจนเป็น 0 ใบ)");
+        return;
+      }
+      
+      for (let i = 0; i < subBookings.length; i++) {
+        const sub = subBookings[i];
+        if (!sub.name.trim() || !sub.phone.trim()) {
+          alert(`กรุณากรอกชื่อและเบอร์โทรศัพท์ของผู้รับย่อยคนที่ ${i + 1} ให้ครบถ้วนด้วยครับ`);
+          return;
+        }
+        if (sub.quantity < 20) {
+          alert(`ขออภัยครับ: จำนวนขั้นต่ำของผู้รับย่อยคนที่ ${i + 1} ต้องไม่น้อยกว่า 20 ใบ`);
+          return;
+        }
+        if (!sub.useMainAddress && !sub.address.trim()) {
+          alert(`กรุณากรอกที่อยู่สำหรับผู้รับย่อยคนที่ ${i + 1} หรือติ๊กเลือกใช้ที่อยู่หลักครับ`);
+          return;
+        }
+      }
+    }
+
     const processedData = {
       ...data,
       quantity: resolvedQty,
       address: fullAddress,
       isDidActive,
-      branch: resolvedBranchDisplay
+      branch: resolvedBranchDisplay,
+      isAdvancedMode,
+      subBookings: isAdvancedMode ? subBookings : []
     };
 
     // Remove select helper fields from QR payload
@@ -166,7 +247,14 @@ export default function CustomerForm() {
       dt: processedData.district || '',
       pv: processedData.province || '',
       zp: processedData.zipcode || '',
-      id: processedData.did || ''
+      id: processedData.did || '',
+      s: isAdvancedMode ? subBookings.map(sub => ({
+        n: sub.name,
+        p: sub.phone,
+        q: sub.quantity,
+        m: sub.useMainAddress ? 1 : 0,
+        a: sub.useMainAddress ? '' : sub.address
+      })) : []
     };
     const payload = JSON.stringify(compressedData);
     setGeneratedData({ ...processedData, payload });
@@ -242,6 +330,10 @@ export default function CustomerForm() {
         .modal-tab-bar {
           -ms-overflow-style: none;  /* IE and Edge */
           scrollbar-width: none;  /* Firefox */
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
         @keyframes floatGold {
           0% {
@@ -554,7 +646,22 @@ export default function CustomerForm() {
               {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem', fontWeight: 600 }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
             </div>
             <div className="form-group">
-              <label className="form-label">ชื่อ-นามสกุล <span style={{color:'red'}}>*</span></label>
+              <label 
+                className="form-label"
+                onMouseDown={() => startLongPress('name')} 
+                onMouseUp={cancelLongPress} 
+                onMouseLeave={cancelLongPress} 
+                onTouchStart={() => startLongPress('name')} 
+                onTouchEnd={cancelLongPress}
+                style={{ cursor: 'pointer', userSelect: 'none' }}
+              >
+                ชื่อ-นามสกุล <span style={{color:'red'}}>*</span>
+              </label>
+              {!isAdvancedMode && (
+                <div style={{ fontSize: '0.75rem', color: '#a16207', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  💡 กดค้าง 3 วิ เพื่อเปิดโหมดระบุชื่อผู้รับย่อย (กรณีสั่ง 1 ออเดอร์ แต่พิมพ์หลายชื่อ)
+                </div>
+              )}
               <input type="text" className={`form-control ${getFieldClass('name')}`} required {...register("name", { required: true })} placeholder="ระบุชื่อและนามสกุล" />
               {errors.name && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุชื่อ-นามสกุล</span>}
             </div>
@@ -610,7 +717,223 @@ export default function CustomerForm() {
               )}
             </div>
 
-            <ThaiAddressFields register={register} setValue={setValue} errors={errors} dirtyFields={dirtyFields} touchedFields={touchedFields} isAddressRequired={!isDidActive} />
+            <ThaiAddressFields 
+              register={register} 
+              setValue={setValue} 
+              errors={errors} 
+              dirtyFields={dirtyFields} 
+              touchedFields={touchedFields} 
+              isAddressRequired={!isDidActive}
+              hintText={!isAdvancedMode ? '💡 กดค้าง 3 วิ เพื่อเพิ่มที่อยู่แยกสำหรับผู้รับย่อย' : null}
+              onAddressLabelEvents={{
+                onMouseDown: () => startLongPress('address'),
+                onMouseUp: cancelLongPress,
+                onMouseLeave: cancelLongPress,
+                onTouchStart: () => startLongPress('address'),
+                onTouchEnd: cancelLongPress
+              }}
+            />
+
+            {isAdvancedMode && (
+              <div ref={advancedSectionRef} style={{
+                marginTop: '1.5rem',
+                padding: '1.25rem',
+                background: 'linear-gradient(135deg, #fffbeb 0%, #fff7ed 100%)',
+                border: '2px solid #f59e0b',
+                borderRadius: '16px',
+                boxShadow: '0 4px 15px rgba(245, 158, 11, 0.15)',
+                position: 'relative'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                  <h3 style={{ fontSize: '1.1rem', color: '#b45309', margin: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    👥 แบ่งสัดส่วนจัดส่ง / พิมพ์แยกรายชื่อ
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => { setIsAdvancedMode(false); setSubBookings([]); showToast('🔒 ปิดโหมดผู้รับย่อยแล้ว'); }}
+                    style={{ border: 'none', background: '#fef3c7', color: '#92400e', fontSize: '0.78rem', fontWeight: 'bold', padding: '0.25rem 0.6rem', borderRadius: '6px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  >
+                    ✕ ปิดโหมดนี้
+                  </button>
+                </div>
+                <p style={{ fontSize: '0.82rem', color: '#78350f', marginBottom: '0.75rem' }}>
+                  แต่ละรายชื่อระบุจำนวนขั้นต่ำ 20 ใบ | ติ๊ก <strong>"ใช้ที่อยู่เดียวกัน"</strong> หรือระบุที่อยู่ใหม่ได้
+                </p>
+                <div style={{ padding: '0.5rem 0.75rem', background: '#fef9c3', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.82rem', color: '#78350f', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.25rem' }}>
+                  <span>📦 รวมทั้งหมด: {quantity} ใบ</span>
+                  <span>✅ แบ่งแล้ว: {subSum} ใบ</span>
+                  <span style={{ color: mainQty < 20 && mainQty > 0 ? '#dc2626' : '#16a34a' }}>
+                    👤 ผู้รับหลักคงเหลือ: {mainQty} ใบ
+                    {mainQty < 20 && mainQty > 0 && ' ⚠️'}
+                  </span>
+                </div>
+
+                {subBookings.map((sub, idx) => (
+                  <div key={sub.id} style={{
+                    padding: '1rem',
+                    background: '#ffffff',
+                    border: '1.5px solid #fde047',
+                    borderRadius: '12px',
+                    marginBottom: '1rem',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    position: 'relative'
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => setSubBookings(subBookings.filter(s => s.id !== sub.id))}
+                      style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        border: 'none',
+                        background: 'none',
+                        color: '#dc2626',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      ❌ ลบผู้รับย่อย
+                    </button>
+                    
+                    <h4 style={{ fontSize: '0.9rem', color: '#b45309', marginBottom: '0.75rem', fontWeight: 'bold' }}>ผู้รับย่อยคนที่ {idx + 1}</h4>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                      <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '0.25rem', color: '#78350f' }}>ชื่อ-นามสกุล <span style={{color:'red'}}>*</span></label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          style={{ padding: '0.45rem 0.6rem', fontSize: '0.9rem', borderColor: '#fde047' }}
+                          value={sub.name}
+                          onChange={(e) => {
+                            const updated = subBookings.map(s => s.id === sub.id ? { ...s, name: e.target.value } : s);
+                            setSubBookings(updated);
+                          }}
+                          placeholder="ชื่อ-นามสกุล"
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '0.25rem', color: '#78350f' }}>เบอร์โทรศัพท์ <span style={{color:'red'}}>*</span></label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          style={{ padding: '0.45rem 0.6rem', fontSize: '0.9rem', borderColor: '#fde047' }}
+                          value={sub.phone}
+                          onChange={(e) => {
+                            const updated = subBookings.map(s => s.id === sub.id ? { ...s, phone: e.target.value } : s);
+                            setSubBookings(updated);
+                          }}
+                          placeholder="เบอร์โทรศัพท์"
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                      <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '0.25rem', color: '#78350f' }}>จำนวนพิมพ์ (ใบ) <span style={{color:'red'}}>*</span></label>
+                        <input
+                          type="number"
+                          min="20"
+                          className="form-control"
+                          style={{ padding: '0.45rem 0.6rem', fontSize: '0.9rem', borderColor: '#fde047' }}
+                          value={sub.quantity}
+                          onChange={(e) => {
+                            const qty = parseInt(e.target.value, 10) || 0;
+                            const updated = subBookings.map(s => s.id === sub.id ? { ...s, quantity: qty } : s);
+                            setSubBookings(updated);
+                          }}
+                          placeholder="ขั้นต่ำ 20 ใบ"
+                        />
+                        {sub.quantity < 20 && <span style={{ color: '#dc2626', fontSize: '0.75rem', fontWeight: 'bold' }}>ขั้นต่ำ 20 ใบ</span>}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', color: '#78350f', fontWeight: 'bold', marginTop: '0.75rem' }}>
+                          <input
+                            type="checkbox"
+                            checked={sub.useMainAddress}
+                            onChange={(e) => {
+                              const updated = subBookings.map(s => s.id === sub.id ? { ...s, useMainAddress: e.target.checked } : s);
+                              setSubBookings(updated);
+                            }}
+                          />
+                          ใช้ที่อยู่เดียวกับผู้รับหลัก
+                        </label>
+                      </div>
+                    </div>
+
+                    {!sub.useMainAddress && (
+                      <div style={{ marginTop: '0.75rem' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '0.25rem', color: '#78350f' }}>ที่อยู่ย่อยแบบละเอียด <span style={{color:'red'}}>*</span></label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          style={{ padding: '0.45rem 0.6rem', fontSize: '0.9rem', borderColor: '#fde047' }}
+                          value={sub.address}
+                          onChange={(e) => {
+                            const updated = subBookings.map(s => s.id === sub.id ? { ...s, address: e.target.value } : s);
+                            setSubBookings(updated);
+                          }}
+                          placeholder="ระบุบ้านเลขที่, หมู่, ถนน, ตำบล, อำเภอ, จังหวัด"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubBookings([...subBookings, {
+                      id: Date.now(),
+                      name: '',
+                      phone: '',
+                      quantity: 20,
+                      useMainAddress: true,
+                      address: ''
+                    }]);
+                  }}
+                  className="btn"
+                  style={{
+                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    padding: '0.6rem 1rem',
+                    width: '100%',
+                    borderRadius: '10px',
+                    boxShadow: '0 2px 5px rgba(217, 119, 6, 0.2)'
+                  }}
+                  disabled={subSum >= quantity}
+                >
+                  ➕ เพิ่มชื่อ/ที่อยู่ผู้รับย่อย
+                </button>
+              </div>
+            )}
+
+            {/* Toast Notification */}
+            {toastMsg && (
+              <div style={{
+                position: 'fixed',
+                bottom: '1.5rem',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                backgroundColor: '#1e293b',
+                color: '#fff',
+                padding: '0.75rem 1.25rem',
+                borderRadius: '12px',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+                zIndex: 9999,
+                maxWidth: '90vw',
+                textAlign: 'center',
+                lineHeight: '1.5',
+                animation: 'fadeInUp 0.3s ease'
+              }}>
+                {toastMsg}
+              </div>
+            )}
+
             <div style={{ marginTop: '2rem' }}>
               <button type="submit" className="btn btn-primary" style={{ width: '100%', fontSize: '1.1rem', fontWeight: 'bold' }}>
                 ตกลงสั่งพิมพ์
@@ -700,6 +1023,44 @@ export default function CustomerForm() {
               {generatedData.did && (
                 <div style={{ fontSize: '1.1rem', marginTop: '1rem', padding: '0.5rem', background: '#f8fafc', borderLeft: '4px solid var(--secondary)' }}>
                   <strong>D-ID:</strong> {generatedData.did}
+                </div>
+              )}
+
+              {generatedData.isAdvancedMode && generatedData.subBookings && generatedData.subBookings.length > 0 && (
+                <div style={{ 
+                  marginTop: '1.25rem', 
+                  padding: '0.75rem 1rem', 
+                  background: '#fffbeb', 
+                  border: '1.5px solid #fde047', 
+                  borderRadius: '10px',
+                  fontSize: '0.95rem',
+                  textAlign: 'left'
+                }}>
+                  <div style={{ fontWeight: 'bold', color: '#b45309', borderBottom: '1.5px dashed #fde047', paddingBottom: '0.35rem', marginBottom: '0.5rem' }}>
+                    📋 รายละเอียดการพิมพ์แยกรายชื่อผู้รับย่อย:
+                  </div>
+                  {(() => {
+                    const subSumVal = generatedData.subBookings.reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 0), 0);
+                    const mainQtyVal = generatedData.quantity - subSumVal;
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {mainQtyVal > 0 && (
+                          <div style={{ borderBottom: '1px solid #fef9c3', paddingBottom: '0.25rem' }}>
+                            • <strong>{generatedData.name}</strong> ({generatedData.phone}) — <strong>{mainQtyVal} ใบ</strong><br/>
+                            <span style={{ fontSize: '0.8rem', color: '#78350f' }}>ที่อยู่จัดส่ง: ส่งที่อยู่หลัก</span>
+                          </div>
+                        )}
+                        {generatedData.subBookings.map((sub, idx) => (
+                          <div key={sub.id} style={{ borderBottom: idx < generatedData.subBookings.length - 1 ? '1px solid #fef9c3' : 'none', paddingBottom: idx < generatedData.subBookings.length - 1 ? '0.25rem' : 0 }}>
+                            • <strong>{sub.name}</strong> ({sub.phone}) — <strong>{sub.quantity} ใบ</strong><br/>
+                            <span style={{ fontSize: '0.8rem', color: '#78350f' }}>
+                              ที่อยู่จัดส่ง: {sub.useMainAddress ? 'ส่งที่อยู่หลัก' : sub.address}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>

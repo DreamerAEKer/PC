@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useThaiAddress } from 'use-thai-address';
 import { Info } from 'lucide-react';
 
-export default function ThaiAddressFields({ register, setValue, errors, defaultValues, dirtyFields, touchedFields, isAddressRequired = true }) {
+export default function ThaiAddressFields({ register, setValue, errors, defaultValues, dirtyFields, touchedFields, isAddressRequired = true, onAddressLabelEvents, hintText }) {
   const { filteredData, searchByField, reset } = useThaiAddress();
   const [activeField, setActiveField] = useState(null); // 'subdistrict', 'district', 'province', 'zipcode'
   const containerRef = useRef(null);
@@ -95,7 +95,12 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
   return (
     <div ref={containerRef}>
       <div className="form-group">
-        <label className="form-label">ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน) {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
+        <label className="form-label" {...onAddressLabelEvents} style={{ cursor: onAddressLabelEvents ? 'pointer' : 'default', userSelect: 'none' }}>ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน) {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
+        {hintText && (
+          <div style={{ fontSize: '0.75rem', color: '#a16207', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            {hintText}
+          </div>
+        )}
         <input type="text" className={`form-control ${getFieldClass('addressLine1')}`} required={isAddressRequired} {...register("addressLine1", { required: isAddressRequired })} placeholder="ระบุบ้านเลขที่ หมู่ ซอย ถนน" defaultValue={defaultValues?.addressLine1 || ''} />
         {errors.addressLine1 && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุที่อยู่</span>}
       </div>
