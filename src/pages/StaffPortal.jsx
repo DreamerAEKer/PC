@@ -915,6 +915,12 @@ export default function StaffPortal() {
               order: 2 !important;
             }
           }
+          
+          @media (min-width: 769px) {
+            .mobile-only-scan-helper {
+              display: none !important;
+            }
+          }
 
           .quick-qr-modal-overlay {
             position: fixed;
@@ -1030,7 +1036,7 @@ export default function StaffPortal() {
               <div id="reader-hidden" style={{ position: 'absolute', top: '-9999px', width: '500px', height: '500px' }}></div>
 
               {(scanMode === 'camera' || scanMode === 'usb') && (
-                <div style={{ marginBottom: '1.25rem' }}>
+                <div className="mobile-only-scan-helper" style={{ marginBottom: '1.25rem' }}>
                   {/* Target Scan Selector */}
                   <div style={{
                     backgroundColor: '#fffbeb',
