@@ -731,14 +731,21 @@ export default function StaffPortal() {
     }
 
     // Fallback to html5QrCode
-    const html5QrCode = new Html5Qrcode("reader-hidden");
+    let html5QrCode;
     try {
+      html5QrCode = new Html5Qrcode("reader-hidden");
       const decodedText = await html5QrCode.scanFile(file, false);
       if (!processDecodedData(decodedText)) {
         alert("ไม่พบ QR Code ในรูปภาพนี้ หรือข้อมูลไม่ถูกต้อง กรุณาลองสแกนผ่านกล้องแทน");
       }
     } catch (err) {
       alert("ไม่พบ QR Code ในรูปภาพนี้ หรือข้อมูลไม่ถูกต้อง กรุณาลองสแกนผ่านกล้องแทน");
+    } finally {
+      if (html5QrCode) {
+        try {
+          await html5QrCode.clear();
+        } catch (e) {}
+      }
     }
   };
 
@@ -749,6 +756,13 @@ export default function StaffPortal() {
     let successCount = 0;
     let failCount = 0;
     const decodedRecords = [];
+
+    let html5QrCode;
+    try {
+      html5QrCode = new Html5Qrcode("reader-hidden");
+    } catch (err) {
+      console.warn("Failed to create Html5Qrcode instance:", err);
+    }
 
     const decodeSingleImage = async (file) => {
       let decodedText = '';
@@ -765,9 +779,8 @@ export default function StaffPortal() {
         }
       }
 
-      if (!decodedText) {
+      if (!decodedText && html5QrCode) {
         try {
-          const html5QrCode = new Html5Qrcode("reader-hidden");
           decodedText = await html5QrCode.scanFile(file, false);
         } catch (err) {
           console.error("html5QrCode decode error:", err);
@@ -777,91 +790,101 @@ export default function StaffPortal() {
       return decodedText;
     };
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      try {
-        const decodedText = await decodeSingleImage(file);
-        if (decodedText) {
-          const parsed = JSON.parse(decodedText);
-          
-          if (parsed && parsed.b === 1 && Array.isArray(parsed.r)) {
-            parsed.r.forEach((raw, sIdx) => {
-              const mappedSubBookings = (raw.s || []).map((sub, subIdx) => ({
-                id: Date.now() + Math.random() + sIdx + subIdx,
-                name: sub.n || '',
-                phone: sub.p || '',
-                quantity: sub.q || 20,
-                useMainAddress: sub.m === 1,
-                address: sub.a || ''
-              }));
-              decodedRecords.push({
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        try {
+          const decodedText = await decodeSingleImage(file);
+          if (decodedText) {
+            const parsed = JSON.parse(decodedText);
+            
+            if (parsed && parsed.b === 1 && Array.isArray(parsed.r)) {
+              parsed.r.forEach((raw, sIdx) => {
+                const mappedSubBookings = (raw.s || []).map((sub, subIdx) => ({
+                  id: Date.now() + Math.random() + sIdx + subIdx,
+                  name: sub.n || '',
+                  phone: sub.p || '',
+                  quantity: sub.q || 20,
+                  useMainAddress: sub.m === 1,
+                  address: sub.a || ''
+                }));
+                decodedRecords.push({
+                  id: Date.now() + Math.random() + sIdx,
+                  timestamp: new Date().toISOString(),
+                  orderDate: raw.d || new Date().toISOString().split('T')[0],
+                  quantity: raw.q || 1,
+                  name: raw.n || '',
+                  phone: raw.p || '',
+                  addressLine1: raw.a || '',
+                  address: raw.a || '',
+                  subdistrict: raw.sd || '',
+                  district: raw.dt || '',
+                  province: raw.pv || '',
+                  zipcode: raw.zp || '',
+                  did: raw.id || '',
+                  isAdvancedMode: mappedSubBookings.length > 0,
+                  subBookings: mappedSubBookings
+                });
+              });
+              successCount++;
+            } else {
+              const singleData = parseQrPayload(decodedText);
+              
+              const prefixSubdist = singleData.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.';
+              const prefixDist = singleData.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.';
+              const prefixProv = singleData.province === 'กรุงเทพมหานคร' ? '' : 'จ.';
+              
+              const parts = [
+                singleData.addressLine1 || '',
+                singleData.subdistrict ? `${prefixSubdist}${singleData.subdistrict}` : '',
+                singleData.district ? `${prefixDist}${singleData.district}` : '',
+                singleData.province ? `${prefixProv}${singleData.province}` : ''
+              ].filter(Boolean);
+              const fullAddress = parts.join(' ');
+
+              const mappedSubBookings = (singleData.subBookings || []).map((sub, sIdx) => ({
                 id: Date.now() + Math.random() + sIdx,
+                name: sub.name || sub.n || '',
+                phone: sub.phone || sub.p || '',
+                quantity: sub.quantity || sub.q || 20,
+                useMainAddress: sub.useMainAddress || sub.m === 1,
+                address: sub.address || sub.a || ''
+              }));
+
+              decodedRecords.push({
+                id: Date.now() + Math.random() + i,
                 timestamp: new Date().toISOString(),
-                orderDate: raw.d || new Date().toISOString().split('T')[0],
-                quantity: raw.q || 1,
-                name: raw.n || '',
-                phone: raw.p || '',
-                addressLine1: raw.a || '',
-                address: raw.a || '',
-                subdistrict: raw.sd || '',
-                district: raw.dt || '',
-                province: raw.pv || '',
-                zipcode: raw.zp || '',
-                did: raw.id || '',
+                orderDate: singleData.orderDate || new Date().toISOString().split('T')[0],
+                quantity: singleData.quantity || 100,
+                name: singleData.name || '',
+                phone: singleData.phone || '',
+                addressLine1: singleData.addressLine1 || '',
+                address: fullAddress,
+                subdistrict: singleData.subdistrict || '',
+                district: singleData.district || '',
+                province: singleData.province || '',
+                zipcode: singleData.zipcode || '',
+                did: singleData.did || '',
                 isAdvancedMode: mappedSubBookings.length > 0,
                 subBookings: mappedSubBookings
               });
-            });
-            successCount++;
+              successCount++;
+            }
           } else {
-            const singleData = parseQrPayload(decodedText);
-            
-            const prefixSubdist = singleData.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.';
-            const prefixDist = singleData.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.';
-            const prefixProv = singleData.province === 'กรุงเทพมหานคร' ? '' : 'จ.';
-            
-            const parts = [
-              singleData.addressLine1 || '',
-              singleData.subdistrict ? `${prefixSubdist}${singleData.subdistrict}` : '',
-              singleData.district ? `${prefixDist}${singleData.district}` : '',
-              singleData.province ? `${prefixProv}${singleData.province}` : ''
-            ].filter(Boolean);
-            const fullAddress = parts.join(' ');
-
-            const mappedSubBookings = (singleData.subBookings || []).map((sub, sIdx) => ({
-              id: Date.now() + Math.random() + sIdx,
-              name: sub.name || sub.n || '',
-              phone: sub.phone || sub.p || '',
-              quantity: sub.quantity || sub.q || 20,
-              useMainAddress: sub.useMainAddress || sub.m === 1,
-              address: sub.address || sub.a || ''
-            }));
-
-            decodedRecords.push({
-              id: Date.now() + Math.random() + i,
-              timestamp: new Date().toISOString(),
-              orderDate: singleData.orderDate || new Date().toISOString().split('T')[0],
-              quantity: singleData.quantity || 100,
-              name: singleData.name || '',
-              phone: singleData.phone || '',
-              addressLine1: singleData.addressLine1 || '',
-              address: fullAddress,
-              subdistrict: singleData.subdistrict || '',
-              district: singleData.district || '',
-              province: singleData.province || '',
-              zipcode: singleData.zipcode || '',
-              did: singleData.did || '',
-              isAdvancedMode: mappedSubBookings.length > 0,
-              subBookings: mappedSubBookings
-            });
-            successCount++;
+            failCount++;
           }
-        } else {
+        } catch (err) {
+          console.error("Error processing file index " + i, err);
           failCount++;
         }
-      } catch (err) {
-        console.error("Error processing file index " + i, err);
-        failCount++;
+      }
+    } finally {
+      if (html5QrCode) {
+        try {
+          await html5QrCode.clear();
+        } catch (e) {
+          console.error("Failed to clear html5QrCode:", e);
+        }
       }
     }
 
