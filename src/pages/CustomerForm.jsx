@@ -360,25 +360,16 @@ export default function CustomerForm() {
               
               <div style={{ 
                 padding: '1rem', 
-                background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', 
-                border: '2.5px solid #d97706', 
-                borderRadius: '12px',
-                boxShadow: '0 4px 15px rgba(217, 119, 6, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
-                position: 'relative',
-                overflow: 'hidden',
+                backgroundColor: '#f8fafc', 
+                border: '1.5px solid #cbd5e1', 
+                borderRadius: '10px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.75rem'
+                gap: '0.85rem'
               }}>
-                {/* Floating gold pieces background */}
-                <span className="floating-gold-item" style={{ left: '10%', bottom: '10%', animationDelay: '0s' }}>🪙</span>
-                <span className="floating-gold-item" style={{ left: '30%', bottom: '5%', animationDelay: '1.5s', fontSize: '1.2rem' }}>✨</span>
-                <span className="floating-gold-item" style={{ right: '15%', bottom: '8%', animationDelay: '0.8s' }}>🪙</span>
-                <span className="floating-gold-item" style={{ right: '35%', bottom: '12%', animationDelay: '2.3s', fontSize: '1.1rem' }}>✨</span>
-
                 {/* Input and labels row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifyContent: 'flex-start', position: 'relative', zIndex: 2, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#92400e', whiteSpace: 'nowrap', textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}>โปรดระบุจำนวน</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#475569', whiteSpace: 'nowrap' }}>ระบุจำนวน:</span>
                   <input 
                     type="number" 
                     min="50" 
@@ -387,115 +378,68 @@ export default function CustomerForm() {
                     {...register("customQuantity", { required: true, min: 50 })} 
                     placeholder="เช่น 150" 
                     style={{ 
-                      width: '95px', 
+                      width: '100px', 
                       display: 'inline-block', 
                       margin: 0, 
                       padding: '0.4rem 0.5rem', 
                       textAlign: 'center', 
-                      borderColor: '#d97706', 
-                      borderWidth: '2px', 
-                      fontSize: '1rem',
-                      fontWeight: 'bold',
-                      color: '#78350f',
+                      borderColor: '#cbd5e1', 
+                      borderWidth: '1.5px', 
+                      fontSize: '0.95rem',
+                      color: '#0f172a',
                       backgroundColor: '#ffffff',
-                      borderRadius: '8px',
-                      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)'
+                      borderRadius: '6px'
                     }}
                   />
-                  <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#92400e', whiteSpace: 'nowrap', textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}>ใบ <span style={{color:'red'}}>*</span></span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#475569', whiteSpace: 'nowrap' }}>ใบ <span style={{color:'red'}}>*</span></span>
                 </div>
 
-                {/* Quick preset buttons (Gold bar styled with progressive scaling) */}
-                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', position: 'relative', zIndex: 2, alignItems: 'center' }}>
-                  {["100", "200", "300", "400", "500", "1000", "2000"].map((preset) => {
-                    const presetVal = parseInt(preset, 10);
-                    // Progressive scaling based on preset value
-                    let scale = 0.92;
-                    if (presetVal === 200) scale = 0.96;
-                    else if (presetVal === 300) scale = 1.0;
-                    else if (presetVal === 400) scale = 1.03;
-                    else if (presetVal === 500) scale = 1.06;
-                    else if (presetVal === 1000) scale = 1.12;
-                    else if (presetVal === 2000) scale = 1.18;
+                {/* Quick preset buttons */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#64748b' }}>หรือเลือกจำนวนด่วน:</span>
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {["100", "200", "300", "400", "500", "1000", "2000"].map((preset) => {
+                      const presetVal = parseInt(preset, 10);
+                      const isActive = quantity === presetVal;
 
-                    const isActive = quantity === presetVal;
-
-                    return (
-                      <button
-                        key={preset}
-                        type="button"
-                        onClick={() => setQuantityFields(preset)}
-                        style={{
-                          padding: '0.35rem 0.65rem',
-                          fontSize: '0.8rem',
-                          fontWeight: 'bold',
-                          color: isActive ? '#ffffff' : '#92400e',
-                          background: isActive 
-                            ? 'linear-gradient(135deg, #fef08a 0%, #eab308 50%, #ca8a04 100%)' 
-                            : 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
-                          border: isActive ? '2px solid #a16207' : '1.5px solid #d97706',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          transform: `scale(${scale}) ${isActive ? 'translateY(-2px)' : 'none'}`,
-                          boxShadow: isActive 
-                            ? '0 4px 8px rgba(217, 119, 6, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.5)' 
-                            : '0 1px 3px rgba(0, 0, 0, 0.05)',
-                          transition: 'all 0.15s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.15rem'
-                        }}
-                        onMouseOver={(e) => {
-                          if (!isActive) {
-                            e.currentTarget.style.background = 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)';
-                          }
-                        }}
-                        onMouseOut={(e) => {
-                          if (!isActive) {
-                            e.currentTarget.style.background = 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)';
-                          }
-                        }}
-                      >
-                        <span>🪙</span>
-                        <span>{preset}</span>
-                      </button>
-                    );
-                  })}
+                      return (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setQuantityFields(preset)}
+                          style={{
+                            padding: '0.4rem 0.8rem',
+                            minWidth: '65px',
+                            fontSize: '0.85rem',
+                            fontWeight: '600',
+                            color: isActive ? '#ffffff' : '#475569',
+                            backgroundColor: isActive ? 'var(--primary)' : '#ffffff',
+                            border: isActive ? '1.5px solid var(--primary)' : '1.5px solid #cbd5e1',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                          onMouseOver={(e) => {
+                            if (!isActive) {
+                              e.currentTarget.style.backgroundColor = '#f1f5f9';
+                              e.currentTarget.style.borderColor = '#94a3b8';
+                            }
+                          }}
+                          onMouseOut={(e) => {
+                            if (!isActive) {
+                              e.currentTarget.style.backgroundColor = '#ffffff';
+                              e.currentTarget.style.borderColor = '#cbd5e1';
+                            }
+                          }}
+                        >
+                          {preset}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                {/* Visual pile of gold bars/coins */}
-                <div style={{ 
-                  display: 'flex', 
-                  gap: '0.2rem', 
-                  flexWrap: 'wrap', 
-                  alignItems: 'center', 
-                  justifyContent: 'flex-start',
-                  minHeight: '24px',
-                  padding: '0.35rem 0.5rem',
-                  background: 'rgba(251, 191, 36, 0.12)',
-                  borderRadius: '8px',
-                  border: '1px dashed #d97706',
-                  position: 'relative',
-                  zIndex: 2
-                }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#92400e', marginRight: '0.25rem' }}>กองรางวัลของคุณ:</span>
-                  {Array.from({ length: Math.min(15, Math.max(1, Math.floor(quantity / 100))) }).map((_, idx) => (
-                    <span 
-                      key={idx} 
-                      style={{ 
-                        display: 'inline-block',
-                        fontSize: '1.1rem',
-                        animation: 'floatGold 3s infinite ease-in-out',
-                        animationDelay: `${idx * 0.1}s`,
-                        lineHeight: 1
-                      }}
-                    >
-                      🪙
-                    </span>
-                  ))}
-                </div>
-
-                {errors.customQuantity && <span style={{ color: '#b45309', fontSize: '0.85rem', display: 'block', marginTop: '0.5rem', fontWeight: 600, position: 'relative', zIndex: 2 }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
+                {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem', fontWeight: 600 }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
               </div>
             </div>
             <div className="form-group">
