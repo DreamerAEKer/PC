@@ -570,7 +570,9 @@ export default function StaffPortal() {
   const [isUrlCopied, setIsUrlCopied] = useState(false);
   const [showQuickQrModal, setShowQuickQrModal] = useState(false);
   
-  const generatedCustomerUrl = `${window.location.origin}${window.location.pathname}?branch=${encodeURIComponent(branchCode)}`;
+  const generatedCustomerUrl = branchCode === '10501'
+    ? `${window.location.origin}${window.location.pathname}`
+    : `${window.location.origin}${window.location.pathname}?branch=${encodeURIComponent(branchCode)}`;
 
   const copyGeneratedUrl = () => {
     navigator.clipboard.writeText(generatedCustomerUrl);
