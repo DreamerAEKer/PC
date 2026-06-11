@@ -52,7 +52,22 @@ export default function StaffPortal() {
   const [staffName, setStaffName] = useState('');
   const [staffPhone, setStaffPhone] = useState('');
   const [isSettingsDirty, setIsSettingsDirty] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
   const navigate = useNavigate();
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === history.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(history.map(r => r.id));
+    }
+  };
+
+  const toggleSelectRecord = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
 
   const { filteredData, searchByField } = useThaiAddress();
 
@@ -328,13 +343,19 @@ export default function StaffPortal() {
   };
 
   const exportHistory = async () => {
-    if (history.length === 0) {
+    const recordsToExport = selectedIds.length > 0
+      ? history.filter(r => selectedIds.includes(r.id))
+      : history;
+
+    if (recordsToExport.length === 0) {
       alert("ไม่มีประวัติการพิมพ์ให้ส่งออกครับ");
       return;
     }
-    const dataStr = JSON.stringify(history, null, 2);
+    const dataStr = JSON.stringify(recordsToExport, null, 2);
     const dateStr = new Date().toISOString().split('T')[0];
-    const filename = `staff-history-${dateStr}.json`;
+    const filename = selectedIds.length > 0 
+      ? `staff-history-selected-${dateStr}.json`
+      : `staff-history-${dateStr}.json`;
 
     if (navigator.share && navigator.canShare) {
       try {
@@ -343,7 +364,7 @@ export default function StaffPortal() {
           await navigator.share({
             files: [file],
             title: 'ประวัติข้อมูลลูกค้าจอง',
-            text: `ไฟล์ข้อมูลลูกค้าสาขา ${branchName} ประจำวันที่ ${dateStr}`
+            text: `ไฟล์ข้อมูลลูกค้าสาขา ${branchName} (${branchCode}) ประจำวันที่ ${dateStr}`
           });
           return;
         }
@@ -1278,19 +1299,62 @@ export default function StaffPortal() {
           {/* Right column: History */}
           <div style={{ flex: '1 1 350px' }}>
             <div className="card">
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <History size={20} />
-                ประวัติการพิมพ์ (เครื่องนี้)
-              </h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                  <History size={20} />
+                  ประวัติการพิมพ์ (เครื่องนี้)
+                </h3>
+                {history.length > 0 && (
+                  <button 
+                    type="button"
+                    onClick={toggleSelectAll} 
+                    className="btn"
+                    style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', margin: 0, border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#475569', cursor: 'pointer', borderRadius: '4px' }}
+                  >
+                    {selectedIds.length === history.length ? 'ยกเลิกเลือกทั้งหมด' : 'เลือกทั้งหมด'}
+                  </button>
+                )}
+              </div>
+
+              {/* Totals Summary */}
+              {history.length > 0 && (() => {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const todayTotal = history
+                  .filter(r => r.orderDate === todayStr || (r.timestamp && r.timestamp.startsWith(todayStr)))
+                  .reduce((sum, r) => sum + (r.quantity || 0), 0);
+                const grandTotal = history.reduce((sum, r) => sum + (r.quantity || 0), 0);
+                return (
+                  <div style={{ 
+                    display: 'flex', 
+                    gap: '0.75rem', 
+                    marginBottom: '1rem',
+                    backgroundColor: '#f8fafc',
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)'
+                  }}>
+                    <div style={{ flex: 1, textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ยอดวันนี้</div>
+                      <strong style={{ fontSize: '1.1rem', color: 'var(--primary)' }}>{todayTotal.toLocaleString()} ใบ</strong>
+                    </div>
+                    <div style={{ width: '1px', backgroundColor: 'var(--border)' }}></div>
+                    <div style={{ flex: 1, textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ยอดรวมทั้งหมด</div>
+                      <strong style={{ fontSize: '1.1rem', color: '#0f172a' }}>{grandTotal.toLocaleString()} ใบ</strong>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Export/Import Control Buttons */}
               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
                 <button 
                   onClick={exportHistory} 
                   className="btn btn-secondary" 
-                  style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}
-                  title="ดาวน์โหลดประวัติทั้งหมดเป็นไฟล์เพื่อนำไปเปิดเครื่องอื่น"
+                  style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
+                  title="ดาวน์โหลดประวัติเป็นไฟล์เพื่อนำไปเปิดเครื่องอื่น"
                 >
-                  <Download size={14} /> ส่งออกข้อมูล (.json)
+                  <Download size={14} /> {selectedIds.length > 0 ? `ส่งออกที่เลือก (${selectedIds.length})` : 'ส่งออกข้อมูลทั้งหมด'}
                 </button>
                 <label 
                   className="btn btn-secondary" 
@@ -1319,16 +1383,24 @@ export default function StaffPortal() {
                         background: '#fff'
                       }}
                     >
-                      <div>
-                        <div style={{ fontWeight: '600', color: 'var(--text-main)' }}>{record.name}</div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                          {record.phone && <span>โทร: {record.phone}</span>}
-                          {record.phone && <span style={{ color: '#cbd5e1' }}>|</span>}
-                          {record.quantity !== undefined && <span>จำนวนที่พิมพ์: {record.quantity} ใบ</span>}
-                          {record.quantity !== undefined && <span style={{ color: '#cbd5e1' }}>|</span>}
-                          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                            {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
-                          </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, marginRight: '0.5rem' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIds.includes(record.id)}
+                          onChange={() => toggleSelectRecord(record.id)}
+                          style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: '600', color: 'var(--text-main)' }}>{record.name}</div>
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {record.phone && <span>โทร: {record.phone}</span>}
+                            {record.phone && <span style={{ color: '#cbd5e1' }}>|</span>}
+                            {record.quantity !== undefined && <span>จำนวนที่พิมพ์: {record.quantity} ใบ</span>}
+                            {record.quantity !== undefined && <span style={{ color: '#cbd5e1' }}>|</span>}
+                            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                              {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
