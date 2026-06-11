@@ -1546,7 +1546,7 @@ export default function CustomerForm() {
               </div>
             )}
 
-            {/* Short Details */}
+            {/* Short Details with fixed height to prevent button shifting */}
             <div style={{
               backgroundColor: '#f8fafc',
               borderRadius: '12px',
@@ -1555,33 +1555,47 @@ export default function CustomerForm() {
               marginBottom: '1.5rem',
               border: '1px solid #e2e8f0',
               fontSize: '0.95rem',
-              lineHeight: '1.6'
+              lineHeight: '1.6',
+              height: '185px', // Exact height calculated for all fields + border + padding
+              boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
             }}>
-              <div style={{ borderBottom: '1px dashed #cbd5e1', paddingBottom: '0.5rem', marginBottom: '0.5rem', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
-                📍 รับพิมพ์โดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#64748b' }}>ชื่อผู้รับ:</span>
-                <strong style={{ color: '#0f172a' }}>{generatedData.name}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#64748b' }}>เบอร์โทร:</span>
-                <strong style={{ color: '#0f172a' }}>{generatedData.phone}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#64748b' }}>จำนวนที่จอง:</span>
-                <strong style={{ color: 'var(--primary)', fontSize: '1.05rem' }}>{generatedData.quantity} ใบ</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#64748b' }}>วันที่สั่งจอง:</span>
-                <strong style={{ color: '#0f172a' }}>{generatedData.orderDate}</strong>
-              </div>
-              {generatedData.did && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #e2e8f0', marginTop: '0.5rem', paddingTop: '0.5rem' }}>
-                  <span style={{ color: '#64748b' }}>D-ID:</span>
-                  <strong style={{ color: 'var(--secondary)' }}>{generatedData.did}</strong>
+              <div>
+                <div style={{ borderBottom: '1px dashed #cbd5e1', paddingBottom: '0.4rem', marginBottom: '0.4rem', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
+                  📍 รับพิมพ์โดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
                 </div>
-              )}
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#64748b' }}>ชื่อผู้รับ:</span>
+                  <strong style={{ color: '#0f172a' }}>{generatedData.name}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#64748b' }}>เบอร์โทร:</span>
+                  <strong style={{ color: '#0f172a' }}>{generatedData.phone}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#64748b' }}>จำนวนที่จอง:</span>
+                  <strong style={{ color: 'var(--primary)', fontSize: '1.05rem' }}>{generatedData.quantity} ใบ</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#64748b' }}>วันที่สั่งจอง:</span>
+                  <strong style={{ color: '#0f172a' }}>{generatedData.orderDate}</strong>
+                </div>
+              </div>
+              <div style={{ 
+                borderTop: '1px solid #e2e8f0', 
+                marginTop: '0.4rem', 
+                paddingTop: '0.4rem',
+                minHeight: '26px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                visibility: generatedData.did ? 'visible' : 'hidden' // Keeps layout space even when hidden
+              }}>
+                <span style={{ color: '#64748b' }}>D-ID:</span>
+                <strong style={{ color: 'var(--secondary)' }}>{generatedData.did || '-'}</strong>
+              </div>
             </div>
 
             {/* Stepper Buttons for Bulk Send */}
