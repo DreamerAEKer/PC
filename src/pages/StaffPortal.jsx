@@ -1260,47 +1260,45 @@ export default function StaffPortal() {
                   </div>
                   <div className="form-group" style={{ flex: 1 }}>
                     <label className="form-label">จำนวน (ใบ) <span style={{color:'red'}}>*</span></label>
-                    <select 
-                      className="form-control" 
-                      required 
-                      {...register("selectQuantity", { required: true })}
-                      style={{ width: '100%' }}
-                    >
-                      <option value="100">100 ใบ</option>
-                      <option value="200">200 ใบ</option>
-                      <option value="300">300 ใบ</option>
-                      <option value="400">400 ใบ</option>
-                      <option value="500">500 ใบ</option>
-                      <option value="1000">1,000 ใบ</option>
-                      <option value="2000">2,000 ใบ</option>
-                      <option value="custom">ระบุค่าเอง...</option>
-                    </select>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'stretch' }}>
+                      <select 
+                        className="form-control" 
+                        required 
+                        {...register("selectQuantity", { required: true })}
+                        style={{ flex: selectQty === 'custom' ? '1 1 50%' : '1 1 100%', minWidth: 0, transition: 'all 0.2s' }}
+                      >
+                        <option value="100">100 ใบ</option>
+                        <option value="200">200 ใบ</option>
+                        <option value="300">300 ใบ</option>
+                        <option value="400">400 ใบ</option>
+                        <option value="500">500 ใบ</option>
+                        <option value="1000">1,000 ใบ</option>
+                        <option value="2000">2,000 ใบ</option>
+                        <option value="custom">ระบุค่าเอง...</option>
+                      </select>
+                      
+                      {selectQty === 'custom' && (
+                        <input 
+                          type="number" 
+                          min="50" 
+                          className={`form-control ${getFieldClass('customQuantity')}`} 
+                          required 
+                          {...register("customQuantity", { required: true, min: 50 })} 
+                          placeholder="ระบุจำนวน" 
+                          style={{ 
+                            flex: '1 1 50%', 
+                            minWidth: '80px', 
+                            padding: '0.35rem 0.5rem', 
+                            textAlign: 'center', 
+                            borderColor: '#e11d48', 
+                            borderWidth: '2px', 
+                            fontSize: '0.95rem' 
+                          }}
+                        />
+                      )}
+                    </div>
                     {errors.selectQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวน</span>}
-                    
-                    {selectQty === 'custom' && (
-                      <div className="form-group" style={{ 
-                        marginTop: '0.75rem', 
-                        padding: '0.75rem', 
-                        backgroundColor: '#fff1f2', 
-                        border: '2px solid #fecdd3', 
-                        borderRadius: '8px'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start' }}>
-                          <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#e11d48', whiteSpace: 'nowrap' }}>โปรดระบุจำนวน</span>
-                          <input 
-                            type="number" 
-                            min="50" 
-                            className={`form-control ${getFieldClass('customQuantity')}`} 
-                            required 
-                            {...register("customQuantity", { required: true, min: 50 })} 
-                            placeholder="เช่น 150" 
-                            style={{ width: '85px', display: 'inline-block', margin: 0, padding: '0.35rem 0.5rem', textAlign: 'center', borderColor: '#e11d48', borderWidth: '2px', fontSize: '0.95rem' }}
-                          />
-                          <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#e11d48', whiteSpace: 'nowrap' }}>ใบ <span style={{color:'red'}}>*</span></span>
-                        </div>
-                        {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
-                      </div>
-                    )}
+                    {selectQty === 'custom' && errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
                   </div>
                 </div>
                 <div className="form-group">
