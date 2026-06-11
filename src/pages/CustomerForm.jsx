@@ -1049,7 +1049,7 @@ export default function CustomerForm() {
               <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.4rem', paddingRight: '170px' }}>ข้อมูลผู้รับ (สำหรับการพิมพ์)</h2>
               <div style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem' }}>
                 วันที่สั่งจอง: {generatedData.orderDate} | จำนวน: {generatedData.quantity} ใบ<br/>
-                รับจองโดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
+                รับพิมพ์โดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
               </div>
               <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: '600' }}>
                 ชื่อ: {generatedData.name}
@@ -1144,12 +1144,16 @@ export default function CustomerForm() {
                     return;
                   }
                   
+                  if (selectedIds.length > 2) {
+                    alert("⚠️ ส่งออกข้อมูลได้ทีละ 2 ข้อมูลครับ");
+                    return;
+                  }
+                  
                   const selectedRecords = history.filter(r => selectedIds.includes(r.id));
                   
-                  // Construct a combined QR code payload containing multiple records
                   const combinedData = {
-                    isBulk: true,
-                    records: selectedRecords.map(record => ({
+                    b: 1,
+                    r: selectedRecords.map(record => ({
                       d: record.orderDate,
                       q: record.quantity,
                       n: record.name,
@@ -1502,7 +1506,7 @@ export default function CustomerForm() {
               lineHeight: '1.6'
             }}>
               <div style={{ borderBottom: '1px dashed #cbd5e1', paddingBottom: '0.5rem', marginBottom: '0.5rem', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
-                📍 รับจองโดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
+                📍 รับพิมพ์โดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: '#64748b' }}>ชื่อผู้รับ:</span>
