@@ -468,109 +468,88 @@ export default function CustomerForm() {
             </div>
             <div className="form-group">
               <label className="form-label">จำนวน (ใบ) <span style={{color:'red'}}>*</span></label>
-              <select 
-                className="form-control" 
-                required 
-                {...register("selectQuantity", { required: true })}
-                style={{ width: '100%' }}
-              >
-                <option value="100">100 ใบ</option>
-                <option value="200">200 ใบ</option>
-                <option value="300">300 ใบ</option>
-                <option value="400">400 ใบ</option>
-                <option value="500">500 ใบ</option>
-                <option value="1000">1,000 ใบ</option>
-                <option value="2000">2,000 ใบ</option>
-                <option value="custom">ระบุค่าเอง...</option>
-              </select>
-              {errors.selectQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวน</span>}
-            </div>
+              <div style={{ 
+                padding: '0.85rem 1rem', 
+                background: 'linear-gradient(135deg, #fffdf6 0%, #fffbeb 100%)', 
+                border: '3px solid #f59e0b', 
+                borderRadius: '16px',
+                boxShadow: '0 4px 15px rgba(245, 158, 11, 0.1), inset 0 1px 0 rgba(255,255,255,0.6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                minHeight: '68px'
+              }}>
+                {/* Floating 3D Background Coins and Postcards */}
+                <div className={`bg-coin-3d bg-float-1 ${isTyping ? 'typing-active' : ''}`} style={{ left: '8%', top: '15%' }}>฿</div>
+                <div className={`bg-postcard-3d bg-float-2 ${isTyping ? 'typing-active' : ''}`} style={{ left: '22%', bottom: '8%' }} />
+                <div className={`bg-coin-3d bg-float-2 ${isTyping ? 'typing-active' : ''}`} style={{ right: '8%', top: '20%' }}>฿</div>
+                <div className={`bg-postcard-3d bg-float-1 ${isTyping ? 'typing-active' : ''}`} style={{ right: '22%', bottom: '12%' }} />
 
-            {selectQty === 'custom' && (
-              <div className="form-group">
-                <div style={{ 
-                  padding: '0.85rem 1rem', 
-                  background: 'linear-gradient(135deg, #fffdf6 0%, #fffbeb 100%)', 
-                  border: '3px solid #f59e0b', 
-                  borderRadius: '16px',
-                  boxShadow: '0 4px 15px rgba(245, 158, 11, 0.1), inset 0 1px 0 rgba(255,255,255,0.6)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  minHeight: '68px'
-                }}>
-                  {/* Floating 3D Background Coins and Postcards */}
-                  <div className={`bg-coin-3d bg-float-1 ${isTyping ? 'typing-active' : ''}`} style={{ left: '8%', top: '15%' }}>฿</div>
-                  <div className={`bg-postcard-3d bg-float-2 ${isTyping ? 'typing-active' : ''}`} style={{ left: '22%', bottom: '8%' }} />
-                  <div className={`bg-coin-3d bg-float-2 ${isTyping ? 'typing-active' : ''}`} style={{ right: '8%', top: '20%' }}>฿</div>
-                  <div className={`bg-postcard-3d bg-float-1 ${isTyping ? 'typing-active' : ''}`} style={{ right: '22%', bottom: '12%' }} />
-
-                  {/* Sparkle and Text controls */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', position: 'relative', zIndex: 2 }}>
+                {/* Sparkle and Text controls */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', position: 'relative', zIndex: 2 }}>
+                  <span style={{ 
+                    fontSize: '1.05rem', 
+                    fontWeight: 'bold', 
+                    color: '#b45309', 
+                    whiteSpace: 'nowrap',
+                    position: 'relative'
+                  }}>
+                    โปรดระบุจำนวน
                     <span style={{ 
-                      fontSize: '1.05rem', 
-                      fontWeight: 'bold', 
-                      color: '#b45309', 
-                      whiteSpace: 'nowrap',
-                      position: 'relative'
+                      position: 'absolute',
+                      top: '-15px',
+                      left: '70px',
+                      fontSize: '0.9rem'
                     }}>
-                      โปรดระบุจำนวน
-                      <span style={{ 
-                        position: 'absolute',
-                        top: '-15px',
-                        left: '70px',
-                        fontSize: '0.9rem'
-                      }}>
-                        ✨
-                      </span>
+                      ✨
                     </span>
-                    {(() => {
-                      const { onChange: rfhOnChange, ...restRegister } = register("customQuantity", { required: true, min: 50 });
-                      return (
-                        <input 
-                          type="number" 
-                          min="50" 
-                          className={`form-control ${getFieldClass('customQuantity')}`} 
-                          required 
-                          {...restRegister}
-                          onChange={(e) => {
-                            rfhOnChange(e);
-                            setIsTyping(true);
-                            if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-                            typingTimeoutRef.current = setTimeout(() => {
-                              setIsTyping(false);
-                            }, 650);
-                          }}
-                          placeholder="เช่น 12000" 
-                          style={{ 
-                            width: '155px', 
-                            display: 'inline-block', 
-                            margin: '0 0.25rem', 
-                            padding: '0.35rem 0.5rem', 
-                            textAlign: 'center', 
-                            borderColor: '#f59e0b', 
-                            borderWidth: '2px', 
-                            fontSize: '1.25rem',
-                            fontWeight: '800',
-                            color: '#b45309',
-                            backgroundColor: '#ffffff',
-                            borderRadius: '10px',
-                            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)',
-                            height: '38px'
-                          }}
-                        />
-                      );
-                    })()}
-                    <span style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#b45309', whiteSpace: 'nowrap' }}>
-                      ใบ <span style={{ color: 'red' }}>*</span>
-                    </span>
-                  </div>
+                  </span>
+                  {(() => {
+                    const { onChange: rfhOnChange, ...restRegister } = register("customQuantity", { required: true, min: 50 });
+                    return (
+                      <input 
+                        type="number" 
+                        min="50" 
+                        className={`form-control ${getFieldClass('customQuantity')}`} 
+                        required 
+                        {...restRegister}
+                        onChange={(e) => {
+                          rfhOnChange(e);
+                          setIsTyping(true);
+                          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                          typingTimeoutRef.current = setTimeout(() => {
+                            setIsTyping(false);
+                          }, 650);
+                        }}
+                        placeholder="เช่น 12000" 
+                        style={{ 
+                          width: '155px', 
+                          display: 'inline-block', 
+                          margin: '0 0.25rem', 
+                          padding: '0.35rem 0.5rem', 
+                          textAlign: 'center', 
+                          borderColor: '#f59e0b', 
+                          borderWidth: '2px', 
+                          fontSize: '1.25rem',
+                          fontWeight: '800',
+                          color: '#b45309',
+                          backgroundColor: '#ffffff',
+                          borderRadius: '10px',
+                          boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)',
+                          height: '38px'
+                        }}
+                      />
+                    );
+                  })()}
+                  <span style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#b45309', whiteSpace: 'nowrap' }}>
+                    ใบ <span style={{ color: 'red' }}>*</span>
+                  </span>
                 </div>
-                {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem', fontWeight: 600 }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
               </div>
-            )}
+              {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem', fontWeight: 600 }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
+            </div>
             <div className="form-group">
               <label className="form-label">ชื่อ-นามสกุล <span style={{color:'red'}}>*</span></label>
               <input type="text" className={`form-control ${getFieldClass('name')}`} required {...register("name", { required: true })} placeholder="ระบุชื่อและนามสกุล" />
