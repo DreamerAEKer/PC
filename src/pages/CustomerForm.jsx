@@ -243,6 +243,11 @@ export default function CustomerForm() {
             opacity: 0;
           }
         }
+        @keyframes pulseGold {
+          0% { transform: skewX(-15deg) scale(1); }
+          50% { transform: skewX(-15deg) scale(1.08); }
+          100% { transform: skewX(-15deg) scale(1); }
+        }
         .floating-gold-item {
           position: absolute;
           pointer-events: none;
@@ -445,39 +450,78 @@ export default function CustomerForm() {
                   </div>
                 </div>
 
-                {/* Visual pile of gold bars (3D structured look) */}
+                {/* Visual Gold Bar Ticket Opportunity (Conceptual & Animated) */}
                 <div style={{ 
                   display: 'flex', 
                   flexDirection: 'column',
-                  gap: '0.4rem',
-                  padding: '0.5rem 0.75rem',
-                  background: 'rgba(251, 191, 36, 0.06)',
+                  gap: '0.5rem',
+                  padding: '0.75rem 1rem',
+                  background: 'rgba(251, 191, 36, 0.04)',
                   borderRadius: '10px',
-                  border: '1.5px dashed #eab308'
+                  border: '1.5px dashed #eab308',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#a16207' }}>🏆 จำนวนทองแท่งสะสม (ตามยอดสั่งซื้อ):</span>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#ca8a04' }}>{Math.max(1, Math.floor(quantity / 100))} แท่ง</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', alignItems: 'center', minHeight: '18px' }}>
-                    {Array.from({ length: Math.min(20, Math.max(1, Math.floor(quantity / 100))) }).map((_, idx) => (
-                      <div 
-                        key={idx} 
-                        style={{
-                          width: '32px',
-                          height: '11px',
-                          background: 'linear-gradient(135deg, #ffe066 0%, #f5b041 50%, #d35400 100%)',
-                          border: '1px solid #b7950b',
-                          borderRadius: '2px',
-                          boxShadow: '1px 1px 2px rgba(0,0,0,0.15)',
-                          transform: 'skewX(-15deg)',
-                          display: 'inline-block'
-                        }}
-                        title={`ทองแท่งที่ ${idx + 1}`}
-                      />
-                    ))}
-                    {quantity >= 2100 && <span style={{ fontSize: '0.75rem', color: '#a16207', fontWeight: 'bold' }}>+ มากกว่านี้</span>}
-                  </div>
+                  {(() => {
+                    const glowRadius = Math.min(25, 4 + (quantity / 100) * 1.1);
+                    const glowOpacity = Math.min(0.9, 0.3 + (quantity / 100) * 0.03);
+                    const starsCount = Math.min(8, Math.max(1, Math.floor(quantity / 250)));
+                    
+                    return (
+                      <>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#a16207', marginBottom: '0.25rem', zIndex: 2 }}>
+                          ✨ เพิ่มโอกาสลุ้นโชคทองคำก้อนใหญ่ (สั่งพิมพ์ {quantity} ใบ)
+                        </span>
+                        
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '45px', width: '100%' }}>
+                          {/* Floating Sparkles around the gold bar */}
+                          {Array.from({ length: starsCount }).map((_, idx) => (
+                            <span 
+                              key={idx} 
+                              style={{ 
+                                position: 'absolute',
+                                fontSize: '1rem',
+                                animation: 'floatGold 3s infinite ease-in-out',
+                                animationDelay: `${idx * 0.3}s`,
+                                left: `${25 + (idx * 12) % 50}%`,
+                                bottom: `${10 + (idx * 7) % 30}px`,
+                                pointerEvents: 'none',
+                                zIndex: 1
+                              }}
+                            >
+                              ✨
+                            </span>
+                          ))}
+                          
+                          {/* The single, glowing 3D Gold Bar */}
+                          <div 
+                            style={{
+                              width: '75px',
+                              height: '24px',
+                              background: 'linear-gradient(135deg, #ffe666 0%, #f5b041 50%, #d35400 100%)',
+                              border: '1.5px solid #b7950b',
+                              borderRadius: '4px',
+                              boxShadow: '0 4px 10px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.4)',
+                              filter: `drop-shadow(0 0 ${glowRadius}px rgba(234, 179, 8, ${glowOpacity}))`,
+                              transform: 'skewX(-15deg)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              zIndex: 2,
+                              transition: 'all 0.3s ease',
+                              animation: quantity >= 500 ? 'pulseGold 2s infinite ease-in-out' : 'none'
+                            }}
+                          >
+                            <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#ffffff', textShadow: '1px 1px 2px rgba(0,0,0,0.6)', transform: 'skewX(15deg)' }}>
+                              GOLD
+                            </span>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem', fontWeight: 600 }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
