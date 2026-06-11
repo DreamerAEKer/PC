@@ -176,6 +176,21 @@ export default function CustomerForm() {
     return () => clearTimeout(timeout);
   }, [formValues]);
 
+  // Scroll to advanced section when it opens
+  useEffect(() => {
+    if (isAdvancedMode && advancedSectionRef.current) {
+      const timer = setTimeout(() => {
+        const el = advancedSectionRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetY = scrollTop + rect.top - 24; // 24px breathing room above section
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
+      }, 120); // wait for React to render the section
+      return () => clearTimeout(timer);
+    }
+  }, [isAdvancedMode]);
+
   const onSubmit = async (data) => {
     const isDidActive = data.did && data.did.trim().length === 6;
     let fullAddress = "";
