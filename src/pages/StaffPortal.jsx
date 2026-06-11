@@ -1549,7 +1549,105 @@ export default function StaffPortal() {
           </div>
 
           {/* Right column: History */}
-          <div style={{ flex: '1 1 350px' }}>
+          <div style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Totals Summary */}
+            {history.length > 0 && (() => {
+              const todayStr = new Date().toISOString().split('T')[0];
+              const todayRecordsList = history.filter(r => r.orderDate === todayStr || (r.timestamp && r.timestamp.startsWith(todayStr)));
+              const todayCount = todayRecordsList.length;
+              const todayTotal = todayRecordsList.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
+              const todayPrice = todayTotal * 3;
+
+              const grandCount = history.length;
+              const grandTotal = history.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
+              const grandPrice = grandTotal * 3;
+              return (
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '1fr 1fr', 
+                  gap: '1.25rem'
+                }}>
+                  {/* Today Stats Card */}
+                  <div style={{
+                    background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
+                    border: '1.5px solid #fecdd3',
+                    borderRadius: '16px',
+                    padding: '1.25rem',
+                    boxShadow: '0 4px 12px rgba(225, 29, 72, 0.05)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '1rem', borderBottom: '1px solid #fda4af', paddingBottom: '0.5rem' }}>
+                      <span style={{ fontSize: '1.2rem' }}>📅</span> ยอดสั่งพิมพ์วันนี้
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวนสั่ง</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{todayCount} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>รายการ</span></div>
+                      </div>
+                      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวนใบ</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{todayTotal} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>ใบ</span></div>
+                      </div>
+                    </div>
+                    <div style={{ 
+                      background: 'linear-gradient(90deg, var(--primary) 0%, #be123c 100%)',
+                      color: 'white',
+                      padding: '0.6rem 1rem',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      boxShadow: '0 4px 10px rgba(225, 29, 72, 0.2)'
+                    }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 'bold', opacity: 0.9 }}>รวมเป็นเงิน:</span>
+                      <strong style={{ fontSize: '1.25rem', fontWeight: '900' }}>{todayPrice.toLocaleString()} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>บาท</span></strong>
+                    </div>
+                  </div>
+
+                  {/* Grand Stats Card */}
+                  <div style={{
+                    background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+                    border: '1.5px solid #bfdbfe',
+                    borderRadius: '16px',
+                    padding: '1.25rem',
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.05)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#1d4ed8', fontWeight: 'bold', fontSize: '1rem', borderBottom: '1px solid #93c5fd', paddingBottom: '0.5rem' }}>
+                      <span style={{ fontSize: '1.2rem' }}>📊</span> ยอดรวมทั้งหมดทุกวัน
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวนสั่ง</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1d4ed8', marginTop: '0.15rem' }}>{grandCount} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>รายการ</span></div>
+                      </div>
+                      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวนใบ</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1d4ed8', marginTop: '0.15rem' }}>{grandTotal.toLocaleString()} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>ใบ</span></div>
+                      </div>
+                    </div>
+                    <div style={{ 
+                      background: 'linear-gradient(90deg, #1d4ed8 0%, #1e40af 100%)',
+                      color: 'white',
+                      padding: '0.6rem 1rem',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      boxShadow: '0 4px 10px rgba(29, 78, 216, 0.2)'
+                    }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 'bold', opacity: 0.9 }}>รวมเป็นเงิน:</span>
+                      <strong style={{ fontSize: '1.25rem', fontWeight: '900' }}>{grandPrice.toLocaleString()} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>บาท</span></strong>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             <div className="card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
@@ -1587,105 +1685,6 @@ export default function StaffPortal() {
                   <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
                 </label>
               </div>
-
-              {/* Totals Summary */}
-              {history.length > 0 && (() => {
-                const todayStr = new Date().toISOString().split('T')[0];
-                const todayRecordsList = history.filter(r => r.orderDate === todayStr || (r.timestamp && r.timestamp.startsWith(todayStr)));
-                const todayCount = todayRecordsList.length;
-                const todayTotal = todayRecordsList.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
-                const todayPrice = todayTotal * 3;
-
-                const grandCount = history.length;
-                const grandTotal = history.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
-                const grandPrice = grandTotal * 3;
-                return (
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: '1fr 1fr', 
-                    gap: '1.25rem', 
-                    marginBottom: '1.5rem' 
-                  }}>
-                    {/* Today Stats Card */}
-                    <div style={{
-                      background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
-                      border: '1.5px solid #fecdd3',
-                      borderRadius: '16px',
-                      padding: '1.25rem',
-                      boxShadow: '0 4px 12px rgba(225, 29, 72, 0.05)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.75rem'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '1rem', borderBottom: '1px solid #fda4af', paddingBottom: '0.5rem' }}>
-                        <span style={{ fontSize: '1.2rem' }}>📅</span> ยอดสั่งพิมพ์วันนี้
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
-                          <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวนสั่ง</div>
-                          <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{todayCount} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>รายการ</span></div>
-                        </div>
-                        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
-                          <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวนใบ</div>
-                          <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{todayTotal} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>ใบ</span></div>
-                        </div>
-                      </div>
-                      <div style={{ 
-                        background: 'linear-gradient(90deg, var(--primary) 0%, #be123c 100%)',
-                        color: 'white',
-                        padding: '0.6rem 1rem',
-                        borderRadius: '12px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        boxShadow: '0 4px 10px rgba(225, 29, 72, 0.2)'
-                      }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 'bold', opacity: 0.9 }}>รวมเป็นเงิน:</span>
-                        <strong style={{ fontSize: '1.25rem', fontWeight: '900' }}>{todayPrice.toLocaleString()} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>บาท</span></strong>
-                      </div>
-                    </div>
-
-                    {/* Grand Stats Card */}
-                    <div style={{
-                      background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
-                      border: '1.5px solid #bfdbfe',
-                      borderRadius: '16px',
-                      padding: '1.25rem',
-                      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.05)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.75rem'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#1d4ed8', fontWeight: 'bold', fontSize: '1rem', borderBottom: '1px solid #93c5fd', paddingBottom: '0.5rem' }}>
-                        <span style={{ fontSize: '1.2rem' }}>📊</span> ยอดรวมทั้งหมดทุกวัน
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                          <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวนสั่ง</div>
-                          <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1d4ed8', marginTop: '0.15rem' }}>{grandCount} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>รายการ</span></div>
-                        </div>
-                        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                          <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวนใบ</div>
-                          <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1d4ed8', marginTop: '0.15rem' }}>{grandTotal.toLocaleString()} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>ใบ</span></div>
-                        </div>
-                      </div>
-                      <div style={{ 
-                        background: 'linear-gradient(90deg, #1d4ed8 0%, #1e40af 100%)',
-                        color: 'white',
-                        padding: '0.6rem 1rem',
-                        borderRadius: '12px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        boxShadow: '0 4px 10px rgba(29, 78, 216, 0.2)'
-                      }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 'bold', opacity: 0.9 }}>รวมเป็นเงิน:</span>
-                        <strong style={{ fontSize: '1.25rem', fontWeight: '900' }}>{grandPrice.toLocaleString()} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>บาท</span></strong>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
 
               {history.length === 0 ? (
                 <p style={{ color: 'var(--text-muted)' }}>ยังไม่มีประวัติการพิมพ์</p>
