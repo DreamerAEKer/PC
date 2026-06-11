@@ -1596,45 +1596,85 @@ export default function StaffPortal() {
                 return (
                   <div style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '1rem', 
-                    marginBottom: '1rem',
-                    backgroundColor: '#f8fafc',
-                    padding: '1rem',
-                    borderRadius: '12px',
-                    border: '1px solid var(--border)'
+                    gridTemplateColumns: '1fr 1fr', 
+                    gap: '1.25rem', 
+                    marginBottom: '1.5rem' 
                   }}>
-                    {/* Today Stats */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', borderRight: '1px solid var(--border)', paddingRight: '0.5rem' }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--primary)', borderBottom: '1px dashed #fecdd3', paddingBottom: '0.25rem', marginBottom: '0.25rem' }}>📅 ยอดวันนี้</div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                        <span style={{ color: 'var(--text-muted)' }}>จำนวนสั่งพิมพ์:</span>
-                        <strong style={{ color: 'var(--text-main)' }}>{todayCount.toLocaleString()} รายการ</strong>
+                    {/* Today Stats Card */}
+                    <div style={{
+                      background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
+                      border: '1.5px solid #fecdd3',
+                      borderRadius: '16px',
+                      padding: '1.25rem',
+                      boxShadow: '0 4px 12px rgba(225, 29, 72, 0.05)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.75rem'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '1rem', borderBottom: '1px solid #fda4af', paddingBottom: '0.5rem' }}>
+                        <span style={{ fontSize: '1.2rem' }}>📅</span> ยอดสั่งพิมพ์วันนี้
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                        <span style={{ color: 'var(--text-muted)' }}>จำนวนใบ:</span>
-                        <strong style={{ color: 'var(--text-main)' }}>{todayTotal.toLocaleString()} ใบ</strong>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
+                          <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวนสั่ง</div>
+                          <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{todayCount} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>รายการ</span></div>
+                        </div>
+                        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
+                          <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวนใบ</div>
+                          <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{todayTotal} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>ใบ</span></div>
+                        </div>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                        <span style={{ color: 'var(--text-muted)', fontWeight: '600' }}>รวมเป็นเงิน:</span>
-                        <strong style={{ color: 'var(--primary)' }}>{todayPrice.toLocaleString()} บาท</strong>
+                      <div style={{ 
+                        background: 'linear-gradient(90deg, var(--primary) 0%, #be123c 100%)',
+                        color: 'white',
+                        padding: '0.6rem 1rem',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        boxShadow: '0 4px 10px rgba(225, 29, 72, 0.2)'
+                      }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 'bold', opacity: 0.9 }}>รวมเป็นเงิน:</span>
+                        <strong style={{ fontSize: '1.25rem', fontWeight: '900' }}>{todayPrice.toLocaleString()} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>บาท</span></strong>
                       </div>
                     </div>
 
-                    {/* Grand Stats */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', paddingLeft: '0.5rem' }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#1e293b', borderBottom: '1px dashed #e2e8f0', paddingBottom: '0.25rem', marginBottom: '0.25rem' }}>📊 ยอดรวมทั้งหมด</div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                        <span style={{ color: 'var(--text-muted)' }}>จำนวนสั่งพิมพ์:</span>
-                        <strong style={{ color: 'var(--text-main)' }}>{grandCount.toLocaleString()} รายการ</strong>
+                    {/* Grand Stats Card */}
+                    <div style={{
+                      background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+                      border: '1.5px solid #bfdbfe',
+                      borderRadius: '16px',
+                      padding: '1.25rem',
+                      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.05)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.75rem'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#1d4ed8', fontWeight: 'bold', fontSize: '1rem', borderBottom: '1px solid #93c5fd', paddingBottom: '0.5rem' }}>
+                        <span style={{ fontSize: '1.2rem' }}>📊</span> ยอดรวมทั้งหมดทุกวัน
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                        <span style={{ color: 'var(--text-muted)' }}>จำนวนใบ:</span>
-                        <strong style={{ color: 'var(--text-main)' }}>{grandTotal.toLocaleString()} ใบ</strong>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                          <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวนสั่ง</div>
+                          <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1d4ed8', marginTop: '0.15rem' }}>{grandCount} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>รายการ</span></div>
+                        </div>
+                        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                          <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวนใบ</div>
+                          <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1d4ed8', marginTop: '0.15rem' }}>{grandTotal.toLocaleString()} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>ใบ</span></div>
+                        </div>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                        <span style={{ color: 'var(--text-muted)', fontWeight: '600' }}>รวมเป็นเงิน:</span>
-                        <strong style={{ color: '#0f172a' }}>{grandPrice.toLocaleString()} บาท</strong>
+                      <div style={{ 
+                        background: 'linear-gradient(90deg, #1d4ed8 0%, #1e40af 100%)',
+                        color: 'white',
+                        padding: '0.6rem 1rem',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        boxShadow: '0 4px 10px rgba(29, 78, 216, 0.2)'
+                      }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 'bold', opacity: 0.9 }}>รวมเป็นเงิน:</span>
+                        <strong style={{ fontSize: '1.25rem', fontWeight: '900' }}>{grandPrice.toLocaleString()} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>บาท</span></strong>
                       </div>
                     </div>
                   </div>
