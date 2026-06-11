@@ -958,7 +958,7 @@ export default function CustomerForm() {
               {/* Top Overview Image */}
               <div style={{ width: '100%', maxWidth: '280px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: 'var(--secondary)', marginBottom: '0.35rem' }}>⚽ ภาพรวม 4 ขั้นตอน</span>
-                <img src="guide_step1.jpg" alt="ภาพรวม 4 ขั้นตอน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
+                <img src="guide_step4.jpg" alt="ภาพรวม 4 ขั้นตอน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
               </div>
               
               {/* 2x2 Grid for Step Detail Images */}
@@ -979,11 +979,11 @@ export default function CustomerForm() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', marginBottom: '0.35rem' }}>3. เลือกทีม & จำนวน</span>
-                  <img src="guide_step4.jpg" alt="ขั้นตอนการเลือกประเทศและจำนวน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }} />
+                  <img src="guide_step5.jpg" alt="ขั้นตอนการเลือกประเทศและจำนวน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', marginBottom: '0.35rem' }}>4. รอลุ้นโชคใหญ่</span>
-                  <img src="guide_step5.jpg" alt="ขั้นตอนรอร่วมลุ้นโชค" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }} />
+                  <img src="guide_step1.jpg" alt="ขั้นตอนรอร่วมลุ้นโชค" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }} />
                 </div>
               </div>
             </div>
