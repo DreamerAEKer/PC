@@ -201,6 +201,21 @@ export default function CustomerForm() {
     }
   }, [isAdvancedMode]);
 
+  // Global keydown handler for Escape key to close modals
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsModalOpen(false);
+        setBulkRecords([]);
+        setShowRulesModal(false);
+        setShowGuideModal(false);
+        setShowDeleteModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const onSubmit = async (data) => {
     const isDidActive = data.did && data.did.trim().length === 6;
     let fullAddress = "";
