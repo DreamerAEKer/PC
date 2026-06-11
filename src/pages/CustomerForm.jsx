@@ -254,7 +254,7 @@ export default function CustomerForm() {
                 border: '1.5px solid #fecdd3'
               }}
             >
-              🏆 กติกาการร่วมลุ้น
+              🏆 กติกาการลุ้นโชค
             </button>
           </div>
           <form onSubmit={handleSubmit(onSubmit, onError)}>
