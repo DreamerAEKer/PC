@@ -227,24 +227,13 @@ export default function CustomerForm() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Clickable Banner */}
+      {/* Non-clickable Banner */}
       <div 
-        onClick={() => setShowRulesModal(true)}
         style={{ 
-          cursor: 'pointer', 
           width: '100%', 
           borderRadius: '16px', 
           overflow: 'hidden', 
           boxShadow: 'var(--shadow)',
-          transition: 'all 0.2s ease-in-out',
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.transform = 'scale(1.005)';
-          e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.1)';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = 'var(--shadow)';
         }}
       >
         <img 
@@ -257,10 +246,10 @@ export default function CustomerForm() {
       <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
         <div style={{ flex: '1 1 400px' }}>
           <div className="card glass-panel">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, fontSize: '1.25rem' }}>
-              <CheckCircle color="var(--primary)" />
-              กรอกข้อมูลเพื่อสั่งพิมพ์ไปรษณียบัตร
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', gap: '0.5rem' }}>
+            <h2 style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', margin: 0, fontSize: '1.2rem', lineHeight: '1.4' }}>
+              <CheckCircle color="var(--primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <span>กรอกข้อมูลเพื่อสั่งพิมพ์ไปรษณียบัตร</span>
             </h2>
             <button
               type="button"
@@ -279,7 +268,9 @@ export default function CustomerForm() {
                 margin: 0,
                 cursor: 'pointer',
                 borderRadius: '8px',
-                border: '1.5px solid #fecdd3'
+                border: '1.5px solid #fecdd3',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
               }}
             >
               🏆 กติกาการลุ้นโชค
