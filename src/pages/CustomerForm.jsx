@@ -889,11 +889,13 @@ export default function CustomerForm() {
                 <button
                   type="button"
                   onClick={() => {
+                    const remaining = quantity - subSum;
+                    const newQty = Math.max(20, Math.floor(remaining / 2));
                     setSubBookings([...subBookings, {
                       id: Date.now(),
                       name: '',
                       phone: '',
-                      quantity: 20,
+                      quantity: newQty,
                       useMainAddress: true,
                       addressLine1: '',
                       subdistrict: '',
@@ -912,7 +914,7 @@ export default function CustomerForm() {
                     borderRadius: '10px',
                     boxShadow: '0 2px 5px rgba(217, 119, 6, 0.2)'
                   }}
-                  disabled={subSum >= quantity}
+                  disabled={quantity - subSum < 20}
                 >
                   ➕ เพิ่มรายชื่อย่อย
                 </button>
