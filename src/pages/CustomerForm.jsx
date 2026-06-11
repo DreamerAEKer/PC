@@ -306,19 +306,44 @@ export default function CustomerForm() {
           border: 1px dashed rgba(255, 255, 255, 0.4);
           border-radius: 50%;
         }
-        .bg-bar-3d {
-          width: 38px;
-          height: 13px;
-          background: linear-gradient(135deg, #ffe666 0%, #f5b041 50%, #d35400 100%);
-          border: 1px solid #b7950b;
-          border-radius: 2px;
-          box-shadow: 1px 2px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.4);
-          transform: skewX(-15deg);
+        .bg-postcard-3d {
+          width: 44px;
+          height: 28px;
+          background: linear-gradient(135deg, #fff3b0 0%, #ca8a04 100%);
+          border: 1.5px solid #a16207;
+          border-radius: 4px;
+          box-shadow: 0 4px 8px rgba(161, 98, 7, 0.25), inset 0 1px 0 rgba(255,255,255,0.5);
           position: absolute;
-          opacity: 0.45;
+          opacity: 0.5;
           z-index: 1;
           pointer-events: none;
           transition: all 0.2s ease;
+        }
+        .bg-postcard-3d::before {
+          content: '';
+          position: absolute;
+          top: 3px;
+          right: 3px;
+          width: 8px;
+          height: 10px;
+          border: 0.8px dashed #a16207;
+          background: #fef08a;
+          border-radius: 1px;
+        }
+        .bg-postcard-3d::after {
+          content: '';
+          position: absolute;
+          bottom: 4px;
+          right: 3px;
+          width: 18px;
+          height: 8px;
+          background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            #a16207 2px,
+            #a16207 3px
+          );
         }
         .bg-float-1 {
           animation: floatBgItem1 3s infinite ease-in-out;
@@ -476,11 +501,11 @@ export default function CustomerForm() {
                   overflow: 'hidden',
                   minHeight: '68px'
                 }}>
-                  {/* Floating 3D Background Coins and Bars */}
+                  {/* Floating 3D Background Coins and Postcards */}
                   <div className={`bg-coin-3d bg-float-1 ${isTyping ? 'typing-active' : ''}`} style={{ left: '8%', top: '15%' }}>฿</div>
-                  <div className={`bg-bar-3d bg-float-2 ${isTyping ? 'typing-active' : ''}`} style={{ left: '22%', bottom: '8%', transform: 'skewX(-15deg)' }} />
+                  <div className={`bg-postcard-3d bg-float-2 ${isTyping ? 'typing-active' : ''}`} style={{ left: '22%', bottom: '8%' }} />
                   <div className={`bg-coin-3d bg-float-2 ${isTyping ? 'typing-active' : ''}`} style={{ right: '8%', top: '20%' }}>฿</div>
-                  <div className={`bg-bar-3d bg-float-1 ${isTyping ? 'typing-active' : ''}`} style={{ right: '22%', bottom: '12%', transform: 'skewX(-15deg)' }} />
+                  <div className={`bg-postcard-3d bg-float-1 ${isTyping ? 'typing-active' : ''}`} style={{ right: '22%', bottom: '12%' }} />
 
                   {/* Sparkle and Text controls */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', position: 'relative', zIndex: 2 }}>
@@ -518,9 +543,9 @@ export default function CustomerForm() {
                               setIsTyping(false);
                             }, 650);
                           }}
-                          placeholder="เช่น 1200" 
+                          placeholder="เช่น 12000" 
                           style={{ 
-                            width: '120px', 
+                            width: '155px', 
                             display: 'inline-block', 
                             margin: '0 0.25rem', 
                             padding: '0.35rem 0.5rem', 
