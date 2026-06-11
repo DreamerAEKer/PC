@@ -226,9 +226,37 @@ export default function CustomerForm() {
   };
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-      <div style={{ flex: '1 1 400px' }}>
-        <div className="card glass-panel">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Clickable Banner */}
+      <div 
+        onClick={() => setShowRulesModal(true)}
+        style={{ 
+          cursor: 'pointer', 
+          width: '100%', 
+          borderRadius: '16px', 
+          overflow: 'hidden', 
+          boxShadow: 'var(--shadow)',
+          transition: 'all 0.2s ease-in-out',
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.transform = 'scale(1.005)';
+          e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.1)';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = 'var(--shadow)';
+        }}
+      >
+        <img 
+          src="banner.jpg" 
+          alt="เชียร์บอลให้มัน เฮลั่นรับโชค" 
+          style={{ width: '100%', height: 'auto', display: 'block' }} 
+        />
+      </div>
+
+      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 400px' }}>
+          <div className="card glass-panel">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, fontSize: '1.25rem' }}>
               <CheckCircle color="var(--primary)" />
@@ -785,5 +813,6 @@ export default function CustomerForm() {
         </div>
       )}
     </div>
+  </div>
   );
 }
