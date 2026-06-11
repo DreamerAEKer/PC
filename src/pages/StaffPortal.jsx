@@ -481,6 +481,8 @@ export default function StaffPortal() {
   useEffect(() => {
     let qrCodeInstance = null;
     let isMounted = true;
+    let lastScanTime = 0;
+    let lastScanText = '';
 
     if (scanMode === 'camera' && cameraActive) {
       const timer = setTimeout(() => {
@@ -505,6 +507,13 @@ export default function StaffPortal() {
             },
 
             (decodedText) => {
+              const now = Date.now();
+              if (decodedText === lastScanText && (now - lastScanTime) < 3000) {
+                return;
+              }
+              lastScanText = decodedText;
+              lastScanTime = now;
+
               try {
                 const parsed = JSON.parse(decodedText);
                 if (parsed && parsed.b === 1 && Array.isArray(parsed.r)) {
