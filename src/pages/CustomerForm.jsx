@@ -1433,7 +1433,7 @@ export default function CustomerForm() {
           padding: '1rem',
           boxSizing: 'border-box'
         }}>
-          <div className="card glass-panel" style={{
+          <div ref={cardRef} className="card glass-panel" style={{
             width: '100%',
             maxWidth: '420px',
             backgroundColor: '#ffffff',
