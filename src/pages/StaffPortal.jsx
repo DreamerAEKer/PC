@@ -54,6 +54,9 @@ export default function StaffPortal() {
   const [staffPhone, setStaffPhone] = useState('');
   const [isSettingsDirty, setIsSettingsDirty] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [swipeOffset, setSwipeOffset] = useState({});
+  const [swipedItemId, setSwipedItemId] = useState(null);
   const navigate = useNavigate();
 
   // Re-check count stats
@@ -630,6 +633,216 @@ export default function StaffPortal() {
     }
   }, [scanMode, cameraActive]);
 
+  const decodeQRFromImage = async (file) => {
+    // 1. Try BarcodeDetector first on the original image (since it's fast)
+    if ('BarcodeDetector' in window) {
+      try {
+        const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+        const imageBitmap = await createImageBitmap(file);
+        const barcodes = await barcodeDetector.detect(imageBitmap);
+        if (barcodes.length > 0) {
+          return barcodes[0].rawValue;
+        }
+      } catch (err) {
+        console.log("BarcodeDetector error:", err);
+      }
+    }
+
+    // 2. Fallback to html5QrCode on original file
+    let html5QrCode;
+    try {
+      html5QrCode = new Html5Qrcode("reader-hidden");
+    } catch (err) {
+      console.warn("Failed to create Html5Qrcode instance:", err);
+    }
+
+    if (html5QrCode) {
+      try {
+        const decodedText = await html5QrCode.scanFile(file, false);
+        if (decodedText) {
+          try { await html5QrCode.clear(); } catch (e) {}
+          return decodedText;
+        }
+      } catch (err) {
+        console.log("html5QrCode scanFile direct failed, trying preprocessed canvas...");
+      }
+    }
+
+    // 3. Canvas Preprocessing (to solve moire patterns, glare, high resolution screen photos)
+    try {
+      const img = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = reject;
+          image.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const sizes = [800, 1200, 600];
+      for (const targetWidth of sizes) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) continue;
+
+        const scale = targetWidth / img.width;
+        const width = targetWidth;
+        const height = img.height * scale;
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Try BarcodeDetector on canvas
+        if ('BarcodeDetector' in window) {
+          try {
+            const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+            const barcodes = await barcodeDetector.detect(canvas);
+            if (barcodes.length > 0) {
+              if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
+              return barcodes[0].rawValue;
+            }
+          } catch (e) {
+            console.log("BarcodeDetector canvas error:", e);
+          }
+        }
+
+        // Try html5QrCode on canvas
+        if (html5QrCode) {
+          try {
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+            if (blob) {
+              const decodedText = await html5QrCode.scanFile(blob, false);
+              if (decodedText) {
+                try { await html5QrCode.clear(); } catch (e) {}
+                return decodedText;
+              }
+            }
+          } catch (err) {
+            console.log(`html5QrCode canvas ${width}px scan failed`);
+          }
+        }
+
+        // Try Grayscale + Binarization (extremely useful for high-glare screen pictures)
+        try {
+          const imgData = ctx.getImageData(0, 0, width, height);
+          const data = imgData.data;
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i+1];
+            const b = data[i+2];
+            let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+            gray = gray > 120 ? 255 : 0;
+            data[i] = gray;
+            data[i+1] = gray;
+            data[i+2] = gray;
+          }
+          ctx.putImageData(imgData, 0, 0);
+
+          if ('BarcodeDetector' in window) {
+            try {
+              const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+              const barcodes = await barcodeDetector.detect(canvas);
+              if (barcodes.length > 0) {
+                if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
+                return barcodes[0].rawValue;
+              }
+            } catch (e) {}
+          }
+
+          if (html5QrCode) {
+            try {
+              const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+              if (blob) {
+                const decodedText = await html5QrCode.scanFile(blob, false);
+                if (decodedText) {
+                  try { await html5QrCode.clear(); } catch (e) {}
+                  return decodedText;
+                }
+              }
+            } catch (err) {}
+          }
+        } catch (e) {
+          console.log("Grayscale enhancement failed:", e);
+        }
+      }
+    } catch (err) {
+      console.error("Canvas preprocessing error:", err);
+    }
+
+    if (html5QrCode) {
+      try { await html5QrCode.clear(); } catch (e) {}
+    }
+    return '';
+  };
+
+  const handleDeleteRecord = (id) => {
+    if (window.confirm("คุณต้องการลบรายการประวัตินี้ใช่หรือไม่?")) {
+      setHistory(prev => {
+        const next = prev.filter(r => r.id !== id);
+        localStorage.setItem('staffHistory', JSON.stringify(next));
+        return next;
+      });
+      setSelectedIds(prev => prev.filter(i => i !== id));
+      setSwipeOffset(prev => {
+        const copy = { ...prev };
+        delete copy[id];
+        return copy;
+      });
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    if (window.confirm(`คุณต้องการลบรายการที่เลือกทั้งหมดจำนวน ${selectedIds.length} รายการใช่หรือไม่?`)) {
+      setHistory(prev => {
+        const next = prev.filter(r => !selectedIds.includes(r.id));
+        localStorage.setItem('staffHistory', JSON.stringify(next));
+        return next;
+      });
+      setSelectedIds([]);
+      setSwipeOffset({});
+    }
+  };
+
+  const handleTouchStart = (id, e) => {
+    setTouchStartX(e.touches[0].clientX);
+    if (swipedItemId && swipedItemId !== id) {
+      setSwipeOffset(prev => ({ ...prev, [swipedItemId]: 0 }));
+      setSwipedItemId(null);
+    }
+  };
+
+  const handleTouchMove = (id, e) => {
+    if (touchStartX === null) return;
+    const currentX = e.touches[0].clientX;
+    const diffX = touchStartX - currentX;
+
+    if (diffX > 0) {
+      const offset = Math.min(diffX, 80);
+      setSwipeOffset(prev => ({ ...prev, [id]: offset }));
+    } else {
+      const offset = Math.max(diffX, -20);
+      setSwipeOffset(prev => ({ ...prev, [id]: Math.max(0, 80 + offset) }));
+    }
+  };
+
+  const handleTouchEnd = (id, e) => {
+    setTouchStartX(null);
+    const currentOffset = swipeOffset[id] || 0;
+    if (currentOffset > 40) {
+      setSwipeOffset(prev => ({ ...prev, [id]: 80 }));
+      setSwipedItemId(id);
+    } else {
+      setSwipeOffset(prev => ({ ...prev, [id]: 0 }));
+      if (swipedItemId === id) {
+        setSwipedItemId(null);
+      }
+    }
+  };
+
   const handleFileDecode = async (file) => {
     if (!file) return;
 
@@ -715,38 +928,11 @@ export default function StaffPortal() {
       }
     };
 
-    if ('BarcodeDetector' in window) {
-      try {
-        const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
-        const imageBitmap = await createImageBitmap(file);
-        const barcodes = await barcodeDetector.detect(imageBitmap);
-        if (barcodes.length > 0) {
-          if (processDecodedData(barcodes[0].rawValue)) {
-            return;
-          }
-        }
-      } catch (err) {
-        console.log("BarcodeDetector error:", err);
-      }
+    const decodedText = await decodeQRFromImage(file);
+    if (decodedText && processDecodedData(decodedText)) {
+      return;
     }
-
-    // Fallback to html5QrCode
-    let html5QrCode;
-    try {
-      html5QrCode = new Html5Qrcode("reader-hidden");
-      const decodedText = await html5QrCode.scanFile(file, false);
-      if (!processDecodedData(decodedText)) {
-        alert("ไม่พบ QR Code ในรูปภาพนี้ หรือข้อมูลไม่ถูกต้อง กรุณาลองสแกนผ่านกล้องแทน");
-      }
-    } catch (err) {
-      alert("ไม่พบ QR Code ในรูปภาพนี้ หรือข้อมูลไม่ถูกต้อง กรุณาลองสแกนผ่านกล้องแทน");
-    } finally {
-      if (html5QrCode) {
-        try {
-          await html5QrCode.clear();
-        } catch (e) {}
-      }
-    }
+    alert("ไม่พบ QR Code ในรูปภาพนี้ หรือข้อมูลไม่ถูกต้อง กรุณาลองสแกนผ่านกล้องแทน");
   };
 
   const handleMultipleImagesImport = async (e) => {
@@ -757,37 +943,8 @@ export default function StaffPortal() {
     let failCount = 0;
     const decodedRecords = [];
 
-    let html5QrCode;
-    try {
-      html5QrCode = new Html5Qrcode("reader-hidden");
-    } catch (err) {
-      console.warn("Failed to create Html5Qrcode instance:", err);
-    }
-
     const decodeSingleImage = async (file) => {
-      let decodedText = '';
-      if ('BarcodeDetector' in window) {
-        try {
-          const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
-          const imageBitmap = await createImageBitmap(file);
-          const barcodes = await barcodeDetector.detect(imageBitmap);
-          if (barcodes.length > 0) {
-            decodedText = barcodes[0].rawValue;
-          }
-        } catch (err) {
-          console.log("BarcodeDetector error:", err);
-        }
-      }
-
-      if (!decodedText && html5QrCode) {
-        try {
-          decodedText = await html5QrCode.scanFile(file, false);
-        } catch (err) {
-          console.error("html5QrCode decode error:", err);
-        }
-      }
-
-      return decodedText;
+      return await decodeQRFromImage(file);
     };
 
     try {
@@ -878,14 +1035,8 @@ export default function StaffPortal() {
           failCount++;
         }
       }
-    } finally {
-      if (html5QrCode) {
-        try {
-          await html5QrCode.clear();
-        } catch (e) {
-          console.error("Failed to clear html5QrCode:", e);
-        }
-      }
+    } catch (e) {
+      console.error("Multiple images import error:", e);
     }
 
     if (decodedRecords.length > 0) {
@@ -1912,36 +2063,60 @@ export default function StaffPortal() {
               </div>
 
               {selectedIds.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const selectedRecords = history.filter(r => selectedIds.includes(r.id));
-                    flushSync(() => {
-                      setPrintDataList(selectedRecords);
-                    });
-                    window.print();
-                    setTimeout(() => {
-                      setPrintDataList([]);
-                    }, 500);
-                  }}
-                  className="btn btn-primary"
-                  style={{
-                    width: '100%',
-                    marginBottom: '1rem',
-                    padding: '0.6rem 1rem',
-                    fontSize: '0.9rem',
-                    fontWeight: 'bold',
-                    backgroundColor: '#e11d48',
-                    borderColor: '#e11d48',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    boxShadow: '0 4px 10px rgba(225, 29, 72, 0.25)'
-                  }}
-                >
-                  <Printer size={16} /> 🖨️ สั่งพิมพ์รายการที่เลือกทั้งหมด ({selectedIds.length} รายการ)
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const selectedRecords = history.filter(r => selectedIds.includes(r.id));
+                      flushSync(() => {
+                        setPrintDataList(selectedRecords);
+                      });
+                      window.print();
+                      setTimeout(() => {
+                        setPrintDataList([]);
+                      }, 500);
+                    }}
+                    className="btn btn-primary"
+                    style={{
+                      flex: 2,
+                      padding: '0.6rem 1rem',
+                      fontSize: '0.9rem',
+                      fontWeight: 'bold',
+                      backgroundColor: '#e11d48',
+                      borderColor: '#e11d48',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      boxShadow: '0 4px 10px rgba(225, 29, 72, 0.25)',
+                      margin: 0
+                    }}
+                  >
+                    <Printer size={16} /> 🖨️ สั่งพิมพ์ ({selectedIds.length} รายการ)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteSelected}
+                    className="btn btn-secondary"
+                    style={{
+                      flex: 1,
+                      padding: '0.6rem 1rem',
+                      fontSize: '0.9rem',
+                      fontWeight: 'bold',
+                      backgroundColor: '#fff1f2',
+                      borderColor: '#fecdd3',
+                      color: '#e11d48',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      cursor: 'pointer',
+                      margin: 0
+                    }}
+                  >
+                    🗑️ ลบที่เลือก
+                  </button>
+                </div>
               )}
 
               {history.length === 0 ? (
@@ -1950,65 +2125,106 @@ export default function StaffPortal() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '500px', overflowY: 'auto' }}>
                   {history.map((record) => (
                     <div 
-                      key={record.id} 
+                      key={record.id}
                       style={{ 
-                        padding: '1rem', 
-                        border: '1px solid var(--border)', 
+                        position: 'relative', 
+                        overflow: 'hidden', 
                         borderRadius: '8px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        background: '#fff'
+                        width: '100%',
+                        background: '#ef4444'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, marginRight: '0.5rem' }}>
-                        <input 
-                          type="checkbox" 
-                          checked={selectedIds.includes(record.id)}
-                          onChange={() => toggleSelectRecord(record.id)}
-                          style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
-                        />
-                        <div 
-                          style={{ cursor: 'pointer', flex: 1 }} 
-                          onClick={() => setSelectedDetailRecord(record)}
-                          title="คลิกเพื่อดูรายละเอียดข้อมูลลูกค้า"
-                        >
-                          <div style={{ fontWeight: '600', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            {record.name}
-                            <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--primary)', backgroundColor: '#fff1f2', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #fecdd3' }}>
-                              🔍 ดูรายละเอียด
-                            </span>
-                          </div>
-                          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                            {record.phone && <span>โทร: {record.phone}</span>}
-                            {record.phone && <span style={{ color: '#cbd5e1' }}>|</span>}
-                            {record.quantity !== undefined && <span>จำนวนที่พิมพ์: {record.quantity} ใบ</span>}
-                            {record.quantity !== undefined && <span style={{ color: '#cbd5e1' }}>|</span>}
-                            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                              {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+                      {/* Swipe Delete Action Background */}
+                      <div 
+                        onClick={() => handleDeleteRecord(record.id)}
+                        style={{
+                          position: 'absolute',
+                          right: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: '80px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#fff',
+                          fontWeight: 'bold',
+                          fontSize: '0.9rem',
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                          zIndex: 1
+                        }}
+                      >
+                        ลบ
+                      </div>
+
+                      {/* Foreground Content Card */}
+                      <div 
+                        onTouchStart={(e) => handleTouchStart(record.id, e)}
+                        onTouchMove={(e) => handleTouchMove(record.id, e)}
+                        onTouchEnd={(e) => handleTouchEnd(record.id, e)}
+                        style={{ 
+                          padding: '1rem', 
+                          border: '1px solid var(--border)', 
+                          borderRadius: '8px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          background: '#fff',
+                          transform: `translateX(-${swipeOffset[record.id] || 0}px)`,
+                          transition: touchStartX === null ? 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
+                          position: 'relative',
+                          zIndex: 2
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, marginRight: '0.5rem' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={selectedIds.includes(record.id)}
+                            onChange={() => toggleSelectRecord(record.id)}
+                            style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
+                          />
+                          <div 
+                            style={{ cursor: 'pointer', flex: 1 }} 
+                            onClick={() => setSelectedDetailRecord(record)}
+                            title="คลิกเพื่อดูรายละเอียดข้อมูลลูกค้า"
+                          >
+                            <div style={{ fontWeight: '600', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              {record.name}
+                              <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--primary)', backgroundColor: '#fff1f2', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #fecdd3' }}>
+                                🔍 ดูรายละเอียด
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              {record.phone && <span>โทร: {record.phone}</span>}
+                              {record.phone && <span style={{ color: '#cbd5e1' }}>|</span>}
+                              {record.quantity !== undefined && <span>จำนวนที่พิมพ์: {record.quantity} ใบ</span>}
+                              {record.quantity !== undefined && <span style={{ color: '#cbd5e1' }}>|</span>}
+                              <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                                {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                        <button 
-                          onClick={() => handlePrintHistory(record)} 
-                          className="btn btn-secondary" 
-                          style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.2rem', margin: 0 }}
-                        >
-                          <Printer size={12} /> พิมพ์ซ้ำ
-                        </button>
-                        <button 
-                          onClick={() => {
-                            populateFromScan(record);
-                            // Scroll to form on mobile
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          }} 
-                          className="btn" 
-                          style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.2rem', margin: 0, cursor: 'pointer' }}
-                        >
-                          ✏️ แก้ไข
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                          <button 
+                            onClick={() => handlePrintHistory(record)} 
+                            className="btn btn-secondary" 
+                            style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.2rem', margin: 0 }}
+                          >
+                            <Printer size={12} /> พิมพ์ซ้ำ
+                          </button>
+                          <button 
+                            onClick={() => {
+                              populateFromScan(record);
+                              // Scroll to form on mobile
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }} 
+                            className="btn" 
+                            style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.2rem', margin: 0, cursor: 'pointer' }}
+                          >
+                            ✏️ แก้ไข
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
