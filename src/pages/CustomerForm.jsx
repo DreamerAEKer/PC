@@ -953,127 +953,39 @@ export default function CustomerForm() {
               </button>
             </div>
 
-            {/* Tabs Selector */}
-            <div className="modal-tab-bar" style={{ display: 'flex', gap: '0.25rem', marginBottom: '1rem', backgroundColor: '#f1f5f9', padding: '0.25rem', borderRadius: '8px', overflowX: 'auto' }}>
-              <button
-                type="button"
-                onClick={() => setGuideActiveTab(0)}
-                style={{
-                  flex: 1,
-                  padding: '0.5rem',
-                  fontSize: '0.8rem',
-                  margin: 0,
-                  borderRadius: '6px',
-                  backgroundColor: guideActiveTab === 0 ? '#fff' : 'transparent',
-                  color: guideActiveTab === 0 ? 'var(--secondary)' : '#475569',
-                  border: 'none',
-                  fontWeight: guideActiveTab === 0 ? 'bold' : 'normal',
-                  boxShadow: guideActiveTab === 0 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                ⚽ ภาพรวม (4 Steps)
-              </button>
-              <button
-                type="button"
-                onClick={() => setGuideActiveTab(1)}
-                style={{
-                  flex: 1,
-                  padding: '0.5rem',
-                  fontSize: '0.8rem',
-                  margin: 0,
-                  borderRadius: '6px',
-                  backgroundColor: guideActiveTab === 1 ? '#fff' : 'transparent',
-                  color: guideActiveTab === 1 ? 'var(--secondary)' : '#475569',
-                  border: 'none',
-                  fontWeight: guideActiveTab === 1 ? 'bold' : 'normal',
-                  boxShadow: guideActiveTab === 1 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                1. โหลด & สมัคร
-              </button>
-              <button
-                type="button"
-                onClick={() => setGuideActiveTab(2)}
-                style={{
-                  flex: 1,
-                  padding: '0.5rem',
-                  fontSize: '0.8rem',
-                  margin: 0,
-                  borderRadius: '6px',
-                  backgroundColor: guideActiveTab === 2 ? '#fff' : 'transparent',
-                  color: guideActiveTab === 2 ? 'var(--secondary)' : '#475569',
-                  border: 'none',
-                  fontWeight: guideActiveTab === 2 ? 'bold' : 'normal',
-                  boxShadow: guideActiveTab === 2 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                2. เข้าเมนูโหวต
-              </button>
-              <button
-                type="button"
-                onClick={() => setGuideActiveTab(3)}
-                style={{
-                  flex: 1,
-                  padding: '0.5rem',
-                  fontSize: '0.8rem',
-                  margin: 0,
-                  borderRadius: '6px',
-                  backgroundColor: guideActiveTab === 3 ? '#fff' : 'transparent',
-                  color: guideActiveTab === 3 ? 'var(--secondary)' : '#475569',
-                  border: 'none',
-                  fontWeight: guideActiveTab === 3 ? 'bold' : 'normal',
-                  boxShadow: guideActiveTab === 3 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                3. เลือกทีม & จำนวน
-              </button>
-              <button
-                type="button"
-                onClick={() => setGuideActiveTab(4)}
-                style={{
-                  flex: 1,
-                  padding: '0.5rem',
-                  fontSize: '0.8rem',
-                  margin: 0,
-                  borderRadius: '6px',
-                  backgroundColor: guideActiveTab === 4 ? '#fff' : 'transparent',
-                  color: guideActiveTab === 4 ? 'var(--secondary)' : '#475569',
-                  border: 'none',
-                  fontWeight: guideActiveTab === 4 ? 'bold' : 'normal',
-                  boxShadow: guideActiveTab === 4 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                4. รอลุ้นโชคใหญ่
-              </button>
-            </div>
-
-            {/* Tab Contents */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              {guideActiveTab === 0 && (
-                <img src="guide_step1.jpg" alt="ภาพรวม 4 ขั้นตอน" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
-              )}
-              {guideActiveTab === 1 && (
-                <img src="guide_step2.jpg" alt="ขั้นตอนโหลดและลงทะเบียน" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
-              )}
-              {guideActiveTab === 2 && (
-                <img src="guide_step3.jpg" alt="ขั้นตอนคลิกเมนูโหวต" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
-              )}
-              {guideActiveTab === 3 && (
-                <img src="guide_step4.jpg" alt="ขั้นตอนการเลือกประเทศและจำนวน" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
-              )}
-              {guideActiveTab === 4 && (
-                <img src="guide_step5.jpg" alt="ขั้นตอนรอร่วมลุ้นโชค" style={{ maxWidth: '100%', maxHeight: '60vh', width: 'auto', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
-              )}
+            {/* Combined Steps Layout */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0', display: 'flex', flexDirection: 'column', gap: '1.25rem', alignItems: 'center' }}>
+              {/* Top Overview Image */}
+              <div style={{ width: '100%', maxWidth: '280px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: 'var(--secondary)', marginBottom: '0.35rem' }}>⚽ ภาพรวม 4 ขั้นตอน</span>
+                <img src="guide_step1.jpg" alt="ภาพรวม 4 ขั้นตอน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
+              </div>
+              
+              {/* 2x2 Grid for Step Detail Images */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(2, 1fr)', 
+                gap: '1rem', 
+                width: '100%', 
+                maxWidth: '560px'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', marginBottom: '0.35rem' }}>1. โหลด & สมัคร</span>
+                  <img src="guide_step2.jpg" alt="ขั้นตอนโหลดและลงทะเบียน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', marginBottom: '0.35rem' }}>2. เข้าเมนูโหวต</span>
+                  <img src="guide_step3.jpg" alt="ขั้นตอนคลิกเมนูโหวต" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', marginBottom: '0.35rem' }}>3. เลือกทีม & จำนวน</span>
+                  <img src="guide_step4.jpg" alt="ขั้นตอนการเลือกประเทศและจำนวน" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', marginBottom: '0.35rem' }}>4. รอลุ้นโชคใหญ่</span>
+                  <img src="guide_step5.jpg" alt="ขั้นตอนรอร่วมลุ้นโชค" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }} />
+                </div>
+              </div>
             </div>
 
             <div style={{ marginTop: '1.25rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0' }}>
