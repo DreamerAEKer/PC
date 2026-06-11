@@ -1561,6 +1561,26 @@ export default function StaffPortal() {
                 )}
               </div>
 
+              {/* Export/Import Control Buttons */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                <button 
+                  onClick={exportHistory} 
+                  className="btn btn-secondary" 
+                  style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
+                  title="ดาวน์โหลดประวัติเป็นไฟล์เพื่อนำไปเปิดเครื่องอื่น"
+                >
+                  <Download size={14} /> {selectedIds.length > 0 ? `ส่งออกที่เลือก (${selectedIds.length})` : 'ส่งออกข้อมูลทั้งหมด'}
+                </button>
+                <label 
+                  className="btn btn-secondary" 
+                  style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', cursor: 'pointer', margin: 0 }}
+                  title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
+                >
+                  <Upload size={14} /> นำเข้าข้อมูล
+                  <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
+                </label>
+              </div>
+
               {/* Totals Summary */}
               {history.length > 0 && (() => {
                 const todayStr = new Date().toISOString().split('T')[0];
@@ -1619,26 +1639,6 @@ export default function StaffPortal() {
                   </div>
                 );
               })()}
-
-              {/* Export/Import Control Buttons */}
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                <button 
-                  onClick={exportHistory} 
-                  className="btn btn-secondary" 
-                  style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
-                  title="ดาวน์โหลดประวัติเป็นไฟล์เพื่อนำไปเปิดเครื่องอื่น"
-                >
-                  <Download size={14} /> {selectedIds.length > 0 ? `ส่งออกที่เลือก (${selectedIds.length})` : 'ส่งออกข้อมูลทั้งหมด'}
-                </button>
-                <label 
-                  className="btn btn-secondary" 
-                  style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', cursor: 'pointer', margin: 0 }}
-                  title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
-                >
-                  <Upload size={14} /> นำเข้าข้อมูล
-                  <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
-                </label>
-              </div>
 
               {history.length === 0 ? (
                 <p style={{ color: 'var(--text-muted)' }}>ยังไม่มีประวัติการพิมพ์</p>
