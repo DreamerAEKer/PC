@@ -261,46 +261,73 @@ export default function CustomerForm() {
           50% { transform: skewX(-15deg) scale(1.08); }
           100% { transform: skewX(-15deg) scale(1); }
         }
-        @keyframes bounceCoin {
-          0% { transform: translateY(0) scale(1) rotate(0deg); }
-          15% { transform: translateY(-16px) scale(1.18) rotate(-15deg); }
-          30% { transform: translateY(3px) scale(0.9) rotate(5deg); }
-          45% { transform: translateY(-8px) scale(1.06) rotate(-8deg); }
-          65% { transform: translateY(1px) scale(0.98) rotate(3deg); }
-          85% { transform: translateY(-3px) scale(1.02) rotate(-1deg); }
-          100% { transform: translateY(0) scale(1) rotate(0deg); }
+        @keyframes floatBgItem1 {
+          0% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-10px) rotate(15deg); }
+          100% { transform: translateY(0) rotate(0deg); }
         }
-        .coin-3d-baht {
-          width: 48px;
-          height: 48px;
+        @keyframes floatBgItem2 {
+          0% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-14px) rotate(-20deg); }
+          100% { transform: translateY(0) rotate(0deg); }
+        }
+        @keyframes spinTyping {
+          0% { transform: translateY(0) rotate(0deg) scale(1); }
+          50% { transform: translateY(-25px) rotate(180deg) scale(1.3); opacity: 0.95; }
+          100% { transform: translateY(0) rotate(360deg) scale(1); }
+        }
+        .bg-coin-3d {
+          width: 28px;
+          height: 28px;
           background: linear-gradient(135deg, #ffe066 0%, #f5b041 50%, #d35400 100%);
-          border: 3.5px solid #b7950b;
+          border: 2px solid #b7950b;
           border-radius: 50%;
-          box-shadow: 0 5px 15px rgba(217, 119, 6, 0.35), inset 0 2px 0 rgba(255,255,255,0.6), inset 0 -3px 0 rgba(0,0,0,0.2);
+          box-shadow: 0 3px 6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5);
           display: flex;
           align-items: center;
           justify-content: center;
           color: #ffffff;
-          font-family: 'Outfit', 'Inter', sans-serif;
-          font-size: 1.6rem;
+          font-size: 0.95rem;
           font-weight: 900;
-          text-shadow: 1px 2px 3px rgba(146, 64, 14, 0.8);
-          position: relative;
-          user-select: none;
-          transition: transform 0.2s ease;
+          text-shadow: 1px 1px 1px rgba(146, 64, 14, 0.6);
+          position: absolute;
+          opacity: 0.45;
+          z-index: 1;
+          pointer-events: none;
+          transition: all 0.2s ease;
         }
-        .coin-3d-baht::after {
+        .bg-coin-3d::after {
           content: '';
           position: absolute;
-          top: 3px;
-          left: 3px;
-          right: 3px;
-          bottom: 3px;
-          border: 1.5px dashed rgba(255, 255, 255, 0.5);
+          top: 2px;
+          left: 2px;
+          right: 2px;
+          bottom: 2px;
+          border: 1px dashed rgba(255, 255, 255, 0.4);
           border-radius: 50%;
         }
-        .coin-bounce-active {
-          animation: bounceCoin 0.65s cubic-bezier(0.25, 0.8, 0.25, 1);
+        .bg-bar-3d {
+          width: 38px;
+          height: 13px;
+          background: linear-gradient(135deg, #ffe666 0%, #f5b041 50%, #d35400 100%);
+          border: 1px solid #b7950b;
+          border-radius: 2px;
+          box-shadow: 1px 2px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.4);
+          transform: skewX(-15deg);
+          position: absolute;
+          opacity: 0.45;
+          z-index: 1;
+          pointer-events: none;
+          transition: all 0.2s ease;
+        }
+        .bg-float-1 {
+          animation: floatBgItem1 3s infinite ease-in-out;
+        }
+        .bg-float-2 {
+          animation: floatBgItem2 3.8s infinite ease-in-out;
+        }
+        .typing-active {
+          animation: spinTyping 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) infinite !important;
         }
         .floating-gold-item {
           position: absolute;
@@ -437,7 +464,7 @@ export default function CustomerForm() {
             {selectQty === 'custom' && (
               <div className="form-group">
                 <div style={{ 
-                  padding: '0.85rem 1rem 0.85rem 4.25rem', 
+                  padding: '0.85rem 1rem', 
                   background: 'linear-gradient(135deg, #fffdf6 0%, #fffbeb 100%)', 
                   border: '3px solid #f59e0b', 
                   borderRadius: '16px',
@@ -449,19 +476,11 @@ export default function CustomerForm() {
                   overflow: 'hidden',
                   minHeight: '68px'
                 }}>
-                  {/* Left bottom coin emoji decoration like in screenshot */}
-                  <div style={{ 
-                    position: 'absolute', 
-                    left: '16px', 
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    zIndex: 2,
-                    pointerEvents: 'none'
-                  }}>
-                    <div className={`coin-3d-baht ${isTyping ? 'coin-bounce-active' : ''}`}>
-                      ฿
-                    </div>
-                  </div>
+                  {/* Floating 3D Background Coins and Bars */}
+                  <div className={`bg-coin-3d bg-float-1 ${isTyping ? 'typing-active' : ''}`} style={{ left: '8%', top: '15%' }}>฿</div>
+                  <div className={`bg-bar-3d bg-float-2 ${isTyping ? 'typing-active' : ''}`} style={{ left: '22%', bottom: '8%', transform: 'skewX(-15deg)' }} />
+                  <div className={`bg-coin-3d bg-float-2 ${isTyping ? 'typing-active' : ''}`} style={{ right: '8%', top: '20%' }}>฿</div>
+                  <div className={`bg-bar-3d bg-float-1 ${isTyping ? 'typing-active' : ''}`} style={{ right: '22%', bottom: '12%', transform: 'skewX(-15deg)' }} />
 
                   {/* Sparkle and Text controls */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', position: 'relative', zIndex: 2 }}>
