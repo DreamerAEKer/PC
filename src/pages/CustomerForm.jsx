@@ -141,6 +141,12 @@ export default function CustomerForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const cardRef = useRef(null);
 
+  // States for history selection & delete holding
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [longPressRecord, setLongPressRecord] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const pressTimerRef = useRef(null);
+
   useEffect(() => {
     // Load history from local storage
     const saved = localStorage.getItem('customerHistory');
@@ -1125,11 +1131,6 @@ export default function CustomerForm() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {/* Send Selected Button */}
               {(() => {
-                const [selectedIds, setSelectedIds] = useState([]);
-                const [longPressRecord, setLongPressRecord] = useState(null);
-                const [showDeleteModal, setShowDeleteModal] = useState(false);
-                const pressTimerRef = useRef(null);
-
                 const handleSelectToggle = (id, e) => {
                   e.stopPropagation();
                   setSelectedIds(prev =>
