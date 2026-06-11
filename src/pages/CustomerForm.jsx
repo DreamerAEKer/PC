@@ -237,6 +237,28 @@ export default function CustomerForm() {
           -ms-overflow-style: none;  /* IE and Edge */
           scrollbar-width: none;  /* Firefox */
         }
+        @media (max-width: 640px) {
+          .card-header-responsive {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 0.75rem !important;
+          }
+          .card-header-responsive h2 {
+            font-size: 1.15rem !important;
+          }
+          .card-header-responsive .btn-group-responsive {
+            width: 100% !important;
+            display: flex !important;
+            gap: 0.5rem !important;
+            justify-content: space-between !important;
+          }
+          .card-header-responsive .btn-group-responsive button {
+            flex: 1 !important;
+            justify-content: center !important;
+            padding: 0.5rem 0.25rem !important;
+            font-size: 0.75rem !important;
+          }
+        }
       `}</style>
       {/* Non-clickable Banner */}
       <div 
@@ -257,12 +279,12 @@ export default function CustomerForm() {
       <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
         <div style={{ flex: '1 1 400px' }}>
           <div className="card glass-panel">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', gap: '0.5rem' }}>
+          <div className="card-header-responsive" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', gap: '0.5rem' }}>
             <h2 style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', margin: 0, fontSize: '1.2rem', lineHeight: '1.4' }}>
               <CheckCircle color="var(--primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
               <span>กรอกข้อมูลเพื่อสั่งพิมพ์ไปรษณียบัตร</span>
             </h2>
-            <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <div className="btn-group-responsive" style={{ display: 'flex', gap: '0.4rem', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               <button
                 type="button"
                 onClick={() => setShowRulesModal(true)}
