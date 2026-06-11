@@ -1149,6 +1149,7 @@ export default function CustomerForm() {
                   }
                   
 
+                  const selectedRecords = history.filter(r => selectedIds.includes(r.id));
                   
                   // Save selected records to state to display them as a sequence of single QR codes
                   setBulkRecords(selectedRecords);
