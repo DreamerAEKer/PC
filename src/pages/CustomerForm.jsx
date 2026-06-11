@@ -1464,37 +1464,64 @@ export default function CustomerForm() {
               </div>
             )}
 
-            {/* QR Code Container */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              backgroundColor: '#fff',
-              padding: '1.25rem 1rem 1rem 1rem',
-              borderRadius: '12px',
-              border: '2px solid var(--primary)',
-              width: 'fit-content',
-              margin: '1rem auto 1.25rem auto',
-              boxShadow: '0 4px 12px rgba(225, 29, 72, 0.15)',
-              position: 'relative'
-            }}>
-              <div style={{ 
-                position: 'absolute', 
-                top: '-0.75rem', 
-                backgroundColor: 'var(--primary)', 
-                color: '#fff', 
-                fontSize: '0.75rem', 
-                fontWeight: 'bold', 
-                padding: '0.15rem 0.6rem', 
-                borderRadius: '20px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}>
-                {bulkRecords.length > 0 ? `QR ลำดับที่ ${bulkIndex + 1}` : 'QR สำหรับสั่งพิมพ์'}
-              </div>
-              <div style={{ marginTop: '0.5rem' }}>
-                <QRCodeCanvas value={generatedData.payload} size={200} level="Q" />
+            {/* QR Code Container with Animation Wrapper */}
+            <div style={{ position: 'relative', overflow: 'hidden', width: '100%', display: 'flex', justifyContent: 'center' }}>
+              <div 
+                key={bulkIndex}
+                className="qr-card-bounce"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  backgroundColor: '#fff',
+                  padding: '1.25rem 1rem 1rem 1rem',
+                  borderRadius: '12px',
+                  border: '2px solid var(--primary)',
+                  width: 'fit-content',
+                  margin: '1rem auto 1.25rem auto',
+                  boxShadow: '0 4px 12px rgba(225, 29, 72, 0.15)',
+                  position: 'relative'
+                }}
+              >
+                <div style={{ 
+                  position: 'absolute', 
+                  top: '-0.75rem', 
+                  backgroundColor: 'var(--primary)', 
+                  color: '#fff', 
+                  fontSize: '0.75rem', 
+                  fontWeight: 'bold', 
+                  padding: '0.15rem 0.6rem', 
+                  borderRadius: '20px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}>
+                  {bulkRecords.length > 0 ? `QR ลำดับที่ ${bulkIndex + 1}` : 'QR สำหรับสั่งพิมพ์'}
+                </div>
+                <div style={{ marginTop: '0.5rem' }}>
+                  <QRCodeCanvas value={generatedData.payload} size={200} level="Q" />
+                </div>
               </div>
             </div>
+
+            {/* End of Sequence Indicator */}
+            {bulkRecords.length > 0 && bulkIndex === bulkRecords.length - 1 && (
+              <div style={{
+                backgroundColor: '#dcfce7',
+                color: '#15803d',
+                fontSize: '0.9rem',
+                fontWeight: 'bold',
+                padding: '0.5rem',
+                borderRadius: '8px',
+                marginBottom: '1rem',
+                animation: 'pulse 2s infinite',
+                border: '1px solid #bbf7d0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.35rem'
+              }}>
+                <span>✨ รายการสุดท้ายแล้ว (ครบถ้วน)</span>
+              </div>
+            )}
 
             {/* Short Details */}
             <div style={{
@@ -1566,7 +1593,15 @@ export default function CustomerForm() {
                     };
                     setGeneratedData({ ...prevRec, payload: JSON.stringify(compData) });
                   }}
-                  style={{ flex: 1, padding: '0.5rem' }}
+                  style={{ 
+                    flex: 1, 
+                    padding: '0.5rem', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '0.25rem',
+                    opacity: bulkIndex === 0 ? 0.5 : 1
+                  }}
                 >
                   ◀️ รายการก่อนหน้า
                 </button>
@@ -1599,7 +1634,17 @@ export default function CustomerForm() {
                     };
                     setGeneratedData({ ...nextRec, payload: JSON.stringify(compData) });
                   }}
-                  style={{ flex: 1, padding: '0.5rem', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none' }}
+                  style={{ 
+                    flex: 1, 
+                    padding: '0.5rem', 
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                    border: 'none',
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '0.25rem',
+                    opacity: bulkIndex === bulkRecords.length - 1 ? 0.5 : 1
+                  }}
                 >
                   รายการถัดไป ▶️
                 </button>

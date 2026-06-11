@@ -542,13 +542,28 @@ export default function StaffPortal() {
                 } else {
                   // Single import
                   const data = parseQrPayload(decodedText);
-                  populateFromScan(data);
                   
                   if (targetScanCount > 0) {
+                    // Automatically save to history when scanning sequentially
+                    const newRecord = { 
+                      ...data, 
+                      id: Date.now() + Math.random(), 
+                      timestamp: new Date().toISOString() 
+                    };
+                    setHistory(prevHistory => {
+                      const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
+                      // Prevent duplicates in history for this fast sequence
+                      const exists = safeHistory.some(r => r.name === newRecord.name && r.phone === newRecord.phone && r.quantity === newRecord.quantity);
+                      if (exists) return safeHistory;
+                      const updatedHistory = [newRecord, ...safeHistory].slice(0, 100);
+                      localStorage.setItem('staffHistory', JSON.stringify(updatedHistory));
+                      return updatedHistory;
+                    });
+
                     setCurrentScanCount(prev => {
                       const next = prev + 1;
                       if (next >= targetScanCount) {
-                        alert(`🎉 สแกนนำเข้าครบตามเป้าหมายแล้ว! (${next} / ${targetScanCount} รายการ)`);
+                        alert(`🎉 สแกนนำเข้าครบตามเป้าหมายและบันทึกทั้งหมดเรียบร้อยแล้ว! (${next} / ${targetScanCount} รายการ)`);
                         if (qrCodeInstance && qrCodeInstance.isScanning) {
                           qrCodeInstance.stop().catch(() => {}).then(() => {
                             setScanMode('manual');
@@ -561,11 +576,13 @@ export default function StaffPortal() {
                           setCurrentScanCount(0);
                         }
                       } else {
-                        alert(`✅ สแกนสำเร็จรายการที่ ${next} / ${targetScanCount}`);
+                        // Success toast-like alert, keeping scanner active
+                        alert(`✅ นำเข้ารายการที่ ${next} / ${targetScanCount} เรียบร้อย! กรุณาสไลด์หรือสแกนรายการถัดไปได้เลย`);
                       }
                       return next;
                     });
                   } else {
+                    populateFromScan(data);
                     if (qrCodeInstance && qrCodeInstance.isScanning) {
                       qrCodeInstance.stop().catch(() => {}).then(() => {
                         setScanMode('manual');
