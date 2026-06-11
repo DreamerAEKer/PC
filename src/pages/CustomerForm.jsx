@@ -735,7 +735,7 @@ export default function CustomerForm() {
                   cursor: 'pointer'
                 }}
               >
-                🎁 ของรางวัลทั้งหมด
+                🎁 ของรางวัล
               </button>
               <button
                 type="button"
@@ -761,13 +761,13 @@ export default function CustomerForm() {
             {/* Tab Contents */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
               {rulesActiveTab === 0 && (
-                <img src="/rules_1.jpg" alt="FAQ และ เงื่อนไข" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                <img src="rules_1.jpg" alt="FAQ และ เงื่อนไข" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
               )}
               {rulesActiveTab === 1 && (
-                <img src="/rules_2.jpg" alt="รายการของรางวัล" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                <img src="rules_2.jpg" alt="รายการของรางวัล" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
               )}
               {rulesActiveTab === 2 && (
-                <img src="/rules_3.jpg" alt="วิธีเขียนที่ถูกต้อง" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                <img src="rules_3.jpg" alt="วิธีเขียนที่ถูกต้อง" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
               )}
             </div>
 
