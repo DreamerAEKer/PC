@@ -10,6 +10,9 @@ import { useThaiAddress } from 'use-thai-address';
 export default function CustomerForm() {
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
 
+  const [showRulesModal, setShowRulesModal] = useState(false);
+  const [rulesActiveTab, setRulesActiveTab] = useState(0);
+
   const selectQty = watch("selectQuantity", "100");
   const customQty = watch("customQuantity", "");
   const quantity = selectQty === "custom" ? (parseInt(customQty, 10) || 0) : (parseInt(selectQty, 10) || 0);
@@ -226,10 +229,34 @@ export default function CustomerForm() {
     <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
       <div style={{ flex: '1 1 400px' }}>
         <div className="card glass-panel">
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-            <CheckCircle color="var(--primary)" />
-            กรอกข้อมูลเพื่อสั่งพิมพ์ไปรษณียบัตร
-          </h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, fontSize: '1.25rem' }}>
+              <CheckCircle color="var(--primary)" />
+              กรอกข้อมูลเพื่อสั่งพิมพ์ไปรษณียบัตร
+            </h2>
+            <button
+              type="button"
+              onClick={() => setShowRulesModal(true)}
+              className="btn"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                borderColor: '#e11d48',
+                color: '#e11d48',
+                backgroundColor: '#fff1f2',
+                fontWeight: 'bold',
+                fontSize: '0.8rem',
+                padding: '0.35rem 0.75rem',
+                margin: 0,
+                cursor: 'pointer',
+                borderRadius: '8px',
+                border: '1.5px solid #fecdd3'
+              }}
+            >
+              🏆 กติกาการร่วมลุ้น
+            </button>
+          </div>
           <form onSubmit={handleSubmit(onSubmit, onError)}>
             <div className="form-group">
               <label className="form-label">วันที่สั่งจอง <span style={{color:'red'}}>*</span></label>
@@ -621,6 +648,137 @@ export default function CustomerForm() {
               
               <button onClick={() => setIsModalOpen(false)} className="btn btn-secondary" style={{ width: '100%', padding: '0.6rem', fontWeight: 600 }}>
                 ปิดหน้าจอนี้ (กลับไปแก้ไข)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rules Modal */}
+      {showRulesModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999,
+          padding: '1rem',
+          boxSizing: 'border-box'
+        }} onClick={() => setShowRulesModal(false)}>
+          <div className="card glass-panel" style={{
+            width: '100%',
+            maxWidth: '650px',
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            padding: '1.5rem',
+            boxSizing: 'border-box',
+            textAlign: 'center',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column'
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.25rem', fontWeight: 700 }}>
+                🏆 กติกาและเงื่อนไขการร่วมลุ้นรางวัล
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setShowRulesModal(false)}
+                style={{ border: 'none', background: 'none', fontSize: '1.25rem', cursor: 'pointer', color: '#64748b' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Tabs Selector */}
+            <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '1rem', backgroundColor: '#f1f5f9', padding: '0.25rem', borderRadius: '8px' }}>
+              <button
+                type="button"
+                onClick={() => setRulesActiveTab(0)}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  fontSize: '0.85rem',
+                  margin: 0,
+                  borderRadius: '6px',
+                  backgroundColor: rulesActiveTab === 0 ? '#fff' : 'transparent',
+                  color: rulesActiveTab === 0 ? 'var(--primary)' : '#475569',
+                  border: 'none',
+                  fontWeight: rulesActiveTab === 0 ? 'bold' : 'normal',
+                  boxShadow: rulesActiveTab === 0 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                ❓ คำถาม & เงื่อนไข
+              </button>
+              <button
+                type="button"
+                onClick={() => setRulesActiveTab(1)}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  fontSize: '0.85rem',
+                  margin: 0,
+                  borderRadius: '6px',
+                  backgroundColor: rulesActiveTab === 1 ? '#fff' : 'transparent',
+                  color: rulesActiveTab === 1 ? 'var(--primary)' : '#475569',
+                  border: 'none',
+                  fontWeight: rulesActiveTab === 1 ? 'bold' : 'normal',
+                  boxShadow: rulesActiveTab === 1 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                🎁 ของรางวัลทั้งหมด
+              </button>
+              <button
+                type="button"
+                onClick={() => setRulesActiveTab(2)}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  fontSize: '0.85rem',
+                  margin: 0,
+                  borderRadius: '6px',
+                  backgroundColor: rulesActiveTab === 2 ? '#fff' : 'transparent',
+                  color: rulesActiveTab === 2 ? 'var(--primary)' : '#475569',
+                  border: 'none',
+                  fontWeight: rulesActiveTab === 2 ? 'bold' : 'normal',
+                  boxShadow: rulesActiveTab === 2 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                📝 วิธีเขียนที่ถูกต้อง
+              </button>
+            </div>
+
+            {/* Tab Contents */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+              {rulesActiveTab === 0 && (
+                <img src="/rules_1.jpg" alt="FAQ และ เงื่อนไข" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+              )}
+              {rulesActiveTab === 1 && (
+                <img src="/rules_2.jpg" alt="รายการของรางวัล" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+              )}
+              {rulesActiveTab === 2 && (
+                <img src="/rules_3.jpg" alt="วิธีเขียนที่ถูกต้อง" style={{ width: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+              )}
+            </div>
+
+            <div style={{ marginTop: '1.25rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0' }}>
+              <button 
+                type="button" 
+                className="btn btn-secondary" 
+                onClick={() => setShowRulesModal(false)}
+                style={{ width: '100%', padding: '0.6rem', fontWeight: 600, cursor: 'pointer' }}
+              >
+                ปิดหน้าจอนี้
               </button>
             </div>
           </div>
