@@ -35,6 +35,7 @@ export default function StaffPortal() {
     return '';
   };
   const [history, setHistory] = useState([]);
+  const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
   const [scanMode, setScanMode] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768 ? 'camera' : 'manual');
   const [cameraActive, setCameraActive] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
   const didValue = watch("did", "");
@@ -1664,8 +1665,17 @@ export default function StaffPortal() {
                           onChange={() => toggleSelectRecord(record.id)}
                           style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
                         />
-                        <div>
-                          <div style={{ fontWeight: '600', color: 'var(--text-main)' }}>{record.name}</div>
+                        <div 
+                          style={{ cursor: 'pointer', flex: 1 }} 
+                          onClick={() => setSelectedDetailRecord(record)}
+                          title="คลิกเพื่อดูรายละเอียดข้อมูลลูกค้า"
+                        >
+                          <div style={{ fontWeight: '600', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {record.name}
+                            <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--primary)', backgroundColor: '#fff1f2', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #fecdd3' }}>
+                              🔍 ดูรายละเอียด
+                            </span>
+                          </div>
                           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                             {record.phone && <span>โทร: {record.phone}</span>}
                             {record.phone && <span style={{ color: '#cbd5e1' }}>|</span>}
@@ -1964,6 +1974,121 @@ export default function StaffPortal() {
             >
               ปิดหน้าต่างนี้
             </button>
+          </div>
+        </div>
+      )}
+      {selectedDetailRecord && (
+        <div className="quick-qr-modal-overlay" onClick={() => setSelectedDetailRecord(null)}>
+          <div className="quick-qr-modal-content" style={{ maxWidth: '600px', textAlign: 'left', padding: '2rem' }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 'bold', borderBottom: '2px solid var(--primary)', paddingBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              🔍 รายละเอียดข้อมูลลูกค้าสั่งพิมพ์
+            </h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
+              <div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>ชื่อ-นามสกุล</span>
+                <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>{selectedDetailRecord.name}</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>เบอร์โทรศัพท์</span>
+                <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>{selectedDetailRecord.phone || '-'}</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>จำนวนสั่งพิมพ์</span>
+                <strong style={{ fontSize: '1.05rem', color: 'var(--primary)' }}>{selectedDetailRecord.quantity} ใบ ({selectedDetailRecord.quantity * 3} บาท)</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>วันที่สั่งจอง</span>
+                <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>{selectedDetailRecord.orderDate}</strong>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border)', marginBottom: '1.25rem' }}>
+              <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)', display: 'block', marginBottom: '0.5rem' }}>ข้อมูลที่อยู่จัดส่ง</strong>
+              {selectedDetailRecord.did ? (
+                <div>
+                  <div style={{ fontSize: '0.9rem', marginBottom: '0.25rem' }}>
+                    <span style={{ color: '#003399', fontWeight: 'bold' }}>D-ID (ไปรษณีย์ไทย):</span> <strong style={{ fontSize: '1.1rem', color: '#e11d48' }}>{selectedDetailRecord.did}</strong>
+                  </div>
+                  {selectedDetailRecord.address && (
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                      ที่อยู่สำรอง: {selectedDetailRecord.address} {selectedDetailRecord.zipcode}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ fontSize: '0.9rem', lineHeight: '1.5', color: 'var(--text-main)' }}>
+                  {selectedDetailRecord.addressLine1 || selectedDetailRecord.address || '-'}<br />
+                  {selectedDetailRecord.subdistrict && `ต./แขวง: ${selectedDetailRecord.subdistrict} `}
+                  {selectedDetailRecord.district && `อ./เขต: ${selectedDetailRecord.district} `}
+                  {selectedDetailRecord.province && `จ.: ${selectedDetailRecord.province} `}
+                  {selectedDetailRecord.zipcode && `รหัสไปรษณีย์: ${selectedDetailRecord.zipcode}`}
+                </div>
+              )}
+            </div>
+
+            {selectedDetailRecord.subBookings && selectedDetailRecord.subBookings.length > 0 && (
+              <div style={{ marginBottom: '1.25rem' }}>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)', display: 'block', marginBottom: '0.5rem' }}>
+                  👥 รายชื่อย่อย ({selectedDetailRecord.subBookings.length} รายการ)
+                </strong>
+                <div style={{ maxHeight: '180px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '8px' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
+                        <th style={{ padding: '0.4rem 0.5rem' }}>ชื่อ</th>
+                        <th style={{ padding: '0.4rem 0.5rem' }}>เบอร์โทร</th>
+                        <th style={{ padding: '0.4rem 0.5rem', textAlign: 'center' }}>จำนวน</th>
+                        <th style={{ padding: '0.4rem 0.5rem' }}>ที่อยู่</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedDetailRecord.subBookings.map((sub, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '0.4rem 0.5rem', fontWeight: 600 }}>{sub.n || sub.name}</td>
+                          <td style={{ padding: '0.4rem 0.5rem' }}>{sub.p || sub.phone || '-'}</td>
+                          <td style={{ padding: '0.4rem 0.5rem', textAlign: 'center' }}>{sub.q || sub.quantity} ใบ</td>
+                          <td style={{ padding: '0.4rem 0.5rem', color: 'var(--text-muted)' }}>
+                            {sub.m === 1 || sub.useMainAddress ? 'ใช้ที่อยู่เดียวกับหลัก' : (sub.a || sub.address || '-')}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }}>
+              <button 
+                onClick={() => {
+                  handlePrintHistory(selectedDetailRecord);
+                  setSelectedDetailRecord(null);
+                }}
+                className="btn btn-primary"
+                style={{ flex: 1, padding: '0.6rem 1rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}
+              >
+                <Printer size={16} /> พิมพ์ข้อมูลนี้
+              </button>
+              <button 
+                onClick={() => {
+                  populateFromScan(selectedDetailRecord);
+                  setSelectedDetailRecord(null);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="btn"
+                style={{ flex: 1, padding: '0.6rem 1rem', fontSize: '0.9rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', cursor: 'pointer' }}
+              >
+                ✏️ แก้ไขข้อมูล
+              </button>
+              <button 
+                onClick={() => setSelectedDetailRecord(null)}
+                className="btn btn-secondary"
+                style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem', cursor: 'pointer' }}
+              >
+                ปิด
+              </button>
+            </div>
           </div>
         </div>
       )}
