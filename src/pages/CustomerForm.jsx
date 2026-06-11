@@ -147,6 +147,10 @@ export default function CustomerForm() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const pressTimerRef = useRef(null);
 
+  // States for sequential bulk QR display
+  const [bulkRecords, setBulkRecords] = useState([]);
+  const [bulkIndex, setBulkIndex] = useState(0);
+
   useEffect(() => {
     // Load history from local storage
     const saved = localStorage.getItem('customerHistory');
@@ -1149,49 +1153,35 @@ export default function CustomerForm() {
                     return;
                   }
                   
-                  const selectedRecords = history.filter(r => selectedIds.includes(r.id));
-                  
-                  const combinedData = {
-                    b: 1,
-                    r: selectedRecords.map(record => ({
-                      d: record.orderDate,
-                      q: record.quantity,
-                      n: record.name,
-                      p: record.phone,
-                      a: record.addressLine1 || record.address || '',
-                      sd: record.subdistrict || '',
-                      dt: record.district || '',
-                      pv: record.province || '',
-                      zp: record.zipcode || '',
-                      id: record.did || '',
-                      s: record.subBookings ? record.subBookings.map(sub => ({
-                        n: sub.name,
-                        p: sub.phone,
-                        q: sub.quantity,
-                        m: sub.useMainAddress ? 1 : 0,
-                        a: sub.address
-                      })) : []
-                    }))
-                  };
-                  
-                  const payload = JSON.stringify(combinedData);
-                  
-                  // Mock a generatedData object for the ticket modal
-                  const totalQty = selectedRecords.reduce((sum, r) => sum + r.quantity, 0);
-                  const bulkGenerated = {
-                    name: `รายการจองกลุ่ม (${selectedRecords.length} รายการ)`,
-                    phone: `${selectedRecords.length} รายชื่อ`,
-                    quantity: totalQty,
-                    orderDate: new Date().toISOString().split('T')[0],
-                    branch: selectedRecords[0]?.branch || 'ไปรษณีย์กลาง 10501',
-                    payload: payload,
-                    isBulk: true,
-                    selectedRecordsCount: selectedRecords.length
-                  };
-                  
-                  setGeneratedData(bulkGenerated);
-                  setIsModalOpen(true);
+                  // Save selected records to state to display them as a sequence of single QR codes
+                  setBulkRecords(selectedRecords);
+                  setBulkIndex(0);
                   setSelectedIds([]);
+                  
+                  // Setup generatedData for the first record in sequence
+                  const firstRecord = selectedRecords[0];
+                  const compressedData = {
+                    d: firstRecord.orderDate,
+                    q: firstRecord.quantity,
+                    n: firstRecord.name,
+                    p: firstRecord.phone,
+                    a: firstRecord.addressLine1 || firstRecord.address || '',
+                    sd: firstRecord.subdistrict || '',
+                    dt: firstRecord.district || '',
+                    pv: firstRecord.province || '',
+                    zp: firstRecord.zipcode || '',
+                    id: firstRecord.did || '',
+                    s: firstRecord.subBookings ? firstRecord.subBookings.map(sub => ({
+                      n: sub.name,
+                      p: sub.phone,
+                      q: sub.quantity,
+                      m: sub.useMainAddress ? 1 : 0,
+                      a: sub.address
+                    })) : []
+                  };
+                  const payload = JSON.stringify(compressedData);
+                  setGeneratedData({ ...firstRecord, payload });
+                  setIsModalOpen(true);
                 };
 
                 const startHistoryLongPress = (record) => {
@@ -1458,9 +1448,23 @@ export default function CustomerForm() {
             <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--primary)', fontSize: '1.2rem', fontWeight: 700 }}>
               🎟️ ตั๋วจองไปรษณียบัตร
             </h3>
-            <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.25rem', fontWeight: 500 }}>
-              ยื่นหน้าจอนี้ให้เจ้าหน้าที่สแกนได้ทันที
-            </div>
+            {bulkRecords.length > 0 ? (
+              <div style={{ 
+                backgroundColor: '#fef3c7', 
+                color: '#d97706', 
+                fontSize: '0.9rem', 
+                fontWeight: 'bold', 
+                padding: '0.4rem', 
+                borderRadius: '8px', 
+                marginBottom: '0.75rem' 
+              }}>
+                📂 ส่งออกข้อมูลกลุ่ม (รายการที่ {bulkIndex + 1} จาก {bulkRecords.length})
+              </div>
+            ) : (
+              <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.25rem', fontWeight: 500 }}>
+                ยื่นหน้าจอนี้ให้เจ้าหน้าที่สแกนได้ทันที
+              </div>
+            )}
 
             {/* QR Code Container */}
             <div style={{
@@ -1487,7 +1491,7 @@ export default function CustomerForm() {
                 borderRadius: '20px',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
               }}>
-                QR สำหรับสั่งพิมพ์
+                {bulkRecords.length > 0 ? `QR ลำดับที่ ${bulkIndex + 1}` : 'QR สำหรับสั่งพิมพ์'}
               </div>
               <div style={{ marginTop: '0.5rem' }}>
                 <QRCodeCanvas value={generatedData.payload} size={200} level="Q" />
@@ -1532,6 +1536,78 @@ export default function CustomerForm() {
               )}
             </div>
 
+            {/* Stepper Buttons for Bulk Send */}
+            {bulkRecords.length > 0 && (
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  disabled={bulkIndex === 0}
+                  onClick={() => {
+                    const prevIdx = bulkIndex - 1;
+                    setBulkIndex(prevIdx);
+                    const prevRec = bulkRecords[prevIdx];
+                    const compData = {
+                      d: prevRec.orderDate,
+                      q: prevRec.quantity,
+                      n: prevRec.name,
+                      p: prevRec.phone,
+                      a: prevRec.addressLine1 || prevRec.address || '',
+                      sd: prevRec.subdistrict || '',
+                      dt: prevRec.district || '',
+                      pv: prevRec.province || '',
+                      zp: prevRec.zipcode || '',
+                      id: prevRec.did || '',
+                      s: prevRec.subBookings ? prevRec.subBookings.map(sub => ({
+                        n: sub.name,
+                        p: sub.phone,
+                        q: sub.quantity,
+                        m: sub.useMainAddress ? 1 : 0,
+                        a: sub.address
+                      })) : []
+                    };
+                    setGeneratedData({ ...prevRec, payload: JSON.stringify(compData) });
+                  }}
+                  style={{ flex: 1, padding: '0.5rem' }}
+                >
+                  ◀️ รายการก่อนหน้า
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-primary" 
+                  disabled={bulkIndex === bulkRecords.length - 1}
+                  onClick={() => {
+                    const nextIdx = bulkIndex + 1;
+                    setBulkIndex(nextIdx);
+                    const nextRec = bulkRecords[nextIdx];
+                    const compData = {
+                      d: nextRec.orderDate,
+                      q: nextRec.quantity,
+                      n: nextRec.name,
+                      p: nextRec.phone,
+                      a: nextRec.addressLine1 || nextRec.address || '',
+                      sd: nextRec.subdistrict || '',
+                      dt: nextRec.district || '',
+                      pv: nextRec.province || '',
+                      zp: nextRec.zipcode || '',
+                      id: nextRec.did || '',
+                      s: nextRec.subBookings ? nextRec.subBookings.map(sub => ({
+                        n: sub.name,
+                        p: sub.phone,
+                        q: sub.quantity,
+                        m: sub.useMainAddress ? 1 : 0,
+                        a: sub.address
+                      })) : []
+                    };
+                    setGeneratedData({ ...nextRec, payload: JSON.stringify(compData) });
+                  }}
+                  style={{ flex: 1, padding: '0.5rem', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none' }}
+                >
+                  รายการถัดไป ▶️
+                </button>
+              </div>
+            )}
+
             {/* Actions */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -1543,8 +1619,8 @@ export default function CustomerForm() {
                 </button>
               </div>
               
-              <button onClick={() => setIsModalOpen(false)} className="btn btn-secondary" style={{ width: '100%', padding: '0.6rem', fontWeight: 600 }}>
-                ปิดหน้าจอนี้ (กลับไปแก้ไข)
+              <button onClick={() => { setIsModalOpen(false); setBulkRecords([]); }} className="btn btn-secondary" style={{ width: '100%', padding: '0.6rem', fontWeight: 600 }}>
+                ปิดหน้าจอนี้
               </button>
             </div>
           </div>

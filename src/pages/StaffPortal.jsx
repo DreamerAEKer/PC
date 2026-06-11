@@ -55,6 +55,10 @@ export default function StaffPortal() {
   const [selectedIds, setSelectedIds] = useState([]);
   const navigate = useNavigate();
 
+  // Re-check count stats
+  const [targetScanCount, setTargetScanCount] = useState(0);
+  const [currentScanCount, setCurrentScanCount] = useState(0);
+
   const toggleSelectAll = () => {
     if (selectedIds.length === history.length) {
       setSelectedIds([]);
@@ -539,14 +543,38 @@ export default function StaffPortal() {
                   // Single import
                   const data = parseQrPayload(decodedText);
                   populateFromScan(data);
-                  if (qrCodeInstance && qrCodeInstance.isScanning) {
-                    qrCodeInstance.stop().catch(() => {}).then(() => {
-                      setScanMode('manual');
+                  
+                  if (targetScanCount > 0) {
+                    setCurrentScanCount(prev => {
+                      const next = prev + 1;
+                      if (next >= targetScanCount) {
+                        alert(`🎉 สแกนนำเข้าครบตามเป้าหมายแล้ว! (${next} / ${targetScanCount} รายการ)`);
+                        if (qrCodeInstance && qrCodeInstance.isScanning) {
+                          qrCodeInstance.stop().catch(() => {}).then(() => {
+                            setScanMode('manual');
+                            setTargetScanCount(0);
+                            setCurrentScanCount(0);
+                          });
+                        } else {
+                          setScanMode('manual');
+                          setTargetScanCount(0);
+                          setCurrentScanCount(0);
+                        }
+                      } else {
+                        alert(`✅ สแกนสำเร็จรายการที่ ${next} / ${targetScanCount}`);
+                      }
+                      return next;
                     });
                   } else {
-                    setScanMode('manual');
+                    if (qrCodeInstance && qrCodeInstance.isScanning) {
+                      qrCodeInstance.stop().catch(() => {}).then(() => {
+                        setScanMode('manual');
+                      });
+                    } else {
+                      setScanMode('manual');
+                    }
+                    alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
                   }
-                  alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
                 }
               } catch (err) {
                 alert("QR Code ไม่ถูกต้องหรือไม่ใช่ข้อมูลจากระบบนี้");
@@ -638,7 +666,22 @@ export default function StaffPortal() {
       try {
         const data = parseQrPayload(decodedText);
         populateFromScan(data);
-        alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
+        
+        if (targetScanCount > 0) {
+          setCurrentScanCount(prev => {
+            const next = prev + 1;
+            if (next >= targetScanCount) {
+              alert(`🎉 นำเข้าไฟล์รูปภาพครบตามเป้าหมายแล้ว! (${next} / ${targetScanCount} รายการ)`);
+              setTargetScanCount(0);
+              setCurrentScanCount(0);
+            } else {
+              alert(`✅ นำเข้าสำเร็จรายการที่ ${next} / ${targetScanCount}`);
+            }
+            return next;
+          });
+        } else {
+          alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
+        }
         return true;
       } catch (err) {
         return false;
@@ -967,6 +1010,72 @@ export default function StaffPortal() {
               </div>
 
               <div id="reader-hidden" style={{ position: 'absolute', top: '-9999px', width: '500px', height: '500px' }}></div>
+
+              {(scanMode === 'camera' || scanMode === 'usb') && (
+                <div style={{ marginBottom: '1.25rem' }}>
+                  {/* Target Scan Selector */}
+                  <div style={{
+                    backgroundColor: '#fffbeb',
+                    border: '1.5px solid #fde047',
+                    borderRadius: '12px',
+                    padding: '0.75rem',
+                    marginBottom: '1rem',
+                    textAlign: 'left'
+                  }}>
+                    <strong style={{ fontSize: '0.85rem', color: '#b45309', display: 'block', marginBottom: '0.5rem' }}>
+                      📋 ตัวช่วยรับข้อมูลเป็นกลุ่ม (สแกนต่อเนื่อง):
+                    </strong>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.8rem', color: '#78350f' }}>จำนวนรายการที่จองร่วมกัน:</span>
+                      <select 
+                        value={targetScanCount}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10) || 0;
+                          setTargetScanCount(val);
+                          setCurrentScanCount(0);
+                        }}
+                        style={{
+                          padding: '0.25rem 0.5rem',
+                          fontSize: '0.85rem',
+                          borderRadius: '6px',
+                          borderColor: '#fde047',
+                          backgroundColor: '#fff',
+                          fontWeight: 'bold',
+                          color: '#b45309',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <option value="0">สแกนเดี่ยว (สแกนทีละใบ)</option>
+                        <option value="2">2 รายการ</option>
+                        <option value="3">3 รายการ</option>
+                        <option value="4">4 รายการ</option>
+                        <option value="5">5 รายการ</option>
+                        <option value="10">10 รายการ</option>
+                      </select>
+                    </div>
+                    {targetScanCount > 0 && (
+                      <div style={{ 
+                        marginTop: '0.5rem', 
+                        fontSize: '0.85rem', 
+                        fontWeight: 'bold',
+                        color: currentScanCount >= targetScanCount ? '#16a34a' : '#d97706',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        <span>สถานะการสแกน:</span>
+                        <span style={{ 
+                          backgroundColor: currentScanCount >= targetScanCount ? '#dcfce7' : '#fef3c7', 
+                          padding: '0.15rem 0.5rem', 
+                          borderRadius: '20px' 
+                        }}>
+                          {currentScanCount} / {targetScanCount} รายการ
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {(scanMode === 'camera' || scanMode === 'usb') && (
                 <div>
