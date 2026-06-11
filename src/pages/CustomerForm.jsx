@@ -27,6 +27,7 @@ export default function CustomerForm() {
 
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [subBookings, setSubBookings] = useState([]);
+  const [subPhoneErrors, setSubPhoneErrors] = useState({});
   const longPressTimerRef = useRef(null);
   const advancedSectionRef = useRef(null);
   const [toastMsg, setToastMsg] = useState(null);
@@ -68,6 +69,13 @@ export default function CustomerForm() {
 
   const setQuantityFields = (qtyVal) => {
     setValue("customQuantity", String(qtyVal || 100), { shouldValidate: true, shouldDirty: true });
+  };
+
+  const PHONE_REGEX = /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i;
+
+  const validateSubPhone = (id, value) => {
+    const isValid = PHONE_REGEX.test(value) || value.trim() === '';
+    setSubPhoneErrors(prev => ({ ...prev, [id]: isValid ? null : 'รูปแบบเบอร์โทรไม่ถูกต้อง (9-10 หลัก เช่น 0812345678)' }));
   };
 
   const didValue = watch("did", "");
@@ -816,14 +824,20 @@ export default function CustomerForm() {
                         <input
                           type="text"
                           className="form-control"
-                          style={{ padding: '0.45rem 0.6rem', fontSize: '0.9rem', borderColor: '#fde047' }}
+                          style={{ padding: '0.45rem 0.6rem', fontSize: '0.9rem', borderColor: subPhoneErrors[sub.id] ? '#dc2626' : '#fde047' }}
                           value={sub.phone}
                           onChange={(e) => {
                             const updated = subBookings.map(s => s.id === sub.id ? { ...s, phone: e.target.value } : s);
                             setSubBookings(updated);
+                            validateSubPhone(sub.id, e.target.value);
                           }}
-                          placeholder="เบอร์โทรศัพท์"
+                          placeholder="เช่น 08X-XXX-XXXX"
                         />
+                        {subPhoneErrors[sub.id] && (
+                          <span style={{ color: '#dc2626', fontSize: '0.72rem', fontWeight: '600', display: 'block', marginTop: '0.2rem' }}>
+                            {subPhoneErrors[sub.id]}
+                          </span>
+                        )}
                       </div>
                     </div>
 

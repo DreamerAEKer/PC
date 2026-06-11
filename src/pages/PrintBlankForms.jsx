@@ -115,7 +115,7 @@ export default function PrintBlankForms() {
             {/* Left Column (Tear-off Receipt - 35%) */}
             <div style={{ flex: '0 0 35%', paddingRight: '0.8rem', borderRight: '1px dashed #94a3b8', display: 'flex', flexDirection: 'column', fontSize: '0.75rem' }}>
               <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '0.1rem', fontSize: '0.85rem', lineHeight: '1.3' }}>แบบฟอร์มสั่งพิมพ์<br/>ชื่อ-ที่อยู่ ลงบนไปรษณียบัตร</div>
-              <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '0.5rem', fontSize: '0.75rem' }}>ที่ {branchName} {branchCode}</div>
+              <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '0.5rem', fontSize: '0.75rem' }}>ที่ {branchCode}</div>
               
               <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '0.15rem', fontSize: '0.8rem', backgroundColor: '#f1f5f9', padding: '0.2rem 0', borderRadius: '4px' }}>ส่วนที่ลูกค้าเก็บไว้</div>
               
@@ -190,9 +190,9 @@ export default function PrintBlankForms() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', width: '100%' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <QRCodeCanvas value={generatedCustomerUrl} size={42} level="M" />
-                  <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
-                    <span style={{ fontSize: '0.55rem', fontWeight: 'bold', color: 'var(--primary)' }}>สแกนจองคิว</span>
-                    <span style={{ fontSize: '0.65rem', color: '#0f172a', fontWeight: 'bold' }}>{branchName} {branchCode}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.3', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '0.52rem', fontWeight: 'bold', color: 'var(--primary)', whiteSpace: 'nowrap' }}>สแกนสั่งพิมพ์</span>
+                    <span style={{ fontSize: '0.8rem', color: '#0f172a', fontWeight: '900', letterSpacing: '0.02em' }}>{branchCode}</span>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}>
