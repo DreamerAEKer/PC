@@ -1282,7 +1282,7 @@ export default function CustomerForm() {
                         </div>
                         
                         <div 
-                          style={{ flex: 1, cursor: 'pointer' }}
+                          style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
                           onClick={() => {
                             const recordToSet = {
                               ...record,
@@ -1311,22 +1311,30 @@ export default function CustomerForm() {
                             setIsModalOpen(true);
                           }}
                         >
-                          <div style={{ fontWeight: '500', color: '#0f172a' }}>{record.name}</div>
-                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-                            📅 {new Date(record.timestamp).toLocaleDateString('th-TH')} — 📦 <strong>{record.quantity} ใบ</strong>
+                          <div style={{ fontWeight: '600', color: '#0f172a', fontSize: '0.95rem', wordBreak: 'break-word' }}>{record.name}</div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <span>📅 {new Date(record.timestamp).toLocaleDateString('th-TH')}</span>
+                            <span>•</span>
+                            <span>📦 <strong>{record.quantity} ใบ</strong></span>
                           </div>
                           
                           {/* Expanded Quick Details */}
                           <div style={{ fontSize: '0.8rem', color: '#475569', marginTop: '0.35rem', borderTop: '1px dashed #e2e8f0', paddingTop: '0.35rem' }}>
-                            📞 เบอร์: {record.phone}
-                            {record.did && <span style={{ marginLeft: '0.5rem', padding: '0.1rem 0.35rem', backgroundColor: '#eff6ff', color: '#1d4ed8', borderRadius: '4px', fontWeight: 'bold' }}>D-ID: {record.did}</span>}
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
+                              <span>📞 เบอร์: {record.phone}</span>
+                              {record.did && <span style={{ padding: '0.1rem 0.35rem', backgroundColor: '#eff6ff', color: '#1d4ed8', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.75rem' }}>D-ID: {record.did}</span>}
+                            </div>
                             {record.address && (
                               <div style={{ 
-                                textOverflow: 'ellipsis', 
-                                overflow: 'hidden', 
-                                whiteSpace: 'nowrap', 
                                 color: '#64748b',
-                                marginTop: '0.15rem' 
+                                marginTop: '0.25rem',
+                                lineHeight: '1.4',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                wordBreak: 'break-word'
                               }}>
                                 📍 ที่อยู่: {record.address}
                               </div>
