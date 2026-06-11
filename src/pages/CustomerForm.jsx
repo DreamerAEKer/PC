@@ -15,21 +15,12 @@ export default function CustomerForm() {
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [guideActiveTab, setGuideActiveTab] = useState(0);
 
-  const selectQty = watch("selectQuantity", "100");
-  const customQty = watch("customQuantity", "");
-  const quantity = selectQty === "custom" ? (parseInt(customQty, 10) || 0) : (parseInt(selectQty, 10) || 0);
+  const customQty = watch("customQuantity", "100");
+  const quantity = parseInt(customQty, 10) || 0;
   const totalPrice = quantity * 3;
 
   const setQuantityFields = (qtyVal) => {
-    const presets = ["100", "200", "300", "400", "500", "1000", "2000"];
-    const qtyStr = String(qtyVal || 100);
-    if (presets.includes(qtyStr)) {
-      setValue("selectQuantity", qtyStr, { shouldValidate: true });
-      setValue("customQuantity", "", { shouldValidate: true });
-    } else {
-      setValue("selectQuantity", "custom", { shouldValidate: true });
-      setValue("customQuantity", qtyStr, { shouldValidate: true });
-    }
+    setValue("customQuantity", String(qtyVal || 100), { shouldValidate: true, shouldDirty: true });
   };
 
   const didValue = watch("did", "");
@@ -135,7 +126,7 @@ export default function CustomerForm() {
       fullAddress = `${data.addressLine1 || ''} ${subTitle} ${distTitle} ${provTitle}`.replace(/\s+/g, ' ').trim();
     }
     
-    const resolvedQty = data.selectQuantity === "custom" ? (parseInt(data.customQuantity, 10) || 0) : (parseInt(data.selectQuantity, 10) || 0);
+    const resolvedQty = parseInt(data.customQuantity, 10) || 0;
 
     const processedData = {
       ...data,
@@ -146,7 +137,6 @@ export default function CustomerForm() {
     };
 
     // Remove select helper fields from QR payload
-    delete processedData.selectQuantity;
     delete processedData.customQuantity;
 
     // Create a payload string (JSON) for the QR code using compressed format
@@ -367,34 +357,18 @@ export default function CustomerForm() {
             </div>
             <div className="form-group">
               <label className="form-label">จำนวน (ใบ) <span style={{color:'red'}}>*</span></label>
-              <select 
-                className="form-control" 
-                required 
-                {...register("selectQuantity", { required: true })}
-                style={{ width: '100%' }}
-              >
-                <option value="100">100 ใบ</option>
-                <option value="200">200 ใบ</option>
-                <option value="300">300 ใบ</option>
-                <option value="400">400 ใบ</option>
-                <option value="500">500 ใบ</option>
-                <option value="1000">1,000 ใบ</option>
-                <option value="2000">2,000 ใบ</option>
-                <option value="custom">ระบุค่าเอง...</option>
-              </select>
-              {errors.selectQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวน</span>}
-            </div>
-
-            {selectQty === 'custom' && (
-              <div className="form-group" style={{ 
-                marginTop: '0.75rem', 
+              
+              <div style={{ 
                 padding: '1rem', 
                 background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', 
                 border: '2.5px solid #d97706', 
                 borderRadius: '12px',
                 boxShadow: '0 4px 15px rgba(217, 119, 6, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
               }}>
                 {/* Floating gold pieces background */}
                 <span className="floating-gold-item" style={{ left: '10%', bottom: '10%', animationDelay: '0s' }}>🪙</span>
@@ -402,7 +376,8 @@ export default function CustomerForm() {
                 <span className="floating-gold-item" style={{ right: '15%', bottom: '8%', animationDelay: '0.8s' }}>🪙</span>
                 <span className="floating-gold-item" style={{ right: '35%', bottom: '12%', animationDelay: '2.3s', fontSize: '1.1rem' }}>✨</span>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifyContent: 'flex-start', position: 'relative', zIndex: 2 }}>
+                {/* Input and labels row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifyContent: 'flex-start', position: 'relative', zIndex: 2, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#92400e', whiteSpace: 'nowrap', textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}>โปรดระบุจำนวน</span>
                   <input 
                     type="number" 
@@ -429,9 +404,45 @@ export default function CustomerForm() {
                   />
                   <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#92400e', whiteSpace: 'nowrap', textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}>ใบ <span style={{color:'red'}}>*</span></span>
                 </div>
+
+                {/* Quick preset buttons */}
+                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', position: 'relative', zIndex: 2 }}>
+                  {["100", "200", "300", "400", "500", "1000", "2000"].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setQuantityFields(preset)}
+                      style={{
+                        padding: '0.35rem 0.65rem',
+                        fontSize: '0.8rem',
+                        fontWeight: 'bold',
+                        color: quantity === parseInt(preset, 10) ? '#ffffff' : '#92400e',
+                        backgroundColor: quantity === parseInt(preset, 10) ? '#d97706' : '#fffbeb',
+                        border: '1.5px solid #d97706',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        boxShadow: quantity === parseInt(preset, 10) ? '0 2px 5px rgba(217,119,6,0.3)' : 'none'
+                      }}
+                      onMouseOver={(e) => {
+                        if (quantity !== parseInt(preset, 10)) {
+                          e.currentTarget.style.backgroundColor = '#fef3c7';
+                        }
+                      }}
+                      onMouseOut={(e) => {
+                        if (quantity !== parseInt(preset, 10)) {
+                          e.currentTarget.style.backgroundColor = '#fffbeb';
+                        }
+                      }}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+
                 {errors.customQuantity && <span style={{ color: '#b45309', fontSize: '0.85rem', display: 'block', marginTop: '0.5rem', fontWeight: 600, position: 'relative', zIndex: 2 }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
               </div>
-            )}
+            </div>
             <div className="form-group">
               <label className="form-label">ชื่อ-นามสกุล <span style={{color:'red'}}>*</span></label>
               <input type="text" className={`form-control ${getFieldClass('name')}`} required {...register("name", { required: true })} placeholder="ระบุชื่อและนามสกุล" />
