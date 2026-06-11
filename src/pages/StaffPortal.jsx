@@ -200,7 +200,7 @@ export default function StaffPortal() {
     return newRecord;
   };
 
-  const [printData, setPrintData] = useState(null);
+  const [printDataList, setPrintDataList] = useState([]);
 
   const [printSettings, setPrintSettings] = useState(() => {
     try {
@@ -312,7 +312,7 @@ export default function StaffPortal() {
     // Update ONLY the print data synchronously.
     // This perfectly matches the DOM mutation of the "พิมพ์ซ้ำ" button, which we know works flawlessly.
     flushSync(() => {
-      setPrintData(newRecord);
+      setPrintDataList([newRecord]);
     });
     
     // Print synchronously
@@ -332,18 +332,18 @@ export default function StaffPortal() {
       setQuantityFields(100);
       setHasActiveData(false);
       setScanMode('manual');
-      setPrintData(null); // Hide the print area from the dashboard
+      setPrintDataList([]); // Hide the print area from the dashboard
     }, 500);
   };
 
   const handlePrintHistory = (record) => {
     flushSync(() => {
-      setPrintData(record);
+      setPrintDataList([record]);
     });
     window.print();
     
     setTimeout(() => {
-      setPrintData(null);
+      setPrintDataList([]);
     }, 500);
   };
 
@@ -411,7 +411,16 @@ export default function StaffPortal() {
             localStorage.setItem('staffHistory', JSON.stringify(sortedUnique));
             return sortedUnique;
           });
-          alert(`นำเข้าข้อมูลสำเร็จ! โหลดประวัติเพิ่มได้ ${parsed.length} รายการ`);
+
+          // Automatically select the imported items
+          const importedIds = parsed.map(item => item.id).filter(Boolean);
+          setSelectedIds(importedIds);
+
+          alert(`นำเข้าข้อมูลสำเร็จ! โหลดประวัติเพิ่มได้ ${parsed.length} รายการ (ระบบได้เลือกรายการเหล่านี้เพื่อเตรียมสั่งพิมพ์แบบกลุ่มให้ท่านแล้ว)`);
+
+          setTimeout(() => {
+            document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
+          }, 300);
         } else {
           alert("รูปแบบไฟล์ไม่ถูกต้อง (ต้องเป็นรายการอาร์เรย์)");
         }
@@ -1648,7 +1657,7 @@ export default function StaffPortal() {
               );
             })()}
 
-            <div className="card">
+            <div className="card" id="history-section">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
                   <History size={20} />
@@ -1685,6 +1694,39 @@ export default function StaffPortal() {
                   <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
                 </label>
               </div>
+
+              {selectedIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const selectedRecords = history.filter(r => selectedIds.includes(r.id));
+                    flushSync(() => {
+                      setPrintDataList(selectedRecords);
+                    });
+                    window.print();
+                    setTimeout(() => {
+                      setPrintDataList([]);
+                    }, 500);
+                  }}
+                  className="btn btn-primary"
+                  style={{
+                    width: '100%',
+                    marginBottom: '1rem',
+                    padding: '0.6rem 1rem',
+                    fontSize: '0.9rem',
+                    fontWeight: 'bold',
+                    backgroundColor: '#e11d48',
+                    borderColor: '#e11d48',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    boxShadow: '0 4px 10px rgba(225, 29, 72, 0.25)'
+                  }}
+                >
+                  <Printer size={16} /> 🖨️ สั่งพิมพ์รายการที่เลือกทั้งหมด ({selectedIds.length} รายการ)
+                </button>
+              )}
 
               {history.length === 0 ? (
                 <p style={{ color: 'var(--text-muted)' }}>ยังไม่มีประวัติการพิมพ์</p>
@@ -1928,43 +1970,59 @@ export default function StaffPortal() {
         </div>
       </div>
 
-      {printData && (
+      {printDataList && printDataList.length > 0 && (
         <div className="print-only print-area">
-          <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif' }}>
-            {printData.did && printSettings.didPrintMode !== 'address' ? (
-              <div>
-                <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
-                  {printData.name}
-                </div>
-                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                  โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printData.phone}</span>
-                </div>
-                {!(printData.did && printData.did.trim().length === 6) && (
-                  <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
-                    {printData.address} {printData.zipcode}
+          {printDataList.map((printItem, idx) => (
+            <div 
+              key={idx} 
+              style={{ 
+                fontSize: `${printSettings.fontSize}pt`, 
+                lineHeight: '1.4', 
+                fontFamily: 'Sarabun, Inter, sans-serif',
+                pageBreakAfter: idx === printDataList.length - 1 ? 'auto' : 'always',
+                breakAfter: idx === printDataList.length - 1 ? 'auto' : 'page',
+                paddingTop: `${printSettings.top}cm`,
+                paddingLeft: `${printSettings.left}cm`,
+                height: '10.5cm',
+                width: '14.8cm',
+                boxSizing: 'border-box'
+              }}
+            >
+              {printItem.did && printSettings.didPrintMode !== 'address' ? (
+                <div>
+                  <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                    {printItem.name}
                   </div>
-                )}
-                <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
-                  {printData.did}
+                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                    โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
+                  </div>
+                  {!(printItem.did && printItem.did.trim().length === 6) && (
+                    <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
+                      {printItem.address} {printItem.zipcode}
+                    </div>
+                  )}
+                  <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
+                    {printItem.did}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <>
-                <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
-                  {printData.name}
-                </div>
-                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                  โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printData.phone}</span>
-                </div>
-                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
-                  {printData.address}
-                </div>
-                <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
-                  {printData.zipcode}
-                </div>
-              </>
-            )}
-          </div>
+              ) : (
+                <>
+                  <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                    {printItem.name}
+                  </div>
+                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                    โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
+                  </div>
+                  <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
+                    {printItem.address}
+                  </div>
+                  <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
+                    {printItem.zipcode}
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
         </div>
       )}
       {showQuickQrModal && (
