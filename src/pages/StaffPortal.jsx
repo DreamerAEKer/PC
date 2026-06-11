@@ -1564,28 +1564,57 @@ export default function StaffPortal() {
               {/* Totals Summary */}
               {history.length > 0 && (() => {
                 const todayStr = new Date().toISOString().split('T')[0];
-                const todayTotal = history
-                  .filter(r => r.orderDate === todayStr || (r.timestamp && r.timestamp.startsWith(todayStr)))
-                  .reduce((sum, r) => sum + (r.quantity || 0), 0);
-                const grandTotal = history.reduce((sum, r) => sum + (r.quantity || 0), 0);
+                const todayRecordsList = history.filter(r => r.orderDate === todayStr || (r.timestamp && r.timestamp.startsWith(todayStr)));
+                const todayCount = todayRecordsList.length;
+                const todayTotal = todayRecordsList.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
+                const todayPrice = todayTotal * 3;
+
+                const grandCount = history.length;
+                const grandTotal = history.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
+                const grandPrice = grandTotal * 3;
                 return (
                   <div style={{ 
-                    display: 'flex', 
-                    gap: '0.75rem', 
+                    display: 'grid', 
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '1rem', 
                     marginBottom: '1rem',
                     backgroundColor: '#f8fafc',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
+                    padding: '1rem',
+                    borderRadius: '12px',
                     border: '1px solid var(--border)'
                   }}>
-                    <div style={{ flex: 1, textAlign: 'center' }}>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ยอดวันนี้</div>
-                      <strong style={{ fontSize: '1.1rem', color: 'var(--primary)' }}>{todayTotal.toLocaleString()} ใบ</strong>
+                    {/* Today Stats */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', borderRight: '1px solid var(--border)', paddingRight: '0.5rem' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--primary)', borderBottom: '1px dashed #fecdd3', paddingBottom: '0.25rem', marginBottom: '0.25rem' }}>📅 ยอดวันนี้</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>จำนวนสั่งพิมพ์:</span>
+                        <strong style={{ color: 'var(--text-main)' }}>{todayCount.toLocaleString()} รายการ</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>จำนวนใบ:</span>
+                        <strong style={{ color: 'var(--text-main)' }}>{todayTotal.toLocaleString()} ใบ</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                        <span style={{ color: 'var(--text-muted)', fontWeight: '600' }}>รวมเป็นเงิน:</span>
+                        <strong style={{ color: 'var(--primary)' }}>{todayPrice.toLocaleString()} บาท</strong>
+                      </div>
                     </div>
-                    <div style={{ width: '1px', backgroundColor: 'var(--border)' }}></div>
-                    <div style={{ flex: 1, textAlign: 'center' }}>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ยอดรวมทั้งหมด</div>
-                      <strong style={{ fontSize: '1.1rem', color: '#0f172a' }}>{grandTotal.toLocaleString()} ใบ</strong>
+
+                    {/* Grand Stats */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', paddingLeft: '0.5rem' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#1e293b', borderBottom: '1px dashed #e2e8f0', paddingBottom: '0.25rem', marginBottom: '0.25rem' }}>📊 ยอดรวมทั้งหมด</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>จำนวนสั่งพิมพ์:</span>
+                        <strong style={{ color: 'var(--text-main)' }}>{grandCount.toLocaleString()} รายการ</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>จำนวนใบ:</span>
+                        <strong style={{ color: 'var(--text-main)' }}>{grandTotal.toLocaleString()} ใบ</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                        <span style={{ color: 'var(--text-muted)', fontWeight: '600' }}>รวมเป็นเงิน:</span>
+                        <strong style={{ color: '#0f172a' }}>{grandPrice.toLocaleString()} บาท</strong>
+                      </div>
                     </div>
                   </div>
                 );
