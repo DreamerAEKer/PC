@@ -802,23 +802,38 @@ export default function StaffPortal() {
         return null;
       };
 
-      // Try cropped center area first (extremely effective for screenshots with surrounding text like the ticket page)
-      const cropRatios = [0.7, 0.5];
+      // Try cropped areas first (extremely effective for screenshots with surrounding text like the ticket page)
+      const cropRatios = [0.7, 0.5, 0.9];
       for (const ratio of cropRatios) {
-        const cropCanvas = document.createElement('canvas');
-        const cropCtx = cropCanvas.getContext('2d');
-        if (cropCtx) {
-          const cropSize = Math.min(img.width, img.height) * ratio;
-          const sx = (img.width - cropSize) / 2;
-          const sy = (img.height - cropSize) / 2;
-          cropCanvas.width = 600;
-          cropCanvas.height = 600;
-          cropCtx.drawImage(img, sx, sy, cropSize, cropSize, 0, 0, 600, 600);
-          
-          const result = await scanCanvas(cropCanvas);
-          if (result) {
-            if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
-            return result;
+        const cropSize = Math.min(img.width, img.height) * ratio;
+        
+        // Define vertical centers to try
+        const verticalCenters = [img.height / 2]; // Always try exact center first
+        if (img.height > img.width) {
+          // For portrait screenshots, try upper-middle positions where the QR is typically located (roughly 25%-45% from the top)
+          verticalCenters.push(img.height * 0.35);
+          verticalCenters.push(img.height * 0.25);
+          verticalCenters.push(img.height * 0.45);
+        }
+
+        for (const yCenter of verticalCenters) {
+          const cropCanvas = document.createElement('canvas');
+          const cropCtx = cropCanvas.getContext('2d');
+          if (cropCtx) {
+            const sx = Math.max(0, (img.width - cropSize) / 2);
+            const sy = Math.max(0, yCenter - (cropSize / 2));
+            const sw = Math.min(cropSize, img.width - sx);
+            const sh = Math.min(cropSize, img.height - sy);
+
+            cropCanvas.width = 600;
+            cropCanvas.height = 600;
+            cropCtx.drawImage(img, sx, sy, sw, sh, 0, 0, 600, 600);
+            
+            const result = await scanCanvas(cropCanvas);
+            if (result) {
+              if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
+              return result;
+            }
           }
         }
       }
