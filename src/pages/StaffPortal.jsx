@@ -483,6 +483,9 @@ export default function StaffPortal() {
       if (raw && typeof raw === 'object') {
         if ('n' in raw || 'p' in raw) {
           return {
+            orderCode: raw.oc || '',
+            senderNickname: raw.sn || '',
+            senderPhone: raw.sp || '',
             orderDate: raw.d || '',
             quantity: raw.q || 1,
             name: raw.n || '',
@@ -3022,11 +3025,23 @@ export default function StaffPortal() {
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
               <div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>ชื่อ-นามสกุล</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>รหัสสั่งพิมพ์</span>
+                <strong style={{ fontSize: '1.05rem', color: '#1d4ed8' }}>{selectedDetailRecord.orderCode || selectedDetailRecord.oc || '-'}</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>ผู้สั่ง (ชื่อเล่น)</span>
+                <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>{selectedDetailRecord.senderNickname || selectedDetailRecord.sn || '-'}</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>เบอร์โทรผู้สั่ง</span>
+                <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>{selectedDetailRecord.senderPhone || selectedDetailRecord.sp || '-'}</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>ชื่อ-นามสกุลผู้รับ</span>
                 <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>{selectedDetailRecord.name}</strong>
               </div>
               <div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>เบอร์โทรศัพท์</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>เบอร์โทรศัพท์ผู้รับ</span>
                 <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>{selectedDetailRecord.phone || '-'}</strong>
               </div>
               <div>

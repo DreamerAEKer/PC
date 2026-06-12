@@ -1176,6 +1176,9 @@ export default function CustomerForm() {
                   // Setup generatedData for the first record in sequence
                   const firstRecord = selectedRecords[0];
                   const compressedData = {
+                    oc: firstRecord.orderCode || firstRecord.oc || '',
+                    sn: firstRecord.senderNickname || firstRecord.sn || '',
+                    sp: firstRecord.senderPhone || firstRecord.sp || '',
                     d: firstRecord.orderDate,
                     q: firstRecord.quantity,
                     n: firstRecord.name,
@@ -1299,6 +1302,9 @@ export default function CustomerForm() {
                             reset(recordToSet);
                             setQuantityFields(record.quantity);
                             const compressedData = {
+                              oc: record.orderCode || record.oc || '',
+                              sn: record.senderNickname || record.sn || '',
+                              sp: record.senderPhone || record.sp || '',
                               d: record.orderDate,
                               q: record.quantity,
                               n: record.name,
@@ -1586,6 +1592,18 @@ export default function CustomerForm() {
                   📍 รับพิมพ์โดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#64748b' }}>รหัสสั่งพิมพ์:</span>
+                  <strong style={{ color: '#0f172a' }}>{generatedData.orderCode || generatedData.oc || '-'}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#64748b' }}>ผู้สั่ง (ชื่อเล่น):</span>
+                  <strong style={{ color: '#0f172a' }}>{generatedData.senderNickname || generatedData.sn || '-'}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#64748b' }}>เบอร์โทรผู้สั่ง:</span>
+                  <strong style={{ color: '#0f172a' }}>{generatedData.senderPhone || generatedData.sp || '-'}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #cbd5e1', marginTop: '0.4rem', paddingTop: '0.4rem' }}>
                   <span style={{ color: '#64748b' }}>ชื่อผู้รับ:</span>
                   <strong style={{ color: '#0f172a' }}>{generatedData.name}</strong>
                 </div>

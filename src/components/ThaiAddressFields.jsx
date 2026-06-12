@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useThaiAddress } from 'use-thai-address';
 import { Info } from 'lucide-react';
 
-export default function ThaiAddressFields({ register, setValue, errors, defaultValues, dirtyFields, touchedFields, isAddressRequired = true, onAddressLabelEvents, hintText }) {
+export default function ThaiAddressFields({ register, setValue, errors, defaultValues, dirtyFields, touchedFields, isAddressRequired = true, onAddressLabelEvents, hintText, watch }) {
   const { filteredData, searchByField, reset } = useThaiAddress();
   const [activeField, setActiveField] = useState(null); // 'subdistrict', 'district', 'province', 'zipcode'
+  const [addrSuggestions, setAddrSuggestions] = useState([]);
+  const [showAddrSuggestions, setShowAddrSuggestions] = useState(false);
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -12,11 +14,23 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
     function handleClickOutside(event) {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setActiveField(null);
+        setShowAddrSuggestions(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('customerAddressSuggestions') || '[]');
+      if (Array.isArray(saved)) {
+        setAddrSuggestions(saved);
+      }
+    } catch (e) {}
+  }, []);
+
+  const addrVal = watch ? watch("addressLine1", "") : "";
 
   const handleSelect = (item) => {
     setValue('subdistrict', item.subDistrict, { shouldValidate: true });
@@ -94,15 +108,60 @@ export default function ThaiAddressFields({ register, setValue, errors, defaultV
 
   return (
     <div ref={containerRef}>
-      <div className="form-group">
+      <div className="form-group" style={{ position: 'relative' }}>
         <label className="form-label" {...onAddressLabelEvents} style={{ cursor: onAddressLabelEvents ? 'pointer' : 'default', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน) {isAddressRequired && <span style={{color:'red'}}>*</span>}</label>
         {hintText && (
           <div style={{ fontSize: '0.75rem', color: '#a16207', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             {hintText}
           </div>
         )}
-        <input type="text" className={`form-control ${getFieldClass('addressLine1')}`} required={isAddressRequired} {...register("addressLine1", { required: isAddressRequired })} placeholder="ระบุบ้านเลขที่ หมู่ ซอย ถนน" defaultValue={defaultValues?.addressLine1 || ''} />
+        <input 
+          type="text" 
+          className={`form-control ${getFieldClass('addressLine1')}`} 
+          required={isAddressRequired} 
+          {...register("addressLine1", { required: isAddressRequired })} 
+          placeholder="ระบุบ้านเลขที่ หมู่ ซอย ถนน" 
+          defaultValue={defaultValues?.addressLine1 || ''}
+          onFocus={() => setShowAddrSuggestions(true)}
+          autoComplete="off"
+        />
         {errors.addressLine1 && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุที่อยู่</span>}
+        
+        {showAddrSuggestions && addrSuggestions.length > 0 && (() => {
+          const val = (addrVal || "").trim().toLowerCase();
+          const matches = addrSuggestions.filter(s => s.toLowerCase().includes(val));
+          if (matches.length === 0) return null;
+          return (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              background: 'white',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              maxHeight: '150px',
+              overflowY: 'auto',
+              zIndex: 1001,
+              boxShadow: 'var(--shadow-lg)',
+              marginTop: '2px'
+            }}>
+              {matches.map((item, idx) => (
+                <div key={idx} 
+                     style={{ padding: '0.75rem', cursor: 'pointer', borderBottom: '1px solid var(--border)', fontSize: '0.85rem', color: '#1e293b', textAlign: 'left' }}
+                     onClick={() => {
+                       setValue('addressLine1', item, { shouldValidate: true, shouldDirty: true });
+                       setShowAddrSuggestions(false);
+                     }}
+                     onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                     onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  📝 {item}
+                </div>
+              ))}
+            </div>
+          );
+        })()}
       </div>
 
       <div style={{ 
