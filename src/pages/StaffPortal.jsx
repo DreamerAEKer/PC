@@ -193,6 +193,8 @@ export default function StaffPortal() {
     } else {
       setQuantityFields(100);
     }
+    // Always enforce today's date on initial load/refresh
+    setValue("orderDate", new Date().toISOString().split('T')[0]);
   }, [setValue]);
 
   const formValues = watch();
