@@ -227,17 +227,25 @@ export default function StaffPortal() {
       const saved = localStorage.getItem('customPrintSettings');
       const parsed = saved ? JSON.parse(saved) : null;
       if (parsed && typeof parsed === 'object') {
+        const hasVersionMarker = localStorage.getItem('printSettingsMigrated_1_15_6') === 'true';
+        let mode = (parsed.didPrintMode === 'did' || parsed.didPrintMode === 'address') ? parsed.didPrintMode : 'address';
+        if (!hasVersionMarker) {
+          mode = 'address';
+          localStorage.setItem('printSettingsMigrated_1_15_6', 'true');
+        }
         return {
           top: typeof parsed.top === 'number' ? parsed.top : 4.5,
           left: typeof parsed.left === 'number' ? parsed.left : 9.5,
           fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 5,
           isNameBold: typeof parsed.isNameBold === 'boolean' ? parsed.isNameBold : true,
           isPhoneBold: typeof parsed.isPhoneBold === 'boolean' ? parsed.isPhoneBold : true,
-          didPrintMode: (parsed.didPrintMode === 'did' || parsed.didPrintMode === 'address') ? parsed.didPrintMode : 'address'
+          didPrintMode: mode
         };
       }
+      localStorage.setItem('printSettingsMigrated_1_15_6', 'true');
       return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' };
     } catch (e) {
+      localStorage.setItem('printSettingsMigrated_1_15_6', 'true');
       return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' };
     }
   });
