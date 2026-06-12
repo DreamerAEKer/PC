@@ -219,6 +219,16 @@ export default function CustomerForm() {
   }, []);
 
   const onSubmit = async (data) => {
+    // Check if phone (for printing on postcard) is missing
+    const hasPhone = data.phone && data.phone.trim().length > 0;
+    
+    if (!hasPhone) {
+      const confirmProceed = window.confirm("คุณยังไม่ได้กรอก เบอร์โทร ยืนยันข้อมูลโดยไม่ใส่ เบอร์โทร");
+      if (!confirmProceed) {
+        return; // Stop form submission
+      }
+    }
+
     const isDidActive = data.did && data.did.trim().length === 6;
     let fullAddress = "";
     if (data.addressLine1 || data.subdistrict || data.district || data.province) {
@@ -746,14 +756,14 @@ export default function CustomerForm() {
               {errors.name && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุชื่อ-นามสกุล</span>}
             </div>
             <div className="form-group">
-              <label className="form-label">เบอร์โทรศัพท์ <span style={{color:'red'}}>*</span></label>
-              <input type="text" className={`form-control ${getFieldClass('phone')}`} required {...register("phone", { 
-                required: "กรุณาระบุเบอร์โทรศัพท์",
-                pattern: {
-                  value: /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i,
-                  message: "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก เช่น 0812345678 หรือ 021234567 ต่อ 12)"
+              <label className="form-label">เบอร์โทรศัพท์</label>
+              <input type="text" className={`form-control ${getFieldClass('phone')}`} {...register("phone", { 
+                required: false,
+                validate: value => {
+                  if (!value || value.trim() === '') return true;
+                  return /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i.test(value) || "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก เช่น 0812345678 หรือ 021234567 ต่อ 12)";
                 }
-              })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
+              })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123 (ถ้ามี)" />
               {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.phone.message}</span>}
             </div>
             {/* D-ID toggle button row and box inputs */}
