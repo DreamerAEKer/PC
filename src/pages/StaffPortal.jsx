@@ -3054,19 +3054,19 @@ export default function StaffPortal() {
                         style={{ 
                           width: '100%',
                           boxSizing: 'border-box',
-                          padding: '1rem', 
+                          padding: '0.75rem 1rem', 
                           border: '1px solid var(--border)', 
                           borderRadius: '8px',
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          flexWrap: 'wrap',
-                          gap: '0.75rem',
+                          gap: '0.5rem',
                           background: '#fff',
                           transform: `translateX(-${swipeOffset[record.id] || 0}px)`,
                           transition: touchStartX === null ? 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
                           position: 'relative',
-                          zIndex: 2
+                          zIndex: 2,
+                          overflow: 'hidden'
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1', minWidth: '0' }}>
