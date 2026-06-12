@@ -1289,11 +1289,8 @@ export default function StaffPortal() {
                 if (code) {
                   const isDup = history.some(r => (r.orderCode === code || r.oc === code)) || decodedRecords.some(r => r.orderCode === code);
                   if (isDup) {
-                    const proceed = window.confirm(`⚠️ ตรวจพบรหัสสั่งพิมพ์ซ้ำจากรูปภาพ QR กลุ่ม: ${code} (ชื่อ: ${name})\nคุณต้องการนำเข้าข้อมูลรายการนี้อีกครั้งหรือไม่?`);
-                    if (!proceed) {
-                      duplicateCount++;
-                      continue;
-                    }
+                    duplicateCount++;
+                    continue; // ข้ามออเดอร์ที่มีอยู่แล้ว — ไม่นำเข้าซ้ำ และคงสถานะพิมพ์แล้วไว้
                   }
                 }
 
@@ -1306,6 +1303,8 @@ export default function StaffPortal() {
                   address: sub.a || ''
                 }));
 
+                // คงสถานะ printed จากข้อมูลในประวัติเดิมถ้ามีอยู่แล้ว
+                const existingRecord = history.find(r => r.orderCode === code || r.oc === code);
                 decodedRecords.push({
                   id: Date.now() + Math.random(),
                   timestamp: new Date().toISOString(),
@@ -1323,7 +1322,7 @@ export default function StaffPortal() {
                   did: recordRaw.id || '',
                   isAdvancedMode: mappedSubBookings.length > 0,
                   subBookings: mappedSubBookings,
-                  printed: false
+                  printed: existingRecord ? existingRecord.printed : false
                 });
                 successCount++;
               }
@@ -1334,11 +1333,8 @@ export default function StaffPortal() {
               if (code) {
                 const isDup = history.some(r => (r.orderCode === code || r.oc === code)) || decodedRecords.some(r => r.orderCode === code);
                 if (isDup) {
-                  const proceed = window.confirm(`⚠️ ตรวจพบรหัสสั่งพิมพ์ซ้ำจากรูปภาพ QR: ${code} (ชื่อ: ${name})\nคุณต้องการนำเข้าข้อมูลรายการนี้อีกครั้งหรือไม่?`);
-                  if (!proceed) {
-                    duplicateCount++;
-                    continue;
-                  }
+                  duplicateCount++;
+                  continue; // ข้ามออเดอร์ที่มีอยู่แล้ว — ไม่นำเข้าซ้ำ และคงสถานะพิมพ์แล้วไว้
                 }
               }
 
@@ -1363,6 +1359,8 @@ export default function StaffPortal() {
                 address: sub.address || sub.a || ''
               }));
 
+              // คงสถานะ printed จากข้อมูลในประวัติเดิมถ้ามีอยู่แล้ว
+              const existingRecordSingle = history.find(r => r.orderCode === code || r.oc === code);
               decodedRecords.push({
                 id: Date.now() + Math.random(),
                 timestamp: new Date().toISOString(),
@@ -1380,7 +1378,7 @@ export default function StaffPortal() {
                 did: singleData.did || '',
                 isAdvancedMode: mappedSubBookings.length > 0,
                 subBookings: mappedSubBookings,
-                printed: false
+                printed: existingRecordSingle ? existingRecordSingle.printed : false
               });
               successCount++;
             }
@@ -1397,6 +1395,15 @@ export default function StaffPortal() {
     if (decodedRecords.length > 0) {
       setHistory(prevHistory => {
         const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
+
+        // สร้าง map ของข้อมูลเก่า keyed by orderCode เพื่อค้นหาสถานะ printed
+        const prevMap = new Map();
+        for (const r of safePrev) {
+          const k = r.orderCode || `${r.name}-${r.phone}`;
+          prevMap.set(k, r);
+        }
+
+        // ใส่ข้อมูลใหม่ก่อน แต่ถ้าเก่ามีอยู่แล้วให้ใช้ข้อมูลเก่า (คงสถานะ printed)
         const merged = [...decodedRecords, ...safePrev];
         const unique = [];
         const seen = new Set();
@@ -1404,7 +1411,13 @@ export default function StaffPortal() {
           const key = item.orderCode ? item.orderCode : `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
           if (!seen.has(key)) {
             seen.add(key);
-            unique.push(item);
+            // ถ้าข้อมูลเก่ามีอยู่แล้วและ printed เป็น true → คง printed: true ไว้
+            const prevItem = prevMap.get(key);
+            if (prevItem && prevItem.printed && !item.printed) {
+              unique.push({ ...item, printed: true });
+            } else {
+              unique.push(item);
+            }
           }
         }
         const sorted = unique.sort((a, b) => b.id - a.id).slice(0, 100);
