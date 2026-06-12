@@ -902,8 +902,29 @@ export default function StaffPortal() {
           return result;
         }
 
+        // Try Grayscale ONLY (preserving details)
+        try {
+          const imgData = ctx.getImageData(0, 0, width, height);
+          const data = imgData.data;
+          for (let i = 0; i < data.length; i += 4) {
+            const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+            data[i] = gray;
+            data[i+1] = gray;
+            data[i+2] = gray;
+          }
+          ctx.putImageData(imgData, 0, 0);
+
+          const grayResult = await scanCanvas(canvas);
+          if (grayResult) {
+            if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
+            return grayResult;
+          }
+        } catch (e) {}
+
         // Try Grayscale + Binarization (as a last resort)
         try {
+          // Re-draw original image to get fresh color data
+          ctx.drawImage(img, 0, 0, width, height);
           const imgData = ctx.getImageData(0, 0, width, height);
           const data = imgData.data;
           for (let i = 0; i < data.length; i += 4) {
