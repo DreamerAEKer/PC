@@ -3053,6 +3053,8 @@ export default function StaffPortal() {
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
+                          flexWrap: 'wrap',
+                          gap: '0.75rem',
                           background: '#fff',
                           transform: `translateX(-${swipeOffset[record.id] || 0}px)`,
                           transition: touchStartX === null ? 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
@@ -3060,7 +3062,7 @@ export default function StaffPortal() {
                           zIndex: 2
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 auto', minWidth: '0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 280px', minWidth: '0' }}>
                           <input 
                             type="checkbox" 
                             checked={selectedIds.includes(record.id)}
@@ -3073,7 +3075,7 @@ export default function StaffPortal() {
                             title="คลิกเพื่อดูรายละเอียดข้อมูลลูกค้า"
                           >
                             <div style={{ fontWeight: '600', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                              <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '180px' }}>{record.name}</span>
+                              <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '140px' }}>{record.name}</span>
                               {record.printed ? (
                                 <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#15803d', backgroundColor: '#dcfce7', padding: '0.1rem 0.45rem', borderRadius: '12px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap' }}>
                                   ✅ พิมพ์แล้ว
@@ -3083,7 +3085,7 @@ export default function StaffPortal() {
                                   ⏳ รอพิมพ์
                                 </span>
                               )}
-                              <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--primary)', backgroundColor: '#fff1f2', padding: '0.1rem 0.4', borderRadius: '4px', border: '1px solid #fecdd3', whiteSpace: 'nowrap' }}>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--primary)', backgroundColor: '#fff1f2', padding: '0.1rem 0.45rem', borderRadius: '4px', border: '1px solid #fecdd3', whiteSpace: 'nowrap' }}>
                                 🔍 รายละเอียด
                               </span>
                             </div>
@@ -3098,7 +3100,7 @@ export default function StaffPortal() {
                             </div>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'nowrap', flexShrink: 0, marginLeft: '0.75rem' }}>
+                        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'nowrap', flexShrink: 0, marginLeft: 'auto' }}>
                           <button 
                             onClick={() => handlePrintHistory(record)} 
                             className="btn btn-secondary" 
