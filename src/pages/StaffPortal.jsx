@@ -1688,20 +1688,33 @@ export default function StaffPortal() {
                   )}
                   
                   {/* USB Scanner Input View (Hidden on mobile via class 'usb-scanner-box') */}
-                  <div className="usb-scanner-box" style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f8fafc', border: '2px dashed var(--primary)', borderRadius: '12px', textAlign: 'center' }}>
-                    <div style={{ marginBottom: '0.75rem' }}>
-                      <strong style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>🔌 ใช้เครื่องสแกนบาร์โค้ด (USB)</strong>
-                      <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                        ยิงเครื่องสแกนเนอร์ได้ทันทีโดยไม่ต้องคลิก (หรือคลิกที่ช่องด้านล่างเพื่อยิง)
-                      </div>
-                    </div>
+                  <div className="usb-scanner-box" style={{ marginBottom: '1.5rem' }}>
                     <input 
                       type="text" 
                       id="usb-scanner-input"
                       autoFocus
                       className="form-control" 
-                      placeholder="👉 คลิกตรงนี้ แล้วยิงสแกนเนอร์..." 
-                      style={{ fontSize: '1rem', padding: '0.6rem', textAlign: 'center', borderColor: 'var(--primary)', borderWidth: '2px', backgroundColor: '#fff' }}
+                      placeholder="สแกน QR Code (ยิงสแกนเนอร์ตรงนี้)..." 
+                      style={{ 
+                        fontSize: '1rem', 
+                        padding: '0.75rem 1rem', 
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1', 
+                        backgroundColor: '#fff',
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        textAlign: 'center',
+                        transition: 'all 0.2s',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--primary)';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(225, 29, 72, 0.15)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#cbd5e1';
+                        e.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
