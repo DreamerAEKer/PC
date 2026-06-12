@@ -1491,6 +1491,8 @@ export default function CustomerForm() {
           <div ref={cardRef} className="card glass-panel" style={{
             width: '100%',
             maxWidth: '420px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
             backgroundColor: '#ffffff',
             borderRadius: '16px',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
