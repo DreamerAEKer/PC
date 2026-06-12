@@ -13,7 +13,9 @@ export default function CustomerForm() {
     mode: 'onChange',
     defaultValues: {
       customQuantity: "100",
-      orderDate: new Date().toISOString().split('T')[0]
+      orderDate: new Date().toISOString().split('T')[0],
+      senderNickname: localStorage.getItem('customerSenderNickname') || '',
+      senderPhone: localStorage.getItem('customerSenderPhone') || ''
     }
   });
 
@@ -707,6 +709,26 @@ export default function CustomerForm() {
               </div>
               {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem', fontWeight: 600 }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
             </div>
+            {/* ข้อมูลผู้สั่ง (Sender Profile) */}
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem', background: '#f8fafc', padding: '1rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <div style={{ flex: '1 1 180px' }}>
+                <label className="form-label" style={{ fontWeight: '700', color: '#1e293b' }}>ชื่อเล่นผู้สั่ง <span style={{color:'red'}}>*</span></label>
+                <input type="text" className={`form-control ${getFieldClass('senderNickname')}`} required {...register("senderNickname", { required: "กรุณาระบุชื่อเล่นผู้สั่ง" })} placeholder="ระบุชื่อเล่นของคุณ" />
+                {errors.senderNickname && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.senderNickname.message}</span>}
+              </div>
+              <div style={{ flex: '1 1 180px' }}>
+                <label className="form-label" style={{ fontWeight: '700', color: '#1e293b' }}>เบอร์โทรผู้สั่ง <span style={{color:'red'}}>*</span></label>
+                <input type="text" className={`form-control ${getFieldClass('senderPhone')}`} required {...register("senderPhone", { 
+                  required: "กรุณาระบุเบอร์โทรผู้สั่ง",
+                  pattern: {
+                    value: /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i,
+                    message: "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก)"
+                  }
+                })} placeholder="ระบุเบอร์โทรศัพท์ของคุณ" />
+                {errors.senderPhone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.senderPhone.message}</span>}
+              </div>
+            </div>
+
             <div className="form-group">
               <label 
                 className="form-label no-callout"
