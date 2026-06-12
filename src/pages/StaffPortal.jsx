@@ -206,6 +206,22 @@ export default function StaffPortal() {
 
   const [printDataList, setPrintDataList] = useState([]);
 
+  const [presets, setPresets] = useState(() => {
+    try {
+      const saved = localStorage.getItem('customPrintPresets');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return [
+      { name: 'ค่าเริ่มต้นไปรษณียบัตร', top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'did' },
+      { name: 'ตัวอักษรใหญ่ (ซม.)', top: 4.0, left: 9.0, fontSize: 7, isNameBold: true, isPhoneBold: true, didPrintMode: 'did' }
+    ];
+  });
+
+  const [newPresetName, setNewPresetName] = useState('');
+
   const [printSettings, setPrintSettings] = useState(() => {
     try {
       const saved = localStorage.getItem('customPrintSettings');
@@ -229,6 +245,10 @@ export default function StaffPortal() {
   useEffect(() => {
     localStorage.setItem('customPrintSettings', JSON.stringify(printSettings));
   }, [printSettings]);
+
+  useEffect(() => {
+    localStorage.setItem('customPrintPresets', JSON.stringify(presets));
+  }, [presets]);
 
   const handleDirectPrintClick = (e) => {
     const form = e.target.closest('form');
@@ -1935,6 +1955,144 @@ export default function StaffPortal() {
                     <Settings size={16} />
                     ตั้งค่าตำแหน่งและขนาดการพิมพ์ (ปรับแต่งเอง)
                   </h4>
+
+                  {/* Preset Manager */}
+                  <div style={{ 
+                    marginBottom: '1rem', 
+                    paddingBottom: '1rem', 
+                    borderBottom: '1px solid #e2e8f0',
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '0.75rem' 
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        🔖 พรีเซ็ตการพิมพ์ที่บันทึกไว้
+                      </span>
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      {/* Select Preset */}
+                      <select
+                        id="preset-selector"
+                        className="form-control"
+                        style={{ flex: '1 1 200px', fontSize: '0.85rem', padding: '0.4rem 0.5rem', minWidth: '150px' }}
+                        onChange={(e) => {
+                          const selectedName = e.target.value;
+                          if (!selectedName) return;
+                          const found = presets.find(p => p.name === selectedName);
+                          if (found) {
+                            setPrintSettings({
+                              top: found.top,
+                              left: found.left,
+                              fontSize: found.fontSize,
+                              isNameBold: found.isNameBold,
+                              isPhoneBold: found.isPhoneBold,
+                              didPrintMode: found.didPrintMode || 'did'
+                            });
+                          }
+                        }}
+                        defaultValue=""
+                      >
+                        <option value="" disabled>-- เลือกพรีเซ็ตที่ต้องการโหลด --</option>
+                        {presets.map(p => (
+                          <option key={p.name} value={p.name}>{p.name}</option>
+                        ))}
+                      </select>
+
+                      {/* Delete Preset */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const selectEl = document.getElementById('preset-selector');
+                          const nameToDelete = selectEl?.value;
+                          if (!nameToDelete) {
+                            alert('กรุณาเลือกพรีเซ็ตที่ต้องการลบก่อนครับ');
+                            return;
+                          }
+                          if (nameToDelete === 'ค่าเริ่มต้นไปรษณียบัตร' || nameToDelete === 'ตัวอักษรใหญ่ (ซม.)') {
+                            alert('ไม่สามารถลบพรีเซ็ตเริ่มต้นของระบบได้ครับ');
+                            return;
+                          }
+                          if (confirm(`คุณต้องการลบพรีเซ็ต "${nameToDelete}" ใช่หรือไม่?`)) {
+                            setPresets(prev => prev.filter(p => p.name !== nameToDelete));
+                            if (selectEl) selectEl.value = "";
+                          }
+                        }}
+                        className="btn"
+                        style={{ 
+                          padding: '0.4rem 0.75rem', 
+                          fontSize: '0.8rem', 
+                          borderColor: '#ef4444', 
+                          color: '#dc2626', 
+                          backgroundColor: '#fef2f2', 
+                          margin: 0,
+                          cursor: 'pointer' 
+                        }}
+                        title="ลบพรีเซ็ตนี้"
+                      >
+                        🗑️ ลบพรีเซ็ต
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      {/* Save current settings as preset */}
+                      <input 
+                        type="text"
+                        className="form-control"
+                        placeholder="ระบุชื่อพรีเซ็ตเพื่อเซฟ (เช่น 'เครื่องพิมพ์ Brother A6')..."
+                        value={newPresetName}
+                        onChange={(e) => setNewPresetName(e.target.value)}
+                        style={{ flex: '1 1 200px', fontSize: '0.85rem', padding: '0.4rem 0.5rem' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const name = newPresetName.trim();
+                          if (!name) {
+                            alert('กรุณากรอกชื่อพรีเซ็ตที่ต้องการบันทึกด้วยครับ');
+                            return;
+                          }
+                          
+                          const exists = presets.some(p => p.name.toLowerCase() === name.toLowerCase());
+                          if (exists) {
+                            if (!confirm(`มีพรีเซ็ตชื่อ "${name}" อยู่แล้ว คุณต้องการเซฟทับใช่หรือไม่?`)) {
+                              return;
+                            }
+                          }
+                          
+                          const newPreset = {
+                            name,
+                            top: printSettings.top,
+                            left: printSettings.left,
+                            fontSize: printSettings.fontSize,
+                            isNameBold: printSettings.isNameBold,
+                            isPhoneBold: printSettings.isPhoneBold,
+                            didPrintMode: printSettings.didPrintMode
+                          };
+                          
+                          setPresets(prev => {
+                            const filtered = prev.filter(p => p.name.toLowerCase() !== name.toLowerCase());
+                            return [...filtered, newPreset];
+                          });
+                          
+                          setNewPresetName('');
+                          alert(`บันทึกพรีเซ็ต "${name}" สำเร็จเรียบร้อยแล้วครับ!`);
+                          
+                          // Set select value after state update
+                          setTimeout(() => {
+                            const selectEl = document.getElementById('preset-selector');
+                            if (selectEl) selectEl.value = name;
+                          }, 50);
+                        }}
+                        className="btn btn-primary"
+                        style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', margin: 0, cursor: 'pointer', backgroundColor: '#22c55e', borderColor: '#22c55e' }}
+                      >
+                        💾 บันทึกพรีเซ็ต
+                      </button>
+                    </div>
+                  </div>
+
                   <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                     <div style={{ flex: 1, minWidth: '150px' }}>
                       <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับลง (ซม.): {printSettings.top}</label>
