@@ -717,14 +717,14 @@ export default function CustomerForm() {
                 {errors.senderNickname && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.senderNickname.message}</span>}
               </div>
               <div style={{ flex: '1 1 180px' }}>
-                <label className="form-label" style={{ fontWeight: '700', color: '#1e293b' }}>เบอร์โทรผู้สั่ง <span style={{color:'red'}}>*</span></label>
-                <input type="text" className={`form-control ${getFieldClass('senderPhone')}`} required {...register("senderPhone", { 
-                  required: "กรุณาระบุเบอร์โทรผู้สั่ง",
-                  pattern: {
-                    value: /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i,
-                    message: "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก)"
+                <label className="form-label" style={{ fontWeight: '700', color: '#1e293b' }}>เบอร์โทรผู้สั่ง</label>
+                <input type="text" className={`form-control ${getFieldClass('senderPhone')}`} {...register("senderPhone", { 
+                  required: false,
+                  validate: value => {
+                    if (!value || value.trim() === '') return true;
+                    return /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i.test(value) || "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก)";
                   }
-                })} placeholder="ระบุเบอร์โทรศัพท์ของคุณ" />
+                })} placeholder="ระบุเบอร์โทรศัพท์ของคุณ (ถ้ามี)" />
                 {errors.senderPhone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.senderPhone.message}</span>}
               </div>
             </div>
