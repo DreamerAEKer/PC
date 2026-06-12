@@ -1523,8 +1523,22 @@ export default function CustomerForm() {
                 }}>
                   {bulkRecords.length > 0 ? `QR ลำดับที่ ${bulkIndex + 1} / ทั้งหมด ${bulkRecords.length}` : 'QR สำหรับสั่งพิมพ์'}
                 </div>
-                <div style={{ marginTop: '0.5rem' }}>
-                  <QRCodeCanvas value={generatedData.payload} size={260} level="L" />
+                <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <QRCodeCanvas value={generatedData.payload} size={300} level="L" fgColor="#000000" bgColor="#ffffff" />
+                  <div style={{ 
+                    marginTop: '0.5rem', 
+                    fontSize: '0.75rem', 
+                    color: '#e11d48', 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#fff1f2', 
+                    padding: '0.25rem 0.5rem', 
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.25rem'
+                  }}>
+                    💡 แนะนำ: เร่งแสงหน้าจอให้สว่างสุดเพื่อสแกนเร็วขึ้น
+                  </div>
                 </div>
               </div>
             </div>
@@ -1560,7 +1574,8 @@ export default function CustomerForm() {
               border: '1px solid #e2e8f0',
               fontSize: '0.95rem',
               lineHeight: '1.6',
-              height: '185px', // Exact height calculated for all fields + border + padding
+              minHeight: '185px',
+              height: 'auto',
               boxSizing: 'border-box',
               display: 'flex',
               flexDirection: 'column',
@@ -1586,6 +1601,12 @@ export default function CustomerForm() {
                   <span style={{ color: '#64748b' }}>วันที่สั่งจอง:</span>
                   <strong style={{ color: '#0f172a' }}>{generatedData.orderDate}</strong>
                 </div>
+                {generatedData.address && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #e2e8f0', marginTop: '0.4rem', paddingTop: '0.4rem' }}>
+                    <span style={{ color: '#64748b', minWidth: '60px' }}>ที่อยู่:</span>
+                    <strong style={{ color: '#0f172a', textAlign: 'right', fontSize: '0.85rem', fontWeight: 600, wordBreak: 'break-all' }}>{generatedData.address} {generatedData.zipcode}</strong>
+                  </div>
+                )}
               </div>
               <div style={{ 
                 borderTop: '1px solid #e2e8f0', 

@@ -215,8 +215,8 @@ export default function StaffPortal() {
       }
     } catch (e) {}
     return [
-      { name: 'ค่าเริ่มต้นไปรษณียบัตร', top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'did' },
-      { name: 'ตัวอักษรใหญ่ (ซม.)', top: 4.0, left: 9.0, fontSize: 7, isNameBold: true, isPhoneBold: true, didPrintMode: 'did' }
+      { name: 'ค่าเริ่มต้นไปรษณียบัตร', top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' },
+      { name: 'ตัวอักษรใหญ่ (ซม.)', top: 4.0, left: 9.0, fontSize: 7, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' }
     ];
   });
 
@@ -233,12 +233,12 @@ export default function StaffPortal() {
           fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 5,
           isNameBold: typeof parsed.isNameBold === 'boolean' ? parsed.isNameBold : true,
           isPhoneBold: typeof parsed.isPhoneBold === 'boolean' ? parsed.isPhoneBold : true,
-          didPrintMode: (parsed.didPrintMode === 'did' || parsed.didPrintMode === 'address') ? parsed.didPrintMode : 'did'
+          didPrintMode: (parsed.didPrintMode === 'did' || parsed.didPrintMode === 'address') ? parsed.didPrintMode : 'address'
         };
       }
-      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'did' };
+      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' };
     } catch (e) {
-      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'did' };
+      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' };
     }
   });
 
@@ -1355,8 +1355,6 @@ export default function StaffPortal() {
               height: 10.5cm;
               background: white;
               position: relative;
-              padding-top: ${printSettings.top}cm;
-              padding-left: ${printSettings.left}cm;
               padding-right: 1cm;
               overflow: hidden;
               box-sizing: border-box;
@@ -2135,19 +2133,19 @@ export default function StaffPortal() {
                         <input 
                           type="radio" 
                           name="didPrintMode" 
-                          checked={printSettings.didPrintMode === 'did'} 
-                          onChange={() => setPrintSettings(p => ({...p, didPrintMode: 'did'}))} 
+                          checked={printSettings.didPrintMode === 'address'} 
+                          onChange={() => setPrintSettings(p => ({...p, didPrintMode: 'address'}))} 
                         />
-                        พิมพ์ D-ID (ซ่อนที่อยู่ปกติ)
+                        พิมพ์ที่อยู่ปกติ (ซ่อน D-ID)
                       </label>
                       <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
                         <input 
                           type="radio" 
                           name="didPrintMode" 
-                          checked={printSettings.didPrintMode === 'address'} 
-                          onChange={() => setPrintSettings(p => ({...p, didPrintMode: 'address'}))} 
+                          checked={printSettings.didPrintMode === 'did'} 
+                          onChange={() => setPrintSettings(p => ({...p, didPrintMode: 'did'}))} 
                         />
-                        พิมพ์ที่อยู่ปกติ (ซ่อน D-ID)
+                        พิมพ์ D-ID (ซ่อนที่อยู่ปกติ)
                       </label>
                     </div>
                   </div>
@@ -2734,10 +2732,11 @@ export default function StaffPortal() {
       </div>
 
       {printDataList && printDataList.length > 0 && (
-        <div className="print-only print-area">
+        <div className="print-only">
           {printDataList.map((printItem, idx) => (
             <div 
               key={idx} 
+              className="print-area" 
               style={{ 
                 fontSize: `${printSettings.fontSize}pt`, 
                 lineHeight: '1.4', 
