@@ -3011,16 +3011,15 @@ export default function StaffPortal() {
                 }
 
                 return (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '500px', overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '60vh', overflowY: 'auto', paddingRight: '2px' }}>
                     {displayedHistory.map((record) => (
                     <div 
                       key={record.id}
                       style={{ 
                         position: 'relative', 
-                        overflow: 'hidden', 
                         borderRadius: '8px',
-                        width: '100%',
-                        background: '#ef4444'
+                        background: '#ef4444',
+                        minHeight: '60px'
                       }}
                     >
                       {/* Swipe Delete Action Background */}
@@ -3040,7 +3039,7 @@ export default function StaffPortal() {
                           fontSize: '0.9rem',
                           cursor: 'pointer',
                           userSelect: 'none',
-                          zIndex: 1
+                          borderRadius: '8px'
                         }}
                       >
                         ลบ
@@ -3054,71 +3053,64 @@ export default function StaffPortal() {
                         style={{ 
                           width: '100%',
                           boxSizing: 'border-box',
-                          padding: '0.75rem 1rem', 
+                          padding: '0.65rem 0.85rem', 
                           border: '1px solid var(--border)', 
                           borderRadius: '8px',
                           display: 'flex',
-                          justifyContent: 'space-between',
                           alignItems: 'center',
                           gap: '0.5rem',
-                          background: '#fff',
+                          background: record.printed ? '#f8fafc' : '#fff',
                           transform: `translateX(-${swipeOffset[record.id] || 0}px)`,
                           transition: touchStartX === null ? 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
                           position: 'relative',
-                          zIndex: 2,
-                          overflow: 'hidden'
+                          zIndex: 2
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1', minWidth: '0' }}>
-                          <input 
-                            type="checkbox" 
-                            checked={selectedIds.includes(record.id)}
-                            onChange={() => toggleSelectRecord(record.id)}
-                            style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)', flexShrink: 0 }}
-                          />
-                          <div 
-                            style={{ cursor: 'pointer', flex: '1', minWidth: '0', display: 'flex', flexDirection: 'column', gap: '0.35rem' }} 
-                            onClick={() => setSelectedDetailRecord(record)}
-                            title="คลิกเพื่อดูรายละเอียดข้อมูลลูกค้า"
-                          >
-                            {/* Name and badge row */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                              <span style={{ fontWeight: '600', color: 'var(--text-main)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '200px' }}>{record.name}</span>
-                              {record.printed ? (
-                                <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#15803d', backgroundColor: '#dcfce7', padding: '0.1rem 0.45rem', borderRadius: '12px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap' }}>
-                                  ✅ พิมพ์แล้ว
-                                </span>
-                              ) : (
-                                <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#b45309', backgroundColor: '#fef3c7', padding: '0.1rem 0.45rem', borderRadius: '12px', border: '1px solid #fde68a', whiteSpace: 'nowrap' }}>
-                                  ⏳ รอพิมพ์
-                                </span>
-                              )}
-                              <span style={{ fontSize: '0.65rem', fontWeight: 'normal', color: 'var(--primary)', backgroundColor: '#fff1f2', padding: '0.1rem 0.45rem', borderRadius: '4px', border: '1px solid #fecdd3', whiteSpace: 'nowrap' }}>
-                                🔍 รายละเอียด
-                              </span>
-                            </div>
+                        {/* Checkbox */}
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIds.includes(record.id)}
+                          onChange={() => toggleSelectRecord(record.id)}
+                          style={{ width: '15px', height: '15px', cursor: 'pointer', accentColor: 'var(--primary)', flexShrink: 0 }}
+                        />
 
-                            {/* Subtitle phone and prints count */}
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                              {record.phone && <span style={{ whiteSpace: 'nowrap' }}>โทร: {record.phone}</span>}
-                              {record.phone && <span style={{ color: '#cbd5e1' }}>|</span>}
-                              {record.quantity !== undefined && <span style={{ whiteSpace: 'nowrap' }}>จำนวน: {record.quantity} ใบ</span>}
-                              {record.quantity !== undefined && <span style={{ color: '#cbd5e1' }}>|</span>}
-                              <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                                {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                            </div>
+                        {/* Info block - takes remaining space */}
+                        <div 
+                          style={{ flex: '1', minWidth: '0', cursor: 'pointer' }} 
+                          onClick={() => setSelectedDetailRecord(record)}
+                          title="คลิกเพื่อดูรายละเอียดข้อมูลลูกค้า"
+                        >
+                          {/* Name and badges */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
+                            <span style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '160px' }}>
+                              {record.name}
+                            </span>
+                            {record.printed ? (
+                              <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#15803d', backgroundColor: '#dcfce7', padding: '0.1rem 0.35rem', borderRadius: '10px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap', flexShrink: 0 }}>✅ พิมพ์แล้ว</span>
+                            ) : (
+                              <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#b45309', backgroundColor: '#fef3c7', padding: '0.1rem 0.35rem', borderRadius: '10px', border: '1px solid #fde68a', whiteSpace: 'nowrap', flexShrink: 0 }}>⏳ รอพิมพ์</span>
+                            )}
+                          </div>
+                          {/* Subtitle */}
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap' }}>
+                            {record.phone && <span style={{ whiteSpace: 'nowrap' }}>โทร: {record.phone}</span>}
+                            {record.phone && <span style={{ color: '#cbd5e1' }}>|</span>}
+                            {record.quantity !== undefined && <span style={{ whiteSpace: 'nowrap' }}>จำนวน: {record.quantity} ใบ</span>}
+                            {record.quantity !== undefined && <span style={{ color: '#cbd5e1' }}>|</span>}
+                            <span style={{ fontSize: '0.7rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                              {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
                           </div>
                         </div>
 
-                        {/* Control buttons right */}
-                        <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0, marginLeft: '0.5rem' }}>
+                        {/* Control buttons - always right, never wrap */}
+                        <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
                           <button 
                             onClick={() => handlePrintHistory(record)} 
                             className="btn btn-secondary" 
                             style={{ 
-                              padding: '0.4rem 0.6rem', 
-                              fontSize: '0.8rem', 
+                              padding: '0.35rem 0.5rem', 
+                              fontSize: '0.75rem', 
                               display: 'flex', 
                               alignItems: 'center', 
                               gap: '0.2rem', 
@@ -3126,19 +3118,33 @@ export default function StaffPortal() {
                               borderColor: record.printed ? '#cbd5e1' : '#b45309',
                               color: record.printed ? 'var(--text-main)' : '#b45309',
                               backgroundColor: record.printed ? '' : '#fffbeb',
-                              whiteSpace: 'nowrap'
+                              whiteSpace: 'nowrap',
+                              lineHeight: 1
                             }}
                           >
-                            <Printer size={12} /> {record.printed ? 'พิมพ์ซ้ำ' : 'สั่งพิมพ์'}
+                            <Printer size={11} /> {record.printed ? 'พิมพ์ซ้ำ' : 'สั่งพิมพ์'}
                           </button>
                           <button 
                             onClick={() => {
                               populateFromScan(record);
-                              // Scroll to form on mobile
                               window.scrollTo({ top: 0, behavior: 'smooth' });
                             }} 
                             className="btn" 
-                            style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.2rem', margin: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                            style={{ 
+                              padding: '0.35rem 0.5rem', 
+                              fontSize: '0.75rem', 
+                              borderColor: '#3b82f6', 
+                              color: '#1d4ed8', 
+                              backgroundColor: '#eff6ff', 
+                              fontWeight: 'bold', 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '0.2rem', 
+                              margin: 0, 
+                              cursor: 'pointer', 
+                              whiteSpace: 'nowrap',
+                              lineHeight: 1
+                            }}
                           >
                             ✏️ แก้ไข
                           </button>
@@ -3146,8 +3152,9 @@ export default function StaffPortal() {
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
                 );
+
               })()}
             </div>
           </div>
