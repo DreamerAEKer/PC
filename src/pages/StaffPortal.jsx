@@ -8,6 +8,7 @@ import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useThaiAddress } from 'use-thai-address';
+import jsQR from 'jsqr';
 
 let globalHiddenScanner = null;
 
@@ -770,7 +771,38 @@ export default function StaffPortal() {
   }, [scanMode, cameraActive]);
 
   const decodeQRFromImage = async (file) => {
-    // 1. Try BarcodeDetector first on the original image (since it's fast)
+    // 1. Try to load image and scan using jsQR directly on the original image (highly reliable)
+    let img = null;
+    try {
+      img = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = reject;
+          image.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        const imgData = ctx.getImageData(0, 0, img.width, img.height);
+        const code = jsQR(imgData.data, img.width, img.height);
+        if (code && code.data) {
+          return code.data;
+        }
+      }
+    } catch (err) {
+      console.warn("Direct jsQR scan failed:", err);
+    }
+
+    // 2. Try BarcodeDetector on the original image (since it's fast)
     if ('BarcodeDetector' in window) {
       try {
         const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
@@ -784,7 +816,7 @@ export default function StaffPortal() {
       }
     }
 
-    // 2. Fallback to html5QrCode on original file
+    // 3. Fallback to html5QrCode on original file
     let html5QrCode = globalHiddenScanner;
     if (!html5QrCode) {
       try {
@@ -807,147 +839,152 @@ export default function StaffPortal() {
       }
     }
 
-    // 3. Canvas Preprocessing (to solve moire patterns, glare, high resolution screen photos)
-    try {
-      const img = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const image = new Image();
-          image.onload = () => resolve(image);
-          image.onerror = reject;
-          image.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-      const scanCanvas = async (cv) => {
-        if ('BarcodeDetector' in window) {
+    // 4. Canvas Preprocessing (to solve moire patterns, glare, high resolution screen photos)
+    if (img) {
+      try {
+        const scanCanvas = async (cv) => {
+          // jsQR first on preprocessed canvas (most robust engine)
           try {
-            const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
-            const barcodes = await barcodeDetector.detect(cv);
-            if (barcodes.length > 0) {
-              return barcodes[0].rawValue;
+            const ctx = cv.getContext('2d');
+            if (ctx) {
+              const imgData = ctx.getImageData(0, 0, cv.width, cv.height);
+              const code = jsQR(imgData.data, cv.width, cv.height);
+              if (code && code.data) {
+                return code.data;
+              }
+            }
+          } catch (e) {}
+
+          // BarcodeDetector on preprocessed canvas
+          if ('BarcodeDetector' in window) {
+            try {
+              const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+              const barcodes = await barcodeDetector.detect(cv);
+              if (barcodes.length > 0) {
+                return barcodes[0].rawValue;
+              }
+            } catch (e) {}
+          }
+
+          // html5QrCode on preprocessed canvas
+          if (html5QrCode) {
+            try {
+              const blob = await new Promise(resolve => cv.toBlob(resolve, 'image/jpeg', 0.9));
+              if (blob) {
+                const decodedText = await html5QrCode.scanFile(blob, false);
+                if (decodedText) {
+                  return decodedText;
+                }
+              }
+            } catch (err) {}
+          }
+          return null;
+        };
+
+        // Try cropped areas first (extremely effective for screenshots with surrounding text like the ticket page)
+        const cropRatios = [0.4, 0.3, 0.6, 0.8, 0.9];
+        for (const ratio of cropRatios) {
+          const cropSize = Math.min(img.width, img.height) * ratio;
+          
+          // Define vertical centers to try
+          const verticalCenters = [img.height / 2]; // Always try exact center first
+          if (img.height > img.width) {
+            // For portrait screenshots, try upper-middle positions where the QR is typically located (roughly 25%-45% from the top)
+            verticalCenters.push(img.height * 0.35);
+            verticalCenters.push(img.height * 0.25);
+            verticalCenters.push(img.height * 0.45);
+          }
+
+          for (const yCenter of verticalCenters) {
+            const cropCanvas = document.createElement('canvas');
+            const cropCtx = cropCanvas.getContext('2d');
+            if (cropCtx) {
+              const sx = Math.max(0, (img.width - cropSize) / 2);
+              const sy = Math.max(0, yCenter - (cropSize / 2));
+              const sw = Math.min(cropSize, img.width - sx);
+              const sh = Math.min(cropSize, img.height - sy);
+
+              cropCanvas.width = sw;
+              cropCanvas.height = sh;
+              cropCtx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+              
+              const result = await scanCanvas(cropCanvas);
+              if (result) {
+                if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
+                return result;
+              }
+            }
+          }
+        }
+
+        // Try resized full images
+        const sizes = [800, 1200, 600];
+        for (const targetWidth of sizes) {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) continue;
+
+          const scale = targetWidth / img.width;
+          const width = targetWidth;
+          const height = img.height * scale;
+          canvas.width = width;
+          canvas.height = height;
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const result = await scanCanvas(canvas);
+          if (result) {
+            if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
+            return result;
+          }
+
+          // Try Grayscale ONLY (preserving details)
+          try {
+            const imgData = ctx.getImageData(0, 0, width, height);
+            const data = imgData.data;
+            for (let i = 0; i < data.length; i += 4) {
+              const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+              data[i] = gray;
+              data[i+1] = gray;
+              data[i+2] = gray;
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            const grayResult = await scanCanvas(canvas);
+            if (grayResult) {
+              if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
+              return grayResult;
+            }
+          } catch (e) {}
+
+          // Try Grayscale + Binarization (as a last resort)
+          try {
+            // Re-draw original image to get fresh color data
+            ctx.drawImage(img, 0, 0, width, height);
+            const imgData = ctx.getImageData(0, 0, width, height);
+            const data = imgData.data;
+            for (let i = 0; i < data.length; i += 4) {
+              const r = data[i];
+              const g = data[i+1];
+              const b = data[i+2];
+              let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+              gray = gray > 120 ? 255 : 0;
+              data[i] = gray;
+              data[i+1] = gray;
+              data[i+2] = gray;
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            const binResult = await scanCanvas(canvas);
+            if (binResult) {
+              if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
+              return binResult;
             }
           } catch (e) {}
         }
-        if (html5QrCode) {
-          try {
-            const blob = await new Promise(resolve => cv.toBlob(resolve, 'image/jpeg', 0.9));
-            if (blob) {
-              const decodedText = await html5QrCode.scanFile(blob, false);
-              if (decodedText) {
-                return decodedText;
-              }
-            }
-          } catch (err) {}
-        }
-        return null;
-      };
-
-      // Try cropped areas first (extremely effective for screenshots with surrounding text like the ticket page)
-      const cropRatios = [0.4, 0.3, 0.6, 0.8, 0.9];
-      for (const ratio of cropRatios) {
-        const cropSize = Math.min(img.width, img.height) * ratio;
-        
-        // Define vertical centers to try
-        const verticalCenters = [img.height / 2]; // Always try exact center first
-        if (img.height > img.width) {
-          // For portrait screenshots, try upper-middle positions where the QR is typically located (roughly 25%-45% from the top)
-          verticalCenters.push(img.height * 0.35);
-          verticalCenters.push(img.height * 0.25);
-          verticalCenters.push(img.height * 0.45);
-        }
-
-        for (const yCenter of verticalCenters) {
-          const cropCanvas = document.createElement('canvas');
-          const cropCtx = cropCanvas.getContext('2d');
-          if (cropCtx) {
-            const sx = Math.max(0, (img.width - cropSize) / 2);
-            const sy = Math.max(0, yCenter - (cropSize / 2));
-            const sw = Math.min(cropSize, img.width - sx);
-            const sh = Math.min(cropSize, img.height - sy);
-
-            cropCanvas.width = sw;
-            cropCanvas.height = sh;
-            cropCtx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
-            
-            const result = await scanCanvas(cropCanvas);
-            if (result) {
-              if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
-              return result;
-            }
-          }
-        }
+      } catch (err) {
+        console.error("Canvas preprocessing error:", err);
       }
-
-      // Try resized full images
-      const sizes = [800, 1200, 600];
-      for (const targetWidth of sizes) {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) continue;
-
-        const scale = targetWidth / img.width;
-        const width = targetWidth;
-        const height = img.height * scale;
-        canvas.width = width;
-        canvas.height = height;
-
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const result = await scanCanvas(canvas);
-        if (result) {
-          if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
-          return result;
-        }
-
-        // Try Grayscale ONLY (preserving details)
-        try {
-          const imgData = ctx.getImageData(0, 0, width, height);
-          const data = imgData.data;
-          for (let i = 0; i < data.length; i += 4) {
-            const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
-            data[i] = gray;
-            data[i+1] = gray;
-            data[i+2] = gray;
-          }
-          ctx.putImageData(imgData, 0, 0);
-
-          const grayResult = await scanCanvas(canvas);
-          if (grayResult) {
-            if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
-            return grayResult;
-          }
-        } catch (e) {}
-
-        // Try Grayscale + Binarization (as a last resort)
-        try {
-          // Re-draw original image to get fresh color data
-          ctx.drawImage(img, 0, 0, width, height);
-          const imgData = ctx.getImageData(0, 0, width, height);
-          const data = imgData.data;
-          for (let i = 0; i < data.length; i += 4) {
-            const r = data[i];
-            const g = data[i+1];
-            const b = data[i+2];
-            let gray = 0.299 * r + 0.587 * g + 0.114 * b;
-            gray = gray > 120 ? 255 : 0;
-            data[i] = gray;
-            data[i+1] = gray;
-            data[i+2] = gray;
-          }
-          ctx.putImageData(imgData, 0, 0);
-
-          const binResult = await scanCanvas(canvas);
-          if (binResult) {
-            if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
-            return binResult;
-          }
-        } catch (e) {}
-      }
-    } catch (err) {
-      console.error("Canvas preprocessing error:", err);
     }
 
     if (html5QrCode) {
