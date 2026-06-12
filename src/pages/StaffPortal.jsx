@@ -3060,20 +3060,20 @@ export default function StaffPortal() {
                           zIndex: 2
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, marginRight: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 auto', minWidth: '0' }}>
                           <input 
                             type="checkbox" 
                             checked={selectedIds.includes(record.id)}
                             onChange={() => toggleSelectRecord(record.id)}
-                            style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
+                            style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)', flexShrink: 0 }}
                           />
                           <div 
-                            style={{ cursor: 'pointer', flex: 1 }} 
+                            style={{ cursor: 'pointer', flex: '1 1 auto', minWidth: '0', overflow: 'hidden' }} 
                             onClick={() => setSelectedDetailRecord(record)}
                             title="คลิกเพื่อดูรายละเอียดข้อมูลลูกค้า"
                           >
                             <div style={{ fontWeight: '600', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                              <span>{record.name}</span>
+                              <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '180px' }}>{record.name}</span>
                               {record.printed ? (
                                 <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#15803d', backgroundColor: '#dcfce7', padding: '0.1rem 0.45rem', borderRadius: '12px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap' }}>
                                   ✅ พิมพ์แล้ว
@@ -3083,22 +3083,22 @@ export default function StaffPortal() {
                                   ⏳ รอพิมพ์
                                 </span>
                               )}
-                              <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--primary)', backgroundColor: '#fff1f2', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #fecdd3', whiteSpace: 'nowrap' }}>
-                                🔍 ดูรายละเอียด
+                              <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--primary)', backgroundColor: '#fff1f2', padding: '0.1rem 0.4', borderRadius: '4px', border: '1px solid #fecdd3', whiteSpace: 'nowrap' }}>
+                                🔍 รายละเอียด
                               </span>
                             </div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                              {record.phone && <span>โทร: {record.phone}</span>}
+                            <div style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              {record.phone && <span style={{ whiteSpace: 'nowrap' }}>โทร: {record.phone}</span>}
                               {record.phone && <span style={{ color: '#cbd5e1' }}>|</span>}
-                              {record.quantity !== undefined && <span>จำนวนที่พิมพ์: {record.quantity} ใบ</span>}
+                              {record.quantity !== undefined && <span style={{ whiteSpace: 'nowrap' }}>จำนวน: {record.quantity} ใบ</span>}
                               {record.quantity !== undefined && <span style={{ color: '#cbd5e1' }}>|</span>}
-                              <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                              <span style={{ fontSize: '0.775rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
                                 {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
                               </span>
                             </div>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'nowrap', flexShrink: 0, marginLeft: '0.75rem' }}>
                           <button 
                             onClick={() => handlePrintHistory(record)} 
                             className="btn btn-secondary" 
@@ -3111,7 +3111,8 @@ export default function StaffPortal() {
                               margin: 0,
                               borderColor: record.printed ? '#cbd5e1' : '#b45309',
                               color: record.printed ? 'var(--text-main)' : '#b45309',
-                              backgroundColor: record.printed ? '' : '#fffbeb'
+                              backgroundColor: record.printed ? '' : '#fffbeb',
+                              whiteSpace: 'nowrap'
                             }}
                           >
                             <Printer size={12} /> {record.printed ? 'พิมพ์ซ้ำ' : 'สั่งพิมพ์'}
@@ -3123,7 +3124,7 @@ export default function StaffPortal() {
                               window.scrollTo({ top: 0, behavior: 'smooth' });
                             }} 
                             className="btn" 
-                            style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.2rem', margin: 0, cursor: 'pointer' }}
+                            style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.2rem', margin: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}
                           >
                             ✏️ แก้ไข
                           </button>
