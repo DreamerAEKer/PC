@@ -2692,7 +2692,7 @@ export default function StaffPortal() {
           </div>
 
           {/* Right column: History */}
-          <div style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div style={{ flex: '1 1 500px', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {/* Totals Summary */}
             {history.length > 0 && (() => {
               const todayStr = new Date().toISOString().split('T')[0];
