@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import { Download, CheckCircle, Clock, Share2 } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
@@ -1142,7 +1142,7 @@ export default function CustomerForm() {
                 alignItems: 'center',
                 boxShadow: '0 2px 8px rgba(225, 29, 72, 0.1)'
               }}>
-                <QRCodeSVG value={generatedData.payload} size={160} level="Q" />
+                <QRCodeCanvas value={generatedData.payload} size={160} level="Q" />
                 <div style={{ 
                   fontSize: '0.65rem', 
                   color: 'var(--primary)', 
@@ -1619,7 +1619,7 @@ export default function CustomerForm() {
                   {bulkRecords.length > 0 ? `QR ลำดับที่ ${bulkIndex + 1} / ทั้งหมด ${bulkRecords.length}` : 'QR สำหรับสั่งพิมพ์'}
                 </div>
                 <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <QRCodeSVG value={generatedData.payload} size={300} level="Q" fgColor="#000000" bgColor="#ffffff" />
+                  <QRCodeCanvas value={generatedData.payload} size={300} level="Q" fgColor="#000000" bgColor="#ffffff" />
                   <div style={{ 
                     marginTop: '0.5rem', 
                     fontSize: '0.75rem', 
