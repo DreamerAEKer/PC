@@ -9,6 +9,8 @@ import DidBoxInput from '../components/DidBoxInput';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useThaiAddress } from 'use-thai-address';
 
+let globalHiddenScanner = null;
+
 export default function StaffPortal() {
   const { register, handleSubmit, setValue, getValues, reset, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
 
@@ -38,6 +40,7 @@ export default function StaffPortal() {
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
   const [scanMode, setScanMode] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768 ? 'camera' : 'manual');
   const [cameraActive, setCameraActive] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
+  const [scanSubMode, setScanSubMode] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768 ? 'camera' : 'file'); // 'file', 'usb', 'camera'
   const didValue = watch("did", "");
   const isDidActive = (didValue || "").trim().length === 6;
   const [showDidInput, setShowDidInput] = useState(false);
@@ -97,11 +100,13 @@ export default function StaffPortal() {
     if (scanMode !== 'camera') {
       setCameraActive(false);
     } else {
-      if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      if (scanSubMode === 'camera') {
         setCameraActive(true);
+      } else {
+        setCameraActive(false);
       }
     }
-  }, [scanMode]);
+  }, [scanMode, scanSubMode]);
 
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
@@ -780,11 +785,14 @@ export default function StaffPortal() {
     }
 
     // 2. Fallback to html5QrCode on original file
-    let html5QrCode;
-    try {
-      html5QrCode = new Html5Qrcode("reader-hidden");
-    } catch (err) {
-      console.warn("Failed to create Html5Qrcode instance:", err);
+    let html5QrCode = globalHiddenScanner;
+    if (!html5QrCode) {
+      try {
+        html5QrCode = new Html5Qrcode("reader-hidden");
+        globalHiddenScanner = html5QrCode;
+      } catch (err) {
+        console.warn("Failed to create Html5Qrcode instance:", err);
+      }
     }
 
     if (html5QrCode) {
@@ -1623,71 +1631,115 @@ export default function StaffPortal() {
 
               {(scanMode === 'camera' || scanMode === 'usb') && (
                 <div>
-                  {/* Multiple Image Import Button (Visible on both mobile & desktop) */}
-                  <div style={{ marginBottom: '1.25rem' }}>
+                  {/* Segmented control for switching scan sub-modes */}
+                  <div style={{
+                    display: 'flex',
+                    backgroundColor: '#f1f5f9',
+                    padding: '4px',
+                    borderRadius: '10px',
+                    marginBottom: '1.25rem',
+                    border: '1px solid #e2e8f0'
+                  }}>
                     <button
                       type="button"
-                      onClick={() => document.getElementById('mobile-image-import-input').click()}
-                      className="btn"
+                      onClick={() => setScanSubMode('file')}
                       style={{
-                        width: '100%',
-                        padding: '0.65rem 1rem',
-                        fontSize: '0.9rem',
-                        fontWeight: 'bold',
-                        color: '#1d4ed8',
-                        backgroundColor: '#eff6ff',
-                        border: '2px dashed #3b82f6',
-                        borderRadius: '12px',
+                        flex: 1,
+                        padding: '8px 12px',
+                        fontSize: '0.85rem',
+                        fontWeight: '600',
+                        borderRadius: '8px',
+                        border: 'none',
+                        backgroundColor: scanSubMode === 'file' ? '#fff' : 'transparent',
+                        color: scanSubMode === 'file' ? 'var(--primary)' : 'var(--text-muted)',
+                        boxShadow: scanSubMode === 'file' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '0.5rem',
-                        cursor: 'pointer',
-                        boxShadow: '0 2px 8px rgba(59, 130, 246, 0.08)',
-                        margin: 0
+                        gap: '6px'
                       }}
                     >
-                      <Upload size={18} />
-                      📥 นำเข้าด้วยภาพถ่าย QR Code (เลือกได้หลายรูป)
+                      <Upload size={16} />
+                      อัปโหลดภาพ
                     </button>
-                    <input
-                      type="file"
-                      id="mobile-image-import-input"
-                      multiple
-                      accept="image/*"
-                      onChange={handleMultipleImagesImport}
-                      style={{ display: 'none' }}
-                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setScanSubMode('usb');
+                        setTimeout(() => {
+                          const input = document.getElementById('usb-scanner-input');
+                          if (input) input.focus();
+                        }, 50);
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '8px 12px',
+                        fontSize: '0.85rem',
+                        fontWeight: '600',
+                        borderRadius: '8px',
+                        border: 'none',
+                        backgroundColor: scanSubMode === 'usb' ? '#fff' : 'transparent',
+                        color: scanSubMode === 'usb' ? 'var(--primary)' : 'var(--text-muted)',
+                        boxShadow: scanSubMode === 'usb' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Keyboard size={16} />
+                      เครื่องยิง USB
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setScanSubMode('camera')}
+                      style={{
+                        flex: 1,
+                        padding: '8px 12px',
+                        fontSize: '0.85rem',
+                        fontWeight: '600',
+                        borderRadius: '8px',
+                        border: 'none',
+                        backgroundColor: scanSubMode === 'camera' ? '#fff' : 'transparent',
+                        color: scanSubMode === 'camera' ? 'var(--primary)' : 'var(--text-muted)',
+                        boxShadow: scanSubMode === 'camera' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <QrCode size={16} />
+                      กล้องเว็บแคม
+                    </button>
                   </div>
 
-                  {/* Camera Scanner View */}
-                  <div id="reader" style={{ width: '100%', marginBottom: '1rem', display: cameraActive ? 'block' : 'none' }}></div>
-                  {cameraActive && (
-                    <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={() => setCameraActive(false)}
-                        style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', cursor: 'pointer' }}
-                      >
-                        ❌ ปิดกล้องสแกน
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Drag and drop image upload (Shown at top in place of camera placeholder on desktop when camera is inactive, hidden on mobile via CSS class 'drag-drop-box') */}
-                  {!cameraActive && (
-                    <div className="drag-drop-box" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                  {/* 1. File Upload Sub-mode */}
+                  {scanSubMode === 'file' && (
+                    <div style={{ marginBottom: '1.5rem' }}>
                       <div 
-                        onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.backgroundColor = '#eff6ff'; }}
-                        onDragLeave={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+                        onDragOver={(e) => { 
+                          e.preventDefault(); 
+                          e.currentTarget.style.borderColor = 'var(--primary)'; 
+                          e.currentTarget.style.backgroundColor = '#eff6ff'; 
+                        }}
+                        onDragLeave={(e) => { 
+                          e.preventDefault(); 
+                          e.currentTarget.style.borderColor = '#cbd5e1'; 
+                          e.currentTarget.style.backgroundColor = '#f8fafc'; 
+                        }}
                         onDrop={async (e) => {
                           e.preventDefault();
                           e.currentTarget.style.borderColor = '#cbd5e1';
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          const file = e.dataTransfer.files[0];
-                          if (file) {
-                            await handleFileDecode(file);
+                          e.currentTarget.style.backgroundColor = '#f8fafc';
+                          if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                            await handleMultipleImagesImport({ target: { files: e.dataTransfer.files } });
                           }
                         }}
                         onClick={() => document.getElementById('drag-file-input').click()}
@@ -1698,105 +1750,157 @@ export default function StaffPortal() {
                           textAlign: 'center',
                           cursor: 'pointer',
                           transition: 'all 0.2s',
-                          backgroundColor: '#f8fafc'
+                          backgroundColor: '#f8fafc',
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
                         }}
                       >
                         <input 
                           type="file" 
                           id="drag-file-input" 
+                          multiple
                           accept="image/*" 
-                          onChange={async (e) => {
-                            const file = e.target.files[0];
-                            if (file) await handleFileDecode(file);
-                            e.target.value = '';
-                          }} 
+                          onChange={handleMultipleImagesImport} 
                           style={{ display: 'none' }} 
                         />
-                        <div style={{ color: 'var(--primary)', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center' }}>
-                          <QrCode size={32} />
+                        <div style={{ color: 'var(--primary)', marginBottom: '0.75rem', display: 'flex', justifyContent: 'center' }}>
+                          <Upload size={36} />
                         </div>
-                        <strong style={{ display: 'block', marginBottom: '0.25rem', color: 'var(--text-main)' }}>ลากไฟล์รูปภาพ QR Code มาวางที่นี่</strong>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>หรือคลิกเพื่อเลือกไฟล์รูปภาพจากเครื่องคอมพิวเตอร์</span>
-                        
-                        {/* Option to start webcam on desktop */}
-                        <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'center' }}>
+                        <strong style={{ display: 'block', marginBottom: '0.35rem', color: 'var(--text-main)', fontSize: '0.95rem' }}>
+                          ลากไฟล์รูปภาพ QR Code มาวางที่นี่
+                        </strong>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                          หรือคลิกเพื่อเลือกไฟล์รูปภาพจากเครื่องคอมพิวเตอร์ (เลือกพร้อมกันได้หลายรูป)
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 2. USB Barcode Scanner Sub-mode */}
+                  {scanSubMode === 'usb' && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <div style={{ 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '12px',
+                        padding: '1.5rem',
+                        backgroundColor: '#fff',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                        textAlign: 'center'
+                      }}>
+                        <div style={{ color: 'var(--primary)', marginBottom: '0.75rem', display: 'flex', justifyContent: 'center' }}>
+                          <Keyboard size={32} />
+                        </div>
+                        <strong style={{ display: 'block', marginBottom: '0.25rem', color: 'var(--text-main)', fontSize: '0.9rem' }}>
+                          ใช้เครื่องยิงบาร์โค้ด / QR Code (USB)
+                        </strong>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                          ยิงเครื่องสแกนเนอร์ได้ทันทีโดยไม่ต้องคลิก (หรือคลิกที่ช่องด้านล่างเพื่อโฟกัส)
+                        </p>
+                        <input 
+                          type="text" 
+                          id="usb-scanner-input"
+                          autoFocus
+                          className="form-control" 
+                          placeholder="👉 คลิกตรงนี้ แล้วยิงสแกนเนอร์..." 
+                          style={{ 
+                            fontSize: '0.95rem', 
+                            padding: '0.65rem 1rem', 
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1', 
+                            backgroundColor: '#fff',
+                            width: '100%',
+                            boxSizing: 'border-box',
+                            textAlign: 'center',
+                            transition: 'all 0.2s',
+                            outline: 'none',
+                            fontWeight: '600',
+                            color: '#1e293b'
+                          }}
+                          onFocus={(e) => {
+                            e.target.style.borderColor = 'var(--primary)';
+                            e.target.style.boxShadow = '0 0 0 3px rgba(211, 47, 47, 0.15)';
+                          }}
+                          onBlur={(e) => {
+                            e.target.style.borderColor = '#cbd5e1';
+                            e.target.style.boxShadow = 'none';
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              try {
+                                const val = e.target.value.trim();
+                                if (!val) return;
+                                const data = parseQrPayload(val);
+                                populateFromScan(data);
+                                e.target.value = '';
+                                setScanMode('manual');
+                                alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
+                              } catch (err) {
+                                alert("ข้อมูล QR Code ไม่ถูกต้อง กรุณาลองใหม่");
+                                e.target.value = '';
+                              }
+                            }
+                          }}
+                          onChange={(e) => {
+                            const val = e.target.value.trim();
+                            if (val.length > 10 && val.startsWith('{') && val.endsWith('}')) {
+                              try {
+                                const data = parseQrPayload(val);
+                                if (data.name || data.phone || data.did) {
+                                  populateFromScan(data);
+                                  e.target.value = '';
+                                  setScanMode('manual');
+                                  alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
+                                }
+                              } catch (err) {}
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 3. Webcam Scanner Sub-mode */}
+                  {scanSubMode === 'camera' && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <div id="reader" style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid #cbd5e1', display: cameraActive ? 'block' : 'none' }}></div>
+                      {!cameraActive && (
+                        <div style={{ 
+                          border: '2px dashed #cbd5e1',
+                          borderRadius: '12px',
+                          padding: '2.5rem 1rem',
+                          textAlign: 'center',
+                          backgroundColor: '#f8fafc'
+                        }}>
+                          <div style={{ color: 'var(--primary)', marginBottom: '0.75rem', display: 'flex', justifyContent: 'center' }}>
+                            <QrCode size={36} />
+                          </div>
+                          <strong style={{ display: 'block', marginBottom: '0.75rem', color: 'var(--text-main)', fontSize: '0.95rem' }}>
+                            กล้องเว็บแคมปิดอยู่
+                          </strong>
                           <button
                             type="button"
-                            className="btn btn-secondary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setCameraActive(true);
-                            }}
-                            style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', borderRadius: '6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                            className="btn btn-primary"
+                            onClick={() => setCameraActive(true)}
+                            style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem' }}
                           >
                             📷 เปิดกล้องสแกนเนอร์
                           </button>
                         </div>
-                      </div>
+                      )}
+                      {cameraActive && (
+                        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => setCameraActive(false)}
+                            style={{ padding: '0.4rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.8rem' }}
+                          >
+                            ❌ ปิดกล้องสแกน
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
-                  
-                  {/* USB Scanner Input View (Hidden on mobile via class 'usb-scanner-box') */}
-                  <div className="usb-scanner-box" style={{ marginBottom: '1.5rem' }}>
-                    <input 
-                      type="text" 
-                      id="usb-scanner-input"
-                      autoFocus
-                      className="form-control" 
-                      placeholder="สแกน QR Code (ยิงสแกนเนอร์ตรงนี้)..." 
-                      style={{ 
-                        fontSize: '1rem', 
-                        padding: '0.75rem 1rem', 
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1', 
-                        backgroundColor: '#fff',
-                        width: '100%',
-                        boxSizing: 'border-box',
-                        textAlign: 'center',
-                        transition: 'all 0.2s',
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = 'var(--primary)';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(225, 29, 72, 0.15)';
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = '#cbd5e1';
-                        e.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          try {
-                            const val = e.target.value.trim();
-                            if (!val) return;
-                            const data = parseQrPayload(val);
-                            populateFromScan(data);
-                            e.target.value = '';
-                            setScanMode('manual');
-                            alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
-                          } catch (err) {
-                            alert("ข้อมูล QR Code ไม่ถูกต้อง กรุณาลองใหม่");
-                            e.target.value = '';
-                          }
-                        }
-                      }}
-                      onChange={(e) => {
-                        const val = e.target.value.trim();
-                        if (val.length > 10 && val.startsWith('{') && val.endsWith('}')) {
-                          try {
-                            const data = parseQrPayload(val);
-                            if (data.name || data.phone || data.did) {
-                              populateFromScan(data);
-                              e.target.value = '';
-                              setScanMode('manual');
-                              alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
-                            }
-                          } catch (err) {}
-                        }
-                      }}
-                    />
-                  </div>
                 </div>
               )}
 
