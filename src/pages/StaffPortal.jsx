@@ -2294,6 +2294,8 @@ export default function StaffPortal() {
                         onTouchMove={(e) => handleTouchMove(record.id, e)}
                         onTouchEnd={(e) => handleTouchEnd(record.id, e)}
                         style={{ 
+                          width: '100%',
+                          boxSizing: 'border-box',
                           padding: '1rem', 
                           border: '1px solid var(--border)', 
                           borderRadius: '8px',
