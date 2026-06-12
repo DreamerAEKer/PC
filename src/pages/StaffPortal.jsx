@@ -315,6 +315,12 @@ export default function StaffPortal() {
     
     // Update ONLY the print data synchronously.
     // This perfectly matches the DOM mutation of the "พิมพ์ซ้ำ" button, which we know works flawlessly.
+    const handleAfterPrint = () => {
+      setPrintDataList([]);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+    window.addEventListener('afterprint', handleAfterPrint);
+
     flushSync(() => {
       setPrintDataList([newRecord]);
     });
@@ -336,19 +342,20 @@ export default function StaffPortal() {
       setQuantityFields(100);
       setHasActiveData(false);
       setScanMode('manual');
-      setPrintDataList([]); // Hide the print area from the dashboard
     }, 500);
   };
 
   const handlePrintHistory = (record) => {
+    const handleAfterPrint = () => {
+      setPrintDataList([]);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+    window.addEventListener('afterprint', handleAfterPrint);
+
     flushSync(() => {
       setPrintDataList([record]);
     });
     window.print();
-    
-    setTimeout(() => {
-      setPrintDataList([]);
-    }, 500);
   };
 
   const exportHistory = async () => {
@@ -2229,13 +2236,16 @@ export default function StaffPortal() {
                     type="button"
                     onClick={() => {
                       const selectedRecords = history.filter(r => selectedIds.includes(r.id));
+                      const handleAfterPrint = () => {
+                        setPrintDataList([]);
+                        window.removeEventListener('afterprint', handleAfterPrint);
+                      };
+                      window.addEventListener('afterprint', handleAfterPrint);
+
                       flushSync(() => {
                         setPrintDataList(selectedRecords);
                       });
                       window.print();
-                      setTimeout(() => {
-                        setPrintDataList([]);
-                      }, 500);
                     }}
                     className="btn btn-primary"
                     style={{
