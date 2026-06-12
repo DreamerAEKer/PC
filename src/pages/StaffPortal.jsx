@@ -2810,18 +2810,18 @@ export default function StaffPortal() {
               </div>
 
               {/* Export/Import Control Buttons */}
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
                 <button 
                   onClick={exportHistory} 
                   className="btn btn-secondary" 
-                  style={{ flex: '1 1 120px', padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
+                  style={{ flex: '1 1 180px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
                   title="ดาวน์โหลดประวัติเป็นไฟล์เพื่อนำไปเปิดเครื่องอื่น"
                 >
                   <Download size={14} /> {selectedIds.length > 0 ? `ส่งออกที่เลือก (${selectedIds.length})` : 'ส่งออกข้อมูลทั้งหมด'}
                 </button>
                 <label 
                   className="btn btn-secondary" 
-                  style={{ flex: '1 1 120px', padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', cursor: 'pointer', margin: 0 }}
+                  style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0 }}
                   title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
                 >
                   <Upload size={14} /> นำเข้าข้อมูล (.json)
@@ -2829,7 +2829,7 @@ export default function StaffPortal() {
                 </label>
                 <label 
                   className="btn btn-secondary" 
-                  style={{ flex: '1 1 120px', padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', cursor: 'pointer', margin: 0 }}
+                  style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0 }}
                   title="ดึงข้อมูลจากไฟล์ทั้งหมดในโฟลเดอร์"
                 >
                   <Upload size={14} /> นำเข้าจากโฟลเดอร์
