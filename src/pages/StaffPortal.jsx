@@ -838,7 +838,7 @@ export default function StaffPortal() {
       };
 
       // Try cropped areas first (extremely effective for screenshots with surrounding text like the ticket page)
-      const cropRatios = [0.7, 0.5, 0.9];
+      const cropRatios = [0.4, 0.3, 0.6, 0.8, 0.9];
       for (const ratio of cropRatios) {
         const cropSize = Math.min(img.width, img.height) * ratio;
         
@@ -860,9 +860,9 @@ export default function StaffPortal() {
             const sw = Math.min(cropSize, img.width - sx);
             const sh = Math.min(cropSize, img.height - sy);
 
-            cropCanvas.width = 600;
-            cropCanvas.height = 600;
-            cropCtx.drawImage(img, sx, sy, sw, sh, 0, 0, 600, 600);
+            cropCanvas.width = sw;
+            cropCanvas.height = sh;
+            cropCtx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
             
             const result = await scanCanvas(cropCanvas);
             if (result) {
@@ -1708,6 +1708,7 @@ export default function StaffPortal() {
                           onChange={async (e) => {
                             const file = e.target.files[0];
                             if (file) await handleFileDecode(file);
+                            e.target.value = '';
                           }} 
                           style={{ display: 'none' }} 
                         />
