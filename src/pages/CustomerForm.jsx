@@ -142,6 +142,7 @@ export default function CustomerForm() {
   const [history, setHistory] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const cardRef = useRef(null);
+  const captureRef = useRef(null); // ref เฉพาะส่วน QR + ข้อมูล (ไม่รวมปุ่ม)
 
   // States for history selection & delete holding
   const [selectedIds, setSelectedIds] = useState([]);
@@ -349,8 +350,8 @@ export default function CustomerForm() {
   };
 
   const downloadImage = async () => {
-    if (!cardRef.current) return;
-    const el = cardRef.current;
+    const el = captureRef.current || cardRef.current;
+    if (!el) return;
     // Temporarily remove scroll/height constraints so html2canvas captures full content
     const prevMaxHeight = el.style.maxHeight;
     const prevOverflow = el.style.overflowY;
@@ -378,8 +379,8 @@ export default function CustomerForm() {
   };
 
   const shareToLine = async () => {
-    if (!cardRef.current) return;
-    const el = cardRef.current;
+    const el = captureRef.current || cardRef.current;
+    if (!el) return;
 
     // Temporarily remove scroll/height constraints for full capture
     const prevMaxHeight = el.style.maxHeight;
@@ -1118,7 +1119,7 @@ export default function CustomerForm() {
             
             {/* The actual card to be converted to Image */}
             <div 
-              ref={cardRef} 
+              ref={captureRef} 
               style={{ 
                 padding: '2rem', 
                 background: '#fff', 
@@ -1586,8 +1587,11 @@ export default function CustomerForm() {
               </div>
             )}
 
+            {/* Capture area: QR + info only (no buttons) */}
+            <div ref={captureRef} style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '0.5rem 0.5rem 0', overflow: 'visible' }}>
+
             {/* QR Code Container with Animation Wrapper */}
-            <div style={{ position: 'relative', overflow: 'hidden', width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
               <div 
                 key={bulkIndex}
                 className="qr-card-bounce"
@@ -1729,6 +1733,8 @@ export default function CustomerForm() {
                 <strong style={{ color: 'var(--secondary)' }}>{generatedData.did || '-'}</strong>
               </div>
             </div>
+
+            </div>{/* end captureRef */}
 
             {/* Stepper Buttons for Bulk Send */}
             {bulkRecords.length > 0 && (
