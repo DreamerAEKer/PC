@@ -38,6 +38,7 @@ export default function StaffPortal() {
     return '';
   };
   const [history, setHistory] = useState([]);
+  const [historyFilter, setHistoryFilter] = useState('all'); // 'all', 'pending', 'printed'
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
   const [scanMode, setScanMode] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768 ? 'camera' : 'manual');
   const [cameraActive, setCameraActive] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
@@ -345,7 +346,7 @@ export default function StaffPortal() {
     delete processedData.customQuantity;
     
     // Create the record manually so we have the ID for printing
-    const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString() };
+    const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString(), printed: true };
     
     // Update ONLY the print data synchronously.
     // This perfectly matches the DOM mutation of the "พิมพ์ซ้ำ" button, which we know works flawlessly.
@@ -383,6 +384,11 @@ export default function StaffPortal() {
     const handleAfterPrint = () => {
       setPrintDataList([]);
       window.removeEventListener('afterprint', handleAfterPrint);
+      setHistory(prev => {
+        const updated = prev.map(r => r.id === record.id ? { ...r, printed: true } : r);
+        localStorage.setItem('staffHistory', JSON.stringify(updated));
+        return updated;
+      });
     };
     window.addEventListener('afterprint', handleAfterPrint);
 
@@ -443,7 +449,10 @@ export default function StaffPortal() {
         if (Array.isArray(parsed)) {
           setHistory(prevHistory => {
             const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
-            const merged = [...parsed, ...safePrev];
+            const merged = [...parsed, ...safePrev].map(item => ({
+              ...item,
+              printed: item.printed !== undefined ? item.printed : false
+            }));
             const unique = [];
             const seen = new Set();
             for (const item of merged) {
@@ -2560,6 +2569,84 @@ export default function StaffPortal() {
                 </label>
               </div>
 
+              {/* Segmented Filter Tabs for History */}
+              <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '1rem', backgroundColor: '#f1f5f9', padding: '0.25rem', borderRadius: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHistoryFilter('all');
+                    setSelectedIds([]);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '6px 10px',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    borderRadius: '6px',
+                    border: 'none',
+                    backgroundColor: historyFilter === 'all' ? '#fff' : 'transparent',
+                    color: historyFilter === 'all' ? 'var(--text-main)' : 'var(--text-muted)',
+                    boxShadow: historyFilter === 'all' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s'
+                  }}
+                >
+                  ทั้งหมด ({history.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHistoryFilter('pending');
+                    setSelectedIds([]);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '6px 10px',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    borderRadius: '6px',
+                    border: 'none',
+                    backgroundColor: historyFilter === 'pending' ? '#fff' : 'transparent',
+                    color: historyFilter === 'pending' ? '#b45309' : 'var(--text-muted)',
+                    boxShadow: historyFilter === 'pending' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  ⏳ รอพิมพ์ ({history.filter(r => !r.printed).length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHistoryFilter('printed');
+                    setSelectedIds([]);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '6px 10px',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    borderRadius: '6px',
+                    border: 'none',
+                    backgroundColor: historyFilter === 'printed' ? '#fff' : 'transparent',
+                    color: historyFilter === 'printed' ? '#15803d' : 'var(--text-muted)',
+                    boxShadow: historyFilter === 'printed' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  ✅ พิมพ์แล้ว ({history.filter(r => r.printed).length})
+                </button>
+              </div>
+
               {selectedIds.length > 0 && (
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
                   <button
@@ -2569,6 +2656,12 @@ export default function StaffPortal() {
                       const handleAfterPrint = () => {
                         setPrintDataList([]);
                         window.removeEventListener('afterprint', handleAfterPrint);
+                        setHistory(prev => {
+                          const updated = prev.map(r => selectedIds.includes(r.id) ? { ...r, printed: true } : r);
+                          localStorage.setItem('staffHistory', JSON.stringify(updated));
+                          return updated;
+                        });
+                        setSelectedIds([]);
                       };
                       window.addEventListener('afterprint', handleAfterPrint);
 
@@ -2620,11 +2713,24 @@ export default function StaffPortal() {
                 </div>
               )}
 
-              {history.length === 0 ? (
-                <p style={{ color: 'var(--text-muted)' }}>ยังไม่มีประวัติการพิมพ์</p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '500px', overflowY: 'auto' }}>
-                  {history.map((record) => (
+              {(() => {
+                const displayedHistory = history.filter(record => {
+                  if (historyFilter === 'pending') return !record.printed;
+                  if (historyFilter === 'printed') return record.printed;
+                  return true;
+                });
+
+                if (displayedHistory.length === 0) {
+                  return (
+                    <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem 0' }}>
+                      {historyFilter === 'pending' ? 'ไม่มีรายการรอพิมพ์ในขณะนี้' : historyFilter === 'printed' ? 'ยังไม่มีประวัติการพิมพ์สำเร็จ' : 'ยังไม่มีข้อมูลในระบบประวัติ'}
+                    </p>
+                  );
+                }
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '500px', overflowY: 'auto' }}>
+                    {displayedHistory.map((record) => (
                     <div 
                       key={record.id}
                       style={{ 
@@ -2691,9 +2797,18 @@ export default function StaffPortal() {
                             onClick={() => setSelectedDetailRecord(record)}
                             title="คลิกเพื่อดูรายละเอียดข้อมูลลูกค้า"
                           >
-                            <div style={{ fontWeight: '600', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              {record.name}
-                              <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--primary)', backgroundColor: '#fff1f2', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #fecdd3' }}>
+                            <div style={{ fontWeight: '600', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              <span>{record.name}</span>
+                              {record.printed ? (
+                                <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#15803d', backgroundColor: '#dcfce7', padding: '0.1rem 0.45rem', borderRadius: '12px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap' }}>
+                                  ✅ พิมพ์แล้ว
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#b45309', backgroundColor: '#fef3c7', padding: '0.1rem 0.45rem', borderRadius: '12px', border: '1px solid #fde68a', whiteSpace: 'nowrap' }}>
+                                  ⏳ รอพิมพ์
+                                </span>
+                              )}
+                              <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--primary)', backgroundColor: '#fff1f2', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #fecdd3', whiteSpace: 'nowrap' }}>
                                 🔍 ดูรายละเอียด
                               </span>
                             </div>
@@ -2712,9 +2827,19 @@ export default function StaffPortal() {
                           <button 
                             onClick={() => handlePrintHistory(record)} 
                             className="btn btn-secondary" 
-                            style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.2rem', margin: 0 }}
+                            style={{ 
+                              padding: '0.4rem 0.6rem', 
+                              fontSize: '0.8rem', 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '0.2rem', 
+                              margin: 0,
+                              borderColor: record.printed ? '#cbd5e1' : '#b45309',
+                              color: record.printed ? 'var(--text-main)' : '#b45309',
+                              backgroundColor: record.printed ? '' : '#fffbeb'
+                            }}
                           >
-                            <Printer size={12} /> พิมพ์ซ้ำ
+                            <Printer size={12} /> {record.printed ? 'พิมพ์ซ้ำ' : 'สั่งพิมพ์'}
                           </button>
                           <button 
                             onClick={() => {
@@ -2732,7 +2857,8 @@ export default function StaffPortal() {
                     </div>
                   ))}
                 </div>
-              )}
+                );
+              })()}
             </div>
           </div>
         </div>
