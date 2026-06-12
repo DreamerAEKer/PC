@@ -1196,6 +1196,237 @@ export default function StaffPortal() {
     alert("ไม่พบ QR Code ในรูปภาพนี้ หรือข้อมูลไม่ถูกต้อง กรุณาลองสแกนผ่านกล้องแทน");
   };
 
+  const handleFolderImport = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    let successCount = 0;
+    let failCount = 0;
+    let duplicateCount = 0;
+    const decodedRecords = [];
+
+    const decodeSingleImage = async (file) => {
+      try {
+        return await decodeQRFromImage(file);
+      } catch (err) {
+        return null;
+      }
+    };
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileName = file.name.toLowerCase();
+
+      if (fileName.endsWith('.json')) {
+        try {
+          const content = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (evt) => resolve(evt.target.result);
+            reader.onerror = (err) => reject(err);
+            reader.readAsText(file);
+          });
+          const parsed = JSON.parse(content);
+          const list = Array.isArray(parsed) ? parsed : [parsed];
+
+          for (const raw of list) {
+            const code = raw.orderCode || raw.oc || '';
+            const name = raw.name || raw.n || '';
+            if (code) {
+              const isDup = history.some(r => (r.orderCode === code || r.oc === code)) || decodedRecords.some(r => r.orderCode === code);
+              if (isDup) {
+                const proceed = window.confirm(`⚠️ ตรวจพบรหัสสั่งพิมพ์ซ้ำจากไฟล์ JSON: ${code} (ชื่อ: ${name})\nคุณต้องการนำเข้าข้อมูลรายการนี้อีกครั้งหรือไม่?`);
+                if (!proceed) {
+                  duplicateCount++;
+                  continue;
+                }
+              }
+            }
+
+            const mappedSubBookings = (raw.subBookings || raw.s || []).map((sub, subIdx) => ({
+              id: Date.now() + Math.random() + subIdx,
+              name: sub.name || sub.n || '',
+              phone: sub.phone || sub.p || '',
+              quantity: sub.quantity || sub.q || 20,
+              useMainAddress: sub.useMainAddress || sub.m === 1,
+              address: sub.address || sub.a || ''
+            }));
+
+            decodedRecords.push({
+              id: raw.id || (Date.now() + Math.random()),
+              timestamp: raw.timestamp || new Date().toISOString(),
+              orderCode: code,
+              orderDate: raw.orderDate || raw.d || new Date().toISOString().split('T')[0],
+              quantity: raw.quantity || raw.q || 1,
+              name: name,
+              phone: raw.phone || raw.p || '',
+              addressLine1: raw.addressLine1 || raw.a || '',
+              address: raw.address || raw.a || '',
+              subdistrict: raw.subdistrict || raw.sd || '',
+              district: raw.district || raw.dt || '',
+              province: raw.province || raw.pv || '',
+              zipcode: raw.zipcode || raw.zp || '',
+              did: raw.did || raw.id || '',
+              isAdvancedMode: mappedSubBookings.length > 0,
+              subBookings: mappedSubBookings,
+              printed: raw.printed !== undefined ? raw.printed : false
+            });
+            successCount++;
+          }
+        } catch (err) {
+          console.error("Error reading JSON file", err);
+          failCount++;
+        }
+      } else if (file.type.startsWith('image/') || fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
+        try {
+          const decodedText = await decodeSingleImage(file);
+          if (decodedText) {
+            const raw = JSON.parse(decodedText);
+            
+            if (raw && raw.b === 1 && Array.isArray(raw.r)) {
+              for (const recordRaw of raw.r) {
+                const code = recordRaw.oc || '';
+                const name = recordRaw.n || '';
+                if (code) {
+                  const isDup = history.some(r => (r.orderCode === code || r.oc === code)) || decodedRecords.some(r => r.orderCode === code);
+                  if (isDup) {
+                    const proceed = window.confirm(`⚠️ ตรวจพบรหัสสั่งพิมพ์ซ้ำจากรูปภาพ QR กลุ่ม: ${code} (ชื่อ: ${name})\nคุณต้องการนำเข้าข้อมูลรายการนี้อีกครั้งหรือไม่?`);
+                    if (!proceed) {
+                      duplicateCount++;
+                      continue;
+                    }
+                  }
+                }
+
+                const mappedSubBookings = (recordRaw.s || []).map((sub, subIdx) => ({
+                  id: Date.now() + Math.random() + subIdx,
+                  name: sub.n || '',
+                  phone: sub.p || '',
+                  quantity: sub.q || 20,
+                  useMainAddress: sub.m === 1,
+                  address: sub.a || ''
+                }));
+
+                decodedRecords.push({
+                  id: Date.now() + Math.random(),
+                  timestamp: new Date().toISOString(),
+                  orderCode: code,
+                  orderDate: recordRaw.d || new Date().toISOString().split('T')[0],
+                  quantity: recordRaw.q || 1,
+                  name: name,
+                  phone: recordRaw.p || '',
+                  addressLine1: recordRaw.a || '',
+                  address: recordRaw.a || '',
+                  subdistrict: recordRaw.sd || '',
+                  district: recordRaw.dt || '',
+                  province: recordRaw.pv || '',
+                  zipcode: recordRaw.zp || '',
+                  did: recordRaw.id || '',
+                  isAdvancedMode: mappedSubBookings.length > 0,
+                  subBookings: mappedSubBookings,
+                  printed: false
+                });
+                successCount++;
+              }
+            } else {
+              const singleData = parseQrPayload(decodedText);
+              const code = singleData.orderCode || singleData.oc || '';
+              const name = singleData.name || '';
+              if (code) {
+                const isDup = history.some(r => (r.orderCode === code || r.oc === code)) || decodedRecords.some(r => r.orderCode === code);
+                if (isDup) {
+                  const proceed = window.confirm(`⚠️ ตรวจพบรหัสสั่งพิมพ์ซ้ำจากรูปภาพ QR: ${code} (ชื่อ: ${name})\nคุณต้องการนำเข้าข้อมูลรายการนี้อีกครั้งหรือไม่?`);
+                  if (!proceed) {
+                    duplicateCount++;
+                    continue;
+                  }
+                }
+              }
+
+              const prefixSubdist = singleData.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.';
+              const prefixDist = singleData.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.';
+              const prefixProv = singleData.province === 'กรุงเทพมหานคร' ? '' : 'จ.';
+              
+              const parts = [
+                singleData.addressLine1 || '',
+                singleData.subdistrict ? `${prefixSubdist}${singleData.subdistrict}` : '',
+                singleData.district ? `${prefixDist}${singleData.district}` : '',
+                singleData.province ? `${prefixProv}${singleData.province}` : ''
+              ].filter(Boolean);
+              const fullAddress = parts.join(' ');
+
+              const mappedSubBookings = (singleData.subBookings || []).map((sub, sIdx) => ({
+                id: Date.now() + Math.random() + sIdx,
+                name: sub.name || sub.n || '',
+                phone: sub.phone || sub.p || '',
+                quantity: sub.quantity || sub.q || 20,
+                useMainAddress: sub.useMainAddress || sub.m === 1,
+                address: sub.address || sub.a || ''
+              }));
+
+              decodedRecords.push({
+                id: Date.now() + Math.random(),
+                timestamp: new Date().toISOString(),
+                orderCode: code,
+                orderDate: singleData.orderDate || new Date().toISOString().split('T')[0],
+                quantity: singleData.quantity || 100,
+                name: name,
+                phone: singleData.phone || '',
+                addressLine1: singleData.addressLine1 || '',
+                address: fullAddress,
+                subdistrict: singleData.subdistrict || '',
+                district: singleData.district || '',
+                province: singleData.province || '',
+                zipcode: singleData.zipcode || '',
+                did: singleData.did || '',
+                isAdvancedMode: mappedSubBookings.length > 0,
+                subBookings: mappedSubBookings,
+                printed: false
+              });
+              successCount++;
+            }
+          } else {
+            failCount++;
+          }
+        } catch (err) {
+          console.error("Error decoding image", err);
+          failCount++;
+        }
+      }
+    }
+
+    if (decodedRecords.length > 0) {
+      setHistory(prevHistory => {
+        const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
+        const merged = [...decodedRecords, ...safePrev];
+        const unique = [];
+        const seen = new Set();
+        for (const item of merged) {
+          const key = item.orderCode ? item.orderCode : `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(item);
+          }
+        }
+        const sorted = unique.sort((a, b) => b.id - a.id).slice(0, 100);
+        localStorage.setItem('staffHistory', JSON.stringify(sorted));
+        return sorted;
+      });
+
+      const importedIds = decodedRecords.map(item => item.id);
+      setSelectedIds(importedIds);
+
+      alert(`นำเข้าจากโฟลเดอร์สำเร็จ! ตรวจพบและนำเข้าไฟล์สำเร็จ ${successCount} รายการ ${duplicateCount > 0 ? `(ข้ามรหัสซ้ำ ${duplicateCount} รายการ)` : ''} ${failCount > 0 ? `| ล้มเหลว/ไม่พบ QR ${failCount} รายการ` : ''}`);
+
+      setTimeout(() => {
+        document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    } else {
+      alert("ไม่พบไฟล์ JSON หรือรูปภาพ QR Code ที่ถูกต้องในโฟลเดอร์ที่เลือกเลยครับ");
+    }
+
+    e.target.value = '';
+  };
+
   const handleMultipleImagesImport = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -1565,7 +1796,6 @@ export default function StaffPortal() {
       <div className="staff-no-print staff-dashboard-wrapper">
         <div className="staff-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <h2>แดชบอร์ดเจ้าหน้าที่ ปณ.</h2>
-          
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
             <label 
               className="btn btn-secondary" 
@@ -1587,6 +1817,34 @@ export default function StaffPortal() {
             >
               <Upload size={16} /> นำเข้าข้อมูลลูกค้า (.json)
               <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
+            </label>
+            <label 
+              className="btn btn-secondary" 
+              style={{ 
+                padding: '0.5rem 1rem', 
+                fontSize: '0.9rem', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem', 
+                cursor: 'pointer', 
+                margin: 0, 
+                borderColor: '#8b5cf6', 
+                color: '#6d28d9', 
+                backgroundColor: '#f5f3ff', 
+                fontWeight: 'bold',
+                boxShadow: '0 2px 4px rgba(139, 92, 246, 0.15)'
+              }}
+              title="ดึงข้อมูลจากไฟล์ทั้งหมดในโฟลเดอร์ (ตรวจจับรหัสสั่งพิมพ์)"
+            >
+              <Upload size={16} /> นำเข้าข้อมูลจากโฟลเดอร์
+              <input 
+                type="file" 
+                webkitdirectory="" 
+                directory="" 
+                multiple 
+                onChange={handleFolderImport} 
+                style={{ display: 'none' }} 
+              />
             </label>
             <Link to="/worldcup" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff' }}>
               <span role="img" aria-label="soccer">⚽</span> ทายผลบอลโลก 2026
@@ -2552,22 +2810,37 @@ export default function StaffPortal() {
               </div>
 
               {/* Export/Import Control Buttons */}
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
                 <button 
                   onClick={exportHistory} 
                   className="btn btn-secondary" 
-                  style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
+                  style={{ flex: '1 1 120px', padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
                   title="ดาวน์โหลดประวัติเป็นไฟล์เพื่อนำไปเปิดเครื่องอื่น"
                 >
                   <Download size={14} /> {selectedIds.length > 0 ? `ส่งออกที่เลือก (${selectedIds.length})` : 'ส่งออกข้อมูลทั้งหมด'}
                 </button>
                 <label 
                   className="btn btn-secondary" 
-                  style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', cursor: 'pointer', margin: 0 }}
+                  style={{ flex: '1 1 120px', padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', cursor: 'pointer', margin: 0 }}
                   title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
                 >
-                  <Upload size={14} /> นำเข้าข้อมูล
+                  <Upload size={14} /> นำเข้าข้อมูล (.json)
                   <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
+                </label>
+                <label 
+                  className="btn btn-secondary" 
+                  style={{ flex: '1 1 120px', padding: '0.4rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', cursor: 'pointer', margin: 0 }}
+                  title="ดึงข้อมูลจากไฟล์ทั้งหมดในโฟลเดอร์"
+                >
+                  <Upload size={14} /> นำเข้าจากโฟลเดอร์
+                  <input 
+                    type="file" 
+                    webkitdirectory="" 
+                    directory="" 
+                    multiple 
+                    onChange={handleFolderImport} 
+                    style={{ display: 'none' }} 
+                  />
                 </label>
               </div>
 
