@@ -502,7 +502,7 @@ export default function StaffPortal() {
                 return { width: qrboxSize, height: qrboxSize };
               },
               experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true
+                useBarCodeDetectorIfSupported: false
               }
             },
 

@@ -1055,7 +1055,7 @@ export default function CustomerForm() {
                 alignItems: 'center',
                 boxShadow: '0 2px 8px rgba(225, 29, 72, 0.1)'
               }}>
-                <QRCodeCanvas value={generatedData.payload} size={130} level="Q" />
+                <QRCodeCanvas value={generatedData.payload} size={160} level="L" />
                 <div style={{ 
                   fontSize: '0.65rem', 
                   color: 'var(--primary)', 
@@ -1524,7 +1524,7 @@ export default function CustomerForm() {
                   {bulkRecords.length > 0 ? `QR ลำดับที่ ${bulkIndex + 1} / ทั้งหมด ${bulkRecords.length}` : 'QR สำหรับสั่งพิมพ์'}
                 </div>
                 <div style={{ marginTop: '0.5rem' }}>
-                  <QRCodeCanvas value={generatedData.payload} size={200} level="Q" />
+                  <QRCodeCanvas value={generatedData.payload} size={260} level="L" />
                 </div>
               </div>
             </div>
