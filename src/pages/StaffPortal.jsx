@@ -1728,6 +1728,9 @@ export default function StaffPortal() {
             .mobile-only-hide-when-no-data.active {
               display: block !important;
             }
+            .desktop-only-btn {
+              display: none !important;
+            }
             .staff-dashboard-wrapper {
               display: flex;
               flex-direction: column;
@@ -1748,6 +1751,9 @@ export default function StaffPortal() {
           @media (min-width: 769px) {
             .mobile-only-scan-helper {
               display: none !important;
+            }
+            .desktop-only-btn {
+              display: flex !important;
             }
           }
 
@@ -1784,11 +1790,12 @@ export default function StaffPortal() {
             from { transform: scale(0.9) translateY(10px); opacity: 0; }
             to { transform: scale(1) translateY(0); opacity: 1; }
           }
-          #reader video {
+           #reader video {
             border-radius: 12px;
             width: 100% !important;
-            height: auto !important;
-            object-fit: cover;
+            height: 100% !important;
+            max-height: 320px;
+            object-fit: cover !important;
           }
         `}
       </style>
@@ -2003,6 +2010,7 @@ export default function StaffPortal() {
                           if (input) input.focus();
                         }, 50);
                       }}
+                      className="desktop-only-btn"
                       style={{
                         flex: 1,
                         padding: '8px 12px',
@@ -2015,7 +2023,6 @@ export default function StaffPortal() {
                         boxShadow: scanSubMode === 'usb' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
-                        display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '6px'
@@ -3074,20 +3081,24 @@ export default function StaffPortal() {
                             onClick={() => setSelectedDetailRecord(record)}
                             title="คลิกเพื่อดูรายละเอียดข้อมูลลูกค้า"
                           >
-                            <div style={{ fontWeight: '600', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                              <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '140px' }}>{record.name}</span>
-                              {record.printed ? (
-                                <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#15803d', backgroundColor: '#dcfce7', padding: '0.1rem 0.45rem', borderRadius: '12px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap' }}>
-                                  ✅ พิมพ์แล้ว
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                              <div style={{ fontWeight: '600', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                                <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '140px' }}>{record.name}</span>
+                                {record.printed ? (
+                                  <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#15803d', backgroundColor: '#dcfce7', padding: '0.05rem 0.35rem', borderRadius: '12px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap' }}>
+                                    ✅ พิมพ์แล้ว
+                                  </span>
+                                ) : (
+                                  <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#b45309', backgroundColor: '#fef3c7', padding: '0.05rem 0.35rem', borderRadius: '12px', border: '1px solid #fde68a', whiteSpace: 'nowrap' }}>
+                                    ⏳ รอพิมพ์
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '0.7rem', fontWeight: 'normal', color: 'var(--primary)', backgroundColor: '#fff1f2', padding: '0.05rem 0.35rem', borderRadius: '4px', border: '1px solid #fecdd3', whiteSpace: 'nowrap' }}>
+                                  🔍 รายละเอียด
                                 </span>
-                              ) : (
-                                <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#b45309', backgroundColor: '#fef3c7', padding: '0.1rem 0.45rem', borderRadius: '12px', border: '1px solid #fde68a', whiteSpace: 'nowrap' }}>
-                                  ⏳ รอพิมพ์
-                                </span>
-                              )}
-                              <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--primary)', backgroundColor: '#fff1f2', padding: '0.1rem 0.45rem', borderRadius: '4px', border: '1px solid #fecdd3', whiteSpace: 'nowrap' }}>
-                                🔍 รายละเอียด
-                              </span>
+                              </div>
                             </div>
                             <div style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                               {record.phone && <span style={{ whiteSpace: 'nowrap' }}>โทร: {record.phone}</span>}
