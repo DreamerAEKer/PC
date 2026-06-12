@@ -349,44 +349,97 @@ export default function CustomerForm() {
   };
 
   const downloadImage = async () => {
-    if (cardRef.current) {
-      const canvas = await html2canvas(cardRef.current, { scale: 2 });
+    if (!cardRef.current) return;
+    const el = cardRef.current;
+    // Temporarily remove scroll/height constraints so html2canvas captures full content
+    const prevMaxHeight = el.style.maxHeight;
+    const prevOverflow = el.style.overflowY;
+    el.style.maxHeight = 'none';
+    el.style.overflowY = 'visible';
+    try {
+      const canvas = await html2canvas(el, { 
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        scrollY: -window.scrollY,
+        windowWidth: document.documentElement.scrollWidth
+      });
       const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = url;
       a.download = getFileName();
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
+    } finally {
+      el.style.maxHeight = prevMaxHeight;
+      el.style.overflowY = prevOverflow;
     }
   };
 
   const shareToLine = async () => {
-    const textToShare = generatedData.isDidActive
-      ? `ข้อมูลผู้รับ\nชื่อ: ${generatedData.name}\nเบอร์โทร: ${generatedData.phone}\nD-ID: ${generatedData.did}`
-      : `ข้อมูลผู้รับ\nชื่อ: ${generatedData.name}\nเบอร์โทร: ${generatedData.phone}\nที่อยู่: ${generatedData.address} ${generatedData.zipcode}${generatedData.did ? `\nD-ID: ${generatedData.did}` : ''}`;
-    
-    if (navigator.canShare && cardRef.current) {
+    if (!cardRef.current) return;
+    const el = cardRef.current;
+
+    // Temporarily remove scroll/height constraints for full capture
+    const prevMaxHeight = el.style.maxHeight;
+    const prevOverflow = el.style.overflowY;
+    el.style.maxHeight = 'none';
+    el.style.overflowY = 'visible';
+
+    let imageFile = null;
+    try {
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        scrollY: -window.scrollY,
+        windowWidth: document.documentElement.scrollWidth
+      });
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      if (blob) {
+        imageFile = new File([blob], getFileName(), { type: 'image/png' });
+      }
+    } catch (e) {
+      console.error('Canvas capture error:', e);
+    } finally {
+      el.style.maxHeight = prevMaxHeight;
+      el.style.overflowY = prevOverflow;
+    }
+
+    // Try native share with image file first (works on mobile iOS/Android)
+    if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
       try {
-        const canvas = await html2canvas(cardRef.current, { scale: 2 });
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        if (blob) {
-          const file = new File([blob], getFileName(), { type: 'image/png' });
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: 'ข้อมูลผู้รับ',
-              text: 'รูปภาพข้อมูลผู้รับ สำหรับการพิมพ์ไปรษณียบัตร'
-            });
-            return;
-          }
-        }
+        await navigator.share({
+          files: [imageFile],
+          title: 'ข้อมูลผู้รับ',
+          text: 'รูปภาพข้อมูลผู้รับ สำหรับการพิมพ์ไปรษณียบัตร'
+        });
+        return;
       } catch (e) {
-        console.error('Share error:', e);
+        if (e.name !== 'AbortError') {
+          console.error('Share error:', e);
+        } else {
+          return; // user cancelled — do nothing
+        }
       }
     }
-    
-    // Fallback: Share text to LINE app/web directly
-    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(textToShare)}`;
-    window.open(lineUrl, '_blank');
+
+    // Fallback for desktop: download the image and open LINE
+    if (imageFile) {
+      const url = URL.createObjectURL(imageFile);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = getFileName();
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      // Also open LINE after short delay
+      setTimeout(() => {
+        window.open('https://line.me', '_blank');
+      }, 800);
+    }
   };
 
   return (
