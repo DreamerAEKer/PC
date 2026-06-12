@@ -778,6 +778,52 @@ export default function StaffPortal() {
         reader.readAsDataURL(file);
       });
 
+      const scanCanvas = async (cv) => {
+        if ('BarcodeDetector' in window) {
+          try {
+            const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+            const barcodes = await barcodeDetector.detect(cv);
+            if (barcodes.length > 0) {
+              return barcodes[0].rawValue;
+            }
+          } catch (e) {}
+        }
+        if (html5QrCode) {
+          try {
+            const blob = await new Promise(resolve => cv.toBlob(resolve, 'image/jpeg', 0.9));
+            if (blob) {
+              const decodedText = await html5QrCode.scanFile(blob, false);
+              if (decodedText) {
+                return decodedText;
+              }
+            }
+          } catch (err) {}
+        }
+        return null;
+      };
+
+      // Try cropped center area first (extremely effective for screenshots with surrounding text like the ticket page)
+      const cropRatios = [0.7, 0.5];
+      for (const ratio of cropRatios) {
+        const cropCanvas = document.createElement('canvas');
+        const cropCtx = cropCanvas.getContext('2d');
+        if (cropCtx) {
+          const cropSize = Math.min(img.width, img.height) * ratio;
+          const sx = (img.width - cropSize) / 2;
+          const sy = (img.height - cropSize) / 2;
+          cropCanvas.width = 600;
+          cropCanvas.height = 600;
+          cropCtx.drawImage(img, sx, sy, cropSize, cropSize, 0, 0, 600, 600);
+          
+          const result = await scanCanvas(cropCanvas);
+          if (result) {
+            if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
+            return result;
+          }
+        }
+      }
+
+      // Try resized full images
       const sizes = [800, 1200, 600];
       for (const targetWidth of sizes) {
         const canvas = document.createElement('canvas');
@@ -792,37 +838,13 @@ export default function StaffPortal() {
 
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Try BarcodeDetector on canvas
-        if ('BarcodeDetector' in window) {
-          try {
-            const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
-            const barcodes = await barcodeDetector.detect(canvas);
-            if (barcodes.length > 0) {
-              if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
-              return barcodes[0].rawValue;
-            }
-          } catch (e) {
-            console.log("BarcodeDetector canvas error:", e);
-          }
+        const result = await scanCanvas(canvas);
+        if (result) {
+          if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
+          return result;
         }
 
-        // Try html5QrCode on canvas
-        if (html5QrCode) {
-          try {
-            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
-            if (blob) {
-              const decodedText = await html5QrCode.scanFile(blob, false);
-              if (decodedText) {
-                try { await html5QrCode.clear(); } catch (e) {}
-                return decodedText;
-              }
-            }
-          } catch (err) {
-            console.log(`html5QrCode canvas ${width}px scan failed`);
-          }
-        }
-
-        // Try Grayscale + Binarization (extremely useful for high-glare screen pictures)
+        // Try Grayscale + Binarization (as a last resort)
         try {
           const imgData = ctx.getImageData(0, 0, width, height);
           const data = imgData.data;
@@ -838,32 +860,12 @@ export default function StaffPortal() {
           }
           ctx.putImageData(imgData, 0, 0);
 
-          if ('BarcodeDetector' in window) {
-            try {
-              const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
-              const barcodes = await barcodeDetector.detect(canvas);
-              if (barcodes.length > 0) {
-                if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
-                return barcodes[0].rawValue;
-              }
-            } catch (e) {}
+          const binResult = await scanCanvas(canvas);
+          if (binResult) {
+            if (html5QrCode) { try { await html5QrCode.clear(); } catch (e) {} }
+            return binResult;
           }
-
-          if (html5QrCode) {
-            try {
-              const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
-              if (blob) {
-                const decodedText = await html5QrCode.scanFile(blob, false);
-                if (decodedText) {
-                  try { await html5QrCode.clear(); } catch (e) {}
-                  return decodedText;
-                }
-              }
-            } catch (err) {}
-          }
-        } catch (e) {
-          console.log("Grayscale enhancement failed:", e);
-        }
+        } catch (e) {}
       }
     } catch (err) {
       console.error("Canvas preprocessing error:", err);
