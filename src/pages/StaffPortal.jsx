@@ -1735,7 +1735,7 @@ export default function StaffPortal() {
     ctx.textBaseline = 'alphabetic'; // reset
 
     // 5. Footer: เสร็จแล้ว แจ้งกับพี่ไปรได้เลย
-    ctx.fillStyle = '#ef4444';
+    ctx.fillStyle = '#16a34a';
     ctx.textAlign = 'center';
     ctx.font = 'bold 34px "Sarabun", "Inter", "Tahoma", sans-serif';
     ctx.fillText('เสร็จแล้ว แจ้งกับพี่ไปรได้เลย', width / 2, 910);
