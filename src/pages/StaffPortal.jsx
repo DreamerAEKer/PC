@@ -1645,11 +1645,11 @@ export default function StaffPortal() {
     // 1. Title: 📲 สแกน QR Code พิมพ์ ชื่อ-ที่อยู่
     ctx.fillStyle = '#1e293b';
     ctx.textAlign = 'center';
-    ctx.font = 'bold 38px "Sarabun", "Inter", "Tahoma", sans-serif';
-    ctx.fillText('📲 สแกน QR Code พิมพ์ ชื่อ-ที่อยู่', width / 2, 80);
+    ctx.font = 'bold 48px "Sarabun", "Inter", "Tahoma", sans-serif';
+    ctx.fillText('📲 สแกน QR Code พิมพ์ ชื่อ-ที่อยู่', width / 2, 75);
 
     // 2. Subtitle: สาขา: ไปรษณีย์กลาง 10501
-    ctx.font = 'bold 30px "Sarabun", "Inter", "Tahoma", sans-serif';
+    ctx.font = 'bold 38px "Sarabun", "Inter", "Tahoma", sans-serif';
     const labelText = 'สาขา: ';
     const branchText = `${branchName} ${branchCode}`;
     
@@ -1663,15 +1663,15 @@ export default function StaffPortal() {
     
     ctx.fillStyle = '#475569';
     ctx.textAlign = 'left';
-    ctx.fillText(labelText, startX, 140);
+    ctx.fillText(labelText, startX, 135);
     ctx.fillStyle = '#ef4444';
-    ctx.fillText(branchText, startX + labelWidth, 140);
+    ctx.fillText(branchText, startX + labelWidth, 135);
 
     // 3. QR Box Container (blue border)
     const boxWidth = 620;
     const boxHeight = 650;
     const boxX = (width - boxWidth) / 2;
-    const boxY = 200;
+    const boxY = 185;
     const borderRadius = 28;
 
     ctx.strokeStyle = '#3b82f6';
@@ -1693,21 +1693,21 @@ export default function StaffPortal() {
     }
     ctx.stroke();
 
-    // Draw QR code inside the box
-    const qrSize = 480;
+    // Draw QR code inside the box (increased size from 480 to 500)
+    const qrSize = 500;
     const qrX = boxX + (boxWidth - qrSize) / 2;
-    const qrY = boxY + 100;
+    const qrY = boxY + 90;
     ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
 
     // 4. Overlapping badge: QR Customer (ลิงก์สำหรับลูกค้าสแกน)
     const badgeText = 'QR Customer (ลิงก์สำหรับลูกค้าสแกน)';
-    ctx.font = 'bold 24px "Sarabun", "Inter", "Tahoma", sans-serif';
+    ctx.font = 'bold 28px "Sarabun", "Inter", "Tahoma", sans-serif';
     const badgeTextWidth = ctx.measureText(badgeText).width;
-    const badgeWidth = badgeTextWidth + 50;
-    const badgeHeight = 50;
+    const badgeWidth = badgeTextWidth + 60;
+    const badgeHeight = 58;
     const badgeX = (width - badgeWidth) / 2;
     const badgeY = boxY - (badgeHeight / 2);
-    const badgeRadius = 25;
+    const badgeRadius = 29;
 
     ctx.fillStyle = '#3b82f6';
     ctx.beginPath();
@@ -1737,8 +1737,8 @@ export default function StaffPortal() {
     // 5. Footer: เสร็จแล้ว แจ้งกับพี่ไปรได้เลย
     ctx.fillStyle = '#16a34a';
     ctx.textAlign = 'center';
-    ctx.font = 'bold 34px "Sarabun", "Inter", "Tahoma", sans-serif';
-    ctx.fillText('เสร็จแล้ว แจ้งกับพี่ไปรได้เลย', width / 2, 910);
+    ctx.font = 'bold 46px "Sarabun", "Inter", "Tahoma", sans-serif';
+    ctx.fillText('เสร็จแล้ว แจ้งกับพี่ไปรได้เลย', width / 2, 905);
 
     // Trigger download
     const url = canvas.toDataURL("image/png");
