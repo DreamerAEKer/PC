@@ -1628,8 +1628,113 @@ export default function StaffPortal() {
   };
 
   const downloadBranchQr = () => {
-    const canvas = document.getElementById('branch-qr-canvas');
-    if (!canvas) return;
+    const qrCanvas = document.getElementById('branch-qr-canvas-large');
+    if (!qrCanvas) return;
+
+    const width = 800;
+    const height = 950;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    // Fill white background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+
+    // 1. Title: 📲 สแกน QR เพื่อกรอกข้อมูล
+    ctx.fillStyle = '#1e293b';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 38px "Sarabun", "Inter", "Tahoma", sans-serif';
+    ctx.fillText('📲 สแกน QR เพื่อกรอกข้อมูล', width / 2, 80);
+
+    // 2. Subtitle: สาขา: ไปรษณีย์กลาง 10501
+    ctx.font = 'bold 30px "Sarabun", "Inter", "Tahoma", sans-serif';
+    const labelText = 'สาขา: ';
+    const branchText = `${branchName} ${branchCode}`;
+    
+    ctx.fillStyle = '#475569';
+    const labelWidth = ctx.measureText(labelText).width;
+    ctx.fillStyle = '#ef4444';
+    const branchWidth = ctx.measureText(branchText).width;
+    
+    const totalTextWidth = labelWidth + branchWidth;
+    const startX = (width - totalTextWidth) / 2;
+    
+    ctx.fillStyle = '#475569';
+    ctx.textAlign = 'left';
+    ctx.fillText(labelText, startX, 140);
+    ctx.fillStyle = '#ef4444';
+    ctx.fillText(branchText, startX + labelWidth, 140);
+
+    // 3. QR Box Container (blue border)
+    const boxWidth = 620;
+    const boxHeight = 670;
+    const boxX = (width - boxWidth) / 2;
+    const boxY = 210;
+    const borderRadius = 28;
+
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(boxX, boxY, boxWidth, boxHeight, borderRadius);
+    } else {
+      ctx.moveTo(boxX + borderRadius, boxY);
+      ctx.lineTo(boxX + boxWidth - borderRadius, boxY);
+      ctx.quadraticCurveTo(boxX + boxWidth, boxY, boxX + boxWidth, boxY + borderRadius);
+      ctx.lineTo(boxX + boxWidth, boxY + boxHeight - borderRadius);
+      ctx.quadraticCurveTo(boxX + boxWidth, boxY + boxHeight, boxX + boxWidth - borderRadius, boxY + boxHeight);
+      ctx.lineTo(boxX + borderRadius, boxY + boxHeight);
+      ctx.quadraticCurveTo(boxX, boxY + boxHeight, boxX, boxY + boxHeight - borderRadius);
+      ctx.lineTo(boxX, boxY + borderRadius);
+      ctx.quadraticCurveTo(boxX, boxY, boxX + borderRadius, boxY);
+      ctx.closePath();
+    }
+    ctx.stroke();
+
+    // Draw QR code inside the box
+    const qrSize = 480;
+    const qrX = boxX + (boxWidth - qrSize) / 2;
+    const qrY = boxY + 110;
+    ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+
+    // 4. Overlapping badge: QR Customer (ลิงก์สำหรับลูกค้าสแกน)
+    const badgeText = 'QR Customer (ลิงก์สำหรับลูกค้าสแกน)';
+    ctx.font = 'bold 24px "Sarabun", "Inter", "Tahoma", sans-serif';
+    const badgeTextWidth = ctx.measureText(badgeText).width;
+    const badgeWidth = badgeTextWidth + 50;
+    const badgeHeight = 50;
+    const badgeX = (width - badgeWidth) / 2;
+    const badgeY = boxY - (badgeHeight / 2);
+    const badgeRadius = 25;
+
+    ctx.fillStyle = '#3b82f6';
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, badgeRadius);
+    } else {
+      ctx.moveTo(badgeX + badgeRadius, badgeY);
+      ctx.lineTo(badgeX + badgeWidth - badgeRadius, badgeY);
+      ctx.quadraticCurveTo(badgeX + badgeWidth, badgeY, badgeX + badgeWidth, badgeY + badgeRadius);
+      ctx.lineTo(badgeX + badgeWidth, badgeY + badgeHeight - badgeRadius);
+      ctx.quadraticCurveTo(badgeX + badgeWidth, badgeY + badgeHeight, badgeX + badgeWidth - badgeRadius, badgeY + badgeHeight);
+      ctx.lineTo(badgeX + badgeRadius, badgeY + badgeHeight);
+      ctx.quadraticCurveTo(badgeX, badgeY + badgeHeight, badgeX, badgeY + badgeHeight - badgeRadius);
+      ctx.lineTo(badgeX, badgeY + badgeRadius);
+      ctx.quadraticCurveTo(badgeX, badgeY, badgeX + badgeRadius, badgeY);
+      ctx.closePath();
+    }
+    ctx.fill();
+
+    // Badge Text
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(badgeText, width / 2, badgeY + (badgeHeight / 2));
+    ctx.textBaseline = 'alphabetic'; // reset
+
+    // Trigger download
     const url = canvas.toDataURL("image/png");
     const link = document.createElement('a');
     link.href = url;
@@ -3309,6 +3414,9 @@ export default function StaffPortal() {
                 boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)'
               }}>
                 <QRCodeCanvas id="branch-qr-canvas" value={generatedCustomerUrl} size={55} level="M" />
+                <div style={{ display: 'none' }}>
+                  <QRCodeCanvas id="branch-qr-canvas-large" value={generatedCustomerUrl} size={512} level="H" includeMargin={false} />
+                </div>
                 <div style={{ fontSize: '0.55rem', color: '#1d4ed8', fontWeight: 'bold', marginTop: '0.2rem', whiteSpace: 'nowrap' }}>
                   QR Customer
                 </div>
