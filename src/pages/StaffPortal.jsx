@@ -1734,11 +1734,11 @@ export default function StaffPortal() {
     ctx.fillText(badgeText, width / 2, badgeY + (badgeHeight / 2));
     ctx.textBaseline = 'alphabetic'; // reset
 
-    // 5. Footer: เสร็จแล้ว โปรดแจ้ง พี่ไปร
+    // 5. Footer: เสร็จแล้ว แจ้งกับพี่ไปรได้เลย
     ctx.fillStyle = '#ef4444';
     ctx.textAlign = 'center';
     ctx.font = 'bold 34px "Sarabun", "Inter", "Tahoma", sans-serif';
-    ctx.fillText('เสร็จแล้ว โปรดแจ้ง พี่ไปร', width / 2, 910);
+    ctx.fillText('เสร็จแล้ว แจ้งกับพี่ไปรได้เลย', width / 2, 910);
 
     // Trigger download
     const url = canvas.toDataURL("image/png");
