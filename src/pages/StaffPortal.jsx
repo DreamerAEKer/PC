@@ -1642,11 +1642,11 @@ export default function StaffPortal() {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
 
-    // 1. Title: 📲 สแกน QR เพื่อกรอกข้อมูล
+    // 1. Title: 📲 สแกน QR Code พิมพ์ ชื่อ-ที่อยู่
     ctx.fillStyle = '#1e293b';
     ctx.textAlign = 'center';
     ctx.font = 'bold 38px "Sarabun", "Inter", "Tahoma", sans-serif';
-    ctx.fillText('📲 สแกน QR เพื่อกรอกข้อมูล', width / 2, 80);
+    ctx.fillText('📲 สแกน QR Code พิมพ์ ชื่อ-ที่อยู่', width / 2, 80);
 
     // 2. Subtitle: สาขา: ไปรษณีย์กลาง 10501
     ctx.font = 'bold 30px "Sarabun", "Inter", "Tahoma", sans-serif';
@@ -1669,9 +1669,9 @@ export default function StaffPortal() {
 
     // 3. QR Box Container (blue border)
     const boxWidth = 620;
-    const boxHeight = 670;
+    const boxHeight = 650;
     const boxX = (width - boxWidth) / 2;
-    const boxY = 210;
+    const boxY = 200;
     const borderRadius = 28;
 
     ctx.strokeStyle = '#3b82f6';
@@ -1696,7 +1696,7 @@ export default function StaffPortal() {
     // Draw QR code inside the box
     const qrSize = 480;
     const qrX = boxX + (boxWidth - qrSize) / 2;
-    const qrY = boxY + 110;
+    const qrY = boxY + 100;
     ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
 
     // 4. Overlapping badge: QR Customer (ลิงก์สำหรับลูกค้าสแกน)
@@ -1733,6 +1733,12 @@ export default function StaffPortal() {
     ctx.textBaseline = 'middle';
     ctx.fillText(badgeText, width / 2, badgeY + (badgeHeight / 2));
     ctx.textBaseline = 'alphabetic'; // reset
+
+    // 5. Footer: เสร็จแล้ว โปรดแจ้ง พี่ไปร
+    ctx.fillStyle = '#ef4444';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 34px "Sarabun", "Inter", "Tahoma", sans-serif';
+    ctx.fillText('เสร็จแล้ว โปรดแจ้ง พี่ไปร', width / 2, 910);
 
     // Trigger download
     const url = canvas.toDataURL("image/png");
