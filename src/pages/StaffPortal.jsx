@@ -69,6 +69,24 @@ export default function StaffPortal() {
   const [swipedItemId, setSwipedItemId] = useState(null);
   const navigate = useNavigate();
 
+  const constructFullAddress = (item) => {
+    if (!item) return '';
+    if (item.address && (item.address.includes('ต.') || item.address.includes('อ.') || item.address.includes('จ.') || item.address.includes('แขวง') || item.address.includes('เขต'))) {
+      return item.address;
+    }
+    const isBKK = item.province === 'กรุงเทพมหานคร';
+    const subTitle = isBKK ? (item.subdistrict ? `แขวง${item.subdistrict}` : '') : (item.subdistrict ? `ต.${item.subdistrict}` : '');
+    const distTitle = isBKK ? (item.district ? `เขต${item.district}` : '') : (item.district ? `อ.${item.district}` : '');
+    const provTitle = isBKK ? (item.province || '') : (item.province ? `จ.${item.province}` : '');
+    const parts = [
+      item.addressLine1 || item.address || '',
+      subTitle,
+      distTitle,
+      provTitle
+    ].filter(Boolean);
+    return parts.join(' ').replace(/\s+/g, ' ').trim();
+  };
+
   const [targetScanCount, setTargetScanCount] = useState(0);
   const [currentScanCount, setCurrentScanCount] = useState(0);
   const [scannedIndexes, setScannedIndexes] = useState([]);
@@ -487,10 +505,22 @@ export default function StaffPortal() {
                 seen.add(item.id);
                 const prevKey = item.id || item.orderCode || `${item.name}-${item.phone}`;
                 const prevItem = prevMap.get(prevKey);
+                
+                let cleanedDid = item.did || '';
+                if (cleanedDid && (cleanedDid === item.id || cleanedDid === item.orderCode || cleanedDid.length > 10)) {
+                  cleanedDid = '';
+                }
+                
+                const cleanedItem = {
+                  ...item,
+                  did: cleanedDid,
+                  address: constructFullAddress(item)
+                };
+
                 if (prevItem) {
-                  unique.push({ ...item, printed: prevItem.printed });
+                  unique.push({ ...cleanedItem, printed: prevItem.printed });
                 } else {
-                  unique.push({ ...item, printed: false });
+                  unique.push({ ...cleanedItem, printed: false });
                 }
               }
             }
@@ -590,8 +620,17 @@ export default function StaffPortal() {
         targetId: existing.id
       });
     } else {
+      let cleanedDid = data.did || '';
+      if (cleanedDid) {
+        const rawDidStr = String(cleanedDid).trim();
+        if (!(rawDidStr.length === 6 && /^\d+$/.test(rawDidStr))) {
+          cleanedDid = '';
+        }
+      }
       const newRecord = {
         ...data,
+        did: cleanedDid,
+        address: constructFullAddress(data),
         orderCode: code,
         id: Date.now() + Math.random(),
         timestamp: new Date().toISOString(),
@@ -673,6 +712,21 @@ export default function StaffPortal() {
                       useMainAddress: sub.m === 1,
                       address: sub.a || ''
                     }));
+                    const itemForAddress = {
+                      addressLine1: raw.a || '',
+                      address: raw.a || '',
+                      subdistrict: raw.sd || '',
+                      district: raw.dt || '',
+                      province: raw.pv || '',
+                      zipcode: raw.zp || ''
+                    };
+                    let cleanedDid = '';
+                    if (raw.id) {
+                      const rawIdStr = String(raw.id).trim();
+                      if (rawIdStr.length === 6 && /^\d+$/.test(rawIdStr)) {
+                        cleanedDid = rawIdStr;
+                      }
+                    }
                     return {
                       id: Date.now() + Math.random(),
                       timestamp: new Date().toISOString(),
@@ -680,13 +734,13 @@ export default function StaffPortal() {
                       quantity: raw.q || 1,
                       name: raw.n || '',
                       phone: raw.p || '',
-                      addressLine1: raw.a || '',
-                      address: raw.a || '',
-                      subdistrict: raw.sd || '',
-                      district: raw.dt || '',
-                      province: raw.pv || '',
-                      zipcode: raw.zp || '',
-                      did: raw.id || '',
+                      addressLine1: itemForAddress.addressLine1,
+                      address: constructFullAddress(itemForAddress),
+                      subdistrict: itemForAddress.subdistrict,
+                      district: itemForAddress.district,
+                      province: itemForAddress.province,
+                      zipcode: itemForAddress.zipcode,
+                      did: cleanedDid,
                       isAdvancedMode: mappedSubBookings.length > 0,
                       subBookings: mappedSubBookings,
                       printed: false,
@@ -1137,8 +1191,8 @@ export default function StaffPortal() {
     return '';
   };
 
-  const handleDeleteRecord = (id) => {
-    if (window.confirm("คุณต้องการลบรายการประวัตินี้ใช่หรือไม่?")) {
+  const handleDeleteRecord = async (id) => {
+    if (await window.showConfirm("คุณต้องการลบรายการประวัตินี้ใช่หรือไม่?")) {
       setHistory(prev => {
         const next = prev.filter(r => r.id !== id);
         localStorage.setItem('staffHistory', JSON.stringify(next));
@@ -1153,8 +1207,8 @@ export default function StaffPortal() {
     }
   };
 
-  const handleDeleteSelected = () => {
-    if (window.confirm(`⚠️ คำเตือน: คุณต้องการลบรายการที่เลือกทั้งหมดจำนวน ${selectedIds.length} รายการออกจากระบบใช่หรือไม่?\n(ข้อมูลประวัติทั้งหมดที่เลือกจะถูกลบอย่างถาวรและไม่สามารถเรียกคืนได้)`)) {
+  const handleDeleteSelected = async () => {
+    if (await window.showConfirm(`⚠️ คำเตือน: คุณต้องการลบรายการที่เลือกทั้งหมดจำนวน ${selectedIds.length} รายการออกจากระบบใช่หรือไม่?\n(ข้อมูลประวัติทั้งหมดที่เลือกจะถูกลบอย่างถาวรและไม่สามารถเรียกคืนได้)`)) {
       setHistory(prev => {
         const next = prev.filter(r => !selectedIds.includes(r.id));
         localStorage.setItem('staffHistory', JSON.stringify(next));
@@ -1201,13 +1255,13 @@ export default function StaffPortal() {
     }
   };
 
-  const handleSavePendingScansEarly = () => {
+  const handleSavePendingScansEarly = async () => {
     if (pendingScannedRecords.length === 0) {
       alert("ยังไม่มีรายการที่สแกนสำเร็จครับ");
       return;
     }
     
-    if (window.confirm(`บันทึกข้อมูลเฉพาะที่สแกนไปแล้วจำนวน ${pendingScannedRecords.length} รายการใช่หรือไม่?`)) {
+    if (await window.showConfirm(`บันทึกข้อมูลเฉพาะที่สแกนไปแล้วจำนวน ${pendingScannedRecords.length} รายการใช่หรือไม่?`)) {
       setHistory(prevHistory => {
         const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
         const uniqueMerged = [...pendingScannedRecords, ...safeHistory];
@@ -1252,6 +1306,21 @@ export default function StaffPortal() {
               useMainAddress: sub.m === 1,
               address: sub.a || ''
             }));
+            const itemForAddress = {
+              addressLine1: raw.a || '',
+              address: raw.a || '',
+              subdistrict: raw.sd || '',
+              district: raw.dt || '',
+              province: raw.pv || '',
+              zipcode: raw.zp || ''
+            };
+            let cleanedDid = '';
+            if (raw.id) {
+              const rawIdStr = String(raw.id).trim();
+              if (rawIdStr.length === 6 && /^\d+$/.test(rawIdStr)) {
+                cleanedDid = rawIdStr;
+              }
+            }
             return {
               id: Date.now() + Math.random(),
               timestamp: new Date().toISOString(),
@@ -1259,13 +1328,13 @@ export default function StaffPortal() {
               quantity: raw.q || 1,
               name: raw.n || '',
               phone: raw.p || '',
-              addressLine1: raw.a || '',
-              address: raw.a || '',
-              subdistrict: raw.sd || '',
-              district: raw.dt || '',
-              province: raw.pv || '',
-              zipcode: raw.zp || '',
-              did: raw.id || '',
+              addressLine1: itemForAddress.addressLine1,
+              address: constructFullAddress(itemForAddress),
+              subdistrict: itemForAddress.subdistrict,
+              district: itemForAddress.district,
+              province: itemForAddress.province,
+              zipcode: itemForAddress.zipcode,
+              did: cleanedDid,
               isAdvancedMode: mappedSubBookings.length > 0,
               subBookings: mappedSubBookings
             };
@@ -1432,7 +1501,7 @@ export default function StaffPortal() {
             if (code) {
               const isDup = history.some(r => (r.orderCode === code || r.oc === code)) || decodedRecords.some(r => r.orderCode === code);
               if (isDup) {
-                const proceed = window.confirm(`⚠️ ตรวจพบรหัสสั่งพิมพ์ซ้ำจากไฟล์ JSON: ${code} (ชื่อ: ${name})\nคุณต้องการนำเข้าข้อมูลรายการนี้อีกครั้งหรือไม่?`);
+                const proceed = await window.showConfirm(`⚠️ ตรวจพบรหัสสั่งพิมพ์ซ้ำจากไฟล์ JSON: ${code} (ชื่อ: ${name})\nคุณต้องการนำเข้าข้อมูลรายการนี้อีกครั้งหรือไม่?`);
                 if (!proceed) {
                   duplicateCount++;
                   continue;
@@ -1449,6 +1518,23 @@ export default function StaffPortal() {
               address: sub.address || sub.a || ''
             }));
 
+            const itemForAddress = {
+              addressLine1: raw.addressLine1 || raw.a || '',
+              address: raw.address || raw.a || '',
+              subdistrict: raw.subdistrict || raw.sd || '',
+              district: raw.district || raw.dt || '',
+              province: raw.province || raw.pv || '',
+              zipcode: raw.zipcode || raw.zp || ''
+            };
+
+            let cleanedDid = raw.did || '';
+            if (!cleanedDid && raw.id) {
+              const rawIdStr = String(raw.id).trim();
+              if (rawIdStr.length === 6 && /^\d+$/.test(rawIdStr)) {
+                cleanedDid = rawIdStr;
+              }
+            }
+
             decodedRecords.push({
               id: raw.id || (Date.now() + Math.random()),
               timestamp: raw.timestamp || new Date().toISOString(),
@@ -1457,13 +1543,13 @@ export default function StaffPortal() {
               quantity: raw.quantity || raw.q || 1,
               name: name,
               phone: raw.phone || raw.p || '',
-              addressLine1: raw.addressLine1 || raw.a || '',
-              address: raw.address || raw.a || '',
-              subdistrict: raw.subdistrict || raw.sd || '',
-              district: raw.district || raw.dt || '',
-              province: raw.province || raw.pv || '',
-              zipcode: raw.zipcode || raw.zp || '',
-              did: raw.did || raw.id || '',
+              addressLine1: itemForAddress.addressLine1,
+              address: constructFullAddress(itemForAddress),
+              subdistrict: itemForAddress.subdistrict,
+              district: itemForAddress.district,
+              province: itemForAddress.province,
+              zipcode: itemForAddress.zipcode,
+              did: cleanedDid,
               isAdvancedMode: mappedSubBookings.length > 0,
               subBookings: mappedSubBookings,
               printed: false
@@ -1501,6 +1587,23 @@ export default function StaffPortal() {
                   address: sub.a || ''
                 }));
 
+                const itemForAddress = {
+                  addressLine1: recordRaw.a || '',
+                  address: recordRaw.a || '',
+                  subdistrict: recordRaw.sd || '',
+                  district: recordRaw.dt || '',
+                  province: recordRaw.pv || '',
+                  zipcode: recordRaw.zp || ''
+                };
+
+                let cleanedDid = '';
+                if (recordRaw.id) {
+                  const rawIdStr = String(recordRaw.id).trim();
+                  if (rawIdStr.length === 6 && /^\d+$/.test(rawIdStr)) {
+                    cleanedDid = rawIdStr;
+                  }
+                }
+
                 decodedRecords.push({
                   id: Date.now() + Math.random(),
                   timestamp: new Date().toISOString(),
@@ -1509,13 +1612,13 @@ export default function StaffPortal() {
                   quantity: recordRaw.q || 1,
                   name: name,
                   phone: recordRaw.p || '',
-                  addressLine1: recordRaw.a || '',
-                  address: recordRaw.a || '',
-                  subdistrict: recordRaw.sd || '',
-                  district: recordRaw.dt || '',
-                  province: recordRaw.pv || '',
-                  zipcode: recordRaw.zp || '',
-                  did: recordRaw.id || '',
+                  addressLine1: itemForAddress.addressLine1,
+                  address: constructFullAddress(itemForAddress),
+                  subdistrict: itemForAddress.subdistrict,
+                  district: itemForAddress.district,
+                  province: itemForAddress.province,
+                  zipcode: itemForAddress.zipcode,
+                  did: cleanedDid,
                   isAdvancedMode: mappedSubBookings.length > 0,
                   subBookings: mappedSubBookings,
                   printed: false
@@ -1555,6 +1658,14 @@ export default function StaffPortal() {
                 address: sub.address || sub.a || ''
               }));
 
+              let cleanedDid = '';
+              if (singleData.did) {
+                const rawDidStr = String(singleData.did).trim();
+                if (rawDidStr.length === 6 && /^\d+$/.test(rawDidStr)) {
+                  cleanedDid = rawDidStr;
+                }
+              }
+
               decodedRecords.push({
                 id: Date.now() + Math.random(),
                 timestamp: new Date().toISOString(),
@@ -1569,7 +1680,7 @@ export default function StaffPortal() {
                 district: singleData.district || '',
                 province: singleData.province || '',
                 zipcode: singleData.zipcode || '',
-                did: singleData.did || '',
+                did: cleanedDid,
                 isAdvancedMode: mappedSubBookings.length > 0,
                 subBookings: mappedSubBookings,
                 printed: false
@@ -2892,7 +3003,7 @@ export default function StaffPortal() {
                       {/* Delete Preset */}
                       <button
                         type="button"
-                        onClick={() => {
+                        onClick={async () => {
                           const selectEl = document.getElementById('preset-selector');
                           const nameToDelete = selectEl?.value;
                           if (!nameToDelete) {
@@ -2903,7 +3014,7 @@ export default function StaffPortal() {
                             alert('ไม่สามารถลบพรีเซ็ตเริ่มต้นของระบบได้ครับ');
                             return;
                           }
-                          if (confirm(`คุณต้องการลบพรีเซ็ต "${nameToDelete}" ใช่หรือไม่?`)) {
+                          if (await window.showConfirm(`คุณต้องการลบพรีเซ็ต "${nameToDelete}" ใช่หรือไม่?`)) {
                             setPresets(prev => prev.filter(p => p.name !== nameToDelete));
                             if (selectEl) selectEl.value = "";
                           }
@@ -2936,7 +3047,7 @@ export default function StaffPortal() {
                       />
                       <button
                         type="button"
-                        onClick={() => {
+                        onClick={async () => {
                           const name = newPresetName.trim();
                           if (!name) {
                             alert('กรุณากรอกชื่อพรีเซ็ตที่ต้องการบันทึกด้วยครับ');
@@ -2945,7 +3056,7 @@ export default function StaffPortal() {
                           
                           const exists = presets.some(p => p.name.toLowerCase() === name.toLowerCase());
                           if (exists) {
-                            if (!confirm(`มีพรีเซ็ตชื่อ "${name}" อยู่แล้ว คุณต้องการเซฟทับใช่หรือไม่?`)) {
+                            if (!await window.showConfirm(`มีพรีเซ็ตชื่อ "${name}" อยู่แล้ว คุณต้องการเซฟทับใช่หรือไม่?`)) {
                               return;
                             }
                           }

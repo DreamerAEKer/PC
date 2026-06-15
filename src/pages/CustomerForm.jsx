@@ -258,7 +258,7 @@ export default function CustomerForm() {
     const hasPhone = data.phone && data.phone.trim().length > 0;
     
     if (!hasPhone) {
-      const confirmProceed = window.confirm("คุณยังไม่ได้กรอก เบอร์โทร ยืนยันข้อมูลโดยไม่ใส่ เบอร์โทร");
+      const confirmProceed = await window.showConfirm("คุณยังไม่ได้กรอก เบอร์โทร ยืนยันข้อมูลโดยไม่ใส่ เบอร์โทร");
       if (!confirmProceed) {
         return; // Stop form submission
       }
