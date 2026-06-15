@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { Html5QrcodeScanner, Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload, RefreshCw, Camera } from 'lucide-react';
+import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload, RefreshCw, Camera, FolderOpen } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -2295,12 +2295,37 @@ export default function StaffPortal() {
                 <Download size={16} /> นำเข้าข้อมูลลูกค้า (.json)
                 <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
               </label>
-              {directoryHandles.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'stretch' }}>
                 <button 
                   type="button"
                   className="btn btn-secondary" 
                   onClick={() => refreshFromDirectoryHandles(directoryHandles)}
-                  disabled={isRefreshingFolder}
+                  disabled={isRefreshingFolder || directoryHandles.length === 0}
+                  style={{ 
+                    padding: '0.5rem 0.75rem', 
+                    fontSize: '0.9rem', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    cursor: directoryHandles.length > 0 ? 'pointer' : 'default', 
+                    margin: 0, 
+                    borderColor: '#8b5cf6', 
+                    color: '#6d28d9', 
+                    backgroundColor: '#f5f3ff', 
+                    fontWeight: 'bold',
+                    borderTopRightRadius: 0,
+                    borderBottomRightRadius: 0,
+                    borderRight: 'none',
+                    opacity: directoryHandles.length === 0 ? 0.4 : (isRefreshingFolder ? 0.7 : 1)
+                  }}
+                  title={directoryHandles.length > 0 ? `ดึงข้อมูลล่าสุดจาก ${directoryHandles.length} โฟลเดอร์ที่เชื่อมต่อ` : "กรุณาเชื่อมต่อโฟลเดอร์ก่อน"}
+                >
+                  <RefreshCw size={16} style={{ animation: isRefreshingFolder ? 'spin 1s linear infinite' : 'none' }} />
+                </button>
+                <button 
+                  type="button"
+                  className="btn btn-secondary" 
+                  onClick={handleFolderPickerClick}
                   style={{ 
                     padding: '0.5rem 1rem', 
                     fontSize: '0.9rem', 
@@ -2309,40 +2334,19 @@ export default function StaffPortal() {
                     gap: '0.5rem', 
                     cursor: 'pointer', 
                     margin: 0, 
-                    borderColor: '#10b981', 
-                    color: '#047857', 
-                    backgroundColor: '#ecfdf5', 
+                    borderColor: '#8b5cf6', 
+                    color: '#6d28d9', 
+                    backgroundColor: '#f5f3ff', 
                     fontWeight: 'bold',
-                    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.15)',
-                    opacity: isRefreshingFolder ? 0.7 : 1
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                    boxShadow: '0 2px 4px rgba(139, 92, 246, 0.15)'
                   }}
-                  title={`ดึงข้อมูลล่าสุดจาก ${directoryHandles.length} โฟลเดอร์ที่เชื่อมต่อ`}
+                  title="เลือกหรือเพิ่มโฟลเดอร์สำหรับเชื่อมต่อดึงข้อมูลส่งพิมพ์"
                 >
-                  <RefreshCw size={16} style={{ animation: isRefreshingFolder ? 'spin 1s linear infinite' : 'none' }} /> {isRefreshingFolder ? "กำลังอัพเดทข้อมูล..." : `อัพเดทข้อมูลสั่งพิมพ์ (${directoryHandles.length})`}
+                  <FolderOpen size={16} /> โฟล์เดอร์เก็บข้อมูลสั่งพิมพ์ {directoryHandles.length > 0 ? `(${directoryHandles.length})` : ''}
                 </button>
-              )}
-              <button 
-                type="button"
-                className="btn btn-secondary" 
-                onClick={handleFolderPickerClick}
-                style={{ 
-                  padding: '0.5rem 1rem', 
-                  fontSize: '0.9rem', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '0.5rem', 
-                  cursor: 'pointer', 
-                  margin: 0, 
-                  borderColor: '#8b5cf6', 
-                  color: '#6d28d9', 
-                  backgroundColor: '#f5f3ff', 
-                  fontWeight: 'bold',
-                  boxShadow: '0 2px 4px rgba(139, 92, 246, 0.15)'
-                }}
-                title="เลือกหรือเพิ่มโฟลเดอร์สำหรับเชื่อมต่อดึงข้อมูลส่งพิมพ์"
-              >
-                <Download size={16} /> {directoryHandles.length > 0 ? "เชื่อมต่อโฟลเดอร์เพิ่ม..." : "นำเข้าข้อมูลจากโฟลเดอร์"}
-              </button>
+              </div>
               <input 
                 id="legacy-folder-input"
                 type="file" 
@@ -3371,27 +3375,51 @@ export default function StaffPortal() {
                   <Download size={14} /> นำเข้าข้อมูล (.json)
                   <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
                 </label>
-                 {directoryHandles.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'stretch', flex: '1 1 200px' }}>
                   <button 
                     type="button"
                     className="btn btn-secondary" 
                     onClick={() => refreshFromDirectoryHandles(directoryHandles)}
-                    disabled={isRefreshingFolder}
-                    style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0, borderColor: '#10b981', color: '#047857', backgroundColor: '#ecfdf5', fontWeight: 'bold', opacity: isRefreshingFolder ? 0.7 : 1 }}
-                    title={`ดึงข้อมูลล่าสุดจาก ${directoryHandles.length} โฟลเดอร์`}
+                    disabled={isRefreshingFolder || directoryHandles.length === 0}
+                    style={{ 
+                      padding: '0.5rem', 
+                      fontSize: '0.825rem', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      cursor: directoryHandles.length > 0 ? 'pointer' : 'default', 
+                      margin: 0, 
+                      borderTopRightRadius: 0,
+                      borderBottomRightRadius: 0,
+                      borderRight: 'none',
+                      opacity: directoryHandles.length === 0 ? 0.4 : (isRefreshingFolder ? 0.7 : 1)
+                    }}
+                    title={directoryHandles.length > 0 ? `ดึงข้อมูลล่าสุดจาก ${directoryHandles.length} โฟลเดอร์` : "กรุณาเชื่อมต่อโฟลเดอร์ก่อน"}
                   >
-                    <RefreshCw size={14} style={{ animation: isRefreshingFolder ? 'spin 1s linear infinite' : 'none' }} /> {isRefreshingFolder ? "กำลังอัพเดท..." : `อัพเดทข้อมูลสั่งพิมพ์ (${directoryHandles.length})`}
+                    <RefreshCw size={14} style={{ animation: isRefreshingFolder ? 'spin 1s linear infinite' : 'none' }} />
                   </button>
-                )}
-                <button 
-                  type="button"
-                  className="btn btn-secondary" 
-                  onClick={handleFolderPickerClick}
-                  style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0 }}
-                  title="เลือกหรือเพิ่มโฟลเดอร์สำหรับดึงข้อมูลสั่งพิมพ์"
-                >
-                  <Download size={14} /> {directoryHandles.length > 0 ? "เชื่อมต่อโฟลเดอร์เพิ่ม" : "นำเข้าจากโฟลเดอร์"}
-                </button>
+                  <button 
+                    type="button"
+                    className="btn btn-secondary" 
+                    onClick={handleFolderPickerClick}
+                    style={{ 
+                      flex: 1,
+                      padding: '0.5rem', 
+                      fontSize: '0.825rem', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      gap: '0.35rem', 
+                      cursor: 'pointer', 
+                      margin: 0, 
+                      borderTopLeftRadius: 0,
+                      borderBottomLeftRadius: 0
+                    }}
+                    title="เลือกหรือเพิ่มโฟลเดอร์สำหรับดึงข้อมูลสั่งพิมพ์"
+                  >
+                    <FolderOpen size={14} /> โฟล์เดอร์เก็บข้อมูลสั่งพิมพ์ {directoryHandles.length > 0 ? `(${directoryHandles.length})` : ''}
+                  </button>
+                </div>
               </div>
 
               {/* Segmented Filter Tabs for History */}
