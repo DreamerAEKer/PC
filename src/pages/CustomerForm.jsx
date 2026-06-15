@@ -1781,6 +1781,7 @@ export default function CustomerForm() {
                     setBulkIndex(prevIdx);
                     const prevRec = bulkRecords[prevIdx];
                     const compData = {
+                      oc: prevRec.orderCode || prevRec.oc || '',
                       d: prevRec.orderDate,
                       q: prevRec.quantity,
                       n: prevRec.name,
@@ -1824,6 +1825,7 @@ export default function CustomerForm() {
                     setBulkIndex(nextIdx);
                     const nextRec = bulkRecords[nextIdx];
                     const compData = {
+                      oc: nextRec.orderCode || nextRec.oc || '',
                       d: nextRec.orderDate,
                       q: nextRec.quantity,
                       n: nextRec.name,
