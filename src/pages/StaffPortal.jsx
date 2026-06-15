@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
-import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload } from 'lucide-react';
+import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload, RefreshCw } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -40,6 +40,8 @@ export default function StaffPortal() {
   const [history, setHistory] = useState([]);
   const [historyFilter, setHistoryFilter] = useState('all'); // 'all', 'pending', 'printed'
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
+  const [directoryHandle, setDirectoryHandle] = useState(null);
+  const [editingRecordId, setEditingRecordId] = useState(null);
   const [scanMode, setScanMode] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768 ? 'camera' : 'manual');
   const [cameraActive, setCameraActive] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
   const [scanSubMode, setScanSubMode] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768 ? 'camera' : 'file'); // 'file', 'usb', 'camera'
@@ -311,20 +313,32 @@ export default function StaffPortal() {
     delete processedData.selectQuantity;
     delete processedData.customQuantity;
     
-    const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString() };
-    
     setHistory(prevHistory => {
       const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
-      const updatedHistory = [newRecord, ...safeHistory].slice(0, 50);
-      localStorage.setItem('staffHistory', JSON.stringify(updatedHistory));
-      return updatedHistory;
+      let updatedHistory;
+      if (editingRecordId) {
+        updatedHistory = safeHistory.map(r => r.id === editingRecordId ? { ...r, ...processedData, printed: false, timestamp: new Date().toISOString() } : r);
+      } else {
+        const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString(), printed: false };
+        updatedHistory = [newRecord, ...safeHistory];
+      }
+      const sliced = updatedHistory.slice(0, 100);
+      localStorage.setItem('staffHistory', JSON.stringify(sliced));
+      return sliced;
     });
     
     reset(); // clear form
     setQuantityFields(100);
     setHasActiveData(false);
+    setEditingRecordId(null);
     setScanMode('manual');
-    alert("บันทึกข้อมูลลูกค้าเข้าระบบสำเร็จ (ไม่ได้สั่งพิมพ์)");
+    setHistoryFilter('pending');
+    
+    alert(editingRecordId ? "อัพเดทข้อมูลลูกค้าและส่งไปที่แท็บรอพิมพ์สำเร็จ" : "บันทึกข้อมูลลูกค้าเข้าระบบสำเร็จ (ไม่ได้สั่งพิมพ์)");
+
+    setTimeout(() => {
+      document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 300);
   };
 
   const onSubmit = (data) => {
@@ -334,7 +348,6 @@ export default function StaffPortal() {
     const provTitle = isBKK ? data.province : `จ.${data.province}`;
     
     const fullAddress = `${data.addressLine1} ${subTitle} ${distTitle} ${provTitle}`;
-    
     const resolvedQty = data.selectQuantity === "custom" ? (parseInt(data.customQuantity, 10) || 0) : (parseInt(data.selectQuantity, 10) || 0);
 
     const processedData = {
@@ -343,15 +356,17 @@ export default function StaffPortal() {
       address: fullAddress
     };
 
-    // Remove select helper fields
     delete processedData.selectQuantity;
     delete processedData.customQuantity;
     
-    // Create the record manually so we have the ID for printing
-    const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString(), printed: true };
+    let newRecord;
+    if (editingRecordId) {
+      const existing = history.find(r => r.id === editingRecordId) || {};
+      newRecord = { ...existing, ...processedData, printed: true, timestamp: new Date().toISOString() };
+    } else {
+      newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString(), printed: true };
+    }
     
-    // Update ONLY the print data synchronously.
-    // This perfectly matches the DOM mutation of the "พิมพ์ซ้ำ" button, which we know works flawlessly.
     const handleAfterPrint = () => {
       setPrintDataList([]);
       window.removeEventListener('afterprint', handleAfterPrint);
@@ -362,22 +377,26 @@ export default function StaffPortal() {
       setPrintDataList([newRecord]);
     });
     
-    // Print synchronously
     window.print();
     
-    // Defer the heavy history update, form reset, and hiding the print area
-    // to avoid crashing Chrome's print preview
     setTimeout(() => {
       setHistory(prevHistory => {
         const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
-        const updatedHistory = [newRecord, ...safeHistory].slice(0, 50);
-        localStorage.setItem('staffHistory', JSON.stringify(updatedHistory));
-        return updatedHistory;
+        let updatedHistory;
+        if (editingRecordId) {
+          updatedHistory = safeHistory.map(r => r.id === editingRecordId ? newRecord : r);
+        } else {
+          updatedHistory = [newRecord, ...safeHistory];
+        }
+        const sliced = updatedHistory.slice(0, 100);
+        localStorage.setItem('staffHistory', JSON.stringify(sliced));
+        return sliced;
       });
       
       reset(); // clear form
       setQuantityFields(100);
       setHasActiveData(false);
+      setEditingRecordId(null);
       setScanMode('manual');
     }, 500);
   };
@@ -449,12 +468,15 @@ export default function StaffPortal() {
       try {
         const parsed = JSON.parse(event.target.result);
         if (Array.isArray(parsed)) {
+          // Force imported records to be pending (printed: false)
+          const parsedPending = parsed.map(item => ({
+            ...item,
+            printed: false
+          }));
+
           setHistory(prevHistory => {
             const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
-            const merged = [...parsed, ...safePrev].map(item => ({
-              ...item,
-              printed: item.printed !== undefined ? item.printed : false
-            }));
+            const merged = [...parsedPending, ...safePrev];
             const unique = [];
             const seen = new Set();
             for (const item of merged) {
@@ -471,6 +493,7 @@ export default function StaffPortal() {
           // Automatically select the imported items
           const importedIds = parsed.map(item => item.id).filter(Boolean);
           setSelectedIds(importedIds);
+          setHistoryFilter('pending');
 
           alert(`นำเข้าข้อมูลสำเร็จ! โหลดประวัติเพิ่มได้ ${parsed.length} รายการ (ระบบได้เลือกรายการเหล่านี้เพื่อเตรียมสั่งพิมพ์แบบกลุ่มให้ท่านแล้ว)`);
 
@@ -531,6 +554,11 @@ export default function StaffPortal() {
     setValue("zipcode", data.zipcode || "-", { shouldValidate: true });
     setValue("did", data.did || "", { shouldValidate: true });
     setHasActiveData(true);
+    if (data.id) {
+      setEditingRecordId(data.id);
+    } else {
+      setEditingRecordId(null);
+    }
   };
 
   useEffect(() => {
@@ -597,7 +625,8 @@ export default function StaffPortal() {
                       zipcode: raw.zp || '',
                       did: raw.id || '',
                       isAdvancedMode: mappedSubBookings.length > 0,
-                      subBookings: mappedSubBookings
+                      subBookings: mappedSubBookings,
+                      printed: false
                     };
                   });
                   
@@ -610,7 +639,12 @@ export default function StaffPortal() {
                       const key = `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
                       if (!seen.has(key)) {
                         seen.add(key);
-                        unique.push(item);
+                        const isNew = newRecords.some(n => n.name === item.name && n.phone === item.phone);
+                        if (isNew) {
+                          unique.push({ ...item, printed: false });
+                        } else {
+                          unique.push(item);
+                        }
                       }
                     }
                     const sorted = unique.sort((a, b) => b.id - a.id).slice(0, 100);
@@ -625,6 +659,10 @@ export default function StaffPortal() {
                   } else {
                     setScanMode('manual');
                   }
+                  setHistoryFilter('pending');
+                  setTimeout(() => {
+                    document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 300);
                   alert(`นำเข้าข้อมูลกลุ่มสำเร็จ! นำเข้ารายชื่อสั่งจอง ${newRecords.length} รายการแล้ว`);
                 } else {
                   // Single import
@@ -646,7 +684,8 @@ export default function StaffPortal() {
                       const newRecord = { 
                         ...data, 
                         id: Date.now() + Math.random(), 
-                        timestamp: new Date().toISOString() 
+                        timestamp: new Date().toISOString(),
+                        printed: false 
                       };
                       setPendingScannedRecords([newRecord]);
                     } else {
@@ -660,7 +699,8 @@ export default function StaffPortal() {
                       const newRecord = { 
                         ...data, 
                         id: Date.now() + Math.random(), 
-                        timestamp: new Date().toISOString() 
+                        timestamp: new Date().toISOString(),
+                        printed: false 
                       };
                       setPendingScannedRecords(prev => [...prev, newRecord]);
                     }
@@ -674,8 +714,9 @@ export default function StaffPortal() {
                         const nextScannedList = [...pendingScannedRecords, { 
                           ...data, 
                           id: Date.now() + Math.random(), 
-                          timestamp: new Date().toISOString() 
-                        }];
+                          timestamp: new Date().toISOString(),
+                          printed: false 
+                        }].map(item => ({ ...item, printed: false }));
                         const uniqueMerged = [...nextScannedList, ...safeHistory];
                         const unique = [];
                         const seen = new Set();
@@ -691,6 +732,11 @@ export default function StaffPortal() {
                         return sorted;
                       });
                       
+                      setHistoryFilter('pending');
+                      setTimeout(() => {
+                        document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
+                      }, 300);
+
                       if (qrCodeInstance && qrCodeInstance.isScanning) {
                         qrCodeInstance.stop().catch(() => {}).then(() => {
                           setScanMode('manual');
@@ -712,7 +758,8 @@ export default function StaffPortal() {
                     const newRecord = { 
                       ...data, 
                       id: Date.now() + Math.random(), 
-                      timestamp: new Date().toISOString() 
+                      timestamp: new Date().toISOString(),
+                      printed: false 
                     };
                     setHistory(prevHistory => {
                       const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
@@ -723,6 +770,11 @@ export default function StaffPortal() {
                       localStorage.setItem('staffHistory', JSON.stringify(updatedHistory));
                       return updatedHistory;
                     });
+                    
+                    setHistoryFilter('pending');
+                    setTimeout(() => {
+                      document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 300);
 
                     setCurrentScanCount(prev => {
                       const next = prev + 1;
@@ -1196,6 +1248,60 @@ export default function StaffPortal() {
     alert("ไม่พบ QR Code ในรูปภาพนี้ หรือข้อมูลไม่ถูกต้อง กรุณาลองสแกนผ่านกล้องแทน");
   };
 
+  const handleFolderPickerClick = async () => {
+    if (window.showDirectoryPicker) {
+      try {
+        const handle = await window.showDirectoryPicker();
+        setDirectoryHandle(handle);
+        await refreshFromDirectoryHandle(handle);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error("showDirectoryPicker error:", err);
+          document.getElementById('legacy-folder-input')?.click();
+        }
+      }
+    } else {
+      document.getElementById('legacy-folder-input')?.click();
+    }
+  };
+
+  const refreshFromDirectoryHandle = async (handle) => {
+    if (!handle) return;
+    try {
+      const opts = { mode: 'read' };
+      if ((await handle.queryPermission(opts)) !== 'granted') {
+        if ((await handle.requestPermission(opts)) !== 'granted') {
+          alert("กรุณาอนุญาตให้เข้าถึงโฟลเดอร์เพื่อดึงข้อมูลครับ");
+          return;
+        }
+      }
+      
+      const files = [];
+      const readDirectory = async (dirHandle) => {
+        for await (const entry of dirHandle.values()) {
+          if (entry.kind === 'file') {
+            const file = await entry.getFile();
+            files.push(file);
+          } else if (entry.kind === 'directory') {
+            await readDirectory(entry);
+          }
+        }
+      };
+      
+      await readDirectory(handle);
+      
+      const mockEvent = {
+        target: {
+          files: files
+        }
+      };
+      await handleFolderImport(mockEvent);
+    } catch (err) {
+      console.error("Refresh folder error:", err);
+      alert("เกิดข้อผิดพลาดในการอัพเดทข้อมูลในโฟลเดอร์: " + err.message);
+    }
+  };
+
   const handleFolderImport = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -1268,7 +1374,7 @@ export default function StaffPortal() {
               did: raw.did || raw.id || '',
               isAdvancedMode: mappedSubBookings.length > 0,
               subBookings: mappedSubBookings,
-              printed: raw.printed !== undefined ? raw.printed : false
+              printed: false
             });
             successCount++;
           }
@@ -1303,8 +1409,6 @@ export default function StaffPortal() {
                   address: sub.a || ''
                 }));
 
-                // คงสถานะ printed จากข้อมูลในประวัติเดิมถ้ามีอยู่แล้ว
-                const existingRecord = history.find(r => r.orderCode === code || r.oc === code);
                 decodedRecords.push({
                   id: Date.now() + Math.random(),
                   timestamp: new Date().toISOString(),
@@ -1322,7 +1426,7 @@ export default function StaffPortal() {
                   did: recordRaw.id || '',
                   isAdvancedMode: mappedSubBookings.length > 0,
                   subBookings: mappedSubBookings,
-                  printed: existingRecord ? existingRecord.printed : false
+                  printed: false
                 });
                 successCount++;
               }
@@ -1359,8 +1463,6 @@ export default function StaffPortal() {
                 address: sub.address || sub.a || ''
               }));
 
-              // คงสถานะ printed จากข้อมูลในประวัติเดิมถ้ามีอยู่แล้ว
-              const existingRecordSingle = history.find(r => r.orderCode === code || r.oc === code);
               decodedRecords.push({
                 id: Date.now() + Math.random(),
                 timestamp: new Date().toISOString(),
@@ -1378,7 +1480,7 @@ export default function StaffPortal() {
                 did: singleData.did || '',
                 isAdvancedMode: mappedSubBookings.length > 0,
                 subBookings: mappedSubBookings,
-                printed: existingRecordSingle ? existingRecordSingle.printed : false
+                printed: false
               });
               successCount++;
             }
@@ -1411,10 +1513,10 @@ export default function StaffPortal() {
           const key = item.orderCode ? item.orderCode : `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
           if (!seen.has(key)) {
             seen.add(key);
-            // ถ้าข้อมูลเก่ามีอยู่แล้วและ printed เป็น true → คง printed: true ไว้
-            const prevItem = prevMap.get(key);
-            if (prevItem && prevItem.printed && !item.printed) {
-              unique.push({ ...item, printed: true });
+            // บังคับให้เป็น false สำหรับรายการนำเข้าใหม่
+            const isImported = decodedRecords.some(d => (d.orderCode && d.orderCode === item.orderCode) || (!d.orderCode && d.name === item.name && d.phone === item.phone));
+            if (isImported) {
+              unique.push({ ...item, printed: false });
             } else {
               unique.push(item);
             }
@@ -1427,6 +1529,7 @@ export default function StaffPortal() {
 
       const importedIds = decodedRecords.map(item => item.id);
       setSelectedIds(importedIds);
+      setHistoryFilter('pending');
 
       alert(`นำเข้าจากโฟลเดอร์สำเร็จ! ตรวจพบและนำเข้าไฟล์สำเร็จ ${successCount} รายการ ${duplicateCount > 0 ? `(ข้ามรหัสซ้ำ ${duplicateCount} รายการ)` : ''} ${failCount > 0 ? `| ล้มเหลว/ไม่พบ QR ${failCount} รายการ` : ''}`);
 
@@ -1437,7 +1540,9 @@ export default function StaffPortal() {
       alert("ไม่พบไฟล์ JSON หรือรูปภาพ QR Code ที่ถูกต้องในโฟลเดอร์ที่เลือกเลยครับ");
     }
 
-    e.target.value = '';
+    if (e && e.target && 'value' in e.target) {
+      e.target.value = '';
+    }
   };
 
   const handleMultipleImagesImport = async (e) => {
@@ -1485,7 +1590,8 @@ export default function StaffPortal() {
                   zipcode: raw.zp || '',
                   did: raw.id || '',
                   isAdvancedMode: mappedSubBookings.length > 0,
-                  subBookings: mappedSubBookings
+                  subBookings: mappedSubBookings,
+                  printed: false
                 });
               });
               successCount++;
@@ -1528,7 +1634,8 @@ export default function StaffPortal() {
                 zipcode: singleData.zipcode || '',
                 did: singleData.did || '',
                 isAdvancedMode: mappedSubBookings.length > 0,
-                subBookings: mappedSubBookings
+                subBookings: mappedSubBookings,
+                printed: false
               });
               successCount++;
             }
@@ -1554,7 +1661,12 @@ export default function StaffPortal() {
           const key = `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
           if (!seen.has(key)) {
             seen.add(key);
-            unique.push(item);
+            const isImported = decodedRecords.some(d => d.name === item.name && d.phone === item.phone);
+            if (isImported) {
+              unique.push({ ...item, printed: false });
+            } else {
+              unique.push(item);
+            }
           }
         }
         const sorted = unique.sort((a, b) => b.id - a.id).slice(0, 100);
@@ -1564,6 +1676,7 @@ export default function StaffPortal() {
 
       const importedIds = decodedRecords.map(item => item.id);
       setSelectedIds(importedIds);
+      setHistoryFilter('pending');
 
       alert(`นำเข้าสำเร็จ ${successCount} ไฟล์! (แปลงเป็นรายการสั่งจองได้ ${decodedRecords.length} รายการและเลือกไว้ให้แล้ว) ${failCount > 0 ? `| ล้มเหลว ${failCount} ไฟล์` : ''}`);
 
@@ -1949,8 +2062,34 @@ export default function StaffPortal() {
               <Upload size={16} /> นำเข้าข้อมูลลูกค้า (.json)
               <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
             </label>
-            <label 
+            {directoryHandle && (
+              <button 
+                type="button"
+                className="btn btn-secondary" 
+                onClick={() => refreshFromDirectoryHandle(directoryHandle)}
+                style={{ 
+                  padding: '0.5rem 1rem', 
+                  fontSize: '0.9rem', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem', 
+                  cursor: 'pointer', 
+                  margin: 0, 
+                  borderColor: '#10b981', 
+                  color: '#047857', 
+                  backgroundColor: '#ecfdf5', 
+                  fontWeight: 'bold',
+                  boxShadow: '0 2px 4px rgba(16, 185, 129, 0.15)'
+                }}
+                title={`ดึงข้อมูลล่าสุดจากโฟลเดอร์ "${directoryHandle.name}"`}
+              >
+                <RefreshCw size={16} /> อัพเดทจากโฟลเดอร์เดิม
+              </button>
+            )}
+            <button 
+              type="button"
               className="btn btn-secondary" 
+              onClick={handleFolderPickerClick}
               style={{ 
                 padding: '0.5rem 1rem', 
                 fontSize: '0.9rem', 
@@ -1968,15 +2107,16 @@ export default function StaffPortal() {
               title="ดึงข้อมูลจากไฟล์ทั้งหมดในโฟลเดอร์ (ตรวจจับรหัสสั่งพิมพ์)"
             >
               <Upload size={16} /> นำเข้าข้อมูลจากโฟลเดอร์
-              <input 
-                type="file" 
-                webkitdirectory="" 
-                directory="" 
-                multiple 
-                onChange={handleFolderImport} 
-                style={{ display: 'none' }} 
-              />
-            </label>
+            </button>
+            <input 
+              id="legacy-folder-input"
+              type="file" 
+              webkitdirectory="" 
+              directory="" 
+              multiple 
+              onChange={handleFolderImport} 
+              style={{ display: 'none' }} 
+            />
             <Link to="/worldcup" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff' }}>
               <span role="img" aria-label="soccer">⚽</span> ทายผลบอลโลก 2026
             </Link>
@@ -2958,21 +3098,26 @@ export default function StaffPortal() {
                   <Upload size={14} /> นำเข้าข้อมูล (.json)
                   <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
                 </label>
-                <label 
+                {directoryHandle && (
+                  <button 
+                    type="button"
+                    className="btn btn-secondary" 
+                    onClick={() => refreshFromDirectoryHandle(directoryHandle)}
+                    style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0, borderColor: '#10b981', color: '#047857', backgroundColor: '#ecfdf5', fontWeight: 'bold' }}
+                    title={`ดึงข้อมูลล่าสุดจากโฟลเดอร์ "${directoryHandle.name}"`}
+                  >
+                    <RefreshCw size={14} /> อัพเดทจากโฟลเดอร์เดิม
+                  </button>
+                )}
+                <button 
+                  type="button"
                   className="btn btn-secondary" 
+                  onClick={handleFolderPickerClick}
                   style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0 }}
                   title="ดึงข้อมูลจากไฟล์ทั้งหมดในโฟลเดอร์"
                 >
                   <Upload size={14} /> นำเข้าจากโฟลเดอร์
-                  <input 
-                    type="file" 
-                    webkitdirectory="" 
-                    directory="" 
-                    multiple 
-                    onChange={handleFolderImport} 
-                    style={{ display: 'none' }} 
-                  />
-                </label>
+                </button>
               </div>
 
               {/* Segmented Filter Tabs for History */}
