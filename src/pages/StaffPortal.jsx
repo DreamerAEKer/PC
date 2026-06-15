@@ -49,6 +49,7 @@ export default function StaffPortal() {
   const isDidActive = (didValue || "").trim().length === 6;
   const [showDidInput, setShowDidInput] = useState(false);
   const [isRefreshingFolder, setIsRefreshingFolder] = useState(false);
+  const [restartKey, setRestartKey] = useState(0);
 
   useEffect(() => {
     if (didValue && didValue.trim().length > 0) {
@@ -574,6 +575,13 @@ export default function StaffPortal() {
     let lastScanTime = 0;
     let lastScanText = '';
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && scanMode === 'camera' && cameraActive) {
+        setRestartKey(prev => prev + 1);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     if (scanMode === 'camera' && cameraActive) {
       const timer = setTimeout(() => {
         if (!isMounted) return;
@@ -585,14 +593,14 @@ export default function StaffPortal() {
           qrCodeInstance.start(
             { facingMode: "environment" },
             {
-              fps: 25,
+              fps: 30,
               qrbox: (viewfinderWidth, viewfinderHeight) => {
                 const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                const qrboxSize = Math.floor(minEdge * 0.75);
+                const qrboxSize = Math.floor(minEdge * 0.85);
                 return { width: qrboxSize, height: qrboxSize };
               },
               experimentalFeatures: {
-                useBarCodeDetectorIfSupported: false
+                useBarCodeDetectorIfSupported: true
               }
             },
 
@@ -607,7 +615,6 @@ export default function StaffPortal() {
               try {
                 const parsed = JSON.parse(decodedText);
                 if (parsed && parsed.b === 1 && Array.isArray(parsed.r)) {
-                  // Bulk import scanned QR Code
                   const newRecords = parsed.r.map(raw => {
                     const mappedSubBookings = (raw.s || []).map((sub, sIdx) => ({
                       id: Date.now() + Math.random() + sIdx,
@@ -633,7 +640,8 @@ export default function StaffPortal() {
                       did: raw.id || '',
                       isAdvancedMode: mappedSubBookings.length > 0,
                       subBookings: mappedSubBookings,
-                      printed: false
+                      printed: false,
+                      orderCode: raw.oc || ''
                     };
                   });
                   
@@ -649,10 +657,10 @@ export default function StaffPortal() {
                     const unique = [];
                     const seen = new Set();
                     for (const item of merged) {
-                      const key = `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
+                      const key = item.orderCode ? item.orderCode : `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
                       if (!seen.has(key)) {
                         seen.add(key);
-                        const prevKey = item.orderCode || `${item.name}-${item.phone}`;
+                        const prevKey = item.orderCode ? item.orderCode : `${item.name}-${item.phone}`;
                         const prevItem = prevMap.get(prevKey);
                         if (prevItem) {
                           unique.push({ ...item, printed: prevItem.printed });
@@ -666,79 +674,86 @@ export default function StaffPortal() {
                     return sorted;
                   });
                   
+                  const importedIds = newRecords.map(item => item.id);
+                  setSelectedIds(importedIds);
+                  setHistoryFilter('pending');
+
+                  alert(`🎉 สแกนนำเข้ากลุ่มสำเร็จ! ได้รับข้อมูล ${newRecords.length} รายการเรียบร้อย`);
+                  
                   if (qrCodeInstance && qrCodeInstance.isScanning) {
                     qrCodeInstance.stop().catch(() => {}).then(() => {
                       setScanMode('manual');
+                      setTargetScanCount(0);
+                      setScannedIndexes([]);
+                      setPendingScannedRecords([]);
                     });
                   } else {
                     setScanMode('manual');
+                    setTargetScanCount(0);
+                    setScannedIndexes([]);
+                    setPendingScannedRecords([]);
                   }
-                  setHistoryFilter('pending');
-                  setTimeout(() => {
-                    document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
-                  }, 300);
-                  alert(`นำเข้าข้อมูลกลุ่มสำเร็จ! นำเข้ารายชื่อสั่งจอง ${newRecords.length} รายการแล้ว`);
                 } else {
-                  // Single import
                   const data = parseQrPayload(decodedText);
                   
-                  // Auto-detect bulk sequence QR codes
-                  const isBulkSequence = data.tot !== undefined && data.tot > 1;
-                  
-                  if (isBulkSequence) {
+                  if (data.tot && data.tot > 1) {
                     const idx = data.idx || 1;
                     const tot = data.tot;
                     
-                    let currentScanned = [...scannedIndexes];
+                    const isAlreadyScanned = scannedIndexes.includes(idx);
+                    if (isAlreadyScanned) {
+                      alert(`⚠️ คุณสแกน QR ลำดับที่ ${idx} ไปแล้วครับ กรุณาสแกนรายการที่ยังไม่ได้สแกน`);
+                      return;
+                    }
+
+                    const newRecord = { 
+                      ...data, 
+                      id: Date.now() + Math.random(), 
+                      timestamp: new Date().toISOString(),
+                      printed: false 
+                    };
+
+                    let nextScannedIndexes = [...scannedIndexes];
+                    let nextPendingRecords = [...pendingScannedRecords];
+
                     if (targetScanCount !== tot) {
-                      currentScanned = [idx];
+                      nextScannedIndexes = [idx];
                       setTargetScanCount(tot);
                       setScannedIndexes([idx]);
-                      
-                      const newRecord = { 
-                        ...data, 
-                        id: Date.now() + Math.random(), 
-                        timestamp: new Date().toISOString(),
-                        printed: false 
-                      };
+                      nextPendingRecords = [newRecord];
                       setPendingScannedRecords([newRecord]);
                     } else {
-                      if (currentScanned.includes(idx)) {
-                        alert(`⚠️ QR ลำดับที่ ${idx} / ${tot} นี้ถูกสแกนไปแล้วครับ`);
-                        return;
-                      }
-                      currentScanned.push(idx);
-                      setScannedIndexes(currentScanned);
-                      
-                      const newRecord = { 
-                        ...data, 
-                        id: Date.now() + Math.random(), 
-                        timestamp: new Date().toISOString(),
-                        printed: false 
-                      };
-                      setPendingScannedRecords(prev => [...prev, newRecord]);
+                      nextScannedIndexes.push(idx);
+                      setScannedIndexes(nextScannedIndexes);
+                      nextPendingRecords.push(newRecord);
+                      setPendingScannedRecords(nextPendingRecords);
                     }
-                    
-                    const scannedCount = currentScanned.length;
+
+                    const scannedCount = nextScannedIndexes.length;
                     if (scannedCount >= tot) {
-                      alert(`🎉 สแกนนำเข้าครบถ้วนทั้งหมดแล้ว! (${scannedCount} / ${tot} รายการ)`);
+                      alert(`🎉 สแกนนำเข้ากลุ่มครบถ้วนแล้ว! (${scannedCount} / ${tot} รายการ)`);
                       
                       setHistory(prevHistory => {
                         const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
-                        const nextScannedList = [...pendingScannedRecords, { 
-                          ...data, 
-                          id: Date.now() + Math.random(), 
-                          timestamp: new Date().toISOString(),
-                          printed: false 
-                        }].map(item => ({ ...item, printed: false }));
-                        const uniqueMerged = [...nextScannedList, ...safeHistory];
+                        const prevMap = new Map();
+                        for (const r of safeHistory) {
+                          const k = r.orderCode || `${r.name}-${r.phone}`;
+                          prevMap.set(k, r);
+                        }
+                        const uniqueMerged = [...nextPendingRecords, ...safeHistory];
                         const unique = [];
                         const seen = new Set();
                         for (const item of uniqueMerged) {
-                          const key = `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
+                          const key = item.orderCode ? item.orderCode : `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
                           if (!seen.has(key)) {
                             seen.add(key);
-                            unique.push(item);
+                            const prevKey = item.orderCode ? item.orderCode : `${item.name}-${item.phone}`;
+                            const prevItem = prevMap.get(prevKey);
+                            if (prevItem) {
+                              unique.push({ ...item, printed: prevItem.printed });
+                            } else {
+                              unique.push({ ...item, printed: false });
+                            }
                           }
                         }
                         const sorted = unique.sort((a, b) => b.id - a.id).slice(0, 100);
@@ -768,7 +783,6 @@ export default function StaffPortal() {
                       alert(`✅ สแกน QR ลำดับที่ ${idx} สำเร็จ!\n(เหลืออีก ${tot - scannedCount} รายการที่ต้องสแกน)`);
                     }
                   } else if (targetScanCount > 0) {
-                    // Automatically save to history when scanning sequentially
                     const newRecord = { 
                       ...data, 
                       id: Date.now() + Math.random(), 
@@ -777,7 +791,6 @@ export default function StaffPortal() {
                     };
                     setHistory(prevHistory => {
                       const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
-                      // Prevent duplicates in history for this fast sequence
                       const exists = safeHistory.some(r => r.name === newRecord.name && r.phone === newRecord.phone && r.quantity === newRecord.quantity);
                       if (exists) return safeHistory;
                       const updatedHistory = [newRecord, ...safeHistory].slice(0, 100);
@@ -806,7 +819,6 @@ export default function StaffPortal() {
                           setCurrentScanCount(0);
                         }
                       } else {
-                        // Success toast-like alert, keeping scanner active
                         alert(`✅ นำเข้ารายการที่ ${next} / ${targetScanCount} เรียบร้อย! กรุณาสไลด์หรือสแกนรายการถัดไปได้เลย`);
                       }
                       return next;
@@ -841,6 +853,7 @@ export default function StaffPortal() {
       return () => {
         clearTimeout(timer);
         isMounted = false;
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
         if (qrCodeInstance) {
           if (qrCodeInstance.isScanning) {
             qrCodeInstance.stop().catch((e) => console.error("Stop failed", e));
@@ -848,7 +861,10 @@ export default function StaffPortal() {
         }
       };
     }
-  }, [scanMode, cameraActive]);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [scanMode, cameraActive, restartKey]);
 
   const decodeQRFromImage = async (file) => {
     // 1. Try to load image and scan using jsQR directly on the original image (highly reliable)
