@@ -1603,7 +1603,9 @@ export default function CustomerForm() {
                   padding: '1.25rem 1rem 1rem 1rem',
                   borderRadius: '12px',
                   border: '2px solid var(--primary)',
-                  width: 'fit-content',
+                  width: '100%',
+                  maxWidth: '300px',
+                  boxSizing: 'border-box',
                   margin: '1rem auto 1.25rem auto',
                   boxShadow: '0 4px 12px rgba(225, 29, 72, 0.15)',
                   position: 'relative'
@@ -1618,14 +1620,28 @@ export default function CustomerForm() {
                   fontWeight: 'bold', 
                   padding: '0.15rem 0.6rem', 
                   borderRadius: '20px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  whiteSpace: 'nowrap'
                 }}>
                   {bulkRecords.length > 0 ? `QR ลำดับที่ ${bulkIndex + 1} / ทั้งหมด ${bulkRecords.length}` : 'QR สำหรับสั่งพิมพ์'}
                 </div>
-                <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <QRCodeCanvas value={generatedData.payload} size={350} level="L" fgColor="#000000" bgColor="#ffffff" />
+                <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                  <QRCodeCanvas 
+                    value={generatedData.payload} 
+                    size={350} 
+                    level="L" 
+                    fgColor="#000000" 
+                    bgColor="#ffffff" 
+                    style={{ 
+                      width: '100%', 
+                      height: 'auto', 
+                      maxWidth: '240px', 
+                      aspectRatio: '1/1',
+                      display: 'block'
+                    }} 
+                  />
                   <div style={{ 
-                    marginTop: '0.5rem', 
+                    marginTop: '0.75rem', 
                     fontSize: '0.75rem', 
                     color: '#e11d48', 
                     fontWeight: 'bold', 
@@ -1634,7 +1650,8 @@ export default function CustomerForm() {
                     borderRadius: '6px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.25rem'
+                    gap: '0.25rem',
+                    textAlign: 'center'
                   }}>
                     💡 แนะนำ: เร่งแสงหน้าจอให้สว่างสุดเพื่อสแกนเร็วขึ้น
                   </div>
