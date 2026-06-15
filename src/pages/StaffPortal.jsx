@@ -1089,7 +1089,7 @@ export default function StaffPortal() {
   };
 
   const handleDeleteSelected = () => {
-    if (window.confirm(`คุณต้องการลบรายการที่เลือกทั้งหมดจำนวน ${selectedIds.length} รายการใช่หรือไม่?`)) {
+    if (window.confirm(`⚠️ คำเตือน: คุณต้องการลบรายการที่เลือกทั้งหมดจำนวน ${selectedIds.length} รายการออกจากระบบใช่หรือไม่?\n(ข้อมูลประวัติทั้งหมดที่เลือกจะถูกลบอย่างถาวรและไม่สามารถเรียกคืนได้)`)) {
       setHistory(prev => {
         const next = prev.filter(r => !selectedIds.includes(r.id));
         localStorage.setItem('staffHistory', JSON.stringify(next));
