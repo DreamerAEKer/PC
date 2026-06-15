@@ -2357,7 +2357,7 @@ export default function StaffPortal() {
                 style={{ display: 'none' }} 
               />
               <Link to="/worldcup" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff' }}>
-                <span role="img" aria-label="soccer">⚽</span> ทายผลบอลโลก 2026
+                <span role="img" aria-label="globe">🌍</span> พิมพ์ชื่อแชมป์
               </Link>
             </div>
             
