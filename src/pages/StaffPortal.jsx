@@ -3142,9 +3142,12 @@ export default function StaffPortal() {
 
             <div className="card" id="history-section">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, flexWrap: 'wrap' }}>
                   <History size={20} />
-                  ประวัติการพิมพ์ (เครื่องนี้)
+                  <span>ประวัติการพิมพ์ (เครื่องนี้)</span>
+                  <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 'normal', marginLeft: '0.5rem', backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '12px' }}>
+                    ⚠️ การเลือกรายการมีไว้เพื่อ "ส่งออกข้อมูล" หรือ "ลบข้อมูล" แบบกลุ่มเท่านั้น
+                  </span>
                 </h3>
                 {history.length > 0 && (
                   <button 
@@ -3277,74 +3280,29 @@ export default function StaffPortal() {
               </div>
 
               {selectedIds.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const selectedRecords = history.filter(r => selectedIds.includes(r.id));
-                        const handleAfterPrint = () => {
-                          setPrintDataList([]);
-                          window.removeEventListener('afterprint', handleAfterPrint);
-                          setHistory(prev => {
-                            const updated = prev.map(r => selectedIds.includes(r.id) ? { ...r, printed: true } : r);
-                            localStorage.setItem('staffHistory', JSON.stringify(updated));
-                            return updated;
-                          });
-                          setSelectedIds([]);
-                        };
-                        window.addEventListener('afterprint', handleAfterPrint);
-
-                        flushSync(() => {
-                          setPrintDataList(selectedRecords);
-                        });
-                        window.print();
-                      }}
-                      className="btn btn-primary"
-                      style={{
-                        flex: 2,
-                        padding: '0.6rem 1rem',
-                        fontSize: '0.9rem',
-                        fontWeight: 'bold',
-                        backgroundColor: '#e11d48',
-                        borderColor: '#e11d48',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        boxShadow: '0 4px 10px rgba(225, 29, 72, 0.25)',
-                        margin: 0
-                      }}
-                    >
-                      <Printer size={16} /> 🖨️ สั่งพิมพ์ ({selectedIds.length} รายการ)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleDeleteSelected}
-                      className="btn btn-secondary"
-                      style={{
-                        flex: 1,
-                        padding: '0.6rem 1rem',
-                        fontSize: '0.9rem',
-                        fontWeight: 'bold',
-                        backgroundColor: '#fff1f2',
-                        borderColor: '#fecdd3',
-                        color: '#e11d48',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        cursor: 'pointer',
-                        margin: 0
-                      }}
-                    >
-                      🗑️ ลบที่เลือก
-                    </button>
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '0.5rem 0.75rem', lineHeight: '1.4' }}>
-                    💡 <strong>ข้อมูลการพิมพ์แบบกลุ่ม:</strong> ระบบจะรวมข้อมูลรายการทั้งหมดที่ติ๊กไว้เพื่อส่งพิมพ์พร้อมกันในหน้าต่างตัวอย่างการพิมพ์เดียว (1 รายการต่อ 1 แผ่น) 
-                    หากคุณต้องการยกเลิก สามารถกดปุ่ม <strong>"ยกเลิก" (Cancel)</strong> ในหน้าตัวอย่างก่อนพิมพ์เพื่อยกเลิกคิวทั้งหมดได้ทันที หรือเลือกพิมพ์เฉพาะบางแผ่นโดยระบุขอบเขตเลขหน้าในช่อง "หน้า" (Pages)
-                  </div>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <button
+                    type="button"
+                    onClick={handleDeleteSelected}
+                    className="btn btn-secondary"
+                    style={{
+                      flex: 1,
+                      padding: '0.6rem 1rem',
+                      fontSize: '0.9rem',
+                      fontWeight: 'bold',
+                      backgroundColor: '#fff1f2',
+                      borderColor: '#fecdd3',
+                      color: '#e11d48',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      cursor: 'pointer',
+                      margin: 0
+                    }}
+                  >
+                    🗑️ ลบรายการที่เลือกทั้งหมด ({selectedIds.length} รายการ)
+                  </button>
                 </div>
               )}
 
