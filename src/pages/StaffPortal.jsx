@@ -2089,6 +2089,18 @@ export default function StaffPortal() {
             max-height: 320px;
             object-fit: cover !important;
           }
+          /* Hide html5-qrcode default feedback banners, watermarks and dashboards */
+          #reader a,
+          #reader img,
+          #reader__status_span {
+            display: none !important;
+          }
+          #reader > div:not(:first-child) {
+            display: none !important;
+          }
+          #reader > span {
+            display: none !important;
+          }
         `}
       </style>
       
