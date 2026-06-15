@@ -2193,6 +2193,12 @@ export default function StaffPortal() {
             .staff-settings-container-row {
               order: 2 !important;
             }
+            .staff-left-column,
+            .staff-right-column {
+              flex: 1 1 100% !important;
+              max-width: 100% !important;
+              min-width: 0 !important;
+            }
           }
           
           @media (min-width: 769px) {
@@ -2415,7 +2421,7 @@ export default function StaffPortal() {
 
         <div className="staff-columns" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           {/* Left column: Entry */}
-          <div style={{ flex: '1 1 400px' }}>
+          <div className="staff-left-column" style={{ flex: '1 1 400px' }}>
             <div className="card glass-panel">
               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
                 <button 
@@ -3251,7 +3257,7 @@ export default function StaffPortal() {
           </div>
 
           {/* Right column: History */}
-          <div style={{ flex: '1 1 500px', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div className="staff-right-column" style={{ flex: '1 1 500px', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {/* Totals Summary */}
             {history.length > 0 && (() => {
               const todayStr = new Date().toISOString().split('T')[0];
