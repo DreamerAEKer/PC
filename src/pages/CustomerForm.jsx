@@ -8,6 +8,19 @@ import SubAddressFields from '../components/SubAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import { useThaiAddress } from 'use-thai-address';
 
+const formatThaiDate = (dateStr) => {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const year = parseInt(parts[0], 10);
+    const month = parts[1];
+    const day = parts[2];
+    const beYear = year + 543;
+    return `${day}/${month}/${beYear}`;
+  }
+  return dateStr;
+};
+
 export default function CustomerForm() {
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ 
     mode: 'onChange',
@@ -1244,7 +1257,7 @@ export default function CustomerForm() {
               <div style={{ paddingRight: '215px', boxSizing: 'border-box' }}>
                 <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.4rem' }}>ข้อมูลผู้รับ (สำหรับการพิมพ์)</h2>
                 <div style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem' }}>
-                  วันที่สั่งจอง: {generatedData.orderDate} | จำนวน: {generatedData.quantity} ใบ<br/>
+                  วันที่สั่งจอง: {formatThaiDate(generatedData.orderDate)} | จำนวน: {generatedData.quantity} ใบ<br/>
                   รับพิมพ์โดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
                 </div>
                 <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: '600' }}>
@@ -1815,7 +1828,7 @@ export default function CustomerForm() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#64748b' }}>วันที่สั่งจอง:</span>
-                  <strong style={{ color: '#0f172a' }}>{generatedData.orderDate}</strong>
+                  <strong style={{ color: '#0f172a' }}>{formatThaiDate(generatedData.orderDate)}</strong>
                 </div>
                 {generatedData.address && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #e2e8f0', marginTop: '0.4rem', paddingTop: '0.4rem' }}>
