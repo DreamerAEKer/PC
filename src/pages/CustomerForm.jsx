@@ -1820,7 +1820,7 @@ export default function CustomerForm() {
                 {generatedData.address && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #e2e8f0', marginTop: '0.4rem', paddingTop: '0.4rem' }}>
                     <span style={{ color: '#64748b', minWidth: '60px' }}>ที่อยู่:</span>
-                    <strong style={{ color: '#0f172a', textAlign: 'right', fontSize: '0.85rem', fontWeight: 600, wordBreak: 'break-all' }}>{generatedData.address} {generatedData.zipcode}</strong>
+                    <strong style={{ color: '#0f172a', textAlign: 'right', fontSize: '0.85rem', fontWeight: 600, wordBreak: 'break-word', overflowWrap: 'break-word' }}>{generatedData.address} {generatedData.zipcode}</strong>
                   </div>
                 )}
               </div>
