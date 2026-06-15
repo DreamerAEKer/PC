@@ -468,21 +468,27 @@ export default function StaffPortal() {
       try {
         const parsed = JSON.parse(event.target.result);
         if (Array.isArray(parsed)) {
-          // Force imported records to be pending (printed: false)
-          const parsedPending = parsed.map(item => ({
-            ...item,
-            printed: false
-          }));
-
           setHistory(prevHistory => {
             const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
-            const merged = [...parsedPending, ...safePrev];
+            const prevMap = new Map();
+            for (const r of safePrev) {
+              const k = r.id || r.orderCode || `${r.name}-${r.phone}`;
+              prevMap.set(k, r);
+            }
+
+            const merged = [...parsed, ...safePrev];
             const unique = [];
             const seen = new Set();
             for (const item of merged) {
               if (item && item.id && !seen.has(item.id)) {
                 seen.add(item.id);
-                unique.push(item);
+                const prevKey = item.id || item.orderCode || `${item.name}-${item.phone}`;
+                const prevItem = prevMap.get(prevKey);
+                if (prevItem) {
+                  unique.push({ ...item, printed: prevItem.printed });
+                } else {
+                  unique.push({ ...item, printed: false });
+                }
               }
             }
             const sortedUnique = unique.sort((a, b) => b.id - a.id).slice(0, 100);
@@ -632,6 +638,12 @@ export default function StaffPortal() {
                   
                   setHistory(prevHistory => {
                     const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
+                    const prevMap = new Map();
+                    for (const r of safePrev) {
+                      const k = r.orderCode || `${r.name}-${r.phone}`;
+                      prevMap.set(k, r);
+                    }
+
                     const merged = [...newRecords, ...safePrev];
                     const unique = [];
                     const seen = new Set();
@@ -639,11 +651,12 @@ export default function StaffPortal() {
                       const key = `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
                       if (!seen.has(key)) {
                         seen.add(key);
-                        const isNew = newRecords.some(n => n.name === item.name && n.phone === item.phone);
-                        if (isNew) {
-                          unique.push({ ...item, printed: false });
+                        const prevKey = item.orderCode || `${item.name}-${item.phone}`;
+                        const prevItem = prevMap.get(prevKey);
+                        if (prevItem) {
+                          unique.push({ ...item, printed: prevItem.printed });
                         } else {
-                          unique.push(item);
+                          unique.push({ ...item, printed: false });
                         }
                       }
                     }
@@ -1523,12 +1536,12 @@ export default function StaffPortal() {
           const key = item.orderCode ? item.orderCode : `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
           if (!seen.has(key)) {
             seen.add(key);
-            // บังคับให้เป็น false สำหรับรายการนำเข้าใหม่
-            const isImported = decodedRecords.some(d => (d.orderCode && d.orderCode === item.orderCode) || (!d.orderCode && d.name === item.name && d.phone === item.phone));
-            if (isImported) {
-              unique.push({ ...item, printed: false });
+            const prevKey = item.orderCode ? item.orderCode : `${item.name}-${item.phone}`;
+            const prevItem = prevMap.get(prevKey);
+            if (prevItem) {
+              unique.push({ ...item, printed: prevItem.printed });
             } else {
-              unique.push(item);
+              unique.push({ ...item, printed: false });
             }
           }
         }
@@ -1664,6 +1677,12 @@ export default function StaffPortal() {
     if (decodedRecords.length > 0) {
       setHistory(prevHistory => {
         const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
+        const prevMap = new Map();
+        for (const r of safePrev) {
+          const k = r.orderCode || `${r.name}-${r.phone}`;
+          prevMap.set(k, r);
+        }
+
         const merged = [...decodedRecords, ...safePrev];
         const unique = [];
         const seen = new Set();
@@ -1671,11 +1690,12 @@ export default function StaffPortal() {
           const key = `${item.name}-${item.phone}-${item.quantity}-${item.orderDate}`;
           if (!seen.has(key)) {
             seen.add(key);
-            const isImported = decodedRecords.some(d => d.name === item.name && d.phone === item.phone);
-            if (isImported) {
-              unique.push({ ...item, printed: false });
+            const prevKey = item.orderCode || `${item.name}-${item.phone}`;
+            const prevItem = prevMap.get(prevKey);
+            if (prevItem) {
+              unique.push({ ...item, printed: prevItem.printed });
             } else {
-              unique.push(item);
+              unique.push({ ...item, printed: false });
             }
           }
         }
