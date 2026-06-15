@@ -120,8 +120,15 @@ a:hover {
 }
 
 @media (max-width: 600px) {
+  .container {
+    padding: 0.75rem;
+  }
   .card {
-    padding: 1.5rem 1rem;
+    padding: 1rem 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .header {
+    margin-bottom: 0.75rem;
   }
 }
 
@@ -150,8 +157,8 @@ a:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 0;
-  margin-bottom: 2rem;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
   border-bottom: 1px solid var(--border);
 }
 
