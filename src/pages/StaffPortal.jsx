@@ -40,7 +40,7 @@ export default function StaffPortal() {
   const [history, setHistory] = useState([]);
   const [historyFilter, setHistoryFilter] = useState('all'); // 'all', 'pending', 'printed'
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
-  const [directoryHandle, setDirectoryHandle] = useState(null);
+  const [directoryHandles, setDirectoryHandles] = useState([]);
   const [editingRecordId, setEditingRecordId] = useState(null);
   const [scanMode, setScanMode] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768 ? 'camera' : 'manual');
   const [cameraActive, setCameraActive] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
@@ -1252,8 +1252,12 @@ export default function StaffPortal() {
     if (window.showDirectoryPicker) {
       try {
         const handle = await window.showDirectoryPicker();
-        setDirectoryHandle(handle);
-        await refreshFromDirectoryHandle(handle);
+        setDirectoryHandles(prev => {
+          if (prev.some(h => h.name === handle.name)) return prev;
+          const next = [...prev, handle];
+          setTimeout(() => refreshFromDirectoryHandles(next), 100);
+          return next;
+        });
       } catch (err) {
         if (err.name !== 'AbortError') {
           console.error("showDirectoryPicker error:", err);
@@ -1265,30 +1269,36 @@ export default function StaffPortal() {
     }
   };
 
-  const refreshFromDirectoryHandle = async (handle) => {
-    if (!handle) return;
+  const refreshFromDirectoryHandles = async (handles = directoryHandles) => {
+    if (!handles || handles.length === 0) return;
     try {
-      const opts = { mode: 'read' };
-      if ((await handle.queryPermission(opts)) !== 'granted') {
-        if ((await handle.requestPermission(opts)) !== 'granted') {
-          alert("กรุณาอนุญาตให้เข้าถึงโฟลเดอร์เพื่อดึงข้อมูลครับ");
-          return;
-        }
-      }
-      
       const files = [];
-      const readDirectory = async (dirHandle) => {
-        for await (const entry of dirHandle.values()) {
-          if (entry.kind === 'file') {
-            const file = await entry.getFile();
-            files.push(file);
-          } else if (entry.kind === 'directory') {
-            await readDirectory(entry);
+      for (const handle of handles) {
+        const opts = { mode: 'read' };
+        if ((await handle.queryPermission(opts)) !== 'granted') {
+          if ((await handle.requestPermission(opts)) !== 'granted') {
+            alert(`กรุณาอนุญาตให้เข้าถึงโฟลเดอร์ "${handle.name}" เพื่อดึงข้อมูลครับ`);
+            continue;
           }
         }
-      };
-      
-      await readDirectory(handle);
+        
+        const readDirectory = async (dirHandle) => {
+          for await (const entry of dirHandle.values()) {
+            if (entry.kind === 'file') {
+              const file = await entry.getFile();
+              files.push(file);
+            } else if (entry.kind === 'directory') {
+              await readDirectory(entry);
+            }
+          }
+        };
+        await readDirectory(handle);
+      }
+
+      if (files.length === 0) {
+        alert("ไม่พบไฟล์ JSON หรือรูปภาพ QR Code ที่ถูกต้องในโฟลเดอร์เลยครับ");
+        return;
+      }
       
       const mockEvent = {
         target: {
@@ -2040,33 +2050,10 @@ export default function StaffPortal() {
       <div className="staff-no-print staff-dashboard-wrapper">
         <div className="staff-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <h2>แดชบอร์ดเจ้าหน้าที่ ปณ.</h2>
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <label 
-              className="btn btn-secondary" 
-              style={{ 
-                padding: '0.5rem 1rem', 
-                fontSize: '0.9rem', 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '0.5rem', 
-                cursor: 'pointer', 
-                margin: 0, 
-                borderColor: '#22c55e', 
-                color: '#15803d', 
-                backgroundColor: '#f0fdf4', 
-                fontWeight: 'bold',
-                boxShadow: '0 2px 4px rgba(34, 197, 94, 0.15)'
-              }}
-              title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
-            >
-              <Upload size={16} /> นำเข้าข้อมูลลูกค้า (.json)
-              <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
-            </label>
-            {directoryHandle && (
-              <button 
-                type="button"
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <label 
                 className="btn btn-secondary" 
-                onClick={() => refreshFromDirectoryHandle(directoryHandle)}
                 style={{ 
                   padding: '0.5rem 1rem', 
                   fontSize: '0.9rem', 
@@ -2075,51 +2062,122 @@ export default function StaffPortal() {
                   gap: '0.5rem', 
                   cursor: 'pointer', 
                   margin: 0, 
-                  borderColor: '#10b981', 
-                  color: '#047857', 
-                  backgroundColor: '#ecfdf5', 
+                  borderColor: '#22c55e', 
+                  color: '#15803d', 
+                  backgroundColor: '#f0fdf4', 
                   fontWeight: 'bold',
-                  boxShadow: '0 2px 4px rgba(16, 185, 129, 0.15)'
+                  boxShadow: '0 2px 4px rgba(34, 197, 94, 0.15)'
                 }}
-                title={`ดึงข้อมูลล่าสุดจากโฟลเดอร์ "${directoryHandle.name}"`}
+                title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
               >
-                <RefreshCw size={16} /> อัพเดทจากโฟลเดอร์เดิม
+                <Upload size={16} /> นำเข้าข้อมูลลูกค้า (.json)
+                <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
+              </label>
+              {directoryHandles.length > 0 && (
+                <button 
+                  type="button"
+                  className="btn btn-secondary" 
+                  onClick={() => refreshFromDirectoryHandles(directoryHandles)}
+                  style={{ 
+                    padding: '0.5rem 1rem', 
+                    fontSize: '0.9rem', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem', 
+                    cursor: 'pointer', 
+                    margin: 0, 
+                    borderColor: '#10b981', 
+                    color: '#047857', 
+                    backgroundColor: '#ecfdf5', 
+                    fontWeight: 'bold',
+                    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.15)'
+                  }}
+                  title={`ดึงข้อมูลล่าสุดจาก ${directoryHandles.length} โฟลเดอร์ที่เชื่อมต่อ`}
+                >
+                  <RefreshCw size={16} /> อัพเดทข้อมูลสั่งพิมพ์ ({directoryHandles.length})
+                </button>
+              )}
+              <button 
+                type="button"
+                className="btn btn-secondary" 
+                onClick={handleFolderPickerClick}
+                style={{ 
+                  padding: '0.5rem 1rem', 
+                  fontSize: '0.9rem', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem', 
+                  cursor: 'pointer', 
+                  margin: 0, 
+                  borderColor: '#8b5cf6', 
+                  color: '#6d28d9', 
+                  backgroundColor: '#f5f3ff', 
+                  fontWeight: 'bold',
+                  boxShadow: '0 2px 4px rgba(139, 92, 246, 0.15)'
+                }}
+                title="เลือกหรือเพิ่มโฟลเดอร์สำหรับเชื่อมต่อดึงข้อมูลส่งพิมพ์"
+              >
+                <Upload size={16} /> {directoryHandles.length > 0 ? "เชื่อมต่อโฟลเดอร์เพิ่ม..." : "นำเข้าข้อมูลจากโฟลเดอร์"}
               </button>
+              <input 
+                id="legacy-folder-input"
+                type="file" 
+                webkitdirectory="" 
+                directory="" 
+                multiple 
+                onChange={handleFolderImport} 
+                style={{ display: 'none' }} 
+              />
+              <Link to="/worldcup" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff' }}>
+                <span role="img" aria-label="soccer">⚽</span> ทายผลบอลโลก 2026
+              </Link>
+            </div>
+            
+            {directoryHandles.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.25rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  📁 โฟลเดอร์ที่เชื่อมโยงอยู่:
+                </span>
+                {directoryHandles.map((handle, idx) => (
+                  <span 
+                    key={idx}
+                    style={{ 
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      gap: '0.35rem', 
+                      backgroundColor: '#f1f5f9', 
+                      border: '1px solid #cbd5e1', 
+                      borderRadius: '16px', 
+                      padding: '0.2rem 0.6rem', 
+                      fontSize: '0.75rem', 
+                      color: 'var(--text-main)',
+                      fontWeight: 500
+                    }}
+                  >
+                    {handle.name}
+                    <button 
+                      type="button"
+                      onClick={() => setDirectoryHandles(prev => prev.filter(h => h.name !== handle.name))}
+                      style={{ 
+                        border: 'none', 
+                        background: 'transparent', 
+                        color: '#ef4444', 
+                        cursor: 'pointer', 
+                        fontSize: '0.9rem', 
+                        lineHeight: 1,
+                        padding: 0, 
+                        fontWeight: 'bold',
+                        display: 'flex', 
+                        alignItems: 'center' 
+                      }}
+                      title="ยกเลิกเชื่อมต่อโฟลเดอร์นี้"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
             )}
-            <button 
-              type="button"
-              className="btn btn-secondary" 
-              onClick={handleFolderPickerClick}
-              style={{ 
-                padding: '0.5rem 1rem', 
-                fontSize: '0.9rem', 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '0.5rem', 
-                cursor: 'pointer', 
-                margin: 0, 
-                borderColor: '#8b5cf6', 
-                color: '#6d28d9', 
-                backgroundColor: '#f5f3ff', 
-                fontWeight: 'bold',
-                boxShadow: '0 2px 4px rgba(139, 92, 246, 0.15)'
-              }}
-              title="ดึงข้อมูลจากไฟล์ทั้งหมดในโฟลเดอร์ (ตรวจจับรหัสสั่งพิมพ์)"
-            >
-              <Upload size={16} /> นำเข้าข้อมูลจากโฟลเดอร์
-            </button>
-            <input 
-              id="legacy-folder-input"
-              type="file" 
-              webkitdirectory="" 
-              directory="" 
-              multiple 
-              onChange={handleFolderImport} 
-              style={{ display: 'none' }} 
-            />
-            <Link to="/worldcup" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff' }}>
-              <span role="img" aria-label="soccer">⚽</span> ทายผลบอลโลก 2026
-            </Link>
           </div>
         </div>
 
@@ -3098,15 +3156,15 @@ export default function StaffPortal() {
                   <Upload size={14} /> นำเข้าข้อมูล (.json)
                   <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
                 </label>
-                {directoryHandle && (
+                 {directoryHandles.length > 0 && (
                   <button 
                     type="button"
                     className="btn btn-secondary" 
-                    onClick={() => refreshFromDirectoryHandle(directoryHandle)}
+                    onClick={() => refreshFromDirectoryHandles(directoryHandles)}
                     style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0, borderColor: '#10b981', color: '#047857', backgroundColor: '#ecfdf5', fontWeight: 'bold' }}
-                    title={`ดึงข้อมูลล่าสุดจากโฟลเดอร์ "${directoryHandle.name}"`}
+                    title={`ดึงข้อมูลล่าสุดจาก ${directoryHandles.length} โฟลเดอร์`}
                   >
-                    <RefreshCw size={14} /> อัพเดทจากโฟลเดอร์เดิม
+                    <RefreshCw size={14} /> อัพเดทข้อมูลสั่งพิมพ์ ({directoryHandles.length})
                   </button>
                 )}
                 <button 
@@ -3114,9 +3172,9 @@ export default function StaffPortal() {
                   className="btn btn-secondary" 
                   onClick={handleFolderPickerClick}
                   style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0 }}
-                  title="ดึงข้อมูลจากไฟล์ทั้งหมดในโฟลเดอร์"
+                  title="เลือกหรือเพิ่มโฟลเดอร์สำหรับดึงข้อมูลสั่งพิมพ์"
                 >
-                  <Upload size={14} /> นำเข้าจากโฟลเดอร์
+                  <Upload size={14} /> {directoryHandles.length > 0 ? "เชื่อมต่อโฟลเดอร์เพิ่ม" : "นำเข้าจากโฟลเดอร์"}
                 </button>
               </div>
 
