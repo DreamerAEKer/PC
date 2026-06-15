@@ -1724,7 +1724,7 @@ export default function CustomerForm() {
                   boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                   whiteSpace: 'nowrap'
                 }}>
-                  {bulkRecords.length > 0 ? `QR ลำดับที่ ${bulkIndex + 1} / ทั้งหมด ${bulkRecords.length}` : 'QR สำหรับสั่งพิมพ์'}
+                  {bulkRecords.length > 1 ? `QR ลำดับที่ ${bulkIndex + 1} / ทั้งหมด ${bulkRecords.length}` : 'QR สำหรับสั่งพิมพ์'}
                 </div>
                 <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                   <QRCodeCanvas 
@@ -1761,7 +1761,7 @@ export default function CustomerForm() {
             </div>
 
             {/* End of Sequence Indicator */}
-            {bulkRecords.length > 0 && bulkIndex === bulkRecords.length - 1 && (
+            {bulkRecords.length > 1 && bulkIndex === bulkRecords.length - 1 && (
               <div style={{
                 backgroundColor: '#dcfce7',
                 color: '#15803d',
