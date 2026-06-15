@@ -38,7 +38,7 @@ export default function StaffPortal() {
     return '';
   };
   const [history, setHistory] = useState([]);
-  const [historyFilter, setHistoryFilter] = useState('all'); // 'all', 'pending', 'printed'
+  const [historyFilter, setHistoryFilter] = useState('pending'); // 'all', 'pending', 'printed'
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
   const [directoryHandles, setDirectoryHandles] = useState([]);
   const [editingRecordId, setEditingRecordId] = useState(null);
@@ -3399,28 +3399,6 @@ export default function StaffPortal() {
                 <button
                   type="button"
                   onClick={() => {
-                    setHistoryFilter('all');
-                    setSelectedIds([]);
-                  }}
-                  style={{
-                    flex: 1,
-                    padding: '6px 10px',
-                    fontSize: '0.8rem',
-                    fontWeight: '600',
-                    borderRadius: '6px',
-                    border: 'none',
-                    backgroundColor: historyFilter === 'all' ? '#fff' : 'transparent',
-                    color: historyFilter === 'all' ? 'var(--text-main)' : 'var(--text-muted)',
-                    boxShadow: historyFilter === 'all' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s'
-                  }}
-                >
-                  ทั้งหมด ({history.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
                     setHistoryFilter('pending');
                     setSelectedIds([]);
                   }}
@@ -3469,6 +3447,28 @@ export default function StaffPortal() {
                   }}
                 >
                   ✅ พิมพ์แล้ว ({history.filter(r => r.printed).length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHistoryFilter('all');
+                    setSelectedIds([]);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '6px 10px',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    borderRadius: '6px',
+                    border: 'none',
+                    backgroundColor: historyFilter === 'all' ? '#fff' : 'transparent',
+                    color: historyFilter === 'all' ? 'var(--text-main)' : 'var(--text-muted)',
+                    boxShadow: historyFilter === 'all' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s'
+                  }}
+                >
+                  ทั้งหมด ({history.length})
                 </button>
               </div>
 
