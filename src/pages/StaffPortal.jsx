@@ -3264,43 +3264,29 @@ export default function StaffPortal() {
               const grandTotal = history.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
               const grandPrice = grandTotal * 3;
               return (
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '1fr 1fr', 
-                  gap: '1.25rem'
-                }}>
+                <div className="stats-grid">
                   {/* Today Stats Card */}
-                  <div style={{
+                  <div className="stats-card" style={{
                     background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
                     border: '1.5px solid #fecdd3',
-                    borderRadius: '16px',
-                    padding: '1.25rem',
-                    boxShadow: '0 4px 12px rgba(225, 29, 72, 0.05)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.75rem'
+                    boxShadow: '0 4px 12px rgba(225, 29, 72, 0.05)'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '1rem', borderBottom: '1px solid #fda4af', paddingBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '1.2rem' }}>📅</span> ยอดสั่งพิมพ์วันนี้
+                    <div className="stats-card-header" style={{ color: 'var(--primary)', borderBottom: '1px solid #fda4af' }}>
+                      ยอดสั่งพิมพ์วันนี้
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวนสั่ง</div>
+                    <div className="stats-subgrid">
+                      <div className="stats-subcard" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวน</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{todayCount} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>รายการ</span></div>
                       </div>
-                      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวนใบ</div>
+                      <div className="stats-subcard" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวน</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{todayTotal} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>ใบ</span></div>
                       </div>
                     </div>
-                    <div style={{ 
+                    <div className="stats-footer" style={{ 
                       background: 'linear-gradient(90deg, var(--primary) 0%, #be123c 100%)',
                       color: 'white',
-                      padding: '0.6rem 1rem',
-                      borderRadius: '12px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
                       boxShadow: '0 4px 10px rgba(225, 29, 72, 0.2)'
                     }}>
                       <span style={{ fontSize: '0.85rem', fontWeight: 'bold', opacity: 0.9 }}>รวมเป็นเงิน:</span>
@@ -3309,37 +3295,27 @@ export default function StaffPortal() {
                   </div>
 
                   {/* Grand Stats Card */}
-                  <div style={{
+                  <div className="stats-card" style={{
                     background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
                     border: '1.5px solid #bfdbfe',
-                    borderRadius: '16px',
-                    padding: '1.25rem',
-                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.05)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.75rem'
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.05)'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#1d4ed8', fontWeight: 'bold', fontSize: '1rem', borderBottom: '1px solid #93c5fd', paddingBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '1.2rem' }}>📊</span> ยอดรวมทั้งหมดทุกวัน
+                    <div className="stats-card-header" style={{ color: '#1d4ed8', borderBottom: '1px solid #93c5fd' }}>
+                      <span style={{ fontSize: '1.2rem' }}>📊</span> ยอดรวมทั้งหมด
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวนสั่ง</div>
+                    <div className="stats-subgrid">
+                      <div className="stats-subcard" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวน</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1d4ed8', marginTop: '0.15rem' }}>{grandCount} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>รายการ</span></div>
                       </div>
-                      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: '0.5rem 0.75rem', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวนใบ</div>
+                      <div className="stats-subcard" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวน</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1d4ed8', marginTop: '0.15rem' }}>{grandTotal.toLocaleString()} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>ใบ</span></div>
                       </div>
                     </div>
-                    <div style={{ 
+                    <div className="stats-footer" style={{ 
                       background: 'linear-gradient(90deg, #1d4ed8 0%, #1e40af 100%)',
                       color: 'white',
-                      padding: '0.6rem 1rem',
-                      borderRadius: '12px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
                       boxShadow: '0 4px 10px rgba(29, 78, 216, 0.2)'
                     }}>
                       <span style={{ fontSize: '0.85rem', fontWeight: 'bold', opacity: 0.9 }}>รวมเป็นเงิน:</span>
