@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
-import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload, RefreshCw } from 'lucide-react';
+import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload, RefreshCw, Camera } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -2316,7 +2316,7 @@ export default function StaffPortal() {
                     gap: '0.5rem'
                   }}
                 >
-                  <QrCode size={16} />
+                  <Camera size={16} />
                   <span style={{ textAlign: 'left', lineHeight: '1.1', fontSize: '0.8rem' }}>
                     สแกน QR Code<br />และรับข้อมูลสั่งพิมพ์
                   </span>
