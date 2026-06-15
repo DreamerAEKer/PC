@@ -350,6 +350,18 @@ export default function CustomerForm() {
      // Remove select helper fields from QR payload
      delete processedData.customQuantity;
  
+
+     // Save addressLine1 suggestion to local storage
+     try {
+       const savedSuggestions = JSON.parse(localStorage.getItem('customerAddressSuggestions') || '[]');
+       if (processedData.addressLine1 && !savedSuggestions.includes(processedData.addressLine1)) {
+         const updatedSuggestions = [processedData.addressLine1, ...savedSuggestions].slice(0, 100);
+         localStorage.setItem('customerAddressSuggestions', JSON.stringify(updatedSuggestions));
+       }
+     } catch (e) {
+       console.error("Error saving address suggestions", e);
+     }
+ 
      // Create a payload string (JSON) for the QR code using compressed format
      const compressedData = {
        oc: generatedOrderCode,
@@ -382,6 +394,22 @@ export default function CustomerForm() {
      const updatedHistory = [newRecord, ...history].slice(0, 10); // Keep last 10
      setHistory(updatedHistory);
      localStorage.setItem('customerHistory', JSON.stringify(updatedHistory));
+
+     // Reset form but retain sender's name and phone
+     reset({
+       senderNickname: processedData.senderNickname || '',
+       senderPhone: processedData.senderPhone || '',
+       name: '',
+       phone: '',
+       did: '',
+       addressLine1: '',
+       subdistrict: '',
+       district: '',
+       province: '',
+       zipcode: ''
+     });
+     setValue("did", "");
+     setShowDidInput(false);
    };
 
   const onError = () => {
@@ -490,6 +518,9 @@ export default function CustomerForm() {
       }, 800);
     }
   };
+
+  const uniqueNames = Array.from(new Set(history.map(r => r.name).filter(Boolean)));
+  const uniquePhones = Array.from(new Set(history.map(r => r.phone).filter(Boolean)));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -856,12 +887,12 @@ export default function CustomerForm() {
               >
                 ชื่อ-นามสกุล <span style={{color:'red'}}>*</span>
               </label>
-              <input type="text" className={`form-control ${getFieldClass('name')}`} required {...register("name", { required: true })} placeholder="ระบุชื่อและนามสกุล" />
+              <input type="text" list="recipient-names-list" className={`form-control ${getFieldClass('name')}`} required {...register("name", { required: true })} placeholder="ระบุชื่อและนามสกุล" />
               {errors.name && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุชื่อ-นามสกุล</span>}
             </div>
             <div className="form-group">
               <label className="form-label">เบอร์โทรศัพท์</label>
-              <input type="text" className={`form-control ${getFieldClass('phone')}`} {...register("phone", { 
+              <input type="text" list="recipient-phones-list" className={`form-control ${getFieldClass('phone')}`} {...register("phone", { 
                 required: false,
                 validate: value => {
                   if (!value || value.trim() === '') return true;
@@ -1157,6 +1188,13 @@ export default function CustomerForm() {
               </div>
             )}
           </form>
+
+          <datalist id="recipient-names-list">
+            {uniqueNames.map(val => <option key={val} value={val} />)}
+          </datalist>
+          <datalist id="recipient-phones-list">
+            {uniquePhones.map(val => <option key={val} value={val} />)}
+          </datalist>
         </div>
       </div>
 
