@@ -2239,8 +2239,20 @@ export default function StaffPortal() {
             </div>
             
             {directoryHandles.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.25rem', justifyContent: 'flex-end', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              <div style={{ 
+                display: 'flex', 
+                flexWrap: 'wrap', 
+                gap: '0.35rem', 
+                marginTop: '0.5rem', 
+                justifyContent: 'flex-start', 
+                alignItems: 'center',
+                padding: '0.35rem 0.6rem',
+                backgroundColor: '#f8fafc',
+                borderRadius: '8px',
+                border: '1px dashed #e2e8f0',
+                width: 'fit-content'
+              }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                   📁 โฟลเดอร์ที่เชื่อมโยงอยู่:
                 </span>
                 {directoryHandles.map((handle, idx) => (
