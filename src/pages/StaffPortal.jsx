@@ -3588,37 +3588,36 @@ export default function StaffPortal() {
                           )}
                         </div>
                         {/* Subtitle */}
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-                          {record.phone && <span style={{ whiteSpace: 'nowrap' }}>โทร: {record.phone}</span>}
-                          {record.phone && <span style={{ color: '#cbd5e1' }}>|</span>}
-                          {record.quantity !== undefined && <span style={{ whiteSpace: 'nowrap' }}>จำนวน: {record.quantity} ใบ</span>}
-                          {record.quantity !== undefined && <span style={{ color: '#cbd5e1' }}>|</span>}
-                          <span style={{ fontSize: '0.7rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                          {record.phone && <div>โทร: {record.phone}</div>}
+                          {record.quantity !== undefined && <div>จำนวน: {record.quantity} ใบ</div>}
+                          <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.15rem' }}>
                             {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
-                          </span>
+                          </div>
                         </div>
                       </div>
 
                       {/* Control buttons - always right, never wrap */}
-                      <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, alignItems: 'center' }}>
                         <button 
                           onClick={() => handlePrintHistory(record)} 
                           className="btn btn-secondary" 
                           style={{ 
-                            padding: '0.35rem 0.5rem', 
-                            fontSize: '0.75rem', 
+                            width: '32px',
+                            height: '32px',
+                            padding: 0, 
                             display: 'flex', 
                             alignItems: 'center', 
-                            gap: '0.2rem', 
+                            justifyContent: 'center', 
                             margin: 0,
                             borderColor: record.printed ? '#cbd5e1' : '#b45309',
                             color: record.printed ? 'var(--text-main)' : '#b45309',
                             backgroundColor: record.printed ? '' : '#fffbeb',
-                            whiteSpace: 'nowrap',
-                            lineHeight: 1
+                            cursor: 'pointer'
                           }}
+                          title={record.printed ? 'พิมพ์ซ้ำ' : 'สั่งพิมพ์'}
                         >
-                          <Printer size={11} /> {record.printed ? 'พิมพ์ซ้ำ' : 'สั่งพิมพ์'}
+                          <Printer size={15} />
                         </button>
                         <button 
                           onClick={() => {
@@ -3627,44 +3626,41 @@ export default function StaffPortal() {
                           }} 
                           className="btn" 
                           style={{ 
-                            padding: '0.35rem 0.5rem', 
-                            fontSize: '0.75rem', 
+                            width: '32px',
+                            height: '32px',
+                            padding: 0, 
                             borderColor: '#3b82f6', 
                             color: '#1d4ed8', 
                             backgroundColor: '#eff6ff', 
-                            fontWeight: 'bold', 
                             display: 'flex', 
                             alignItems: 'center', 
-                            gap: '0.2rem', 
+                            justifyContent: 'center', 
                             margin: 0, 
-                            cursor: 'pointer', 
-                            whiteSpace: 'nowrap',
-                            lineHeight: 1
+                            cursor: 'pointer'
                           }}
+                          title="แก้ไข"
                         >
-                          ✏️ แก้ไข
+                          ✏️
                         </button>
                         <button 
                           onClick={() => handleDeleteRecord(record.id)} 
                           className="btn" 
                           style={{ 
-                            padding: '0.35rem 0.5rem', 
-                            fontSize: '0.75rem', 
+                            width: '32px',
+                            height: '32px',
+                            padding: 0, 
                             borderColor: '#ef4444', 
                             color: '#ef4444', 
                             backgroundColor: '#fef2f2', 
-                            fontWeight: 'bold', 
                             display: 'flex', 
                             alignItems: 'center', 
-                            gap: '0.2rem', 
+                            justifyContent: 'center', 
                             margin: 0, 
-                            cursor: 'pointer', 
-                            whiteSpace: 'nowrap',
-                            lineHeight: 1
+                            cursor: 'pointer'
                           }}
-                          title="ลบรายการนี้"
+                          title="ลบ"
                         >
-                          🗑️ ลบ
+                          🗑️
                         </button>
                       </div>
                     </div>
