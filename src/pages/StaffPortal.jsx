@@ -48,6 +48,7 @@ export default function StaffPortal() {
   const didValue = watch("did", "");
   const isDidActive = (didValue || "").trim().length === 6;
   const [showDidInput, setShowDidInput] = useState(false);
+  const [isRefreshingFolder, setIsRefreshingFolder] = useState(false);
 
   useEffect(() => {
     if (didValue && didValue.trim().length > 0) {
@@ -1284,6 +1285,7 @@ export default function StaffPortal() {
 
   const refreshFromDirectoryHandles = async (handles = directoryHandles) => {
     if (!handles || handles.length === 0) return;
+    setIsRefreshingFolder(true);
     try {
       const files = [];
       for (const handle of handles) {
@@ -1310,6 +1312,7 @@ export default function StaffPortal() {
 
       if (files.length === 0) {
         alert("ไม่พบไฟล์ JSON หรือรูปภาพ QR Code ที่ถูกต้องในโฟลเดอร์เลยครับ");
+        setIsRefreshingFolder(false);
         return;
       }
       
@@ -1322,6 +1325,8 @@ export default function StaffPortal() {
     } catch (err) {
       console.error("Refresh folder error:", err);
       alert("เกิดข้อผิดพลาดในการอัพเดทข้อมูลในโฟลเดอร์: " + err.message);
+    } finally {
+      setIsRefreshingFolder(false);
     }
   };
 
@@ -2057,6 +2062,10 @@ export default function StaffPortal() {
             from { transform: scale(0.9) translateY(10px); opacity: 0; }
             to { transform: scale(1) translateY(0); opacity: 1; }
           }
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
            #reader video {
             border-radius: 12px;
             width: 100% !important;
@@ -2090,7 +2099,7 @@ export default function StaffPortal() {
                 }}
                 title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
               >
-                <Upload size={16} /> นำเข้าข้อมูลลูกค้า (.json)
+                <Download size={16} /> นำเข้าข้อมูลลูกค้า (.json)
                 <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
               </label>
               {directoryHandles.length > 0 && (
@@ -2098,6 +2107,7 @@ export default function StaffPortal() {
                   type="button"
                   className="btn btn-secondary" 
                   onClick={() => refreshFromDirectoryHandles(directoryHandles)}
+                  disabled={isRefreshingFolder}
                   style={{ 
                     padding: '0.5rem 1rem', 
                     fontSize: '0.9rem', 
@@ -2110,11 +2120,12 @@ export default function StaffPortal() {
                     color: '#047857', 
                     backgroundColor: '#ecfdf5', 
                     fontWeight: 'bold',
-                    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.15)'
+                    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.15)',
+                    opacity: isRefreshingFolder ? 0.7 : 1
                   }}
                   title={`ดึงข้อมูลล่าสุดจาก ${directoryHandles.length} โฟลเดอร์ที่เชื่อมต่อ`}
                 >
-                  <RefreshCw size={16} /> อัพเดทข้อมูลสั่งพิมพ์ ({directoryHandles.length})
+                  <RefreshCw size={16} style={{ animation: isRefreshingFolder ? 'spin 1s linear infinite' : 'none' }} /> {isRefreshingFolder ? "กำลังอัพเดทข้อมูล..." : `อัพเดทข้อมูลสั่งพิมพ์ (${directoryHandles.length})`}
                 </button>
               )}
               <button 
@@ -2137,7 +2148,7 @@ export default function StaffPortal() {
                 }}
                 title="เลือกหรือเพิ่มโฟลเดอร์สำหรับเชื่อมต่อดึงข้อมูลส่งพิมพ์"
               >
-                <Upload size={16} /> {directoryHandles.length > 0 ? "เชื่อมต่อโฟลเดอร์เพิ่ม..." : "นำเข้าข้อมูลจากโฟลเดอร์"}
+                <Download size={16} /> {directoryHandles.length > 0 ? "เชื่อมต่อโฟลเดอร์เพิ่ม..." : "นำเข้าข้อมูลจากโฟลเดอร์"}
               </button>
               <input 
                 id="legacy-folder-input"
@@ -3169,14 +3180,14 @@ export default function StaffPortal() {
                   style={{ flex: '1 1 180px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
                   title="ดาวน์โหลดประวัติเป็นไฟล์เพื่อนำไปเปิดเครื่องอื่น"
                 >
-                  <Download size={14} /> {selectedIds.length > 0 ? `ส่งออกที่เลือก (${selectedIds.length})` : 'ส่งออกข้อมูลทั้งหมด'}
+                  <Upload size={14} /> {selectedIds.length > 0 ? `ส่งออกที่เลือก (${selectedIds.length})` : 'ส่งออกข้อมูลทั้งหมด'}
                 </button>
                 <label 
                   className="btn btn-secondary" 
                   style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0 }}
                   title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
                 >
-                  <Upload size={14} /> นำเข้าข้อมูล (.json)
+                  <Download size={14} /> นำเข้าข้อมูล (.json)
                   <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
                 </label>
                  {directoryHandles.length > 0 && (
@@ -3184,10 +3195,11 @@ export default function StaffPortal() {
                     type="button"
                     className="btn btn-secondary" 
                     onClick={() => refreshFromDirectoryHandles(directoryHandles)}
-                    style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0, borderColor: '#10b981', color: '#047857', backgroundColor: '#ecfdf5', fontWeight: 'bold' }}
+                    disabled={isRefreshingFolder}
+                    style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0, borderColor: '#10b981', color: '#047857', backgroundColor: '#ecfdf5', fontWeight: 'bold', opacity: isRefreshingFolder ? 0.7 : 1 }}
                     title={`ดึงข้อมูลล่าสุดจาก ${directoryHandles.length} โฟลเดอร์`}
                   >
-                    <RefreshCw size={14} /> อัพเดทข้อมูลสั่งพิมพ์ ({directoryHandles.length})
+                    <RefreshCw size={14} style={{ animation: isRefreshingFolder ? 'spin 1s linear infinite' : 'none' }} /> {isRefreshingFolder ? "กำลังอัพเดท..." : `อัพเดทข้อมูลสั่งพิมพ์ (${directoryHandles.length})`}
                   </button>
                 )}
                 <button 
@@ -3197,7 +3209,7 @@ export default function StaffPortal() {
                   style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0 }}
                   title="เลือกหรือเพิ่มโฟลเดอร์สำหรับดึงข้อมูลสั่งพิมพ์"
                 >
-                  <Upload size={14} /> {directoryHandles.length > 0 ? "เชื่อมต่อโฟลเดอร์เพิ่ม" : "นำเข้าจากโฟลเดอร์"}
+                  <Download size={14} /> {directoryHandles.length > 0 ? "เชื่อมต่อโฟลเดอร์เพิ่ม" : "นำเข้าจากโฟลเดอร์"}
                 </button>
               </div>
 
