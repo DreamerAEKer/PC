@@ -3549,142 +3549,123 @@ export default function StaffPortal() {
                       key={record.id}
                       id={`record-row-${record.id}`}
                       style={{ 
-                        position: 'relative', 
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        padding: '0.65rem 0.85rem', 
+                        border: '1px solid var(--border)', 
                         borderRadius: '8px',
-                        background: '#ef4444',
-                        minHeight: '60px',
-                        scrollMargin: '100px',
-                        overflow: 'hidden'
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        background: record.printed ? '#f8fafc' : '#fff',
+                        position: 'relative',
+                        scrollMargin: '100px'
                       }}
                     >
-                      {/* Swipe Delete Action Background */}
+                      {/* Checkbox */}
+                      <input 
+                        type="checkbox" 
+                        checked={selectedIds.includes(record.id)}
+                        onChange={() => toggleSelectRecord(record.id)}
+                        style={{ width: '15px', height: '15px', cursor: 'pointer', accentColor: 'var(--primary)', flexShrink: 0 }}
+                      />
+
+                      {/* Info block - takes remaining space */}
                       <div 
-                        onClick={() => handleDeleteRecord(record.id)}
-                        style={{
-                          position: 'absolute',
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: '80px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#fff',
-                          fontWeight: 'bold',
-                          fontSize: '0.9rem',
-                          cursor: 'pointer',
-                          userSelect: 'none',
-                          borderRadius: '8px'
-                        }}
+                        style={{ flex: '1', minWidth: '0', cursor: 'pointer' }} 
+                        onClick={() => setSelectedDetailRecord(record)}
+                        title="คลิกเพื่อดูรายละเอียดข้อมูลลูกค้า"
                       >
-                        ลบ
+                        {/* Name and badges */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
+                          <span style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '160px' }}>
+                            {record.name}
+                          </span>
+                          {record.printed ? (
+                            <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#15803d', backgroundColor: '#dcfce7', padding: '0.1rem 0.35rem', borderRadius: '10px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap', flexShrink: 0 }}>✅ พิมพ์แล้ว</span>
+                          ) : (
+                            <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#b45309', backgroundColor: '#fef3c7', padding: '0.1rem 0.35rem', borderRadius: '10px', border: '1px solid #fde68a', whiteSpace: 'nowrap', flexShrink: 0 }}>⏳ รอพิมพ์</span>
+                          )}
+                        </div>
+                        {/* Subtitle */}
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          {record.phone && <span style={{ whiteSpace: 'nowrap' }}>โทร: {record.phone}</span>}
+                          {record.phone && <span style={{ color: '#cbd5e1' }}>|</span>}
+                          {record.quantity !== undefined && <span style={{ whiteSpace: 'nowrap' }}>จำนวน: {record.quantity} ใบ</span>}
+                          {record.quantity !== undefined && <span style={{ color: '#cbd5e1' }}>|</span>}
+                          <span style={{ fontSize: '0.7rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                            {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Foreground Content Card */}
-                      <div 
-                        onTouchStart={(e) => handleTouchStart(record.id, e)}
-                        onTouchMove={(e) => handleTouchMove(record.id, e)}
-                        onTouchEnd={(e) => handleTouchEnd(record.id, e)}
-                        style={{ 
-                          width: '100%',
-                          boxSizing: 'border-box',
-                          padding: '0.65rem 0.85rem', 
-                          border: '1px solid var(--border)', 
-                          borderRadius: '8px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          background: record.printed ? '#f8fafc' : '#fff',
-                          transform: `translateX(-${swipeOffset[record.id] || 0}px)`,
-                          transition: touchStartX === null ? 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
-                          position: 'relative',
-                          zIndex: 2,
-                          touchAction: 'pan-y'
-                        }}
-                      >
-                        {/* Checkbox */}
-                        <input 
-                          type="checkbox" 
-                          checked={selectedIds.includes(record.id)}
-                          onChange={() => toggleSelectRecord(record.id)}
-                          style={{ width: '15px', height: '15px', cursor: 'pointer', accentColor: 'var(--primary)', flexShrink: 0 }}
-                        />
-
-                        {/* Info block - takes remaining space */}
-                        <div 
-                          style={{ flex: '1', minWidth: '0', cursor: 'pointer' }} 
-                          onClick={() => setSelectedDetailRecord(record)}
-                          title="คลิกเพื่อดูรายละเอียดข้อมูลลูกค้า"
+                      {/* Control buttons - always right, never wrap */}
+                      <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
+                        <button 
+                          onClick={() => handlePrintHistory(record)} 
+                          className="btn btn-secondary" 
+                          style={{ 
+                            padding: '0.35rem 0.5rem', 
+                            fontSize: '0.75rem', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '0.2rem', 
+                            margin: 0,
+                            borderColor: record.printed ? '#cbd5e1' : '#b45309',
+                            color: record.printed ? 'var(--text-main)' : '#b45309',
+                            backgroundColor: record.printed ? '' : '#fffbeb',
+                            whiteSpace: 'nowrap',
+                            lineHeight: 1
+                          }}
                         >
-                          {/* Name and badges */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
-                            <span style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '160px' }}>
-                              {record.name}
-                            </span>
-                            {record.printed ? (
-                              <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#15803d', backgroundColor: '#dcfce7', padding: '0.1rem 0.35rem', borderRadius: '10px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap', flexShrink: 0 }}>✅ พิมพ์แล้ว</span>
-                            ) : (
-                              <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#b45309', backgroundColor: '#fef3c7', padding: '0.1rem 0.35rem', borderRadius: '10px', border: '1px solid #fde68a', whiteSpace: 'nowrap', flexShrink: 0 }}>⏳ รอพิมพ์</span>
-                            )}
-                          </div>
-                          {/* Subtitle */}
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap' }}>
-                            {record.phone && <span style={{ whiteSpace: 'nowrap' }}>โทร: {record.phone}</span>}
-                            {record.phone && <span style={{ color: '#cbd5e1' }}>|</span>}
-                            {record.quantity !== undefined && <span style={{ whiteSpace: 'nowrap' }}>จำนวน: {record.quantity} ใบ</span>}
-                            {record.quantity !== undefined && <span style={{ color: '#cbd5e1' }}>|</span>}
-                            <span style={{ fontSize: '0.7rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                              {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Control buttons - always right, never wrap */}
-                        <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
-                          <button 
-                            onClick={() => handlePrintHistory(record)} 
-                            className="btn btn-secondary" 
-                            style={{ 
-                              padding: '0.35rem 0.5rem', 
-                              fontSize: '0.75rem', 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: '0.2rem', 
-                              margin: 0,
-                              borderColor: record.printed ? '#cbd5e1' : '#b45309',
-                              color: record.printed ? 'var(--text-main)' : '#b45309',
-                              backgroundColor: record.printed ? '' : '#fffbeb',
-                              whiteSpace: 'nowrap',
-                              lineHeight: 1
-                            }}
-                          >
-                            <Printer size={11} /> {record.printed ? 'พิมพ์ซ้ำ' : 'สั่งพิมพ์'}
-                          </button>
-                          <button 
-                            onClick={() => {
-                              populateFromScan(record);
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }} 
-                            className="btn" 
-                            style={{ 
-                              padding: '0.35rem 0.5rem', 
-                              fontSize: '0.75rem', 
-                              borderColor: '#3b82f6', 
-                              color: '#1d4ed8', 
-                              backgroundColor: '#eff6ff', 
-                              fontWeight: 'bold', 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: '0.2rem', 
-                              margin: 0, 
-                              cursor: 'pointer', 
-                              whiteSpace: 'nowrap',
-                              lineHeight: 1
-                            }}
-                          >
-                            ✏️ แก้ไข
-                          </button>
-                        </div>
+                          <Printer size={11} /> {record.printed ? 'พิมพ์ซ้ำ' : 'สั่งพิมพ์'}
+                        </button>
+                        <button 
+                          onClick={() => {
+                            populateFromScan(record);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }} 
+                          className="btn" 
+                          style={{ 
+                            padding: '0.35rem 0.5rem', 
+                            fontSize: '0.75rem', 
+                            borderColor: '#3b82f6', 
+                            color: '#1d4ed8', 
+                            backgroundColor: '#eff6ff', 
+                            fontWeight: 'bold', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '0.2rem', 
+                            margin: 0, 
+                            cursor: 'pointer', 
+                            whiteSpace: 'nowrap',
+                            lineHeight: 1
+                          }}
+                        >
+                          ✏️ แก้ไข
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteRecord(record.id)} 
+                          className="btn" 
+                          style={{ 
+                            padding: '0.35rem 0.5rem', 
+                            fontSize: '0.75rem', 
+                            borderColor: '#ef4444', 
+                            color: '#ef4444', 
+                            backgroundColor: '#fef2f2', 
+                            fontWeight: 'bold', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '0.2rem', 
+                            margin: 0, 
+                            cursor: 'pointer', 
+                            whiteSpace: 'nowrap',
+                            lineHeight: 1
+                          }}
+                          title="ลบรายการนี้"
+                        >
+                          🗑️ ลบ
+                        </button>
                       </div>
                     </div>
                   ))}
