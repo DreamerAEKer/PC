@@ -1143,7 +1143,7 @@ export default function CustomerForm() {
                 alignItems: 'center',
                 boxShadow: '0 2px 8px rgba(225, 29, 72, 0.1)'
               }}>
-                <QRCodeCanvas value={generatedData.payload} size={160} level="Q" />
+                <QRCodeCanvas value={generatedData.payload} size={180} level="L" />
                 <div style={{ 
                   fontSize: '0.65rem', 
                   color: 'var(--primary)', 
@@ -1155,7 +1155,7 @@ export default function CustomerForm() {
                   QR สำหรับสั่งพิมพ์
                 </div>
               </div>
-              <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.4rem', paddingRight: '170px' }}>ข้อมูลผู้รับ (สำหรับการพิมพ์)</h2>
+              <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.4rem', paddingRight: '205px' }}>ข้อมูลผู้รับ (สำหรับการพิมพ์)</h2>
               <div style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem' }}>
                 วันที่สั่งจอง: {generatedData.orderDate} | จำนวน: {generatedData.quantity} ใบ<br/>
                 รับพิมพ์โดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
@@ -1567,7 +1567,7 @@ export default function CustomerForm() {
             textAlign: 'center'
           }}>
             <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--primary)', fontSize: '1.2rem', fontWeight: 700 }}>
-              🎟️ ตั๋วจองไปรษณียบัตร
+              📄 ใบสั่งพิมพ์ ชื่อ-ที่อยู่
             </h3>
             {bulkRecords.length > 0 ? (
               <div style={{ 
@@ -1623,7 +1623,7 @@ export default function CustomerForm() {
                   {bulkRecords.length > 0 ? `QR ลำดับที่ ${bulkIndex + 1} / ทั้งหมด ${bulkRecords.length}` : 'QR สำหรับสั่งพิมพ์'}
                 </div>
                 <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <QRCodeCanvas value={generatedData.payload} size={300} level="Q" fgColor="#000000" bgColor="#ffffff" />
+                  <QRCodeCanvas value={generatedData.payload} size={350} level="L" fgColor="#000000" bgColor="#ffffff" />
                   <div style={{ 
                     marginTop: '0.5rem', 
                     fontSize: '0.75rem', 
