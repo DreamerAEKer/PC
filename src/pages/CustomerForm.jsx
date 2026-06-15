@@ -206,12 +206,44 @@ export default function CustomerForm() {
     }
   }, [isAdvancedMode]);
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setBulkRecords([]);
+    
+    // Clear recipient-specific fields in form
+    setValue("name", "");
+    setValue("phone", "");
+    setValue("did", "");
+    setValue("addressLine1", "");
+    setValue("subdistrict", "");
+    setValue("district", "");
+    setValue("province", "");
+    setValue("zipcode", "");
+    
+    // Reset sub-bookings and advanced mode
+    setSubBookings([]);
+    setIsAdvancedMode(false);
+    
+    // Clean up localStorage to retain only sender info & customQuantity
+    const savedForm = localStorage.getItem('customerFormData');
+    if (savedForm) {
+      try {
+        const data = JSON.parse(savedForm);
+        const cleaned = {
+          senderNickname: data.senderNickname || "",
+          senderPhone: data.senderPhone || "",
+          customQuantity: data.customQuantity || "100"
+        };
+        localStorage.setItem('customerFormData', JSON.stringify(cleaned));
+      } catch (e) {}
+    }
+  };
+
   // Global keydown handler for Escape key to close modals
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        setIsModalOpen(false);
-        setBulkRecords([]);
+        handleCloseModal();
         setShowRulesModal(false);
         setShowGuideModal(false);
         setShowDeleteModal(false);
@@ -1171,27 +1203,29 @@ export default function CustomerForm() {
                   QR สำหรับสั่งพิมพ์
                 </div>
               </div>
-              <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.4rem', paddingRight: '205px' }}>ข้อมูลผู้รับ (สำหรับการพิมพ์)</h2>
-              <div style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem' }}>
-                วันที่สั่งจอง: {generatedData.orderDate} | จำนวน: {generatedData.quantity} ใบ<br/>
-                รับพิมพ์โดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
-              </div>
-              <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: '600' }}>
-                ชื่อ: {generatedData.name}
-              </div>
-              <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                เบอร์โทร: {generatedData.phone}
-              </div>
-              {generatedData.address && (
-                <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem', lineHeight: '1.6' }}>
-                  ที่อยู่: {generatedData.address} {generatedData.zipcode}
+              <div style={{ paddingRight: '215px', boxSizing: 'border-box' }}>
+                <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.4rem' }}>ข้อมูลผู้รับ (สำหรับการพิมพ์)</h2>
+                <div style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem' }}>
+                  วันที่สั่งจอง: {generatedData.orderDate} | จำนวน: {generatedData.quantity} ใบ<br/>
+                  รับพิมพ์โดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
                 </div>
-              )}
-              {generatedData.did && (
-                <div style={{ fontSize: '1.1rem', marginTop: '1rem', padding: '0.5rem', background: '#f8fafc', borderLeft: '4px solid var(--secondary)' }}>
-                  <strong>D-ID:</strong> {generatedData.did}
+                <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: '600' }}>
+                  ชื่อ: {generatedData.name}
                 </div>
-              )}
+                <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
+                  เบอร์โทร: {generatedData.phone}
+                </div>
+                {generatedData.address && (
+                  <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem', lineHeight: '1.6' }}>
+                    ที่อยู่: {generatedData.address} {generatedData.zipcode}
+                  </div>
+                )}
+                {generatedData.did && (
+                  <div style={{ fontSize: '1.1rem', marginTop: '1rem', padding: '0.5rem', background: '#f8fafc', borderLeft: '4px solid var(--secondary)' }}>
+                    <strong>D-ID:</strong> {generatedData.did}
+                  </div>
+                )}
+              </div>
 
               {generatedData.isAdvancedMode && generatedData.subBookings && generatedData.subBookings.length > 0 && (
                 <div style={{ 
@@ -1876,7 +1910,7 @@ export default function CustomerForm() {
                 </button>
               </div>
               
-              <button onClick={() => { setIsModalOpen(false); setBulkRecords([]); }} className="btn btn-secondary" style={{ width: '100%', padding: '0.6rem', fontWeight: 600 }}>
+              <button onClick={handleCloseModal} className="btn btn-secondary" style={{ width: '100%', padding: '0.6rem', fontWeight: 600 }}>
                 ปิดหน้าจอนี้
               </button>
             </div>

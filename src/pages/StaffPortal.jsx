@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
-import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
+import { Html5QrcodeScanner, Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload, RefreshCw, Camera } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
@@ -646,6 +646,8 @@ export default function StaffPortal() {
                 const qrboxSize = Math.floor(minEdge * 0.85);
                 return { width: qrboxSize, height: qrboxSize };
               },
+              formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
+              aspectRatio: 1.0,
               experimentalFeatures: {
                 useBarCodeDetectorIfSupported: true
               }
@@ -3430,7 +3432,8 @@ export default function StaffPortal() {
                         borderRadius: '8px',
                         background: '#ef4444',
                         minHeight: '60px',
-                        scrollMargin: '100px'
+                        scrollMargin: '100px',
+                        overflow: 'hidden'
                       }}
                     >
                       {/* Swipe Delete Action Background */}
@@ -3474,7 +3477,8 @@ export default function StaffPortal() {
                           transform: `translateX(-${swipeOffset[record.id] || 0}px)`,
                           transition: touchStartX === null ? 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
                           position: 'relative',
-                          zIndex: 2
+                          zIndex: 2,
+                          touchAction: 'pan-y'
                         }}
                       >
                         {/* Checkbox */}
