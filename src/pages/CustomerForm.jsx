@@ -290,51 +290,67 @@ export default function CustomerForm() {
       return { ...sub, address: subAddr };
     }) : [];
 
-    const processedData = {
-      ...data,
-      quantity: resolvedQty,
-      address: fullAddress,
-      isDidActive,
-      branch: resolvedBranchDisplay,
-      isAdvancedMode,
-      subBookings: processedSubBookings
-    };
+     const branchStr = getBranchFromUrl();
+     const match = branchStr.match(/\d{5}/);
+     const branchCode = match ? match[0] : '10501';
+     const now = new Date();
+     const yy = String(now.getFullYear()).slice(-2);
+     const mm = String(now.getMonth() + 1).padStart(2, '0');
+     const dd = String(now.getDate()).padStart(2, '0');
+     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+     let rand = '';
+     for (let i = 0; i < 4; i++) {
+       rand += chars.charAt(Math.floor(Math.random() * chars.length));
+     }
+     const generatedOrderCode = `PC-${yy}${mm}${dd}-${branchCode}-${rand}`;
 
-    // Remove select helper fields from QR payload
-    delete processedData.customQuantity;
-
-    // Create a payload string (JSON) for the QR code using compressed format
-    const compressedData = {
-      d: processedData.orderDate,
-      q: processedData.quantity,
-      n: processedData.name,
-      p: processedData.phone,
-      a: processedData.addressLine1 || '',
-      sd: processedData.subdistrict || '',
-      dt: processedData.district || '',
-      pv: processedData.province || '',
-      zp: processedData.zipcode || '',
-      id: processedData.did || '',
-      idx: 1,
-      tot: 1,
-      s: processedSubBookings.map(sub => ({
-        n: sub.name,
-        p: sub.phone,
-        q: sub.quantity,
-        m: sub.useMainAddress ? 1 : 0,
-        a: sub.address
-      }))
-    };
-    const payload = JSON.stringify(compressedData);
-    setGeneratedData({ ...processedData, payload });
-    setIsModalOpen(true);
-
-    // Save to history
-    const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString() };
-    const updatedHistory = [newRecord, ...history].slice(0, 10); // Keep last 10
-    setHistory(updatedHistory);
-    localStorage.setItem('customerHistory', JSON.stringify(updatedHistory));
-  };
+     const processedData = {
+       ...data,
+       quantity: resolvedQty,
+       address: fullAddress,
+       isDidActive,
+       branch: resolvedBranchDisplay,
+       isAdvancedMode,
+       subBookings: processedSubBookings,
+       orderCode: generatedOrderCode
+     };
+ 
+     // Remove select helper fields from QR payload
+     delete processedData.customQuantity;
+ 
+     // Create a payload string (JSON) for the QR code using compressed format
+     const compressedData = {
+       oc: generatedOrderCode,
+       d: processedData.orderDate,
+       q: processedData.quantity,
+       n: processedData.name,
+       p: processedData.phone,
+       a: processedData.addressLine1 || '',
+       sd: processedData.subdistrict || '',
+       dt: processedData.district || '',
+       pv: processedData.province || '',
+       zp: processedData.zipcode || '',
+       id: processedData.did || '',
+       idx: 1,
+       tot: 1,
+       s: processedSubBookings.map(sub => ({
+         n: sub.name,
+         p: sub.phone,
+         q: sub.quantity,
+         m: sub.useMainAddress ? 1 : 0,
+         a: sub.address
+       }))
+     };
+     const payload = JSON.stringify(compressedData);
+     setGeneratedData({ ...processedData, payload });
+     setIsModalOpen(true);
+ 
+     // Save to history
+     const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString() };
+     const updatedHistory = [newRecord, ...history].slice(0, 10); // Keep last 10
+     setHistory(updatedHistory);
+     localStorage.setItem('customerHistory', JSON.stringify(updatedHistory));
+   };
 
   const onError = () => {
     // We can still show an alert, but inline errors will also be visible
@@ -343,10 +359,10 @@ export default function CustomerForm() {
 
   const getFileName = () => {
     if (!generatedData) return `postcard-${Date.now()}.png`;
-    // Remove characters that are not allowed in file names
     const safeName = generatedData.name.replace(/[<>:"/\\|?*]/g, '').trim();
-    // Format: ชื่อ-สกุล_จำนวนใบ_วันที่.png
-    return `${safeName}_${generatedData.quantity}ใบ_${generatedData.orderDate}.png`;
+    const code = generatedData.orderCode || generatedData.oc || '';
+    const suffix = code ? `_${code}` : '';
+    return `${safeName}_${generatedData.quantity}ใบ_${generatedData.orderDate}${suffix}.png`;
   };
 
   const downloadImage = async () => {
