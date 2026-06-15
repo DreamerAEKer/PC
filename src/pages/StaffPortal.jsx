@@ -50,6 +50,7 @@ export default function StaffPortal() {
   const [showDidInput, setShowDidInput] = useState(false);
   const [isRefreshingFolder, setIsRefreshingFolder] = useState(false);
   const [restartKey, setRestartKey] = useState(0);
+  const [scanResultModal, setScanResultModal] = useState(null);
 
   useEffect(() => {
     if (didValue && didValue.trim().length > 0) {
@@ -569,6 +570,52 @@ export default function StaffPortal() {
     }
   };
 
+  const onScanSuccess = (data) => {
+    populateFromScan(data);
+    
+    const code = data.oc || data.orderCode || '';
+    const existing = history.find(r => 
+      (code && (r.orderCode === code || r.oc === code)) || 
+      (r.name === data.name && r.phone === data.phone && r.quantity === data.quantity)
+    );
+    
+    if (existing) {
+      setScanResultModal({
+        success: true,
+        isDup: true,
+        name: data.name,
+        quantity: data.quantity,
+        orderCode: code || '-',
+        dupDate: new Date(existing.timestamp).toLocaleDateString('th-TH') + ' ' + new Date(existing.timestamp).toLocaleTimeString('th-TH'),
+        targetId: existing.id
+      });
+    } else {
+      const newRecord = {
+        ...data,
+        orderCode: code,
+        id: Date.now() + Math.random(),
+        timestamp: new Date().toISOString(),
+        printed: false
+      };
+      setHistory(prev => {
+        const safePrev = Array.isArray(prev) ? prev : [];
+        const updated = [newRecord, ...safePrev];
+        localStorage.setItem('staffHistory', JSON.stringify(updated));
+        return updated;
+      });
+      setHistoryFilter('pending');
+      
+      setScanResultModal({
+        success: true,
+        isDup: false,
+        name: data.name,
+        quantity: data.quantity,
+        orderCode: code || '-',
+        targetId: newRecord.id
+      });
+    }
+  };
+
   useEffect(() => {
     let qrCodeInstance = null;
     let isMounted = true;
@@ -824,7 +871,6 @@ export default function StaffPortal() {
                       return next;
                     });
                   } else {
-                    populateFromScan(data);
                     if (qrCodeInstance && qrCodeInstance.isScanning) {
                       qrCodeInstance.stop().catch(() => {}).then(() => {
                         setScanMode('manual');
@@ -832,7 +878,7 @@ export default function StaffPortal() {
                     } else {
                       setScanMode('manual');
                     }
-                    alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
+                    onScanSuccess(data);
                   }
                 }
               } catch (err) {
@@ -1248,9 +1294,9 @@ export default function StaffPortal() {
       // Fallback to single import
       try {
         const data = parseQrPayload(decodedText);
-        populateFromScan(data);
         
         if (targetScanCount > 0) {
+          populateFromScan(data);
           setCurrentScanCount(prev => {
             const next = prev + 1;
             if (next >= targetScanCount) {
@@ -1263,7 +1309,7 @@ export default function StaffPortal() {
             return next;
           });
         } else {
-          alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
+          onScanSuccess(data);
         }
         return true;
       } catch (err) {
@@ -3366,11 +3412,13 @@ export default function StaffPortal() {
                     {displayedHistory.map((record) => (
                     <div 
                       key={record.id}
+                      id={`record-row-${record.id}`}
                       style={{ 
                         position: 'relative', 
                         borderRadius: '8px',
                         background: '#ef4444',
-                        minHeight: '60px'
+                        minHeight: '60px',
+                        scrollMargin: '100px'
                       }}
                     >
                       {/* Swipe Delete Action Background */}
@@ -3915,6 +3963,155 @@ export default function StaffPortal() {
                 style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem', cursor: 'pointer' }}
               >
                 ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {scanResultModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1100,
+          padding: '1rem',
+          boxSizing: 'border-box'
+        }}>
+          <div className="card glass-panel" style={{
+            width: '100%',
+            maxWidth: '400px',
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            padding: '1.75rem',
+            boxSizing: 'border-box',
+            textAlign: 'center',
+            position: 'relative',
+            animation: 'scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              backgroundColor: scanResultModal.isDup ? '#fffbeb' : '#f0fdf4',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1rem auto',
+              border: scanResultModal.isDup ? '2px solid #fef3c7' : '2px solid #dcfce7'
+            }}>
+              {scanResultModal.isDup ? (
+                <span style={{ fontSize: '2rem' }}>⚠️</span>
+              ) : (
+                <span style={{ fontSize: '2.5rem', color: '#22c55e' }}>✓</span>
+              )}
+            </div>
+
+            <h3 style={{ 
+              margin: '0 0 1rem 0', 
+              color: scanResultModal.isDup ? '#d97706' : '#16a34a', 
+              fontSize: '1.3rem', 
+              fontWeight: 700 
+            }}>
+              {scanResultModal.isDup ? 'ข้อมูลนี้มีในระบบแล้ว' : 'รับข้อมูลสั่งพิมพ์สำเร็จ'}
+            </h3>
+
+            <div style={{
+              backgroundColor: '#f8fafc',
+              borderRadius: '12px',
+              padding: '1rem',
+              textAlign: 'left',
+              fontSize: '0.925rem',
+              color: '#334155',
+              border: '1px solid #e2e8f0',
+              marginBottom: '1.25rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                <span style={{ color: '#64748b' }}>ชื่อ-สกุล:</span>
+                <strong style={{ color: '#0f172a', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '240px' }}>{scanResultModal.name}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                <span style={{ color: '#64748b' }}>จำนวนที่สั่ง:</span>
+                <strong style={{ color: 'var(--primary)', fontSize: '1.05rem' }}>{scanResultModal.quantity} ใบ</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                <span style={{ color: '#64748b' }}>รหัสสั่งพิมพ์:</span>
+                <strong style={{ color: '#1e40af', fontFamily: 'monospace' }}>{scanResultModal.orderCode}</strong>
+              </div>
+              
+              {scanResultModal.isDup && (
+                <div style={{
+                  marginTop: '0.75rem',
+                  paddingTop: '0.75rem',
+                  borderTop: '1px dashed #cbd5e1',
+                  color: '#b45309',
+                  fontSize: '0.825rem',
+                  lineHeight: '1.4'
+                }}>
+                  ℹ️ นำเข้าระบบแล้วเมื่อวันที่:<br/>
+                  <strong>📅 {scanResultModal.dupDate}</strong>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {scanResultModal.targetId && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    const tid = scanResultModal.targetId;
+                    setScanResultModal(null);
+                    setHistoryFilter('all');
+                    setTimeout(() => {
+                      const row = document.getElementById(`record-row-${tid}`);
+                      if (row) {
+                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        const foreground = row.children[1] || row;
+                        const prevShadow = foreground.style.boxShadow;
+                        const prevBorder = foreground.style.borderColor;
+                        foreground.style.boxShadow = '0 0 15px rgba(59, 130, 246, 0.8)';
+                        foreground.style.borderColor = '#3b82f6';
+                        foreground.style.transition = 'all 0.3s ease';
+                        setTimeout(() => {
+                          foreground.style.boxShadow = prevShadow;
+                          foreground.style.borderColor = prevBorder;
+                        }, 2500);
+                      }
+                    }, 350);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '0.65rem',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.25rem',
+                    backgroundColor: scanResultModal.isDup ? '#3b82f6' : '#10b981',
+                    border: 'none',
+                    color: '#fff'
+                  }}
+                >
+                  🔍 ไปที่รายการสั่งพิมพ์นี้
+                </button>
+              )}
+
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setScanResultModal(null)}
+                style={{ width: '100%', padding: '0.65rem', fontWeight: 600 }}
+              >
+                ปิดหน้าต่าง
               </button>
             </div>
           </div>
