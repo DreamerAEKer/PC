@@ -3440,18 +3440,10 @@ export default function StaffPortal() {
                 <button 
                   onClick={() => exportHistory('download')} 
                   className="btn btn-secondary" 
-                  style={{ flex: '1 1 120px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
+                  style={{ flex: '1 1 180px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
                   title="ดาวน์โหลดประวัติเป็นไฟล์ลงเครื่องคอมพิวเตอร์"
                 >
                   💾 บันทึกลงเครื่อง {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
-                </button>
-                <button 
-                  onClick={() => exportHistory('share')} 
-                  className="btn btn-secondary" 
-                  style={{ flex: '1 1 120px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
-                  title="แชร์ข้อมูลประวัติ (ส่งต่อให้เพื่อนทาง LINE หรือแอปอื่นๆ)"
-                >
-                  📤 แชร์ข้อมูล/ส่งไลน์ {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
                 </button>
                 <label 
                   className="btn btn-secondary" 
