@@ -3387,14 +3387,15 @@ export default function StaffPortal() {
                   </span>
                 </h3>
                 {history.length > 0 && (
-                  <button 
-                    type="button"
-                    onClick={toggleSelectAll} 
-                    className="btn"
-                    style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', margin: 0, border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#475569', cursor: 'pointer', borderRadius: '4px' }}
-                  >
-                    {selectedIds.length === history.length ? 'ยกเลิกเลือกทั้งหมด' : 'เลือกทั้งหมด'}
-                  </button>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--text-muted)', cursor: 'pointer', userSelect: 'none' }}>
+                    <input 
+                      type="checkbox"
+                      checked={selectedIds.length === history.length}
+                      onChange={toggleSelectAll}
+                      style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
+                    />
+                    <span>เลือกทั้งหมด</span>
+                  </label>
                 )}
               </div>
 

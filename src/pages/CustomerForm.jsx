@@ -1427,6 +1427,25 @@ export default function CustomerForm() {
 
                 return (
                   <>
+                    {history.length > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: '0.5rem', padding: '0 0.25rem' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--text-muted)', cursor: 'pointer', userSelect: 'none' }}>
+                          <input 
+                            type="checkbox"
+                            checked={selectedIds.length === history.length}
+                            onChange={() => {
+                              if (selectedIds.length === history.length) {
+                                setSelectedIds([]);
+                              } else {
+                                setSelectedIds(history.map(r => r.id));
+                              }
+                            }}
+                            style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
+                          />
+                          <span>เลือกทั้งหมด</span>
+                        </label>
+                      </div>
+                    )}
                     <button
                       type="button"
                       onClick={handleSendToPost}
