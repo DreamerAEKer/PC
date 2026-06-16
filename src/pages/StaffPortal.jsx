@@ -39,6 +39,7 @@ export default function StaffPortal() {
   };
   const [history, setHistory] = useState([]);
   const [historyFilter, setHistoryFilter] = useState('pending'); // 'all', 'pending', 'printed'
+  const [latestRecordId, setLatestRecordId] = useState(null);
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
   const [directoryHandles, setDirectoryHandles] = useState([]);
   const [editingRecordId, setEditingRecordId] = useState(null);
@@ -57,6 +58,37 @@ export default function StaffPortal() {
       setShowDidInput(true);
     }
   }, [didValue]);
+
+  useEffect(() => {
+    if (latestRecordId) {
+      const record = history.find(r => r.id === latestRecordId);
+      if (record) {
+        if (!record.printed) {
+          setHistoryFilter('pending');
+        } else {
+          setHistoryFilter('all');
+        }
+      }
+      
+      const scrollAndHighlight = () => {
+        const row = document.getElementById(`record-row-${latestRecordId}`);
+        if (row) {
+          row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          row.style.transition = 'background-color 0.3s ease';
+          row.style.backgroundColor = '#fef08a';
+          setTimeout(() => {
+            row.style.backgroundColor = record && record.printed ? '#f8fafc' : '#fff';
+          }, 2000);
+          setLatestRecordId(null);
+        }
+      };
+
+      scrollAndHighlight();
+      const timer = setTimeout(scrollAndHighlight, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [latestRecordId, history]);
+
   const [hasActiveData, setHasActiveData] = useState(false);
   const [branchName, setBranchName] = useState('ไปรษณีย์กลาง');
   const [branchCode, setBranchCode] = useState('10501');
@@ -611,8 +643,6 @@ export default function StaffPortal() {
   };
 
   const onScanSuccess = (data) => {
-    populateFromScan(data);
-    
     const code = data.oc || data.orderCode || '';
     const existing = history.find(r => 
       (code && (r.orderCode === code || r.oc === code)) || 
@@ -629,6 +659,7 @@ export default function StaffPortal() {
         dupDate: new Date(existing.timestamp).toLocaleDateString('th-TH') + ' ' + new Date(existing.timestamp).toLocaleTimeString('th-TH'),
         targetId: existing.id
       });
+      setLatestRecordId(existing.id);
     } else {
       let cleanedDid = data.did || '';
       if (cleanedDid) {
@@ -653,6 +684,7 @@ export default function StaffPortal() {
         return updated;
       });
       setHistoryFilter('pending');
+      setLatestRecordId(newRecord.id);
       
       setScanResultModal({
         success: true,
@@ -790,6 +822,9 @@ export default function StaffPortal() {
                   const importedIds = newRecords.map(item => item.id);
                   setSelectedIds(importedIds);
                   setHistoryFilter('pending');
+                  if (newRecords[0]) {
+                    setLatestRecordId(newRecords[0].id);
+                  }
 
                   alert(`🎉 สแกนนำเข้ากลุ่มสำเร็จ! ได้รับข้อมูล ${newRecords.length} รายการเรียบร้อย`);
                   
@@ -875,9 +910,9 @@ export default function StaffPortal() {
                       });
                       
                       setHistoryFilter('pending');
-                      setTimeout(() => {
-                        document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
-                      }, 300);
+                      if (nextPendingRecords[0]) {
+                        setLatestRecordId(nextPendingRecords[0].id);
+                      }
 
                       if (qrCodeInstance && qrCodeInstance.isScanning) {
                         qrCodeInstance.stop().catch(() => {}).then(() => {
@@ -912,9 +947,7 @@ export default function StaffPortal() {
                     });
                     
                     setHistoryFilter('pending');
-                    setTimeout(() => {
-                      document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
-                    }, 300);
+                    setLatestRecordId(newRecord.id);
 
                     setCurrentScanCount(prev => {
                       const next = prev + 1;
@@ -1377,7 +1410,7 @@ export default function StaffPortal() {
         const data = parseQrPayload(decodedText);
         
         if (targetScanCount > 0) {
-          populateFromScan(data);
+          onScanSuccess(data);
           setCurrentScanCount(prev => {
             const next = prev + 1;
             if (next >= targetScanCount) {
@@ -1743,12 +1776,11 @@ export default function StaffPortal() {
       const importedIds = decodedRecords.map(item => item.id);
       setSelectedIds(importedIds);
       setHistoryFilter('pending');
+      if (decodedRecords[0]) {
+        setLatestRecordId(decodedRecords[0].id);
+      }
 
       alert(`นำเข้าจากโฟลเดอร์สำเร็จ! ตรวจพบและนำเข้าไฟล์สำเร็จ ${successCount} รายการ ${duplicateCount > 0 ? `(ข้ามรหัสซ้ำ ${duplicateCount} รายการ)` : ''} ${failCount > 0 ? `| ล้มเหลว/ไม่พบ QR ${failCount} รายการ` : ''}`);
-
-      setTimeout(() => {
-        document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
-      }, 300);
     } else {
       alert("ไม่พบไฟล์ JSON หรือรูปภาพ QR Code ที่ถูกต้องในโฟลเดอร์ที่เลือกเลยครับ");
     }
@@ -1897,12 +1929,11 @@ export default function StaffPortal() {
       const importedIds = decodedRecords.map(item => item.id);
       setSelectedIds(importedIds);
       setHistoryFilter('pending');
+      if (decodedRecords[0]) {
+        setLatestRecordId(decodedRecords[0].id);
+      }
 
       alert(`นำเข้าสำเร็จ ${successCount} ไฟล์! (แปลงเป็นรายการสั่งจองได้ ${decodedRecords.length} รายการและเลือกไว้ให้แล้ว) ${failCount > 0 ? `| ล้มเหลว ${failCount} ไฟล์` : ''}`);
-
-      setTimeout(() => {
-        document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
-      }, 300);
     } else {
       alert("ไม่พบ QR Code หรือข้อมูลไม่ถูกต้องในรูปภาพที่เลือกทั้งหมดครับ");
     }
@@ -2739,10 +2770,9 @@ export default function StaffPortal() {
                                 const val = e.target.value.trim();
                                 if (!val) return;
                                 const data = parseQrPayload(val);
-                                populateFromScan(data);
+                                onScanSuccess(data);
                                 e.target.value = '';
                                 setScanMode('manual');
-                                alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
                               } catch (err) {
                                 alert("ข้อมูล QR Code ไม่ถูกต้อง กรุณาลองใหม่");
                                 e.target.value = '';
@@ -2755,10 +2785,9 @@ export default function StaffPortal() {
                               try {
                                 const data = parseQrPayload(val);
                                 if (data.name || data.phone || data.did) {
-                                  populateFromScan(data);
+                                  onScanSuccess(data);
                                   e.target.value = '';
                                   setScanMode('manual');
-                                  alert("รับข้อมูลสั่งพิมพ์สำเร็จ");
                                 }
                               } catch (err) {}
                             }
@@ -2958,7 +2987,7 @@ export default function StaffPortal() {
                     style={{ width: '100%', fontSize: '1.05rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', margin: 0, padding: '0.65rem' }}
                   >
                     <Printer size={18} />
-                    บันทึกและสั่งพิมพ์
+                    พิมพ์
                   </button>
                   <button 
                     type="button" 
@@ -2966,7 +2995,7 @@ export default function StaffPortal() {
                     className="btn" 
                     style={{ width: '100%', fontSize: '1.05rem', fontWeight: 'bold', border: '2px solid #3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', margin: 0, padding: '0.65rem', cursor: 'pointer' }}
                   >
-                    💾 บันทึกข้อมูลเข้าระบบ (ไม่พิมพ์)
+                    💾 บันทึกข้อมูล
                   </button>
                 </div>
 
