@@ -2979,25 +2979,27 @@ export default function StaffPortal() {
                 </div>
 
                 <ThaiAddressFields register={register} setValue={setValue} errors={errors} dirtyFields={dirtyFields} touchedFields={touchedFields} isAddressRequired={!isDidActive} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
-                  <button 
-                    type="submit" 
-                    onClick={handleDirectPrintClick} 
-                    className="btn btn-primary" 
-                    style={{ width: '100%', fontSize: '1.05rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', margin: 0, padding: '0.65rem' }}
-                  >
-                    <Printer size={18} />
-                    พิมพ์
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={handleSaveOnlyClick} 
-                    className="btn" 
-                    style={{ width: '100%', fontSize: '1.05rem', fontWeight: 'bold', border: '2px solid #3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', margin: 0, padding: '0.65rem', cursor: 'pointer' }}
-                  >
-                    💾 บันทึกข้อมูล
-                  </button>
-                </div>
+                {(scanMode === 'manual' || editingRecordId !== null) && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+                    <button 
+                      type="submit" 
+                      onClick={handleDirectPrintClick} 
+                      className="btn btn-primary" 
+                      style={{ width: '100%', fontSize: '1.05rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', margin: 0, padding: '0.65rem' }}
+                    >
+                      <Printer size={18} />
+                      พิมพ์
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={handleSaveOnlyClick} 
+                      className="btn" 
+                      style={{ width: '100%', fontSize: '1.05rem', fontWeight: 'bold', border: '2px solid #3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', margin: 0, padding: '0.65rem', cursor: 'pointer' }}
+                    >
+                      💾 บันทึกข้อมูล
+                    </button>
+                  </div>
+                )}
 
                 <div className="print-settings-panel" style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#475569' }}>
