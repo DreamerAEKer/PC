@@ -239,17 +239,27 @@ export default function StaffPortal() {
   const [printDataList, setPrintDataList] = useState([]);
 
   const [presets, setPresets] = useState(() => {
+    const defaultList = [
+      { name: 'ค่าเริ่มต้นไปรษณียบัตร', top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' },
+      { name: 'ตัวอักษรใหญ่ (ซม.)', top: 4.0, left: 9.0, fontSize: 7, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' },
+      { name: 'เครื่อง Drop Off', top: 4.0, left: 5.5, fontSize: 15, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' }
+    ];
     try {
       const saved = localStorage.getItem('customPrintPresets');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const merged = [...defaultList];
+          parsed.forEach(p => {
+            if (!merged.some(m => m.name === p.name)) {
+              merged.push(p);
+            }
+          });
+          return merged;
+        }
       }
     } catch (e) {}
-    return [
-      { name: 'ค่าเริ่มต้นไปรษณียบัตร', top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' },
-      { name: 'ตัวอักษรใหญ่ (ซม.)', top: 4.0, left: 9.0, fontSize: 7, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' }
-    ];
+    return defaultList;
   });
 
   const [newPresetName, setNewPresetName] = useState('');
@@ -3020,7 +3030,7 @@ export default function StaffPortal() {
                             alert('กรุณาเลือกพรีเซ็ตที่ต้องการลบก่อนครับ');
                             return;
                           }
-                          if (nameToDelete === 'ค่าเริ่มต้นไปรษณียบัตร' || nameToDelete === 'ตัวอักษรใหญ่ (ซม.)') {
+                          if (nameToDelete === 'ค่าเริ่มต้นไปรษณียบัตร' || nameToDelete === 'ตัวอักษรใหญ่ (ซม.)' || nameToDelete === 'เครื่อง Drop Off') {
                             alert('ไม่สามารถลบพรีเซ็ตเริ่มต้นของระบบได้ครับ');
                             return;
                           }
