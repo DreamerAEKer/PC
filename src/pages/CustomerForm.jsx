@@ -702,7 +702,8 @@ export default function CustomerForm() {
           }
         }
       `}</style>
-      {/* Non-clickable Banner */}
+      {/* Non-clickable Banner commented out for security review */}
+      {/*
       <div 
         style={{ 
           width: '100%', 
@@ -717,6 +718,7 @@ export default function CustomerForm() {
           style={{ width: '100%', height: 'auto', display: 'block' }} 
         />
       </div>
+      */}
 
       <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
         <div style={{ flex: '1 1 400px' }}>
@@ -726,6 +728,8 @@ export default function CustomerForm() {
               <CheckCircle color="var(--primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
               <span>กรอกข้อมูลเพื่อสั่งพิมพ์ไปรษณียบัตร</span>
             </h2>
+            {/* Rules and Guide buttons commented out to prevent loading sensitive brand images */}
+            {/*
             <div className="btn-group-responsive" style={{ display: 'flex', gap: '0.4rem', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               <button
                 type="button"
@@ -776,6 +780,7 @@ export default function CustomerForm() {
                 📱 วิธีโหวตผ่านแอป
               </button>
             </div>
+            */}
           </div>
           <form onSubmit={handleSubmit(onSubmit, onError)}>
             <div className="form-group">
