@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import { flushSync } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
@@ -41,6 +42,7 @@ export default function StaffPortal() {
   const [historyFilter, setHistoryFilter] = useState('pending'); // 'all', 'pending', 'printed'
   const [latestRecordId, setLatestRecordId] = useState(null);
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
+  const [cardRecord, setCardRecord] = useState(null);
   const [directoryHandles, setDirectoryHandles] = useState([]);
   const [editingRecordId, setEditingRecordId] = useState(null);
   const [scanMode, setScanMode] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768 ? 'camera' : 'manual');
@@ -482,7 +484,7 @@ export default function StaffPortal() {
     window.print();
   };
 
-  const exportHistory = async () => {
+  const exportHistory = async (mode = 'download') => {
     const recordsToExport = selectedIds.length > 0
       ? history.filter(r => selectedIds.includes(r.id))
       : history;
@@ -497,20 +499,26 @@ export default function StaffPortal() {
       ? `staff-history-selected-${dateStr}.json`
       : `staff-history-${dateStr}.json`;
 
-    if (navigator.share && navigator.canShare) {
-      try {
-        const file = new File([dataStr], filename, { type: 'application/json' });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: 'ประวัติข้อมูลลูกค้าจอง',
-            text: `ไฟล์ข้อมูลลูกค้าสาขา ${branchName} (${branchCode}) ประจำวันที่ ${dateStr}`
-          });
-          return;
+    if (mode === 'share') {
+      if (navigator.share && navigator.canShare) {
+        try {
+          const file = new File([dataStr], filename, { type: 'application/json' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: 'ประวัติข้อมูลลูกค้าจอง',
+              text: `ไฟล์ข้อมูลลูกค้าสาขา ${branchName} (${branchCode}) ประจำวันที่ ${dateStr}`
+            });
+            return;
+          }
+        } catch (err) {
+          console.warn("Share failed", err);
+          alert("ไม่สามารถแชร์ได้: " + err.message);
         }
-      } catch (err) {
-        console.warn("Share failed, falling back to download", err);
+      } else {
+        alert("อุปกรณ์หรือเบราว์เซอร์ของคุณไม่รองรับการแชร์โดยตรง กรุณาใช้ปุ่มบันทึกลงเครื่องครับ");
       }
+      return;
     }
 
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -520,6 +528,34 @@ export default function StaffPortal() {
     link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const generateAndDownloadCard = async (record) => {
+    setCardRecord(record);
+    setTimeout(async () => {
+      const el = document.getElementById('hidden-capture-card');
+      if (el) {
+        try {
+          const canvas = await html2canvas(el, { 
+            scale: 2,
+            useCORS: true,
+            allowTaint: true
+          });
+          const url = canvas.toDataURL('image/png');
+          const a = document.createElement('a');
+          const dateStr = record.orderDate || new Date().toISOString().split('T')[0];
+          a.href = url;
+          a.download = `postcard-card-${record.name || 'customer'}-${dateStr}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } catch (e) {
+          console.error("Capture card error:", e);
+          alert("ไม่สามารถบันทึกภาพการ์ดได้: " + e.message);
+        }
+      }
+      setCardRecord(null);
+    }, 500);
   };
 
   const importHistory = (e) => {
@@ -3402,12 +3438,20 @@ export default function StaffPortal() {
               {/* Export/Import Control Buttons */}
               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
                 <button 
-                  onClick={exportHistory} 
+                  onClick={() => exportHistory('download')} 
                   className="btn btn-secondary" 
-                  style={{ flex: '1 1 180px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
-                  title="ดาวน์โหลดประวัติเป็นไฟล์เพื่อนำไปเปิดเครื่องอื่น"
+                  style={{ flex: '1 1 120px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
+                  title="ดาวน์โหลดประวัติเป็นไฟล์ลงเครื่องคอมพิวเตอร์"
                 >
-                  <Upload size={14} /> {selectedIds.length > 0 ? `ส่งออกที่เลือก (${selectedIds.length})` : 'ส่งออกข้อมูลทั้งหมด'}
+                  💾 บันทึกลงเครื่อง {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
+                </button>
+                <button 
+                  onClick={() => exportHistory('share')} 
+                  className="btn btn-secondary" 
+                  style={{ flex: '1 1 120px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
+                  title="แชร์ข้อมูลประวัติ (ส่งต่อให้เพื่อนทาง LINE หรือแอปอื่นๆ)"
+                >
+                  📤 แชร์ข้อมูล/ส่งไลน์ {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
                 </button>
                 <label 
                   className="btn btn-secondary" 
@@ -3633,8 +3677,34 @@ export default function StaffPortal() {
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
                           {record.phone && <div>โทร: {record.phone}</div>}
                           {record.quantity !== undefined && <div>จำนวน: {record.quantity} ใบ</div>}
-                          <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.15rem' }}>
-                            {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.2rem' }}>
+                            <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                              {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                generateAndDownloadCard(record);
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.2rem',
+                                padding: '0.15rem 0.4rem',
+                                borderRadius: '4px',
+                                border: '1px solid #10b981',
+                                backgroundColor: '#ecfdf5',
+                                color: '#047857',
+                                fontSize: '0.65rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                outline: 'none'
+                              }}
+                              title="ดาวน์โหลดรูปภาพการ์ดสั่งจอง (ไฟล์รูปภาพแบบเดียวกับของลูกค้า)"
+                            >
+                              🖼️ บันทึก
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -4269,6 +4339,101 @@ export default function StaffPortal() {
               >
                 ปิดหน้าต่าง
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {cardRecord && (
+        <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', zIndex: -10 }}>
+          <div 
+            id="hidden-capture-card" 
+            style={{ 
+              backgroundColor: '#ffffff', 
+              borderRadius: '12px', 
+              padding: '1.25rem', 
+              width: '360px', 
+              boxSizing: 'border-box',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              color: '#0f172a'
+            }}
+          >
+            <div style={{ textAlign: 'center', borderBottom: '2px solid var(--primary)', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.15rem', fontWeight: 'bold' }}>
+                PostcardApp จองพิมพ์ผ่านพี่ไปร
+              </h3>
+              <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.15rem' }}>
+                * สำหรับนำยื่นให้เจ้าหน้าที่สแกนสั่งพิมพ์
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#fff', padding: '1rem', borderRadius: '12px', border: '2px solid var(--primary)', marginBottom: '1rem' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--primary)', marginBottom: '0.5rem' }}>
+                QR สำหรับสั่งพิมพ์
+              </div>
+              <QRCodeCanvas 
+                value={JSON.stringify({
+                  oc: cardRecord.orderCode || cardRecord.oc || '',
+                  sn: cardRecord.senderNickname || cardRecord.sn || '',
+                  sp: cardRecord.senderPhone || cardRecord.sp || '',
+                  d: cardRecord.orderDate || '',
+                  q: cardRecord.quantity || 100,
+                  n: cardRecord.name || '',
+                  p: cardRecord.phone || '',
+                  a: cardRecord.addressLine1 || cardRecord.address || '',
+                  sd: cardRecord.subdistrict || '',
+                  dt: cardRecord.district || '',
+                  pv: cardRecord.province || '',
+                  zp: cardRecord.zipcode || '',
+                  id: cardRecord.did || '',
+                  idx: 1,
+                  tot: 1,
+                  s: cardRecord.subBookings ? cardRecord.subBookings.map(sub => ({
+                    n: sub.name,
+                    p: sub.phone,
+                    q: sub.quantity,
+                    m: sub.useMainAddress ? 1 : 0,
+                    a: sub.address
+                  })) : []
+                })} 
+                size={220} 
+                level="L" 
+              />
+            </div>
+
+            <div style={{ backgroundColor: '#f8fafc', borderRadius: '8px', padding: '0.85rem', border: '1px solid #e2e8f0', fontSize: '0.85rem', lineHeight: '1.5' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #cbd5e1', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                <span style={{ color: '#64748b' }}>รหัสสั่งพิมพ์:</span>
+                <strong style={{ color: '#1e40af', fontFamily: 'monospace' }}>{cardRecord.orderCode || cardRecord.oc || '-'}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>ชื่อผู้รับ:</span>
+                <strong>{cardRecord.name}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>เบอร์โทร:</span>
+                <strong>{cardRecord.phone || '-'}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>จำนวน:</span>
+                <strong style={{ color: 'var(--primary)' }}>{cardRecord.quantity} ใบ</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>วันที่สั่งจอง:</span>
+                <strong>{cardRecord.orderDate || ''}</strong>
+              </div>
+              {cardRecord.did ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #e2e8f0', marginTop: '0.3rem', paddingTop: '0.3rem' }}>
+                  <span style={{ color: '#64748b' }}>D-ID:</span>
+                  <strong style={{ color: '#dc2626' }}>{cardRecord.did}</strong>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #e2e8f0', marginTop: '0.3rem', paddingTop: '0.3rem' }}>
+                  <span style={{ color: '#64748b' }}>ที่อยู่:</span>
+                  <strong style={{ textAlign: 'right', fontSize: '0.8rem', wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '200px' }}>
+                    {cardRecord.addressLine1 || cardRecord.address || ''} {cardRecord.zipcode}
+                  </strong>
+                </div>
+              )}
             </div>
           </div>
         </div>
