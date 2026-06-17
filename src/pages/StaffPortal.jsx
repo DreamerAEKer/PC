@@ -3341,11 +3341,10 @@ export default function StaffPortal() {
           <div className="staff-right-column" style={{ flex: '1 1 500px', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {/* Totals Summary */}
             {history.length > 0 && (() => {
-              const todayStr = new Date().toISOString().split('T')[0];
-              const todayRecordsList = history.filter(r => r.orderDate === todayStr || (r.timestamp && r.timestamp.startsWith(todayStr)));
-              const todayCount = todayRecordsList.length;
-              const todayTotal = todayRecordsList.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
-              const todayPrice = todayTotal * 3;
+              const pendingRecordsList = history.filter(r => !r.printed);
+              const pendingCount = pendingRecordsList.length;
+              const pendingTotal = pendingRecordsList.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
+              const pendingPrice = pendingTotal * 3;
 
               const grandCount = history.length;
               const grandTotal = history.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
@@ -3359,16 +3358,16 @@ export default function StaffPortal() {
                     boxShadow: '0 4px 12px rgba(225, 29, 72, 0.05)'
                   }}>
                     <div className="stats-card-header" style={{ color: 'var(--primary)', borderBottom: '1px solid #fda4af' }}>
-                      ยอดสั่งพิมพ์วันนี้
+                      ยอดรอการสั่งพิมพ์
                     </div>
                     <div className="stats-subgrid">
                       <div className="stats-subcard" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
                         <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวน</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{todayCount} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>รายการ</span></div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{pendingCount} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>รายการ</span></div>
                       </div>
                       <div className="stats-subcard" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
                         <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวน</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{todayTotal} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>ใบ</span></div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{pendingTotal} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>ใบ</span></div>
                       </div>
                     </div>
                     <div className="stats-footer" style={{ 
@@ -3377,7 +3376,7 @@ export default function StaffPortal() {
                       boxShadow: '0 4px 10px rgba(225, 29, 72, 0.2)'
                     }}>
                       <span style={{ fontSize: '0.85rem', fontWeight: 'bold', opacity: 0.9 }}>รวมเป็นเงิน:</span>
-                      <strong style={{ fontSize: '1.25rem', fontWeight: '900' }}>{todayPrice.toLocaleString()} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>บาท</span></strong>
+                      <strong style={{ fontSize: '1.25rem', fontWeight: '900' }}>{pendingPrice.toLocaleString()} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>บาท</span></strong>
                     </div>
                   </div>
 
