@@ -3700,6 +3700,37 @@ export default function StaffPortal() {
                         </div>
                       </div>
 
+                      {/* Sender / Order info block on the right, if available */}
+                      {(record.senderNickname || record.orderCode) && (
+                        <div style={{ 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          alignItems: 'flex-end', 
+                          justifyContent: 'center',
+                          fontSize: '0.75rem', 
+                          color: '#475569', 
+                          textAlign: 'right',
+                          marginRight: '0.75rem',
+                          paddingRight: '0.75rem',
+                          borderRight: '1px dashed #e2e8f0',
+                          flexShrink: 0,
+                          lineHeight: '1.4'
+                        }}>
+                          {record.senderNickname && (
+                            <div>
+                              <span style={{ color: '#94a3b8', fontSize: '0.65rem' }}>ผู้สั่งพิมพ์:</span>{' '}
+                              <strong style={{ color: '#334155' }}>{record.senderNickname}</strong>
+                            </div>
+                          )}
+                          {record.orderCode && (
+                            <div>
+                              <span style={{ color: '#94a3b8', fontSize: '0.65rem' }}>รหัสสั่งซื้อ:</span>{' '}
+                              <strong style={{ color: '#0f172a', fontFamily: 'monospace' }}>{record.orderCode}</strong>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       {/* Control buttons - always right, never wrap */}
                       <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, alignItems: 'center' }}>
                         <button 
