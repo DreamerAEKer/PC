@@ -670,6 +670,9 @@ export default function StaffPortal() {
     setValue("province", data.province || "-", { shouldValidate: true });
     setValue("zipcode", data.zipcode || "-", { shouldValidate: true });
     setValue("did", data.did || "", { shouldValidate: true });
+    setValue("orderCode", data.orderCode || data.oc || "");
+    setValue("senderNickname", data.senderNickname || data.sn || "");
+    setValue("senderPhone", data.senderPhone || data.sp || "");
     setHasActiveData(true);
     if (data.id) {
       setEditingRecordId(data.id);
@@ -2924,6 +2927,52 @@ export default function StaffPortal() {
                     </button>
                   </div>
                 )}
+
+                {(formValues.orderCode || formValues.senderNickname || formValues.senderPhone) && (
+                  <div style={{
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '0.75rem',
+                    marginBottom: '1rem',
+                    fontSize: '0.85rem',
+                    color: '#475569'
+                  }}>
+                    <div style={{ fontWeight: 'bold', color: '#1e293b', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      📋 ข้อมูลการสั่งพิมพ์จากลูกค้า
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.75rem' }}>
+                      <div>
+                        <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>รหัสสั่งพิมพ์</span>
+                        <input 
+                          type="text" 
+                          readOnly 
+                          {...register("orderCode")} 
+                          style={{ width: '100%', border: 'none', background: 'transparent', fontWeight: 'bold', color: '#0f172a', padding: 0, outline: 'none' }} 
+                        />
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>ผู้สั่ง (ชื่อเล่น)</span>
+                        <input 
+                          type="text" 
+                          readOnly 
+                          {...register("senderNickname")} 
+                          style={{ width: '100%', border: 'none', background: 'transparent', fontWeight: 'bold', color: '#0f172a', padding: 0, outline: 'none' }} 
+                        />
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>เบอร์โทรผู้สั่ง</span>
+                        <input 
+                          type="text" 
+                          readOnly 
+                          {...register("senderPhone")} 
+                          style={{ width: '100%', border: 'none', background: 'transparent', fontWeight: 'bold', color: '#0f172a', padding: 0, outline: 'none' }} 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <div className="form-group" style={{ flex: 1 }}>
                     <label className="form-label">วันที่สั่งจอง <span style={{color:'red'}}>*</span></label>
