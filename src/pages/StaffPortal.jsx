@@ -13,6 +13,44 @@ import jsQR from 'jsqr';
 
 let globalHiddenScanner = null;
 
+const DB_NAME = 'StaffPortalDB';
+const STORE_NAME = 'FolderHandles';
+
+const saveHandlesToDB = async (handles) => {
+  return new Promise((resolve) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = (e) => {
+      e.target.result.createObjectStore(STORE_NAME);
+    };
+    request.onsuccess = (e) => {
+      const db = e.target.result;
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      store.put(handles, 'directoryHandles');
+      tx.oncomplete = () => resolve();
+    };
+    request.onerror = () => resolve();
+  });
+};
+
+const loadHandlesFromDB = async () => {
+  return new Promise((resolve) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = (e) => {
+      e.target.result.createObjectStore(STORE_NAME);
+    };
+    request.onsuccess = (e) => {
+      const db = e.target.result;
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const getReq = store.get('directoryHandles');
+      getReq.onsuccess = () => resolve(getReq.result || []);
+      getReq.onerror = () => resolve([]);
+    };
+    request.onerror = () => resolve([]);
+  });
+};
+
 export default function StaffPortal() {
   const { register, handleSubmit, setValue, getValues, reset, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
 
@@ -199,6 +237,16 @@ export default function StaffPortal() {
   const shouldShowRed = hasTextToSave && isSettingsDirty;
 
   useEffect(() => {
+    saveHandlesToDB(directoryHandles);
+  }, [directoryHandles]);
+
+  useEffect(() => {
+    loadHandlesFromDB().then(handles => {
+      if (Array.isArray(handles)) {
+        setDirectoryHandles(handles);
+      }
+    });
+
     const savedBranch = localStorage.getItem('branchName') || 'ไปรษณีย์กลาง';
     const savedCode = localStorage.getItem('branchCode');
     if (savedCode) {
