@@ -1837,7 +1837,11 @@ export default function StaffPortal() {
 
       alert(`นำเข้าจากโฟลเดอร์สำเร็จ! ตรวจพบและนำเข้าไฟล์สำเร็จ ${successCount} รายการ ${duplicateCount > 0 ? `(ข้ามรหัสซ้ำ ${duplicateCount} รายการ)` : ''} ${failCount > 0 ? `| ล้มเหลว/ไม่พบ QR ${failCount} รายการ` : ''}`);
     } else {
-      alert("ไม่พบไฟล์ JSON หรือรูปภาพ QR Code ที่ถูกต้องในโฟลเดอร์ที่เลือกเลยครับ");
+      if (duplicateCount > 0) {
+        alert(`ดึงข้อมูลเสร็จสิ้น: ไม่พบรายการใหม่เพิ่มเติม (ข้ามรายการที่เคยนำเข้าหรือสั่งพิมพ์ไปแล้ว ${duplicateCount} รายการ)`);
+      } else {
+        alert("ไม่พบไฟล์ JSON หรือรูปภาพ QR Code ที่ถูกต้องในโฟลเดอร์ที่เลือกเลยครับ");
+      }
     }
 
     if (e && e.target && 'value' in e.target) {
