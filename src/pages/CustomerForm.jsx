@@ -452,7 +452,15 @@ export default function CustomerForm() {
         useCORS: true,
         allowTaint: true,
         scrollY: -window.scrollY,
-        windowWidth: document.documentElement.scrollWidth
+        windowWidth: document.documentElement.scrollWidth,
+        onclone: (clonedDoc) => {
+          const animatedElements = clonedDoc.querySelectorAll('.qr-card-bounce');
+          animatedElements.forEach(item => {
+            item.style.animation = 'none';
+            item.style.opacity = '1';
+            item.style.transform = 'none';
+          });
+        }
       });
       const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
@@ -484,7 +492,15 @@ export default function CustomerForm() {
         useCORS: true,
         allowTaint: true,
         scrollY: -window.scrollY,
-        windowWidth: document.documentElement.scrollWidth
+        windowWidth: document.documentElement.scrollWidth,
+        onclone: (clonedDoc) => {
+          const animatedElements = clonedDoc.querySelectorAll('.qr-card-bounce');
+          animatedElements.forEach(item => {
+            item.style.animation = 'none';
+            item.style.opacity = '1';
+            item.style.transform = 'none';
+          });
+        }
       });
       const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
       if (blob) {

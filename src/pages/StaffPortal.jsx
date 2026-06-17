@@ -3824,7 +3824,7 @@ export default function StaffPortal() {
                       </div>
 
                       {/* Sender / Order info block on the right, if available */}
-                      {(record.senderNickname || record.orderCode) && (
+                      {(record.senderNickname || record.sn || record.orderCode || record.oc) && (
                         <div style={{ 
                           display: 'flex', 
                           flexDirection: 'column', 
@@ -3839,16 +3839,16 @@ export default function StaffPortal() {
                           flexShrink: 0,
                           lineHeight: '1.4'
                         }}>
-                          {record.senderNickname && (
+                          {(record.senderNickname || record.sn) && (
                             <div>
                               <span style={{ color: '#94a3b8', fontSize: '0.65rem' }}>ผู้สั่งพิมพ์:</span>{' '}
-                              <strong style={{ color: '#334155' }}>{record.senderNickname}</strong>
+                              <strong style={{ color: '#334155' }}>{record.senderNickname || record.sn}</strong>
                             </div>
                           )}
-                          {record.orderCode && (
+                          {(record.orderCode || record.oc) && (
                             <div>
                               <span style={{ color: '#94a3b8', fontSize: '0.65rem' }}>รหัสสั่งซื้อ:</span>{' '}
-                              <strong style={{ color: '#0f172a', fontFamily: 'monospace' }}>{record.orderCode}</strong>
+                              <strong style={{ color: '#0f172a', fontFamily: 'monospace' }}>{record.orderCode || record.oc}</strong>
                             </div>
                           )}
                         </div>
