@@ -378,6 +378,8 @@ export default function CustomerForm() {
      // Create a payload string (JSON) for the QR code using compressed format
      const compressedData = {
        oc: generatedOrderCode,
+       sn: processedData.senderNickname || '',
+       sp: processedData.senderPhone || '',
        d: processedData.orderDate,
        q: processedData.quantity,
        n: processedData.name,
@@ -1907,6 +1909,8 @@ export default function CustomerForm() {
                     const prevRec = bulkRecords[prevIdx];
                     const compData = {
                       oc: prevRec.orderCode || prevRec.oc || '',
+                      sn: prevRec.senderNickname || prevRec.sn || '',
+                      sp: prevRec.senderPhone || prevRec.sp || '',
                       d: prevRec.orderDate,
                       q: prevRec.quantity,
                       n: prevRec.name,
@@ -1951,6 +1955,8 @@ export default function CustomerForm() {
                     const nextRec = bulkRecords[nextIdx];
                     const compData = {
                       oc: nextRec.orderCode || nextRec.oc || '',
+                      sn: nextRec.senderNickname || nextRec.sn || '',
+                      sp: nextRec.senderPhone || nextRec.sp || '',
                       d: nextRec.orderDate,
                       q: nextRec.quantity,
                       n: nextRec.name,

@@ -3847,7 +3847,7 @@ export default function StaffPortal() {
                           )}
                           {(record.orderCode || record.oc) && (
                             <div>
-                              <span style={{ color: '#94a3b8', fontSize: '0.65rem' }}>รหัสสั่งซื้อ:</span>{' '}
+                              <span style={{ color: '#94a3b8', fontSize: '0.65rem' }}>รหัสสั่งพิมพ์:</span>{' '}
                               <strong style={{ color: '#0f172a', fontFamily: 'monospace' }}>{record.orderCode || record.oc}</strong>
                             </div>
                           )}
