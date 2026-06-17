@@ -1577,15 +1577,19 @@ export default function StaffPortal() {
           for (const raw of list) {
             const code = raw.orderCode || raw.oc || '';
             const name = raw.name || raw.n || '';
-            if (code) {
-              const isDup = history.some(r => (r.orderCode === code || r.oc === code)) || decodedRecords.some(r => r.orderCode === code);
-              if (isDup) {
-                const proceed = await window.showConfirm(`⚠️ ตรวจพบรหัสสั่งพิมพ์ซ้ำจากไฟล์ JSON: ${code} (ชื่อ: ${name})\nคุณต้องการนำเข้าข้อมูลรายการนี้อีกครั้งหรือไม่?`);
-                if (!proceed) {
-                  duplicateCount++;
-                  continue;
-                }
-              }
+            const isDup = history.some(r => {
+              if (code && (r.orderCode === code || r.oc === code)) return true;
+              if (!code && r.name === name && r.phone === (raw.phone || raw.p || '')) return true;
+              return false;
+            }) || decodedRecords.some(r => {
+              if (code && r.orderCode === code) return true;
+              if (!code && r.name === name && r.phone === (raw.phone || raw.p || '')) return true;
+              return false;
+            });
+
+            if (isDup) {
+              duplicateCount++;
+              continue;
             }
 
             const mappedSubBookings = (raw.subBookings || raw.s || []).map((sub, subIdx) => ({
@@ -1649,12 +1653,18 @@ export default function StaffPortal() {
               for (const recordRaw of raw.r) {
                 const code = recordRaw.oc || '';
                 const name = recordRaw.n || '';
-                if (code) {
-                  const isDup = history.some(r => (r.orderCode === code || r.oc === code)) || decodedRecords.some(r => r.orderCode === code);
-                  if (isDup) {
-                    duplicateCount++;
-                    continue; // ข้ามออเดอร์ที่มีอยู่แล้ว — ไม่นำเข้าซ้ำ และคงสถานะพิมพ์แล้วไว้
-                  }
+                const isDup = history.some(r => {
+                  if (code && (r.orderCode === code || r.oc === code)) return true;
+                  if (!code && r.name === name && r.phone === (recordRaw.p || '')) return true;
+                  return false;
+                }) || decodedRecords.some(r => {
+                  if (code && r.orderCode === code) return true;
+                  if (!code && r.name === name && r.phone === (recordRaw.p || '')) return true;
+                  return false;
+                });
+                if (isDup) {
+                  duplicateCount++;
+                  continue; // ข้ามออเดอร์ที่มีอยู่แล้ว — ไม่นำเข้าซ้ำ และคงสถานะพิมพ์แล้วไว้
                 }
 
                 const mappedSubBookings = (recordRaw.s || []).map((sub, subIdx) => ({
@@ -1708,12 +1718,18 @@ export default function StaffPortal() {
               const singleData = parseQrPayload(decodedText);
               const code = singleData.orderCode || singleData.oc || '';
               const name = singleData.name || '';
-              if (code) {
-                const isDup = history.some(r => (r.orderCode === code || r.oc === code)) || decodedRecords.some(r => r.orderCode === code);
-                if (isDup) {
-                  duplicateCount++;
-                  continue; // ข้ามออเดอร์ที่มีอยู่แล้ว — ไม่นำเข้าซ้ำ และคงสถานะพิมพ์แล้วไว้
-                }
+              const isDup = history.some(r => {
+                if (code && (r.orderCode === code || r.oc === code)) return true;
+                if (!code && r.name === name && r.phone === (singleData.phone || '')) return true;
+                return false;
+              }) || decodedRecords.some(r => {
+                if (code && r.orderCode === code) return true;
+                if (!code && r.name === name && r.phone === (singleData.phone || '')) return true;
+                return false;
+              });
+              if (isDup) {
+                duplicateCount++;
+                continue; // ข้ามออเดอร์ที่มีอยู่แล้ว — ไม่นำเข้าซ้ำ และคงสถานะพิมพ์แล้วไว้
               }
 
               const prefixSubdist = singleData.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.';
