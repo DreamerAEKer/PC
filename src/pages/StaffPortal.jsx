@@ -1636,6 +1636,8 @@ export default function StaffPortal() {
               province: itemForAddress.province,
               zipcode: itemForAddress.zipcode,
               did: cleanedDid,
+              senderNickname: raw.senderNickname || raw.sn || '',
+              senderPhone: raw.senderPhone || raw.sp || '',
               isAdvancedMode: mappedSubBookings.length > 0,
               subBookings: mappedSubBookings,
               printed: false
@@ -1711,6 +1713,8 @@ export default function StaffPortal() {
                   province: itemForAddress.province,
                   zipcode: itemForAddress.zipcode,
                   did: cleanedDid,
+                  senderNickname: recordRaw.sn || '',
+                  senderPhone: recordRaw.sp || '',
                   isAdvancedMode: mappedSubBookings.length > 0,
                   subBookings: mappedSubBookings,
                   printed: false
@@ -1779,6 +1783,8 @@ export default function StaffPortal() {
                 province: singleData.province || '',
                 zipcode: singleData.zipcode || '',
                 did: cleanedDid,
+                senderNickname: singleData.senderNickname || singleData.sn || '',
+                senderPhone: singleData.senderPhone || singleData.sp || '',
                 isAdvancedMode: mappedSubBookings.length > 0,
                 subBookings: mappedSubBookings,
                 printed: false
