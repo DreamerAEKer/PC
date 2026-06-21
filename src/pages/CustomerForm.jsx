@@ -519,9 +519,7 @@ export default function CustomerForm() {
     if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
       try {
         await navigator.share({
-          files: [imageFile],
-          title: 'ข้อมูลผู้รับ',
-          text: 'รูปภาพข้อมูลผู้รับ สำหรับการพิมพ์ไปรษณียบัตร'
+          files: [imageFile]
         });
         return;
       } catch (e) {
