@@ -7,6 +7,7 @@ import { Html5QrcodeScanner, Html5Qrcode, Html5QrcodeSupportedFormats } from 'ht
 import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload, RefreshCw, Camera, FolderOpen } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
+import ThaiDatePicker from '../components/ThaiDatePicker';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useThaiAddress } from 'use-thai-address';
 import jsQR from 'jsqr';
@@ -3034,7 +3035,13 @@ export default function StaffPortal() {
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <div className="form-group" style={{ flex: 1 }}>
                     <label className="form-label">วันที่สั่งจอง <span style={{color:'red'}}>*</span></label>
-                    <input type="date" className={`form-control ${getFieldClass('orderDate')}`} required {...register("orderDate", { required: true })} defaultValue={new Date().toISOString().split('T')[0]} />
+                    <ThaiDatePicker 
+                      className={`form-control ${getFieldClass('orderDate')}`} 
+                      required 
+                      {...register("orderDate", { required: true })} 
+                      watchValue={watch("orderDate")} 
+                      defaultValue={new Date().toISOString().split('T')[0]} 
+                    />
                     {errors.orderDate && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุวันที่</span>}
                   </div>
                   <div className="form-group" style={{ flex: 1 }}>

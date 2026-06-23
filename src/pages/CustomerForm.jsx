@@ -6,20 +6,10 @@ import { Download, CheckCircle, Clock, Share2 } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import SubAddressFields from '../components/SubAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
+import ThaiDatePicker, { formatThaiDate } from '../components/ThaiDatePicker';
 import { useThaiAddress } from 'use-thai-address';
 
-const formatThaiDate = (dateStr) => {
-  if (!dateStr) return '';
-  const parts = dateStr.split('-');
-  if (parts.length === 3) {
-    const year = parseInt(parts[0], 10);
-    const month = parts[1];
-    const day = parts[2];
-    const beYear = year + 543;
-    return `${day}/${month}/${beYear}`;
-  }
-  return dateStr;
-};
+
 
 export default function CustomerForm() {
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ 
@@ -801,7 +791,13 @@ export default function CustomerForm() {
           <form onSubmit={handleSubmit(onSubmit, onError)}>
             <div className="form-group">
               <label className="form-label">วันที่สั่งจอง <span style={{color:'red'}}>*</span></label>
-              <input type="date" className={`form-control ${getFieldClass('orderDate')}`} required {...register("orderDate", { required: true })} defaultValue={new Date().toISOString().split('T')[0]} />
+              <ThaiDatePicker 
+                className={`form-control ${getFieldClass('orderDate')}`} 
+                required 
+                {...register("orderDate", { required: true })} 
+                watchValue={watch("orderDate")} 
+                defaultValue={new Date().toISOString().split('T')[0]} 
+              />
               {errors.orderDate && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุวันที่สั่งจอง</span>}
             </div>
             <div className="form-group">
