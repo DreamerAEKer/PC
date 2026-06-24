@@ -361,7 +361,7 @@ export default function StaffPortal() {
         return {
           top: typeof parsed.top === 'number' ? parsed.top : 4.5,
           left: typeof parsed.left === 'number' ? parsed.left : 9.5,
-          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 12,
+          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 6,
           isNameBold: typeof parsed.isNameBold === 'boolean' ? parsed.isNameBold : true,
           isPhoneBold: typeof parsed.isPhoneBold === 'boolean' ? parsed.isPhoneBold : true,
           didPrintMode: mode,
@@ -373,10 +373,10 @@ export default function StaffPortal() {
         };
       }
       localStorage.setItem('printSettingsMigrated_1_15_6', 'true');
-      return { top: 4.5, left: 9.5, fontSize: 12, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย', calX: 0, calY: 0 };
+      return { top: 4.5, left: 9.5, fontSize: 6, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย', calX: 0, calY: 0 };
     } catch (e) {
       localStorage.setItem('printSettingsMigrated_1_15_6', 'true');
-      return { top: 4.5, left: 9.5, fontSize: 12, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย', calX: 0, calY: 0 };
+      return { top: 4.5, left: 9.5, fontSize: 6, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย', calX: 0, calY: 0 };
     }
   });
 
@@ -3401,6 +3401,24 @@ export default function StaffPortal() {
                     <div style={{ flex: 1, minWidth: '120px' }}>
                       <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>ขนาดตัวอักษร: {printSettings.fontSize}</label>
                       <input type="range" min="4" max="28" step="1" value={printSettings.fontSize} onChange={(e) => setPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', paddingTop: '1.2rem' }}>
+                      <button 
+                        type="button" 
+                        onClick={() => setPrintSettings(prev => ({ 
+                          ...prev, 
+                          top: 4.5, 
+                          left: 9.5, 
+                          fontSize: 6,
+                          paperSize: 'A6',
+                          calX: 0,
+                          calY: 0
+                        }))} 
+                        className="btn" 
+                        style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', borderColor: '#cbd5e1', color: '#475569', backgroundColor: '#f1f5f9', margin: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                      >
+                        🔄 กลับสู่ค่าเริ่มต้น
+                      </button>
                     </div>
                     <div style={{ flex: 1, minWidth: '150px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: '0.25rem' }}>
                       <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
