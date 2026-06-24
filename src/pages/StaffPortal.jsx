@@ -364,14 +364,17 @@ export default function StaffPortal() {
           fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 5,
           isNameBold: typeof parsed.isNameBold === 'boolean' ? parsed.isNameBold : true,
           isPhoneBold: typeof parsed.isPhoneBold === 'boolean' ? parsed.isPhoneBold : true,
-          didPrintMode: mode
+          didPrintMode: mode,
+          paperSize: typeof parsed.paperSize === 'string' ? parsed.paperSize : 'A6',
+          printCountry: typeof parsed.printCountry === 'boolean' ? parsed.printCountry : false,
+          countryName: typeof parsed.countryName === 'string' ? parsed.countryName : 'ประเทศไทย'
         };
       }
       localStorage.setItem('printSettingsMigrated_1_15_6', 'true');
-      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' };
+      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย' };
     } catch (e) {
       localStorage.setItem('printSettingsMigrated_1_15_6', 'true');
-      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' };
+      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย' };
     }
   });
 
@@ -2260,7 +2263,7 @@ export default function StaffPortal() {
         {`
           @media print {
             @page {
-              size: 14.8cm 10.5cm;
+              size: ${printSettings.paperSize === 'A4' ? '29.7cm 21.0cm' : '14.8cm 10.5cm'};
               margin: 0;
             }
             body {
@@ -2279,6 +2282,24 @@ export default function StaffPortal() {
               padding-right: 1cm;
               overflow: hidden;
               box-sizing: border-box;
+            }
+            .print-a4-page {
+              width: 29.7cm;
+              height: 21.0cm;
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              grid-template-rows: 1fr 1fr;
+              box-sizing: border-box;
+              background: white;
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            .print-a4-cell {
+              width: 14.85cm;
+              height: 10.5cm;
+              box-sizing: border-box;
+              overflow: hidden;
+              background: white;
             }
           }
 
@@ -3205,7 +3226,10 @@ export default function StaffPortal() {
                               fontSize: found.fontSize,
                               isNameBold: found.isNameBold,
                               isPhoneBold: found.isPhoneBold,
-                              didPrintMode: found.didPrintMode || 'did'
+                              didPrintMode: found.didPrintMode || 'did',
+                              paperSize: found.paperSize || 'A6',
+                              printCountry: typeof found.printCountry === 'boolean' ? found.printCountry : false,
+                              countryName: found.countryName || 'ประเทศไทย'
                             });
                           }
                         }}
@@ -3285,7 +3309,10 @@ export default function StaffPortal() {
                             fontSize: printSettings.fontSize,
                             isNameBold: printSettings.isNameBold,
                             isPhoneBold: printSettings.isPhoneBold,
-                            didPrintMode: printSettings.didPrintMode
+                            didPrintMode: printSettings.didPrintMode,
+                            paperSize: printSettings.paperSize || 'A6',
+                            printCountry: typeof printSettings.printCountry === 'boolean' ? printSettings.printCountry : false,
+                            countryName: printSettings.countryName || 'ประเทศไทย'
                           };
                           
                           setPresets(prev => {
@@ -3369,9 +3396,59 @@ export default function StaffPortal() {
                     </div>
                   </div>
 
+                  <div style={{ width: '100%', borderTop: '1px solid #e2e8f0', marginTop: '1rem', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.5rem', color: '#475569' }}>ขนาดกระดาษและเลย์เอาต์การพิมพ์:</label>
+                      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                        <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+                          <input 
+                            type="radio" 
+                            name="paperSize" 
+                            checked={printSettings.paperSize === 'A6'} 
+                            onChange={() => setPrintSettings(p => ({...p, paperSize: 'A6'}))} 
+                          />
+                          ไปรษณียบัตรเดี่ยว (A6)
+                        </label>
+                        <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+                          <input 
+                            type="radio" 
+                            name="paperSize" 
+                            checked={printSettings.paperSize === 'A4'} 
+                            onChange={() => setPrintSettings(p => ({...p, paperSize: 'A4'}))} 
+                          />
+                          กระดาษ A4 (แบ่ง 4 ส่วน)
+                        </label>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={printSettings.printCountry} 
+                          onChange={(e) => setPrintSettings(p => ({...p, printCountry: e.target.checked}))} 
+                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                        />
+                        พิมพ์ชื่อประเทศต่อท้ายที่อยู่
+                      </label>
+                      {printSettings.printCountry && (
+                        <input 
+                          type="text"
+                          className="form-control"
+                          placeholder="ระบุชื่อประเทศ เช่น ประเทศไทย / THAILAND"
+                          value={printSettings.countryName}
+                          onChange={(e) => setPrintSettings(p => ({...p, countryName: e.target.value}))}
+                          style={{ fontSize: '0.85rem', padding: '0.35rem 0.5rem', width: '220px', margin: 0 }}
+                        />
+                      )}
+                    </div>
+                  </div>
+
                   {/* Live Preview Section */}
                   <div style={{ marginTop: '1.5rem' }}>
-                    <h5 style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.5rem' }}>ตัวอย่างพื้นที่การพิมพ์ (จำลองสัดส่วนไปรษณียบัตร 14.8 x 10.5 ซม.)</h5>
+                    <h5 style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                      ตัวอย่างพื้นที่การพิมพ์ ({printSettings.paperSize === 'A4' ? 'จำลองกระดาษ A4 แนวนอน 29.7 x 21 ซม. แบ่ง 4 ส่วน' : 'จำลองสัดส่วนไปรษณียบัตร 14.8 x 10.5 ซม.'})
+                    </h5>
                     <div style={{ 
                       width: '100%', 
                       maxWidth: '400px', 
@@ -3385,62 +3462,131 @@ export default function StaffPortal() {
                     }}>
                       <div style={{ 
                         /* 14.8cm = 559px, 10.5cm = 396px. At scale(0.5): 279.5px x 198px */
+                        /* A4 is 29.7cm x 21.0cm. At scale(0.25): 280.6px x 198.4px */
                         width: '280px', 
                         height: '198px',
                         position: 'relative'
                       }}>
-                        <div style={{
-                          width: '14.8cm',
-                          height: '10.5cm',
-                          backgroundColor: 'white',
-                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          transform: 'scale(0.5)',
-                          transformOrigin: 'top left',
-                          paddingTop: `${printSettings.top}cm`,
-                          paddingLeft: `${printSettings.left}cm`,
-                          paddingRight: '1cm',
-                          boxSizing: 'border-box',
-                          overflow: 'hidden'
-                        }}>
-                          <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif' }}>
-                            {formValues.did && printSettings.didPrintMode !== 'address' ? (
-                              <div>
-                                <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
-                                  {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
-                                </div>
-                                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                                  โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
-                                </div>
-                                {!(formValues.did && formValues.did.trim().length === 6) && (
-                                  <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
-                                    {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}`.trim()}
-                                  </div>
-                                )}
-                                <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
-                                  {formValues.did}
+                        {printSettings.paperSize === 'A4' ? (
+                          <div style={{
+                            width: '29.7cm',
+                            height: '21.0cm',
+                            backgroundColor: 'white',
+                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            transform: 'scale(0.25)',
+                            transformOrigin: 'top left',
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gridTemplateRows: '1fr 1fr',
+                            boxSizing: 'border-box'
+                          }}>
+                            {[0, 1, 2, 3].map((cellIdx) => (
+                              <div key={cellIdx} style={{
+                                width: '14.85cm',
+                                height: '10.5cm',
+                                borderRight: cellIdx % 2 === 0 ? '1px dashed #cbd5e1' : 'none',
+                                borderBottom: cellIdx < 2 ? '1px dashed #cbd5e1' : 'none',
+                                paddingTop: `${printSettings.top}cm`,
+                                paddingLeft: `${printSettings.left}cm`,
+                                paddingRight: '1cm',
+                                boxSizing: 'border-box',
+                                overflow: 'hidden'
+                              }}>
+                                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif', color: '#111', textAlign: 'left' }}>
+                                  {formValues.did && printSettings.didPrintMode !== 'address' ? (
+                                    <div>
+                                      <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                                        {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
+                                      </div>
+                                      <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                        โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
+                                      </div>
+                                      {!(formValues.did && formValues.did.trim().length === 6) && (
+                                        <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
+                                          {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}${printSettings.printCountry ? ' ' + printSettings.countryName : ''}`.trim()}
+                                        </div>
+                                      )}
+                                      <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
+                                        {formValues.did}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                                        {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
+                                      </div>
+                                      <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                        โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
+                                      </div>
+                                      <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
+                                        {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''}`.trim()}
+                                      </div>
+                                      <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
+                                        {`${formValues.zipcode || 'XXXXX'}${printSettings.printCountry ? ' ' + printSettings.countryName : ''}`}
+                                      </div>
+                                    </>
+                                  )}
                                 </div>
                               </div>
-                            ) : (
-                              <>
-                                <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
-                                  {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
-                                </div>
-                                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                                  โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
-                                </div>
-                                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
-                                  {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''}`.trim()}
-                                </div>
-                                <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
-                                  {formValues.zipcode || 'XXXXX'}
-                                </div>
-                              </>
-                            )}
+                            ))}
                           </div>
-                        </div>
+                        ) : (
+                          <div style={{
+                            width: '14.8cm',
+                            height: '10.5cm',
+                            backgroundColor: 'white',
+                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            transform: 'scale(0.5)',
+                            transformOrigin: 'top left',
+                            paddingTop: `${printSettings.top}cm`,
+                            paddingLeft: `${printSettings.left}cm`,
+                            paddingRight: '1cm',
+                            boxSizing: 'border-box',
+                            overflow: 'hidden'
+                          }}>
+                            <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif', color: '#111', textAlign: 'left' }}>
+                              {formValues.did && printSettings.didPrintMode !== 'address' ? (
+                                <div>
+                                  <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                                    {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
+                                  </div>
+                                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                    โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
+                                  </div>
+                                  {!(formValues.did && formValues.did.trim().length === 6) && (
+                                    <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
+                                      {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}${printSettings.printCountry ? ' ' + printSettings.countryName : ''}`.trim()}
+                                    </div>
+                                  )}
+                                  <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
+                                    {formValues.did}
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                                    {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
+                                  </div>
+                                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                    โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
+                                  </div>
+                                  <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
+                                    {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''}`.trim()}
+                                  </div>
+                                  <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
+                                    {`${formValues.zipcode || 'XXXXX'}${printSettings.printCountry ? ' ' + printSettings.countryName : ''}`}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -4110,58 +4256,130 @@ export default function StaffPortal() {
 
       {printDataList && printDataList.length > 0 && (
         <div className="print-only">
-          {printDataList.map((printItem, idx) => (
-            <div 
-              key={idx} 
-              className="print-area" 
-              style={{ 
-                fontSize: `${printSettings.fontSize}pt`, 
-                lineHeight: '1.4', 
-                fontFamily: 'Sarabun, Inter, sans-serif',
-                pageBreakAfter: idx === printDataList.length - 1 ? 'auto' : 'always',
-                breakAfter: idx === printDataList.length - 1 ? 'auto' : 'page',
-                paddingTop: `${printSettings.top}cm`,
-                paddingLeft: `${printSettings.left}cm`,
-                height: '10.5cm',
-                width: '14.8cm',
-                boxSizing: 'border-box'
-              }}
-            >
-              {printItem.did && printSettings.didPrintMode !== 'address' ? (
-                <div>
-                  <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
-                    {printItem.name}
-                  </div>
-                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                    โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
-                  </div>
-                  {!(printItem.did && printItem.did.trim().length === 6) && (
-                    <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
-                      {printItem.address} {printItem.zipcode}
+          {printSettings.paperSize === 'A4' ? (
+            (() => {
+              const chunks = [];
+              for (let i = 0; i < printDataList.length; i += 4) {
+                chunks.push(printDataList.slice(i, i + 4));
+              }
+              return chunks.map((chunk, chunkIdx) => (
+                <div 
+                  key={chunkIdx} 
+                  className="print-a4-page"
+                  style={{
+                    pageBreakAfter: chunkIdx === chunks.length - 1 ? 'auto' : 'always',
+                    breakAfter: chunkIdx === chunks.length - 1 ? 'auto' : 'page',
+                  }}
+                >
+                  {chunk.map((printItem, cellIdx) => (
+                    <div 
+                      key={cellIdx} 
+                      className="print-a4-cell" 
+                      style={{ 
+                        paddingTop: `${printSettings.top}cm`,
+                        paddingLeft: `${printSettings.left}cm`,
+                        paddingRight: '1cm',
+                        fontSize: `${printSettings.fontSize}pt`, 
+                        lineHeight: '1.4', 
+                        fontFamily: 'Sarabun, Inter, sans-serif'
+                      }}
+                    >
+                      {printItem.did && printSettings.didPrintMode !== 'address' ? (
+                        <div>
+                          <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                            {printItem.name}
+                          </div>
+                          <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                            โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
+                          </div>
+                          {!(printItem.did && printItem.did.trim().length === 6) && (
+                            <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
+                              {printItem.address} {printItem.zipcode}{printSettings.printCountry && ` ${printSettings.countryName}`}
+                            </div>
+                          )}
+                          <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
+                            {printItem.did}
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                            {printItem.name}
+                          </div>
+                          <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                            โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
+                          </div>
+                          <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
+                            {printItem.address}
+                          </div>
+                          <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
+                            {printItem.zipcode}{printSettings.printCountry && ` ${printSettings.countryName}`}
+                          </div>
+                        </>
+                      )}
                     </div>
-                  )}
-                  <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
-                    {printItem.did}
-                  </div>
+                  ))}
+                  {/* Empty cells to complete the 2x2 grid if chunk has < 4 items */}
+                  {Array.from({ length: 4 - chunk.length }).map((_, emptyIdx) => (
+                    <div key={`empty-${emptyIdx}`} className="print-a4-cell" />
+                  ))}
                 </div>
-              ) : (
-                <>
-                  <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
-                    {printItem.name}
+              ));
+            })()
+          ) : (
+            printDataList.map((printItem, idx) => (
+              <div 
+                key={idx} 
+                className="print-area" 
+                style={{ 
+                  fontSize: `${printSettings.fontSize}pt`, 
+                  lineHeight: '1.4', 
+                  fontFamily: 'Sarabun, Inter, sans-serif',
+                  pageBreakAfter: idx === printDataList.length - 1 ? 'auto' : 'always',
+                  breakAfter: idx === printDataList.length - 1 ? 'auto' : 'page',
+                  paddingTop: `${printSettings.top}cm`,
+                  paddingLeft: `${printSettings.left}cm`,
+                  height: '10.5cm',
+                  width: '14.8cm',
+                  boxSizing: 'border-box'
+                }}
+              >
+                {printItem.did && printSettings.didPrintMode !== 'address' ? (
+                  <div>
+                    <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                      {printItem.name}
+                    </div>
+                    <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                      โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
+                    </div>
+                    {!(printItem.did && printItem.did.trim().length === 6) && (
+                      <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
+                        {printItem.address} {printItem.zipcode}{printSettings.printCountry && ` ${printSettings.countryName}`}
+                      </div>
+                    )}
+                    <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
+                      {printItem.did}
+                    </div>
                   </div>
-                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                    โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
-                  </div>
-                  <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
-                    {printItem.address}
-                  </div>
-                  <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
-                    {printItem.zipcode}
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
+                ) : (
+                  <>
+                    <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                      {printItem.name}
+                    </div>
+                    <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                      โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
+                    </div>
+                    <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
+                      {printItem.address}
+                    </div>
+                    <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
+                      {printItem.zipcode}{printSettings.printCountry && ` ${printSettings.countryName}`}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))
+          )}
         </div>
       )}
       {showQuickQrModal && (
