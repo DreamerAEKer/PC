@@ -117,6 +117,54 @@ function WorldCupPortal() {
     localStorage.setItem('wcIsPortrait', isPortrait);
   }, [wcPrintSettings, selectedTeams, customTeamsList, printTeam, isPortrait]);
 
+  const handleDragStart = (e) => {
+    const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX);
+    const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] && e.touches[0].clientY);
+    if (clientX === undefined || clientY === undefined) return;
+
+    e.preventDefault();
+
+    const initialTop = wcPrintSettings.top;
+    const initialLeft = wcPrintSettings.left;
+
+    const isA4 = wcPrintSettings.paperSize === 'A4';
+    const scale = isA4 ? 0.25 : 0.5;
+    const pixelsPerCm = 37.795 * scale;
+
+    const handleDragMove = (moveEvent) => {
+      const currentX = moveEvent.clientX !== undefined ? moveEvent.clientX : (moveEvent.touches && moveEvent.touches[0] && moveEvent.touches[0].clientX);
+      const currentY = moveEvent.clientY !== undefined ? moveEvent.clientY : (moveEvent.touches && moveEvent.touches[0] && moveEvent.touches[0].clientY);
+      if (currentX === undefined || currentY === undefined) return;
+
+      const deltaX = currentX - clientX;
+      const deltaY = currentY - clientY;
+
+      const deltaLeftCm = deltaX / pixelsPerCm;
+      const deltaTopCm = deltaY / pixelsPerCm;
+
+      let newLeft = Math.max(0, Math.min(15, Math.round((initialLeft + deltaLeftCm) * 10) / 10));
+      let newTop = Math.max(0, Math.min(10, Math.round((initialTop + deltaTopCm) * 10) / 10));
+
+      setWcPrintSettings(prev => ({
+        ...prev,
+        left: newLeft,
+        top: newTop
+      }));
+    };
+
+    const handleDragEnd = () => {
+      document.removeEventListener('mousemove', handleDragMove);
+      document.removeEventListener('mouseup', handleDragEnd);
+      document.removeEventListener('touchmove', handleDragMove);
+      document.removeEventListener('touchend', handleDragEnd);
+    };
+
+    document.addEventListener('mousemove', handleDragMove);
+    document.addEventListener('mouseup', handleDragEnd);
+    document.addEventListener('touchmove', handleDragMove, { passive: false });
+    document.addEventListener('touchend', handleDragEnd);
+  };
+
   const handlePrint = () => {
     if (!printTeam.trim()) {
       alert("กรุณาระบุประเทศที่ต้องการพิมพ์ 1 ประเทศ");
@@ -446,8 +494,11 @@ function WorldCupPortal() {
 
             {/* Right Column: Live Preview & Print Button */}
             <div style={{ flex: '1 1 320px', display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#fff', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem', textAlign: 'center', fontWeight: 600 }}>
+              <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.25rem', textAlign: 'center', fontWeight: 600 }}>
                 ตัวอย่างพื้นที่การพิมพ์ ({wcPrintSettings.paperSize === 'A4' ? 'จำลองกระดาษ A4 แนวนอน 29.7 x 21 ซม.' : `จำลองสัดส่วนไปรษณียบัตร ${isPortrait ? 'แนวตั้ง 10.5 x 14.8 ซม.' : 'แนวนอน 14.8 x 10.5 ซม.'}`})
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#3b82f6', marginBottom: '0.5rem', textAlign: 'center', fontWeight: 600 }}>
+                🖱️ ใช้เมาส์คลิก/แตะลากชื่อประเทศเพื่อปรับตำแหน่งได้อิสระ
               </div>
               <div style={{ 
                 backgroundColor: '#e2e8f0', 
@@ -483,36 +534,49 @@ function WorldCupPortal() {
                         <div style={{ borderRight: '1px dashed #cbd5e1', borderBottom: '1px dashed #cbd5e1', position: 'relative', overflow: 'hidden' }}>
                           {/* Ideal Position guide (if calibrated) */}
                           {(wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) && (
-                            <div style={{
-                              position: 'absolute',
-                              top: `${wcPrintSettings.top}cm`,
-                              left: `${wcPrintSettings.left}cm`,
-                              fontSize: `${wcPrintSettings.fontSize}pt`, 
-                              fontFamily: 'Sarabun, Inter, sans-serif',
-                              fontWeight: 'bold',
-                              color: '#94a3b8',
-                              opacity: 0.5,
-                              whiteSpace: 'nowrap',
-                              border: '1px dashed #94a3b8',
-                              padding: '2px',
-                              pointerEvents: 'none'
-                            }}>
+                            <div 
+                              onMouseDown={handleDragStart}
+                              onTouchStart={handleDragStart}
+                              style={{
+                                position: 'absolute',
+                                top: `${wcPrintSettings.top}cm`,
+                                left: `${wcPrintSettings.left}cm`,
+                                fontSize: `${wcPrintSettings.fontSize}pt`, 
+                                fontFamily: 'Sarabun, Inter, sans-serif',
+                                fontWeight: 'bold',
+                                color: '#94a3b8',
+                                opacity: 0.5,
+                                whiteSpace: 'nowrap',
+                                border: '1px dashed #94a3b8',
+                                padding: '2px',
+                                cursor: 'grab',
+                                userSelect: 'none',
+                                pointerEvents: 'auto'
+                              }}
+                            >
                               {printTeam || "ชื่อประเทศ"} (ตำแหน่งบนการ์ด)
                             </div>
                           )}
                           {/* Calibrated print position */}
-                          <div style={{
-                            position: 'absolute',
-                            top: `${wcPrintSettings.top + (wcPrintSettings.calY || 0)}cm`,
-                            left: `${wcPrintSettings.left + (wcPrintSettings.calX || 0)}cm`,
-                            fontSize: `${wcPrintSettings.fontSize}pt`, 
-                            fontFamily: 'Sarabun, Inter, sans-serif',
-                            fontWeight: 'bold',
-                            color: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '#d97706' : '#000',
-                            whiteSpace: 'nowrap',
-                            border: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '1px dashed #d97706' : 'none',
-                            padding: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '2px' : '0'
-                          }}>
+                          <div 
+                            onMouseDown={handleDragStart}
+                            onTouchStart={handleDragStart}
+                            style={{
+                              position: 'absolute',
+                              top: `${wcPrintSettings.top + (wcPrintSettings.calY || 0)}cm`,
+                              left: `${wcPrintSettings.left + (wcPrintSettings.calX || 0)}cm`,
+                              fontSize: `${wcPrintSettings.fontSize}pt`, 
+                              fontFamily: 'Sarabun, Inter, sans-serif',
+                              fontWeight: 'bold',
+                              color: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '#d97706' : '#000',
+                              whiteSpace: 'nowrap',
+                              border: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '1px dashed #d97706' : 'none',
+                              padding: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '2px' : '0',
+                              cursor: 'grab',
+                              userSelect: 'none',
+                              pointerEvents: 'auto'
+                            }}
+                          >
                             {printTeam || "ชื่อประเทศ"}
                           </div>
                         </div>
@@ -537,36 +601,49 @@ function WorldCupPortal() {
                     }}>
                       {/* Ideal Position guide (if calibrated) */}
                       {(wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) && (
-                        <div style={{
-                          position: 'absolute',
-                          top: `${wcPrintSettings.top}cm`,
-                          left: `${wcPrintSettings.left}cm`,
-                          fontSize: `${wcPrintSettings.fontSize}pt`, 
-                          fontFamily: 'Sarabun, Inter, sans-serif',
-                          fontWeight: 'bold',
-                          color: '#94a3b8',
-                          opacity: 0.5,
-                          whiteSpace: 'nowrap',
-                          border: '1px dashed #94a3b8',
-                          padding: '2px',
-                          pointerEvents: 'none'
-                        }}>
+                        <div 
+                          onMouseDown={handleDragStart}
+                          onTouchStart={handleDragStart}
+                          style={{
+                            position: 'absolute',
+                            top: `${wcPrintSettings.top}cm`,
+                            left: `${wcPrintSettings.left}cm`,
+                            fontSize: `${wcPrintSettings.fontSize}pt`, 
+                            fontFamily: 'Sarabun, Inter, sans-serif',
+                            fontWeight: 'bold',
+                            color: '#94a3b8',
+                            opacity: 0.5,
+                            whiteSpace: 'nowrap',
+                            border: '1px dashed #94a3b8',
+                            padding: '2px',
+                            cursor: 'grab',
+                            userSelect: 'none',
+                            pointerEvents: 'auto'
+                          }}
+                        >
                           {printTeam || "ชื่อประเทศ"} (ตำแหน่งบนการ์ด)
                         </div>
                       )}
                       {/* Calibrated print position */}
-                      <div style={{ 
-                        position: 'absolute',
-                        top: `${wcPrintSettings.top + (wcPrintSettings.calY || 0)}cm`,
-                        left: `${wcPrintSettings.left + (wcPrintSettings.calX || 0)}cm`,
-                        fontSize: `${wcPrintSettings.fontSize}pt`, 
-                        fontFamily: 'Sarabun, Inter, sans-serif',
-                        fontWeight: 'bold',
-                        color: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '#d97706' : '#000',
-                        whiteSpace: 'nowrap',
-                        border: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '1px dashed #d97706' : 'none',
-                        padding: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '2px' : '0'
-                      }}>
+                      <div 
+                        onMouseDown={handleDragStart}
+                        onTouchStart={handleDragStart}
+                        style={{ 
+                          position: 'absolute',
+                          top: `${wcPrintSettings.top + (wcPrintSettings.calY || 0)}cm`,
+                          left: `${wcPrintSettings.left + (wcPrintSettings.calX || 0)}cm`,
+                          fontSize: `${wcPrintSettings.fontSize}pt`, 
+                          fontFamily: 'Sarabun, Inter, sans-serif',
+                          fontWeight: 'bold',
+                          color: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '#d97706' : '#000',
+                          whiteSpace: 'nowrap',
+                          border: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '1px dashed #d97706' : 'none',
+                          padding: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '2px' : '0',
+                          cursor: 'grab',
+                          userSelect: 'none',
+                          pointerEvents: 'auto'
+                        }}
+                      >
                         {printTeam || "ชื่อประเทศ"}
                       </div>
                     </div>
