@@ -466,8 +466,8 @@ function WorldCupPortal() {
             marginBottom: '1.5rem'
           }}>
             <div style={{ 
-              width: '280px', 
-              height: '198px',
+              width: wcPrintSettings.paperSize === 'A4' ? '280px' : (isPortrait ? '198px' : '280px'), 
+              height: wcPrintSettings.paperSize === 'A4' ? '198px' : (isPortrait ? '280px' : '198px'),
               position: 'relative'
             }}>
               {wcPrintSettings.paperSize === 'A4' ? (
