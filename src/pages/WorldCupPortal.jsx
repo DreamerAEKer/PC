@@ -40,12 +40,13 @@ function WorldCupPortal() {
         return {
           top: typeof parsed.top === 'number' ? parsed.top : 5.5,
           left: typeof parsed.left === 'number' ? parsed.left : 8,
-          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 6
+          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 16,
+          paperSize: typeof parsed.paperSize === 'string' ? parsed.paperSize : 'A6'
         };
       }
-      return { top: 5.5, left: 8, fontSize: 6 };
+      return { top: 5.5, left: 8, fontSize: 16, paperSize: 'A6' };
     } catch (e) {
-      return { top: 5.5, left: 8, fontSize: 6 };
+      return { top: 5.5, left: 8, fontSize: 16, paperSize: 'A6' };
     }
   });
 
@@ -155,7 +156,7 @@ function WorldCupPortal() {
         {`
           @media print {
             @page {
-              size: ${isPortrait ? '10.5cm 14.8cm' : '14.8cm 10.5cm'};
+              size: ${wcPrintSettings.paperSize === 'A4' ? '29.7cm 21.0cm' : (isPortrait ? '10.5cm 14.8cm' : '14.8cm 10.5cm')};
               margin: 0;
             }
             body {
@@ -173,6 +174,14 @@ function WorldCupPortal() {
               position: relative !important;
               overflow: hidden;
               color: black !important;
+            }
+            .print-a4-wrapper {
+              width: 29.7cm;
+              height: 21.0cm;
+              position: relative;
+              background: white;
+              page-break-inside: avoid;
+              break-inside: avoid;
             }
           }
           
@@ -366,7 +375,7 @@ function WorldCupPortal() {
               </div>
               <div style={{ flex: 1, minWidth: '120px' }}>
                 <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขนาดตัวอักษร: {wcPrintSettings.fontSize}</label>
-                <input type="range" min="4" max="36" step="1" value={wcPrintSettings.fontSize} onChange={(e) => setWcPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
+                <input type="range" min="8" max="48" step="1" value={wcPrintSettings.fontSize} onChange={(e) => setWcPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
               </div>
             </div>
 
@@ -381,6 +390,20 @@ function WorldCupPortal() {
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                     <input type="radio" name="main_isPortrait" checked={isPortrait} onChange={() => setIsPortrait(true)} />
                     แนวตั้ง (10.5 x 14.8 ซม.)
+                  </label>
+                </div>
+              </div>
+
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.8rem', color: '#334155' }}>ขนาดกระดาษพิมพ์จริง</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    <input type="radio" name="wc_paperSize" checked={wcPrintSettings.paperSize === 'A6'} onChange={() => setWcPrintSettings(p => ({...p, paperSize: 'A6'}))} />
+                    ไปรษณียบัตรเดี่ยว (A6)
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    <input type="radio" name="wc_paperSize" checked={wcPrintSettings.paperSize === 'A4'} onChange={() => setWcPrintSettings(p => ({...p, paperSize: 'A4'}))} />
+                    กระดาษ A4 (พิมพ์เดี่ยวมุมบนซ้าย)
                   </label>
                 </div>
               </div>
@@ -431,7 +454,7 @@ function WorldCupPortal() {
           )}
 
           <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem', textAlign: 'center' }}>
-            ตัวอย่างพื้นที่การพิมพ์ (จำลองสัดส่วนไปรษณียบัตร {isPortrait ? 'แนวตั้ง 10.5 x 14.8 ซม.' : 'แนวนอน 14.8 x 10.5 ซม.'})
+            ตัวอย่างพื้นที่การพิมพ์ ({wcPrintSettings.paperSize === 'A4' ? 'จำลองกระดาษ A4 แนวนอน 29.7 x 21 ซม.' : `จำลองสัดส่วนไปรษณียบัตร ${isPortrait ? 'แนวตั้ง 10.5 x 14.8 ซม.' : 'แนวนอน 14.8 x 10.5 ซม.'}`})
           </div>
           <div style={{ 
             backgroundColor: '#e2e8f0', 
@@ -443,36 +466,72 @@ function WorldCupPortal() {
             marginBottom: '1.5rem'
           }}>
             <div style={{ 
-              width: isPortrait ? '198px' : '280px', 
-              height: isPortrait ? '280px' : '198px',
+              width: '280px', 
+              height: '198px',
               position: 'relative'
             }}>
-              <div style={{
-                width: isPortrait ? '10.5cm' : '14.8cm',
-                height: isPortrait ? '14.8cm' : '10.5cm',
-                backgroundColor: 'white',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                transform: 'scale(0.5)',
-                transformOrigin: 'top left',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                boxSizing: 'border-box',
-                overflow: 'hidden'
-              }}>
-                <div style={{ 
+              {wcPrintSettings.paperSize === 'A4' ? (
+                <div style={{
+                  width: '29.7cm',
+                  height: '21.0cm',
+                  backgroundColor: 'white',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
                   position: 'absolute',
-                  top: `${wcPrintSettings.top}cm`,
-                  left: `${wcPrintSettings.left}cm`,
-                  fontSize: `${wcPrintSettings.fontSize}pt`, 
-                  fontFamily: 'Sarabun, Inter, sans-serif',
-                  fontWeight: 'bold',
-                  color: '#000',
-                  whiteSpace: 'nowrap'
+                  top: 0,
+                  left: 0,
+                  transform: 'scale(0.25)',
+                  transformOrigin: 'top left',
+                  boxSizing: 'border-box'
                 }}>
-                  {printTeam || "ชื่อประเทศ"}
+                  {/* Dash lines representing A4 divisions */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, width: '29.7cm', height: '21.0cm', display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr' }}>
+                    <div style={{ borderRight: '1px dashed #cbd5e1', borderBottom: '1px dashed #cbd5e1', position: 'relative', overflow: 'hidden' }}>
+                      <div style={{
+                        position: 'absolute',
+                        top: `${wcPrintSettings.top}cm`,
+                        left: `${wcPrintSettings.left}cm`,
+                        fontSize: `${wcPrintSettings.fontSize}pt`, 
+                        fontFamily: 'Sarabun, Inter, sans-serif',
+                        fontWeight: 'bold',
+                        color: '#000',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {printTeam || "ชื่อประเทศ"}
+                      </div>
+                    </div>
+                    <div style={{ borderBottom: '1px dashed #cbd5e1' }}></div>
+                    <div style={{ borderRight: '1px dashed #cbd5e1' }}></div>
+                    <div></div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div style={{
+                  width: isPortrait ? '10.5cm' : '14.8cm',
+                  height: isPortrait ? '14.8cm' : '10.5cm',
+                  backgroundColor: 'white',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                  transform: 'scale(0.5)',
+                  transformOrigin: 'top left',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  boxSizing: 'border-box',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{ 
+                    position: 'absolute',
+                    top: `${wcPrintSettings.top}cm`,
+                    left: `${wcPrintSettings.left}cm`,
+                    fontSize: `${wcPrintSettings.fontSize}pt`, 
+                    fontFamily: 'Sarabun, Inter, sans-serif',
+                    fontWeight: 'bold',
+                    color: '#000',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {printTeam || "ชื่อประเทศ"}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -598,7 +657,27 @@ function WorldCupPortal() {
       )}
 
       {/* Actual Print Area (1 page for the selected printTeam) */}
-      <div className="print-only print-area">
+      {wcPrintSettings.paperSize === 'A4' ? (
+        <div className="print-only print-a4-wrapper">
+          <div className="print-area" style={{ width: isPortrait ? '10.5cm' : '14.8cm', height: isPortrait ? '14.8cm' : '10.5cm', position: 'absolute', top: 0, left: 0 }}>
+            <div style={{ 
+              position: 'absolute',
+              top: `${wcPrintSettings.top}cm`,
+              left: `${wcPrintSettings.left}cm`,
+              fontSize: `${wcPrintSettings.fontSize}pt`, 
+              fontFamily: 'Sarabun, Inter, sans-serif',
+              fontWeight: 'bold',
+              color: '#000',
+              whiteSpace: 'nowrap',
+              margin: 0,
+              padding: 0
+            }}>
+              {printTeam}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="print-only print-area">
           <div style={{ 
             position: 'absolute',
             top: `${wcPrintSettings.top}cm`,
@@ -613,7 +692,8 @@ function WorldCupPortal() {
           }}>
             {printTeam}
           </div>
-      </div>
+        </div>
+      )}
     </>
   );
 }

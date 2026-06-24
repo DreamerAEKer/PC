@@ -323,9 +323,9 @@ export default function StaffPortal() {
 
   const [presets, setPresets] = useState(() => {
     const defaultList = [
-      { name: 'ค่าเริ่มต้นไปรษณียบัตร', top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' },
-      { name: 'ตัวอักษรใหญ่ (ซม.)', top: 4.0, left: 9.0, fontSize: 7, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' },
-      { name: 'เครื่อง Drop Off', top: 4.0, left: 5.5, fontSize: 15, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' }
+      { name: 'ค่าเริ่มต้นไปรษณียบัตร', top: 4.5, left: 9.5, fontSize: 12, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' },
+      { name: 'ตัวอักษรใหญ่ (ซม.)', top: 4.0, left: 9.0, fontSize: 14, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' },
+      { name: 'เครื่อง Drop Off', top: 4.0, left: 5.5, fontSize: 16, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' }
     ];
     try {
       const saved = localStorage.getItem('customPrintPresets');
@@ -361,7 +361,7 @@ export default function StaffPortal() {
         return {
           top: typeof parsed.top === 'number' ? parsed.top : 4.5,
           left: typeof parsed.left === 'number' ? parsed.left : 9.5,
-          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 5,
+          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 12,
           isNameBold: typeof parsed.isNameBold === 'boolean' ? parsed.isNameBold : true,
           isPhoneBold: typeof parsed.isPhoneBold === 'boolean' ? parsed.isPhoneBold : true,
           didPrintMode: mode,
@@ -371,10 +371,10 @@ export default function StaffPortal() {
         };
       }
       localStorage.setItem('printSettingsMigrated_1_15_6', 'true');
-      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย' };
+      return { top: 4.5, left: 9.5, fontSize: 12, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย' };
     } catch (e) {
       localStorage.setItem('printSettingsMigrated_1_15_6', 'true');
-      return { top: 4.5, left: 9.5, fontSize: 5, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย' };
+      return { top: 4.5, left: 9.5, fontSize: 12, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย' };
     }
   });
 
@@ -3348,7 +3348,7 @@ export default function StaffPortal() {
                     </div>
                     <div style={{ flex: 1, minWidth: '150px' }}>
                       <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขนาดตัวอักษร: {printSettings.fontSize}</label>
-                      <input type="range" min="4" max="24" step="1" value={printSettings.fontSize} onChange={(e) => setPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
+                      <input type="range" min="8" max="28" step="1" value={printSettings.fontSize} onChange={(e) => setPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
                     </div>
                     <div style={{ flex: 1, minWidth: '150px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: '0.25rem' }}>
                       <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
@@ -3419,28 +3419,6 @@ export default function StaffPortal() {
                           กระดาษ A4 (แบ่ง 4 ส่วน)
                         </label>
                       </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                        <input 
-                          type="checkbox" 
-                          checked={printSettings.printCountry} 
-                          onChange={(e) => setPrintSettings(p => ({...p, printCountry: e.target.checked}))} 
-                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                        />
-                        พิมพ์ชื่อประเทศต่อท้ายที่อยู่
-                      </label>
-                      {printSettings.printCountry && (
-                        <input 
-                          type="text"
-                          className="form-control"
-                          placeholder="ระบุชื่อประเทศ เช่น ประเทศไทย / THAILAND"
-                          value={printSettings.countryName}
-                          onChange={(e) => setPrintSettings(p => ({...p, countryName: e.target.value}))}
-                          style={{ fontSize: '0.85rem', padding: '0.35rem 0.5rem', width: '220px', margin: 0 }}
-                        />
-                      )}
                     </div>
                   </div>
 
