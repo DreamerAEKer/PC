@@ -361,84 +361,228 @@ function WorldCupPortal() {
             </div>
           </div>
 
-          <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', fontWeight: 600 }}>
-              <Settings size={18} /> ตั้งค่าตำแหน่งการพิมพ์ (อ้างอิงจากกรอบ "แชมป์คือ")
-            </div>
-            
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-              <div style={{ flex: 1, minWidth: '120px' }}>
-                <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับลง (ซม.): {wcPrintSettings.top}</label>
-                <input type="range" min="0" max="10" step="0.5" value={wcPrintSettings.top} onChange={(e) => setWcPrintSettings(p => ({...p, top: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
-              </div>
-              <div style={{ flex: 1, minWidth: '120px' }}>
-                <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับขวา (ซม.): {wcPrintSettings.left}</label>
-                <input type="range" min="0" max="15" step="0.5" value={wcPrintSettings.left} onChange={(e) => setWcPrintSettings(p => ({...p, left: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
-              </div>
-              <div style={{ flex: 1, minWidth: '120px' }}>
-                <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขนาดตัวอักษร: {wcPrintSettings.fontSize}</label>
-                <input type="range" min="8" max="48" step="1" value={wcPrintSettings.fontSize} onChange={(e) => setWcPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
-              </div>
-            </div>
-
-            <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0', display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
-              <div style={{ flex: 1, minWidth: '200px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.8rem', color: '#334155' }}>รูปแบบไปรษณียบัตร</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                    <input type="radio" name="main_isPortrait" checked={!isPortrait} onChange={() => setIsPortrait(false)} />
-                    แนวนอน (14.8 x 10.5 ซม.)
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                    <input type="radio" name="main_isPortrait" checked={isPortrait} onChange={() => setIsPortrait(true)} />
-                    แนวตั้ง (10.5 x 14.8 ซม.)
-                  </label>
-                </div>
-              </div>
-
-              <div style={{ flex: 1, minWidth: '200px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.8rem', color: '#334155' }}>ขนาดกระดาษพิมพ์จริง</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                    <input type="radio" name="wc_paperSize" checked={wcPrintSettings.paperSize === 'A6'} onChange={() => setWcPrintSettings(p => ({...p, paperSize: 'A6'}))} />
-                    ไปรษณียบัตรเดี่ยว (A6)
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                    <input type="radio" name="wc_paperSize" checked={wcPrintSettings.paperSize === 'A4'} onChange={() => setWcPrintSettings(p => ({...p, paperSize: 'A4'}))} />
-                    กระดาษ A4 (พิมพ์เดี่ยวมุมบนซ้าย)
-                  </label>
-                </div>
+          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+            {/* Left Column: Settings and Controls */}
+            <div style={{ flex: '1 1 500px', backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', fontWeight: 600 }}>
+                <Settings size={18} /> ตั้งค่าตำแหน่งการพิมพ์ (อ้างอิงจากกรอบ "แชมป์คือ")
               </div>
               
-              <div style={{ flex: 1, minWidth: '250px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
-                  <button type="button" onClick={() => setIsGuideOpen(true)} style={{ background: 'none', border: 'none', padding: 0, color: '#3b82f6', cursor: 'pointer', display: 'flex', alignItems: 'center' }} title="ดูรูปคู่มือการป้อนกระดาษ">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    <span style={{ fontSize: '0.75rem', marginLeft: '0.2rem', textDecoration: 'underline' }}>ดูรูปตัวอย่างการป้อนกระดาษเข้าเครื่อง</span>
-                  </button>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                <div style={{ flex: 1, minWidth: '120px' }}>
+                  <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับลง (ซม.): {wcPrintSettings.top}</label>
+                  <input type="range" min="0" max="10" step="0.5" value={wcPrintSettings.top} onChange={(e) => setWcPrintSettings(p => ({...p, top: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+                </div>
+                <div style={{ flex: 1, minWidth: '120px' }}>
+                  <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับขวา (ซม.): {wcPrintSettings.left}</label>
+                  <input type="range" min="0" max="15" step="0.5" value={wcPrintSettings.left} onChange={(e) => setWcPrintSettings(p => ({...p, left: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+                </div>
+                <div style={{ flex: 1, minWidth: '120px' }}>
+                  <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขนาดตัวอักษร: {wcPrintSettings.fontSize}</label>
+                  <input type="range" min="8" max="48" step="1" value={wcPrintSettings.fontSize} onChange={(e) => setWcPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
+                </div>
+              </div>
+
+              <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0', display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
+                <div style={{ flex: 1, minWidth: '200px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.8rem', color: '#334155' }}>รูปแบบไปรษณียบัตร</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                      <input type="radio" name="main_isPortrait" checked={!isPortrait} onChange={() => setIsPortrait(false)} />
+                      แนวนอน (14.8 x 10.5 ซม.)
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                      <input type="radio" name="main_isPortrait" checked={isPortrait} onChange={() => setIsPortrait(true)} />
+                      แนวตั้ง (10.5 x 14.8 ซม.)
+                    </label>
+                  </div>
+                </div>
+
+                <div style={{ flex: 1, minWidth: '200px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.8rem', color: '#334155' }}>ขนาดกระดาษพิมพ์จริง</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                      <input type="radio" name="wc_paperSize" checked={wcPrintSettings.paperSize === 'A6'} onChange={() => setWcPrintSettings(p => ({...p, paperSize: 'A6'}))} />
+                      ไปรษณียบัตรเดี่ยว (A6)
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                      <input type="radio" name="wc_paperSize" checked={wcPrintSettings.paperSize === 'A4'} onChange={() => setWcPrintSettings(p => ({...p, paperSize: 'A4'}))} />
+                      กระดาษ A4 (พิมพ์เดี่ยวมุมบนซ้าย)
+                    </label>
+                  </div>
+                </div>
+                
+                <div style={{ flex: 1, minWidth: '200px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
+                    <button type="button" onClick={() => setIsGuideOpen(true)} style={{ background: 'none', border: 'none', padding: 0, color: '#3b82f6', cursor: 'pointer', display: 'flex', alignItems: 'center' }} title="ดูรูปคู่มือการป้อนกระดาษ">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                      <span style={{ fontSize: '0.75rem', marginLeft: '0.2rem', textDecoration: 'underline' }}>ดูรูปตัวอย่างการป้อนกระดาษเข้าเครื่อง</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Printer Calibration Offset section */}
+              <div style={{ width: '100%', borderTop: '1px solid #e2e8f0', marginTop: '1.5rem', paddingTop: '1rem', backgroundColor: '#fffbeb', padding: '0.75rem', borderRadius: '8px', border: '1px solid #fef3c7' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 700, display: 'block', marginBottom: '0.5rem', color: '#b45309' }}>⚙️ ปรับชดเชยระยะเครื่องพิมพ์ (สำหรับชดเชยระยะช่องใส่กระดาษเบี้ยว):</label>
+                <p style={{ fontSize: '0.75rem', color: '#d97706', margin: '0 0 0.75rem 0', lineHeight: '1.4' }}>
+                  *แก้ปัญหางานพิมพ์เลื่อนไม่ตรงช่อง โดยที่การตั้งค่าจัดเลย์เอาต์หน้าจอหลักยังแสดงรูปภาพตรงสวยงามตามปกติ (ค่าชดเชยนี้จะส่งผลต่อตอนกดพิมพ์ออกเครื่องพิมพ์เท่านั้น)
+                </p>
+                <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: '130px' }}>
+                    <label style={{ fontSize: '0.8rem', display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>ชดเชยซ้าย/ขวา (แกน X): {wcPrintSettings.calX > 0 ? `ขวา +${wcPrintSettings.calX}` : wcPrintSettings.calX < 0 ? `ซ้าย ${wcPrintSettings.calX}` : '0'} ซม.</label>
+                    <input type="range" min="-10" max="10" step="0.1" value={wcPrintSettings.calX || 0} onChange={(e) => setWcPrintSettings(p => ({...p, calX: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: '130px' }}>
+                    <label style={{ fontSize: '0.8rem', display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>ชดเชยบน/ล่าง (แกน Y): {wcPrintSettings.calY > 0 ? `ล่าง +${wcPrintSettings.calY}` : wcPrintSettings.calY < 0 ? `บน ${wcPrintSettings.calY}` : '0'} ซม.</label>
+                    <input type="range" min="-10" max="10" step="0.1" value={wcPrintSettings.calY || 0} onChange={(e) => setWcPrintSettings(p => ({...p, calY: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                    <button type="button" onClick={() => setWcPrintSettings(p => ({...p, calX: 0, calY: 0}))} className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', borderColor: '#d97706', color: '#b45309', backgroundColor: '#fff', margin: 0, cursor: 'pointer' }}>รีเซ็ตชดเชย</button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Printer Calibration Offset section */}
-            <div style={{ width: '100%', borderTop: '1px solid #e2e8f0', marginTop: '1.5rem', paddingTop: '1rem', backgroundColor: '#fffbeb', padding: '0.75rem', borderRadius: '8px', border: '1px solid #fef3c7' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 700, display: 'block', marginBottom: '0.5rem', color: '#b45309' }}>⚙️ ปรับชดเชยระยะเครื่องพิมพ์ (สำหรับชดเชยระยะช่องใส่กระดาษเบี้ยว):</label>
-              <p style={{ fontSize: '0.75rem', color: '#d97706', margin: '0 0 0.75rem 0', lineHeight: '1.4' }}>
-                *แก้ปัญหางานพิมพ์เลื่อนไม่ตรงช่อง โดยที่การตั้งค่าจัดเลย์เอาต์หน้าจอหลักยังแสดงรูปภาพตรงสวยงามตามปกติ (ค่าชดเชยนี้จะส่งผลต่อตอนกดพิมพ์ออกเครื่องพิมพ์เท่านั้น)
-              </p>
-              <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: '130px' }}>
-                  <label style={{ fontSize: '0.8rem', display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>ชดเชยซ้าย/ขวา (แกน X): {wcPrintSettings.calX > 0 ? `ขวา +${wcPrintSettings.calX}` : wcPrintSettings.calX < 0 ? `ซ้าย ${wcPrintSettings.calX}` : '0'} ซม.</label>
-                  <input type="range" min="-10" max="10" step="0.1" value={wcPrintSettings.calX || 0} onChange={(e) => setWcPrintSettings(p => ({...p, calX: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
-                </div>
-                <div style={{ flex: 1, minWidth: '130px' }}>
-                  <label style={{ fontSize: '0.8rem', display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>ชดเชยบน/ล่าง (แกน Y): {wcPrintSettings.calY > 0 ? `ล่าง +${wcPrintSettings.calY}` : wcPrintSettings.calY < 0 ? `บน ${wcPrintSettings.calY}` : '0'} ซม.</label>
-                  <input type="range" min="-10" max="10" step="0.1" value={wcPrintSettings.calY || 0} onChange={(e) => setWcPrintSettings(p => ({...p, calY: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                  <button type="button" onClick={() => setWcPrintSettings(p => ({...p, calX: 0, calY: 0}))} className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', borderColor: '#d97706', color: '#b45309', backgroundColor: '#fff', margin: 0, cursor: 'pointer' }}>รีเซ็ตชดเชย</button>
+            {/* Right Column: Live Preview & Print Button */}
+            <div style={{ flex: '1 1 320px', display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#fff', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem', textAlign: 'center', fontWeight: 600 }}>
+                ตัวอย่างพื้นที่การพิมพ์ ({wcPrintSettings.paperSize === 'A4' ? 'จำลองกระดาษ A4 แนวนอน 29.7 x 21 ซม.' : `จำลองสัดส่วนไปรษณียบัตร ${isPortrait ? 'แนวตั้ง 10.5 x 14.8 ซม.' : 'แนวนอน 14.8 x 10.5 ซม.'}`})
+              </div>
+              <div style={{ 
+                backgroundColor: '#e2e8f0', 
+                padding: '1.5rem', 
+                borderRadius: '8px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginBottom: '1rem',
+                width: '100%',
+                maxWidth: '340px'
+              }}>
+                <div style={{ 
+                  width: wcPrintSettings.paperSize === 'A4' ? '280px' : (isPortrait ? '198px' : '280px'), 
+                  height: wcPrintSettings.paperSize === 'A4' ? '198px' : (isPortrait ? '280px' : '198px'),
+                  position: 'relative'
+                }}>
+                  {wcPrintSettings.paperSize === 'A4' ? (
+                    <div style={{
+                      width: '29.7cm',
+                      height: '21.0cm',
+                      backgroundColor: 'white',
+                      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      transform: 'scale(0.25)',
+                      transformOrigin: 'top left',
+                      boxSizing: 'border-box'
+                    }}>
+                      {/* Dash lines representing A4 divisions */}
+                      <div style={{ position: 'absolute', top: 0, left: 0, width: '29.7cm', height: '21.0cm', display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr' }}>
+                        <div style={{ borderRight: '1px dashed #cbd5e1', borderBottom: '1px dashed #cbd5e1', position: 'relative', overflow: 'hidden' }}>
+                          {/* Ideal Position guide (if calibrated) */}
+                          {(wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) && (
+                            <div style={{
+                              position: 'absolute',
+                              top: `${wcPrintSettings.top}cm`,
+                              left: `${wcPrintSettings.left}cm`,
+                              fontSize: `${wcPrintSettings.fontSize}pt`, 
+                              fontFamily: 'Sarabun, Inter, sans-serif',
+                              fontWeight: 'bold',
+                              color: '#94a3b8',
+                              opacity: 0.5,
+                              whiteSpace: 'nowrap',
+                              border: '1px dashed #94a3b8',
+                              padding: '2px',
+                              pointerEvents: 'none'
+                            }}>
+                              {printTeam || "ชื่อประเทศ"} (ตำแหน่งบนการ์ด)
+                            </div>
+                          )}
+                          {/* Calibrated print position */}
+                          <div style={{
+                            position: 'absolute',
+                            top: `${wcPrintSettings.top + (wcPrintSettings.calY || 0)}cm`,
+                            left: `${wcPrintSettings.left + (wcPrintSettings.calX || 0)}cm`,
+                            fontSize: `${wcPrintSettings.fontSize}pt`, 
+                            fontFamily: 'Sarabun, Inter, sans-serif',
+                            fontWeight: 'bold',
+                            color: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '#d97706' : '#000',
+                            whiteSpace: 'nowrap',
+                            border: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '1px dashed #d97706' : 'none',
+                            padding: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '2px' : '0'
+                          }}>
+                            {printTeam || "ชื่อประเทศ"}
+                          </div>
+                        </div>
+                        <div style={{ borderBottom: '1px dashed #cbd5e1' }}></div>
+                        <div style={{ borderRight: '1px dashed #cbd5e1' }}></div>
+                        <div></div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{
+                      width: isPortrait ? '10.5cm' : '14.8cm',
+                      height: isPortrait ? '14.8cm' : '10.5cm',
+                      backgroundColor: 'white',
+                      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                      transform: 'scale(0.5)',
+                      transformOrigin: 'top left',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      boxSizing: 'border-box',
+                      overflow: 'hidden'
+                    }}>
+                      {/* Ideal Position guide (if calibrated) */}
+                      {(wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) && (
+                        <div style={{
+                          position: 'absolute',
+                          top: `${wcPrintSettings.top}cm`,
+                          left: `${wcPrintSettings.left}cm`,
+                          fontSize: `${wcPrintSettings.fontSize}pt`, 
+                          fontFamily: 'Sarabun, Inter, sans-serif',
+                          fontWeight: 'bold',
+                          color: '#94a3b8',
+                          opacity: 0.5,
+                          whiteSpace: 'nowrap',
+                          border: '1px dashed #94a3b8',
+                          padding: '2px',
+                          pointerEvents: 'none'
+                        }}>
+                          {printTeam || "ชื่อประเทศ"} (ตำแหน่งบนการ์ด)
+                        </div>
+                      )}
+                      {/* Calibrated print position */}
+                      <div style={{ 
+                        position: 'absolute',
+                        top: `${wcPrintSettings.top + (wcPrintSettings.calY || 0)}cm`,
+                        left: `${wcPrintSettings.left + (wcPrintSettings.calX || 0)}cm`,
+                        fontSize: `${wcPrintSettings.fontSize}pt`, 
+                        fontFamily: 'Sarabun, Inter, sans-serif',
+                        fontWeight: 'bold',
+                        color: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '#d97706' : '#000',
+                        whiteSpace: 'nowrap',
+                        border: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '1px dashed #d97706' : 'none',
+                        padding: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '2px' : '0'
+                      }}>
+                        {printTeam || "ชื่อประเทศ"}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
+
+              <button 
+                type="button" 
+                onClick={handlePrint}
+                className="btn btn-primary" 
+                style={{ width: '100%', fontSize: '1.2rem', padding: '1rem', backgroundColor: '#dc2626' }}
+                disabled={!printTeam.trim()}
+              >
+                <Printer size={24} /> พิมพ์ "{printTeam || "..."}"
+              </button>
             </div>
           </div>
 
@@ -475,142 +619,6 @@ function WorldCupPortal() {
               </div>
             </div>
           )}
-
-          <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem', textAlign: 'center' }}>
-            ตัวอย่างพื้นที่การพิมพ์ ({wcPrintSettings.paperSize === 'A4' ? 'จำลองกระดาษ A4 แนวนอน 29.7 x 21 ซม.' : `จำลองสัดส่วนไปรษณียบัตร ${isPortrait ? 'แนวตั้ง 10.5 x 14.8 ซม.' : 'แนวนอน 14.8 x 10.5 ซม.'}`})
-          </div>
-          <div style={{ 
-            backgroundColor: '#e2e8f0', 
-            padding: '1.5rem', 
-            borderRadius: '8px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginBottom: '1.5rem'
-          }}>
-            <div style={{ 
-              width: wcPrintSettings.paperSize === 'A4' ? '280px' : (isPortrait ? '198px' : '280px'), 
-              height: wcPrintSettings.paperSize === 'A4' ? '198px' : (isPortrait ? '280px' : '198px'),
-              position: 'relative'
-            }}>
-              {wcPrintSettings.paperSize === 'A4' ? (
-                <div style={{
-                  width: '29.7cm',
-                  height: '21.0cm',
-                  backgroundColor: 'white',
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  transform: 'scale(0.25)',
-                  transformOrigin: 'top left',
-                  boxSizing: 'border-box'
-                }}>
-                  {/* Dash lines representing A4 divisions */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, width: '29.7cm', height: '21.0cm', display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr' }}>
-                    <div style={{ borderRight: '1px dashed #cbd5e1', borderBottom: '1px dashed #cbd5e1', position: 'relative', overflow: 'hidden' }}>
-                      {/* Ideal Position guide (if calibrated) */}
-                      {(wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) && (
-                        <div style={{
-                          position: 'absolute',
-                          top: `${wcPrintSettings.top}cm`,
-                          left: `${wcPrintSettings.left}cm`,
-                          fontSize: `${wcPrintSettings.fontSize}pt`, 
-                          fontFamily: 'Sarabun, Inter, sans-serif',
-                          fontWeight: 'bold',
-                          color: '#94a3b8',
-                          opacity: 0.5,
-                          whiteSpace: 'nowrap',
-                          border: '1px dashed #94a3b8',
-                          padding: '2px',
-                          pointerEvents: 'none'
-                        }}>
-                          {printTeam || "ชื่อประเทศ"} (ตำแหน่งบนการ์ด)
-                        </div>
-                      )}
-                      {/* Calibrated print position */}
-                      <div style={{
-                        position: 'absolute',
-                        top: `${wcPrintSettings.top + (wcPrintSettings.calY || 0)}cm`,
-                        left: `${wcPrintSettings.left + (wcPrintSettings.calX || 0)}cm`,
-                        fontSize: `${wcPrintSettings.fontSize}pt`, 
-                        fontFamily: 'Sarabun, Inter, sans-serif',
-                        fontWeight: 'bold',
-                        color: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '#d97706' : '#000',
-                        whiteSpace: 'nowrap',
-                        border: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '1px dashed #d97706' : 'none',
-                        padding: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '2px' : '0'
-                      }}>
-                        {printTeam || "ชื่อประเทศ"}
-                      </div>
-                    </div>
-                    <div style={{ borderBottom: '1px dashed #cbd5e1' }}></div>
-                    <div style={{ borderRight: '1px dashed #cbd5e1' }}></div>
-                    <div></div>
-                  </div>
-                </div>
-              ) : (
-                <div style={{
-                  width: isPortrait ? '10.5cm' : '14.8cm',
-                  height: isPortrait ? '14.8cm' : '10.5cm',
-                  backgroundColor: 'white',
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                  transform: 'scale(0.5)',
-                  transformOrigin: 'top left',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  boxSizing: 'border-box',
-                  overflow: 'hidden'
-                }}>
-                  {/* Ideal Position guide (if calibrated) */}
-                  {(wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) && (
-                    <div style={{
-                      position: 'absolute',
-                      top: `${wcPrintSettings.top}cm`,
-                      left: `${wcPrintSettings.left}cm`,
-                      fontSize: `${wcPrintSettings.fontSize}pt`, 
-                      fontFamily: 'Sarabun, Inter, sans-serif',
-                      fontWeight: 'bold',
-                      color: '#94a3b8',
-                      opacity: 0.5,
-                      whiteSpace: 'nowrap',
-                      border: '1px dashed #94a3b8',
-                      padding: '2px',
-                      pointerEvents: 'none'
-                    }}>
-                      {printTeam || "ชื่อประเทศ"} (ตำแหน่งบนการ์ด)
-                    </div>
-                  )}
-                  {/* Calibrated print position */}
-                  <div style={{ 
-                    position: 'absolute',
-                    top: `${wcPrintSettings.top + (wcPrintSettings.calY || 0)}cm`,
-                    left: `${wcPrintSettings.left + (wcPrintSettings.calX || 0)}cm`,
-                    fontSize: `${wcPrintSettings.fontSize}pt`, 
-                    fontFamily: 'Sarabun, Inter, sans-serif',
-                    fontWeight: 'bold',
-                    color: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '#d97706' : '#000',
-                    whiteSpace: 'nowrap',
-                    border: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '1px dashed #d97706' : 'none',
-                    padding: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '2px' : '0'
-                  }}>
-                    {printTeam || "ชื่อประเทศ"}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <button 
-            type="button" 
-            onClick={handlePrint}
-            className="btn btn-primary" 
-            style={{ width: '100%', fontSize: '1.2rem', padding: '1rem', backgroundColor: '#dc2626' }}
-            disabled={!printTeam.trim()}
-          >
-            <Printer size={24} /> พิมพ์ "{printTeam || "..."}"
-          </button>
         </div>
       </div>
 
