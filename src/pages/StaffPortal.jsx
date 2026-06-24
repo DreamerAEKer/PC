@@ -388,6 +388,54 @@ export default function StaffPortal() {
     localStorage.setItem('customPrintPresets', JSON.stringify(presets));
   }, [presets]);
 
+  const handleDragStart = (e) => {
+    const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX);
+    const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] && e.touches[0].clientY);
+    if (clientX === undefined || clientY === undefined) return;
+
+    e.preventDefault();
+
+    const initialTop = printSettings.top;
+    const initialLeft = printSettings.left;
+
+    const isA4 = printSettings.paperSize === 'A4';
+    const scale = isA4 ? 0.25 : 0.5;
+    const pixelsPerCm = 37.795 * scale;
+
+    const handleDragMove = (moveEvent) => {
+      const currentX = moveEvent.clientX !== undefined ? moveEvent.clientX : (moveEvent.touches && moveEvent.touches[0] && moveEvent.touches[0].clientX);
+      const currentY = moveEvent.clientY !== undefined ? moveEvent.clientY : (moveEvent.touches && moveEvent.touches[0] && moveEvent.touches[0].clientY);
+      if (currentX === undefined || currentY === undefined) return;
+
+      const deltaX = currentX - clientX;
+      const deltaY = currentY - clientY;
+
+      const deltaLeftCm = deltaX / pixelsPerCm;
+      const deltaTopCm = deltaY / pixelsPerCm;
+
+      let newLeft = Math.max(0, Math.min(15, Math.round((initialLeft + deltaLeftCm) * 10) / 10));
+      let newTop = Math.max(0, Math.min(10, Math.round((initialTop + deltaTopCm) * 10) / 10));
+
+      setPrintSettings(prev => ({
+        ...prev,
+        left: newLeft,
+        top: newTop
+      }));
+    };
+
+    const handleDragEnd = () => {
+      document.removeEventListener('mousemove', handleDragMove);
+      document.removeEventListener('mouseup', handleDragEnd);
+      document.removeEventListener('touchmove', handleDragMove);
+      document.removeEventListener('touchend', handleDragEnd);
+    };
+
+    document.addEventListener('mousemove', handleDragMove);
+    document.addEventListener('mouseup', handleDragEnd);
+    document.addEventListener('touchmove', handleDragMove, { passive: false });
+    document.addEventListener('touchend', handleDragEnd);
+  };
+
   const handleDirectPrintClick = (e) => {
     const form = e.target.closest('form');
     if (form && form.checkValidity()) {
@@ -3343,17 +3391,15 @@ export default function StaffPortal() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                    <div style={{ flex: 1, minWidth: '150px' }}>
-                      <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับลง (ซม.): {printSettings.top}</label>
-                      <input type="range" min="0" max="10" step="0.5" value={printSettings.top} onChange={(e) => setPrintSettings(p => ({...p, top: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div style={{ flex: 2, minWidth: '220px', fontSize: '0.9rem', color: '#334155', fontWeight: 600 }}>
+                      📍 ตำแหน่งปัจจุบัน: ลง {printSettings.top} ซม. | ขวา {printSettings.left} ซม.
+                      <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 'normal', color: '#64748b', marginTop: '0.25rem' }}>
+                        (ลากข้อความผู้รับบนภาพตัวอย่างด้านล่างเพื่อปรับตำแหน่งได้โดยตรง)
+                      </span>
                     </div>
-                    <div style={{ flex: 1, minWidth: '150px' }}>
-                      <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับขวา (ซม.): {printSettings.left}</label>
-                      <input type="range" min="0" max="15" step="0.5" value={printSettings.left} onChange={(e) => setPrintSettings(p => ({...p, left: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: '150px' }}>
-                      <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขนาดตัวอักษร: {printSettings.fontSize}</label>
+                    <div style={{ flex: 1, minWidth: '120px' }}>
+                      <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>ขนาดตัวอักษร: {printSettings.fontSize}</label>
                       <input type="range" min="8" max="28" step="1" value={printSettings.fontSize} onChange={(e) => setPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
                     </div>
                     <div style={{ flex: 1, minWidth: '150px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: '0.25rem' }}>
@@ -3514,7 +3560,20 @@ export default function StaffPortal() {
                                     opacity: 0.5
                                   }} />
                                 )}
-                                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif', color: (printSettings.calX !== 0 || printSettings.calY !== 0) ? '#d97706' : '#111', textAlign: 'left' }}>
+                                <div 
+                                  onMouseDown={handleDragStart}
+                                  onTouchStart={handleDragStart}
+                                  style={{ 
+                                    fontSize: `${printSettings.fontSize}pt`, 
+                                    lineHeight: '1.4', 
+                                    fontFamily: 'Sarabun, Inter, sans-serif', 
+                                    color: (printSettings.calX !== 0 || printSettings.calY !== 0) ? '#d97706' : '#111', 
+                                    textAlign: 'left',
+                                    cursor: 'grab',
+                                    userSelect: 'none',
+                                    pointerEvents: 'auto'
+                                  }}
+                                >
                                   {formValues.did && printSettings.didPrintMode !== 'address' ? (
                                     <div>
                                       <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
@@ -3584,7 +3643,20 @@ export default function StaffPortal() {
                                 opacity: 0.5
                               }} />
                             )}
-                            <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif', color: (printSettings.calX !== 0 || printSettings.calY !== 0) ? '#d97706' : '#111', textAlign: 'left' }}>
+                            <div 
+                              onMouseDown={handleDragStart}
+                              onTouchStart={handleDragStart}
+                              style={{ 
+                                fontSize: `${printSettings.fontSize}pt`, 
+                                lineHeight: '1.4', 
+                                fontFamily: 'Sarabun, Inter, sans-serif', 
+                                color: (printSettings.calX !== 0 || printSettings.calY !== 0) ? '#d97706' : '#111', 
+                                textAlign: 'left',
+                                cursor: 'grab',
+                                userSelect: 'none',
+                                pointerEvents: 'auto'
+                              }}
+                            >
                               {formValues.did && printSettings.didPrintMode !== 'address' ? (
                                 <div>
                                   <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>

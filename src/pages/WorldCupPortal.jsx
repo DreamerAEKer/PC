@@ -416,17 +416,15 @@ function WorldCupPortal() {
                 <Settings size={18} /> ตั้งค่าตำแหน่งการพิมพ์ (อ้างอิงจากกรอบ "แชมป์คือ")
               </div>
               
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ flex: 1, minWidth: '120px' }}>
-                  <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับลง (ซม.): {wcPrintSettings.top}</label>
-                  <input type="range" min="0" max="10" step="0.5" value={wcPrintSettings.top} onChange={(e) => setWcPrintSettings(p => ({...p, top: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
+                <div style={{ flex: 2, minWidth: '200px', fontSize: '0.9rem', color: '#334155', fontWeight: 600 }}>
+                  📍 ตำแหน่งปัจจุบัน: ลง {wcPrintSettings.top} ซม. | ขวา {wcPrintSettings.left} ซม.
+                  <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 'normal', color: '#64748b', marginTop: '0.25rem' }}>
+                    (ลากชื่อประเทศบนภาพตัวอย่างทางขวาเพื่อปรับตำแหน่งได้โดยตรง)
+                  </span>
                 </div>
                 <div style={{ flex: 1, minWidth: '120px' }}>
-                  <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขยับขวา (ซม.): {wcPrintSettings.left}</label>
-                  <input type="range" min="0" max="15" step="0.5" value={wcPrintSettings.left} onChange={(e) => setWcPrintSettings(p => ({...p, left: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
-                </div>
-                <div style={{ flex: 1, minWidth: '120px' }}>
-                  <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>ขนาดตัวอักษร: {wcPrintSettings.fontSize}</label>
+                  <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>ขนาดตัวอักษร: {wcPrintSettings.fontSize}</label>
                   <input type="range" min="8" max="48" step="1" value={wcPrintSettings.fontSize} onChange={(e) => setWcPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
                 </div>
               </div>
