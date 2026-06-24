@@ -39,16 +39,16 @@ function WorldCupPortal() {
       if (parsed && typeof parsed === 'object') {
         return {
           top: typeof parsed.top === 'number' ? parsed.top : 5.5,
-          left: typeof parsed.left === 'number' ? parsed.left : 8,
-          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 16,
+          left: typeof parsed.left === 'number' ? parsed.left : 8.1,
+          fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 6,
           paperSize: typeof parsed.paperSize === 'string' ? parsed.paperSize : 'A6',
           calX: typeof parsed.calX === 'number' ? parsed.calX : 0,
           calY: typeof parsed.calY === 'number' ? parsed.calY : 0
         };
       }
-      return { top: 5.5, left: 8, fontSize: 16, paperSize: 'A6', calX: 0, calY: 0 };
+      return { top: 5.5, left: 8.1, fontSize: 6, paperSize: 'A6', calX: 0, calY: 0 };
     } catch (e) {
-      return { top: 5.5, left: 8, fontSize: 16, paperSize: 'A6', calX: 0, calY: 0 };
+      return { top: 5.5, left: 8.1, fontSize: 6, paperSize: 'A6', calX: 0, calY: 0 };
     }
   });
 
@@ -426,6 +426,19 @@ function WorldCupPortal() {
                 <div style={{ flex: 1, minWidth: '120px' }}>
                   <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>ขนาดตัวอักษร: {wcPrintSettings.fontSize}</label>
                   <input type="range" min="4" max="48" step="1" value={wcPrintSettings.fontSize} onChange={(e) => setWcPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', paddingTop: '1.2rem' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setWcPrintSettings({ top: 5.5, left: 8.1, fontSize: 6, paperSize: 'A6', calX: 0, calY: 0 });
+                      setIsPortrait(false); // Thailand Post Card is landscape by default
+                    }} 
+                    className="btn" 
+                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', borderColor: '#cbd5e1', color: '#475569', backgroundColor: '#f1f5f9', margin: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                  >
+                    🔄 กลับสู่ค่าเริ่มต้น
+                  </button>
                 </div>
               </div>
 
