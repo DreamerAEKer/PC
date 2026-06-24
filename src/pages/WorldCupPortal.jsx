@@ -41,12 +41,14 @@ function WorldCupPortal() {
           top: typeof parsed.top === 'number' ? parsed.top : 5.5,
           left: typeof parsed.left === 'number' ? parsed.left : 8,
           fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 16,
-          paperSize: typeof parsed.paperSize === 'string' ? parsed.paperSize : 'A6'
+          paperSize: typeof parsed.paperSize === 'string' ? parsed.paperSize : 'A6',
+          calX: typeof parsed.calX === 'number' ? parsed.calX : 0,
+          calY: typeof parsed.calY === 'number' ? parsed.calY : 0
         };
       }
-      return { top: 5.5, left: 8, fontSize: 16, paperSize: 'A6' };
+      return { top: 5.5, left: 8, fontSize: 16, paperSize: 'A6', calX: 0, calY: 0 };
     } catch (e) {
-      return { top: 5.5, left: 8, fontSize: 16, paperSize: 'A6' };
+      return { top: 5.5, left: 8, fontSize: 16, paperSize: 'A6', calX: 0, calY: 0 };
     }
   });
 
@@ -417,6 +419,27 @@ function WorldCupPortal() {
                 </div>
               </div>
             </div>
+
+            {/* Printer Calibration Offset section */}
+            <div style={{ width: '100%', borderTop: '1px solid #e2e8f0', marginTop: '1.5rem', paddingTop: '1rem', backgroundColor: '#fffbeb', padding: '0.75rem', borderRadius: '8px', border: '1px solid #fef3c7' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: 700, display: 'block', marginBottom: '0.5rem', color: '#b45309' }}>⚙️ ปรับชดเชยระยะเครื่องพิมพ์ (สำหรับชดเชยระยะช่องใส่กระดาษเบี้ยว):</label>
+              <p style={{ fontSize: '0.75rem', color: '#d97706', margin: '0 0 0.75rem 0', lineHeight: '1.4' }}>
+                *แก้ปัญหางานพิมพ์เลื่อนไม่ตรงช่อง โดยที่การตั้งค่าจัดเลย์เอาต์หน้าจอหลักยังแสดงรูปภาพตรงสวยงามตามปกติ (ค่าชดเชยนี้จะส่งผลต่อตอนกดพิมพ์ออกเครื่องพิมพ์เท่านั้น)
+              </p>
+              <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: '130px' }}>
+                  <label style={{ fontSize: '0.8rem', display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>ชดเชยซ้าย/ขวา (แกน X): {wcPrintSettings.calX > 0 ? `ขวา +${wcPrintSettings.calX}` : wcPrintSettings.calX < 0 ? `ซ้าย ${wcPrintSettings.calX}` : '0'} ซม.</label>
+                  <input type="range" min="-10" max="10" step="0.1" value={wcPrintSettings.calX || 0} onChange={(e) => setWcPrintSettings(p => ({...p, calX: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+                </div>
+                <div style={{ flex: 1, minWidth: '130px' }}>
+                  <label style={{ fontSize: '0.8rem', display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>ชดเชยบน/ล่าง (แกน Y): {wcPrintSettings.calY > 0 ? `ล่าง +${wcPrintSettings.calY}` : wcPrintSettings.calY < 0 ? `บน ${wcPrintSettings.calY}` : '0'} ซม.</label>
+                  <input type="range" min="-10" max="10" step="0.1" value={wcPrintSettings.calY || 0} onChange={(e) => setWcPrintSettings(p => ({...p, calY: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                  <button type="button" onClick={() => setWcPrintSettings(p => ({...p, calX: 0, calY: 0}))} className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', borderColor: '#d97706', color: '#b45309', backgroundColor: '#fff', margin: 0, cursor: 'pointer' }}>รีเซ็ตชดเชย</button>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Guide Modal */}
@@ -662,8 +685,8 @@ function WorldCupPortal() {
           <div className="print-area" style={{ width: isPortrait ? '10.5cm' : '14.8cm', height: isPortrait ? '14.8cm' : '10.5cm', position: 'absolute', top: 0, left: 0 }}>
             <div style={{ 
               position: 'absolute',
-              top: `${wcPrintSettings.top}cm`,
-              left: `${wcPrintSettings.left}cm`,
+              top: `${wcPrintSettings.top + (wcPrintSettings.calY || 0)}cm`,
+              left: `${wcPrintSettings.left + (wcPrintSettings.calX || 0)}cm`,
               fontSize: `${wcPrintSettings.fontSize}pt`, 
               fontFamily: 'Sarabun, Inter, sans-serif',
               fontWeight: 'bold',
@@ -680,8 +703,8 @@ function WorldCupPortal() {
         <div className="print-only print-area">
           <div style={{ 
             position: 'absolute',
-            top: `${wcPrintSettings.top}cm`,
-            left: `${wcPrintSettings.left}cm`,
+            top: `${wcPrintSettings.top + (wcPrintSettings.calY || 0)}cm`,
+            left: `${wcPrintSettings.left + (wcPrintSettings.calX || 0)}cm`,
             fontSize: `${wcPrintSettings.fontSize}pt`, 
             fontFamily: 'Sarabun, Inter, sans-serif',
             fontWeight: 'bold',

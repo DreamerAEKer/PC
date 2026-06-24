@@ -323,9 +323,9 @@ export default function StaffPortal() {
 
   const [presets, setPresets] = useState(() => {
     const defaultList = [
-      { name: 'ค่าเริ่มต้นไปรษณียบัตร', top: 4.5, left: 9.5, fontSize: 12, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' },
-      { name: 'ตัวอักษรใหญ่ (ซม.)', top: 4.0, left: 9.0, fontSize: 14, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' },
-      { name: 'เครื่อง Drop Off', top: 4.0, left: 5.5, fontSize: 16, isNameBold: true, isPhoneBold: true, didPrintMode: 'address' }
+      { name: 'ค่าเริ่มต้นไปรษณียบัตร', top: 4.5, left: 9.5, fontSize: 12, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', calX: 0, calY: 0 },
+      { name: 'ตัวอักษรใหญ่ (ซม.)', top: 4.0, left: 9.0, fontSize: 14, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', calX: 0, calY: 0 },
+      { name: 'เครื่อง Drop Off', top: 4.0, left: 5.5, fontSize: 16, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', calX: 0, calY: 0 }
     ];
     try {
       const saved = localStorage.getItem('customPrintPresets');
@@ -367,14 +367,16 @@ export default function StaffPortal() {
           didPrintMode: mode,
           paperSize: typeof parsed.paperSize === 'string' ? parsed.paperSize : 'A6',
           printCountry: typeof parsed.printCountry === 'boolean' ? parsed.printCountry : false,
-          countryName: typeof parsed.countryName === 'string' ? parsed.countryName : 'ประเทศไทย'
+          countryName: typeof parsed.countryName === 'string' ? parsed.countryName : 'ประเทศไทย',
+          calX: typeof parsed.calX === 'number' ? parsed.calX : 0,
+          calY: typeof parsed.calY === 'number' ? parsed.calY : 0
         };
       }
       localStorage.setItem('printSettingsMigrated_1_15_6', 'true');
-      return { top: 4.5, left: 9.5, fontSize: 12, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย' };
+      return { top: 4.5, left: 9.5, fontSize: 12, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย', calX: 0, calY: 0 };
     } catch (e) {
       localStorage.setItem('printSettingsMigrated_1_15_6', 'true');
-      return { top: 4.5, left: 9.5, fontSize: 12, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย' };
+      return { top: 4.5, left: 9.5, fontSize: 12, isNameBold: true, isPhoneBold: true, didPrintMode: 'address', paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย', calX: 0, calY: 0 };
     }
   });
 
@@ -3229,7 +3231,9 @@ export default function StaffPortal() {
                               didPrintMode: found.didPrintMode || 'did',
                               paperSize: found.paperSize || 'A6',
                               printCountry: typeof found.printCountry === 'boolean' ? found.printCountry : false,
-                              countryName: found.countryName || 'ประเทศไทย'
+                              countryName: found.countryName || 'ประเทศไทย',
+                              calX: typeof found.calX === 'number' ? found.calX : 0,
+                              calY: typeof found.calY === 'number' ? found.calY : 0
                             });
                           }
                         }}
@@ -3312,7 +3316,9 @@ export default function StaffPortal() {
                             didPrintMode: printSettings.didPrintMode,
                             paperSize: printSettings.paperSize || 'A6',
                             printCountry: typeof printSettings.printCountry === 'boolean' ? printSettings.printCountry : false,
-                            countryName: printSettings.countryName || 'ประเทศไทย'
+                            countryName: printSettings.countryName || 'ประเทศไทย',
+                            calX: typeof printSettings.calX === 'number' ? printSettings.calX : 0,
+                            calY: typeof printSettings.calY === 'number' ? printSettings.calY : 0
                           };
                           
                           setPresets(prev => {
@@ -3418,6 +3424,26 @@ export default function StaffPortal() {
                           />
                           กระดาษ A4 (แบ่ง 4 ส่วน)
                         </label>
+                      </div>
+                    </div>
+
+                    <div style={{ width: '100%', borderTop: '1px solid #e2e8f0', paddingTop: '1rem', backgroundColor: '#fffbeb', padding: '0.75rem', borderRadius: '8px', border: '1px solid #fef3c7' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: 700, display: 'block', marginBottom: '0.5rem', color: '#b45309' }}>⚙️ ปรับชดเชยระยะเครื่องพิมพ์ (สำหรับชดเชยระยะช่องใส่กระดาษเบี้ยว):</label>
+                      <p style={{ fontSize: '0.75rem', color: '#d97706', margin: '0 0 0.75rem 0', lineHeight: '1.4' }}>
+                        *แก้ปัญหางานพิมพ์เลื่อนไม่ตรงช่อง โดยที่การตั้งค่าจัดเลย์เอาต์หน้าจอหลักยังแสดงรูปภาพตรงสวยงามตามปกติ (ค่าชดเชยนี้จะผลต่อตอนกดพิมพ์ออกเครื่องพิมพ์เท่านั้น)
+                      </p>
+                      <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1, minWidth: '130px' }}>
+                          <label style={{ fontSize: '0.8rem', display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>ชดเชยซ้าย/ขวา (แกน X): {printSettings.calX > 0 ? `ขวา +${printSettings.calX}` : printSettings.calX < 0 ? `ซ้าย ${printSettings.calX}` : '0'} ซม.</label>
+                          <input type="range" min="-10" max="10" step="0.1" value={printSettings.calX || 0} onChange={(e) => setPrintSettings(p => ({...p, calX: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: '130px' }}>
+                          <label style={{ fontSize: '0.8rem', display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>ชดเชยบน/ล่าง (แกน Y): {printSettings.calY > 0 ? `ล่าง +${printSettings.calY}` : printSettings.calY < 0 ? `บน ${printSettings.calY}` : '0'} ซม.</label>
+                          <input type="range" min="-10" max="10" step="0.1" value={printSettings.calY || 0} onChange={(e) => setPrintSettings(p => ({...p, calY: parseFloat(e.target.value)}))} style={{ width: '100%' }} />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                          <button type="button" onClick={() => setPrintSettings(p => ({...p, calX: 0, calY: 0}))} className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', borderColor: '#d97706', color: '#b45309', backgroundColor: '#fff', margin: 0, cursor: 'pointer' }}>รีเซ็ตชดเชย</button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -4254,8 +4280,8 @@ export default function StaffPortal() {
                       key={cellIdx} 
                       className="print-a4-cell" 
                       style={{ 
-                        paddingTop: `${printSettings.top}cm`,
-                        paddingLeft: `${printSettings.left}cm`,
+                        paddingTop: `${printSettings.top + (printSettings.calY || 0)}cm`,
+                        paddingLeft: `${printSettings.left + (printSettings.calX || 0)}cm`,
                         paddingRight: '1cm',
                         fontSize: `${printSettings.fontSize}pt`, 
                         lineHeight: '1.4', 
@@ -4315,8 +4341,8 @@ export default function StaffPortal() {
                   fontFamily: 'Sarabun, Inter, sans-serif',
                   pageBreakAfter: idx === printDataList.length - 1 ? 'auto' : 'always',
                   breakAfter: idx === printDataList.length - 1 ? 'auto' : 'page',
-                  paddingTop: `${printSettings.top}cm`,
-                  paddingLeft: `${printSettings.left}cm`,
+                  paddingTop: `${printSettings.top + (printSettings.calY || 0)}cm`,
+                  paddingLeft: `${printSettings.left + (printSettings.calX || 0)}cm`,
                   height: '10.5cm',
                   width: '14.8cm',
                   boxSizing: 'border-box'

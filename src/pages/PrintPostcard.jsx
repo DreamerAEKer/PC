@@ -22,12 +22,14 @@ export default function PrintPostcard() {
           printCountry: typeof parsed.printCountry === 'boolean' ? parsed.printCountry : false,
           countryName: typeof parsed.countryName === 'string' ? parsed.countryName : 'ประเทศไทย',
           top: typeof parsed.top === 'number' ? parsed.top : 4.5,
-          left: typeof parsed.left === 'number' ? parsed.left : 9.5
+          left: typeof parsed.left === 'number' ? parsed.left : 9.5,
+          calX: typeof parsed.calX === 'number' ? parsed.calX : 0,
+          calY: typeof parsed.calY === 'number' ? parsed.calY : 0
         };
       }
-      return { didPrintMode: 'did', isNameBold: true, isPhoneBold: true, paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย', top: 4.5, left: 9.5 };
+      return { didPrintMode: 'did', isNameBold: true, isPhoneBold: true, paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย', top: 4.5, left: 9.5, calX: 0, calY: 0 };
     } catch (e) {
-      return { didPrintMode: 'did', isNameBold: true, isPhoneBold: true, paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย', top: 4.5, left: 9.5 };
+      return { didPrintMode: 'did', isNameBold: true, isPhoneBold: true, paperSize: 'A6', printCountry: false, countryName: 'ประเทศไทย', top: 4.5, left: 9.5, calX: 0, calY: 0 };
     }
   })();
 
@@ -145,8 +147,8 @@ export default function PrintPostcard() {
               border: none;
               box-shadow: none;
               margin: 0;
-              padding-top: ${printSettings.top}cm;
-              padding-left: ${printSettings.left}cm;
+              padding-top: ${printSettings.top + (printSettings.calY || 0)}cm;
+              padding-left: ${printSettings.left + (printSettings.calX || 0)}cm;
             }
           }
         `}
@@ -184,7 +186,7 @@ export default function PrintPostcard() {
 
       {printSettings.paperSize === 'A4' && (
         <div className="print-a4-page print-only">
-          <div className="print-a4-cell" style={{ paddingTop: `${printSettings.top}cm`, paddingLeft: `${printSettings.left}cm`, paddingRight: '1cm' }}>
+          <div className="print-a4-cell" style={{ paddingTop: `${printSettings.top + (printSettings.calY || 0)}cm`, paddingLeft: `${printSettings.left + (printSettings.calX || 0)}cm`, paddingRight: '1cm' }}>
             {postcardContent}
           </div>
           <div className="print-a4-cell" />
