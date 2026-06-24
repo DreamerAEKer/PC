@@ -3493,13 +3493,28 @@ export default function StaffPortal() {
                                 height: '10.5cm',
                                 borderRight: cellIdx % 2 === 0 ? '1px dashed #cbd5e1' : 'none',
                                 borderBottom: cellIdx < 2 ? '1px dashed #cbd5e1' : 'none',
-                                paddingTop: `${printSettings.top}cm`,
-                                paddingLeft: `${printSettings.left}cm`,
+                                paddingTop: `${printSettings.top + (printSettings.calY || 0)}cm`,
+                                paddingLeft: `${printSettings.left + (printSettings.calX || 0)}cm`,
                                 paddingRight: '1cm',
                                 boxSizing: 'border-box',
-                                overflow: 'hidden'
+                                overflow: 'hidden',
+                                position: 'relative'
                               }}>
-                                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif', color: '#111', textAlign: 'left' }}>
+                                {/* Ideal position template guide box (only visible when calibrated) */}
+                                {(printSettings.calX !== 0 || printSettings.calY !== 0) && (
+                                  <div style={{
+                                    position: 'absolute',
+                                    top: `${printSettings.top}cm`,
+                                    left: `${printSettings.left}cm`,
+                                    width: '5cm',
+                                    height: '2.5cm',
+                                    border: '1px dashed #94a3b8',
+                                    borderRadius: '4px',
+                                    pointerEvents: 'none',
+                                    opacity: 0.5
+                                  }} />
+                                )}
+                                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif', color: (printSettings.calX !== 0 || printSettings.calY !== 0) ? '#d97706' : '#111', textAlign: 'left' }}>
                                   {formValues.did && printSettings.didPrintMode !== 'address' ? (
                                     <div>
                                       <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
@@ -3548,13 +3563,28 @@ export default function StaffPortal() {
                             left: 0,
                             transform: 'scale(0.5)',
                             transformOrigin: 'top left',
-                            paddingTop: `${printSettings.top}cm`,
-                            paddingLeft: `${printSettings.left}cm`,
+                            paddingTop: `${printSettings.top + (printSettings.calY || 0)}cm`,
+                            paddingLeft: `${printSettings.left + (printSettings.calX || 0)}cm`,
                             paddingRight: '1cm',
                             boxSizing: 'border-box',
-                            overflow: 'hidden'
+                            overflow: 'hidden',
+                            position: 'relative'
                           }}>
-                            <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif', color: '#111', textAlign: 'left' }}>
+                            {/* Ideal position template guide box (only visible when calibrated) */}
+                            {(printSettings.calX !== 0 || printSettings.calY !== 0) && (
+                              <div style={{
+                                position: 'absolute',
+                                top: `${printSettings.top}cm`,
+                                left: `${printSettings.left}cm`,
+                                width: '5cm',
+                                height: '2.5cm',
+                                border: '1px dashed #94a3b8',
+                                borderRadius: '4px',
+                                pointerEvents: 'none',
+                                opacity: 0.5
+                              }} />
+                            )}
+                            <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.4', fontFamily: 'Sarabun, Inter, sans-serif', color: (printSettings.calX !== 0 || printSettings.calY !== 0) ? '#d97706' : '#111', textAlign: 'left' }}>
                               {formValues.did && printSettings.didPrintMode !== 'address' ? (
                                 <div>
                                   <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>

@@ -509,15 +509,37 @@ function WorldCupPortal() {
                   {/* Dash lines representing A4 divisions */}
                   <div style={{ position: 'absolute', top: 0, left: 0, width: '29.7cm', height: '21.0cm', display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr' }}>
                     <div style={{ borderRight: '1px dashed #cbd5e1', borderBottom: '1px dashed #cbd5e1', position: 'relative', overflow: 'hidden' }}>
+                      {/* Ideal Position guide (if calibrated) */}
+                      {(wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) && (
+                        <div style={{
+                          position: 'absolute',
+                          top: `${wcPrintSettings.top}cm`,
+                          left: `${wcPrintSettings.left}cm`,
+                          fontSize: `${wcPrintSettings.fontSize}pt`, 
+                          fontFamily: 'Sarabun, Inter, sans-serif',
+                          fontWeight: 'bold',
+                          color: '#94a3b8',
+                          opacity: 0.5,
+                          whiteSpace: 'nowrap',
+                          border: '1px dashed #94a3b8',
+                          padding: '2px',
+                          pointerEvents: 'none'
+                        }}>
+                          {printTeam || "ชื่อประเทศ"} (ตำแหน่งบนการ์ด)
+                        </div>
+                      )}
+                      {/* Calibrated print position */}
                       <div style={{
                         position: 'absolute',
-                        top: `${wcPrintSettings.top}cm`,
-                        left: `${wcPrintSettings.left}cm`,
+                        top: `${wcPrintSettings.top + (wcPrintSettings.calY || 0)}cm`,
+                        left: `${wcPrintSettings.left + (wcPrintSettings.calX || 0)}cm`,
                         fontSize: `${wcPrintSettings.fontSize}pt`, 
                         fontFamily: 'Sarabun, Inter, sans-serif',
                         fontWeight: 'bold',
-                        color: '#000',
-                        whiteSpace: 'nowrap'
+                        color: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '#d97706' : '#000',
+                        whiteSpace: 'nowrap',
+                        border: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '1px dashed #d97706' : 'none',
+                        padding: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '2px' : '0'
                       }}>
                         {printTeam || "ชื่อประเทศ"}
                       </div>
@@ -541,15 +563,37 @@ function WorldCupPortal() {
                   boxSizing: 'border-box',
                   overflow: 'hidden'
                 }}>
+                  {/* Ideal Position guide (if calibrated) */}
+                  {(wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) && (
+                    <div style={{
+                      position: 'absolute',
+                      top: `${wcPrintSettings.top}cm`,
+                      left: `${wcPrintSettings.left}cm`,
+                      fontSize: `${wcPrintSettings.fontSize}pt`, 
+                      fontFamily: 'Sarabun, Inter, sans-serif',
+                      fontWeight: 'bold',
+                      color: '#94a3b8',
+                      opacity: 0.5,
+                      whiteSpace: 'nowrap',
+                      border: '1px dashed #94a3b8',
+                      padding: '2px',
+                      pointerEvents: 'none'
+                    }}>
+                      {printTeam || "ชื่อประเทศ"} (ตำแหน่งบนการ์ด)
+                    </div>
+                  )}
+                  {/* Calibrated print position */}
                   <div style={{ 
                     position: 'absolute',
-                    top: `${wcPrintSettings.top}cm`,
-                    left: `${wcPrintSettings.left}cm`,
+                    top: `${wcPrintSettings.top + (wcPrintSettings.calY || 0)}cm`,
+                    left: `${wcPrintSettings.left + (wcPrintSettings.calX || 0)}cm`,
                     fontSize: `${wcPrintSettings.fontSize}pt`, 
                     fontFamily: 'Sarabun, Inter, sans-serif',
                     fontWeight: 'bold',
-                    color: '#000',
-                    whiteSpace: 'nowrap'
+                    color: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '#d97706' : '#000',
+                    whiteSpace: 'nowrap',
+                    border: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '1px dashed #d97706' : 'none',
+                    padding: (wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) ? '2px' : '0'
                   }}>
                     {printTeam || "ชื่อประเทศ"}
                   </div>
