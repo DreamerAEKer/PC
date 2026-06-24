@@ -425,7 +425,7 @@ function WorldCupPortal() {
                 </div>
                 <div style={{ flex: 1, minWidth: '120px' }}>
                   <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>ขนาดตัวอักษร: {wcPrintSettings.fontSize}</label>
-                  <input type="range" min="8" max="48" step="1" value={wcPrintSettings.fontSize} onChange={(e) => setWcPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
+                  <input type="range" min="4" max="48" step="1" value={wcPrintSettings.fontSize} onChange={(e) => setWcPrintSettings(p => ({...p, fontSize: parseInt(e.target.value)}))} style={{ width: '100%' }} />
                 </div>
               </div>
 
