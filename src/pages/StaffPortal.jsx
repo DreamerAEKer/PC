@@ -5363,7 +5363,7 @@ export default function StaffPortal() {
             </h3>
             
             <p style={{ margin: '0 0 0.4rem 0', fontSize: '10.5pt', fontWeight: 'bold', color: '#334155' }}>
-              1. โชคชั้นที่ 1: รางวัลสำหรับผู้ทายชื่อประเทศที่เข้ารอบ 16 ทีมสุดท้ายได้ถูกต้อง (ส่งภายใน 28 มิ.ย. 2569)
+              โชคชั้นที่ 1: รางวัลสำหรับผู้ทายชื่อประเทศที่เข้ารอบ 16 ทีมสุดท้ายได้ถูกต้อง (ส่งภายใน 28 มิ.ย. 2569)
             </p>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5pt', marginBottom: '0.75rem' }}>
               <thead>
@@ -5393,7 +5393,7 @@ export default function StaffPortal() {
             </table>
 
             <p style={{ margin: '0 0 0.4rem 0', fontSize: '10.5pt', fontWeight: 'bold', color: '#334155' }}>
-              2. โชคชั้นที่ 2: รางวัลสำหรับผู้ทายผลแชมป์โลกได้ถูกต้อง (ส่งภายใน 19 ก.ค. 2569)
+              โชคชั้นที่ 2: รางวัลหากประเทศที่ท่านเลือกได้แชมป์ (ส่งภายใน 19 ก.ค. 2569)
             </p>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5pt' }}>
               <thead>
