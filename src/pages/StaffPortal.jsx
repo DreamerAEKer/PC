@@ -5319,9 +5319,9 @@ export default function StaffPortal() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '3px double #000', paddingBottom: '0.75rem' }}>
             <div style={{ textAlign: 'left', flex: 1 }}>
               <h1 style={{ margin: '0 0 0.3rem 0', fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>แนะนำการร่วมลุ้นโชคไปรษณียบัตร</h1>
-              <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '14pt', fontWeight: 'bold', color: '#1e3a8a' }}>แคมเปญทายผลแชมป์บอลโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
+              <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '14pt', fontWeight: 'bold', color: '#1e3a8a' }}>แคมเปญทายผลแชมป์ฟุตบอลระดับโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
               <p style={{ margin: '0', fontSize: '10pt', color: '#475569' }}>
-                บริการพิเศษสั่งพิมพ์ชื่อ-ที่อยู่ผู้ส่ง สะดวก รวดเร็ว สวยงาม โดย {branchName}
+                บริการพิเศษสั่งพิมพ์ชื่อ-ที่อยู่ผู้ส่ง สะดวก พร้อมลุ้นโชค รวดเร็ว สวยงาม โดย {branchName}
               </p>
             </div>
             <div style={{ textAlign: 'center', marginLeft: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -5348,10 +5348,10 @@ export default function StaffPortal() {
           {/* Section 2: วันหมดเขต */}
           <div style={{ marginBottom: '1rem', border: '1.5px solid #b91c1c', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#fff5f5' }}>
             <h3 style={{ fontSize: '11.5pt', fontWeight: 'bold', margin: '0 0 0.25rem 0', color: '#b91c1c' }}>
-              ⏳ วันหมดเขตรับไปรษณียบัตรชิงโชค
+              ⏳ หมดเขตส่งไปรษณียบัตรเพื่อร่วมลุ้นโชค
             </h3>
             <p style={{ margin: '0', fontSize: '11pt', fontWeight: 'bold', color: '#7f1d1d' }}>
-              หมดเขตรับชิงโชค ภายในวันที่ 19 กรกฎาคม 2569
+              ภายในวันที่ 19 กรกฎาคม 2569
             </p>
             <p style={{ margin: '0.2rem 0 0 0', fontSize: '9.5pt', color: '#451a03' }}>
               * สำหรับไปรษณียบัตรกระดาษ ต้องหยอดตู้ไปรษณีย์หรือส่ง ณ ที่ทำการไปรษณีย์ ภายในเวลา <strong>18:00 น.</strong> ของวันที่ 19 กรกฎาคม 2569 เท่านั้น (ยึดตามวันตราประทับประจำวันของไปรษณีย์)
@@ -5467,7 +5467,7 @@ export default function StaffPortal() {
           {/* Footer note */}
           <div style={{ textAlign: 'center', fontSize: '8.5pt', color: '#64748b', borderTop: '1px dashed #cbd5e1', paddingTop: '0.5rem' }}>
             ขอขอบพระคุณที่ใช้บริการสั่งพิมพ์ไปรษณียบัตรกับทางเรา<br/>
-            ขอให้ทุกท่านโชคดีและสนุกไปกับการเชียร์ฟุตบอลโลก 2026!
+            ขอให้ทุกท่านโชคดีและสนุกไปกับการเชียร์ฟุตบอลระดับโลก 2026!
           </div>
         </div>
       )}
