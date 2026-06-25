@@ -3998,8 +3998,8 @@ export default function StaffPortal() {
                 <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, flexWrap: 'wrap' }}>
                   <History size={20} />
                   <span>ประวัติการพิมพ์ (เครื่องนี้)</span>
-                  <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 'normal', marginLeft: '0.5rem', backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '12px' }}>
-                    ⚠️ การเลือกรายการมีไว้เพื่อ "ส่งออกข้อมูล" หรือ "ลบข้อมูล" แบบกลุ่มเท่านั้น
+                  <span style={{ fontSize: '0.7rem', color: '#1e40af', fontWeight: 'bold', marginLeft: '0.5rem', backgroundColor: '#eff6ff', padding: '2px 8px', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
+                    💡 ติ๊กถูกเลือกรายการด้านล่าง เพื่อเปิดใช้งานระบบสรุปการเก็บเงินและพิมพ์บิล A4
                   </span>
                 </h3>
                 {history.length > 0 && (
