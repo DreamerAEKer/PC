@@ -5472,7 +5472,7 @@ export default function StaffPortal() {
 
           {/* Footer note */}
           <div style={{ textAlign: 'center', fontSize: '8.5pt', color: '#64748b', borderTop: '1px dashed #cbd5e1', paddingTop: '0.5rem' }}>
-            ขอขอบพระคุณที่ใช้บริการสั่งพิมพ์ไปรษณียบัตรกับทางเรา<br/>
+            ขอขอบพระคุณ ที่ซื้อไปรษณียบัตร ของไปรษณีย์ไทย<br/>
             ขอให้ทุกท่านโชคดีและสนุกไปกับการเชียร์ฟุตบอลระดับโลก 2026!
           </div>
         </div>
