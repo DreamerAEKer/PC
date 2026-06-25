@@ -3878,7 +3878,7 @@ export default function StaffPortal() {
                         <input 
                           type="text" 
                           className="form-control" 
-                          placeholder="เช่น คุณลุง, คุณพ่อ, ครอบครัว..." 
+                          placeholder="เช่น บริษัท/กลุ่มบุคคล, คุณสมชาย..." 
                           value={payerName} 
                           onChange={(e) => setPayerName(e.target.value)} 
                           style={{ width: '100%', padding: '0.35rem 0.5rem', fontSize: '0.85rem' }}
@@ -4442,7 +4442,6 @@ export default function StaffPortal() {
             
             <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border)', margin: '0 0.5rem' }}></div>
             
-            </button>
             <Link to="/worldcup" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff' }}>
               พิมพ์ชื่อแชมป์ <span role="img" aria-label="globe">🌍</span>
             </Link>
@@ -4702,7 +4701,7 @@ export default function StaffPortal() {
           }}>
             {/* Header */}
             <div style={{ textAlign: 'center', marginBottom: '2rem', borderBottom: '2px solid #000', paddingBottom: '1rem' }}>
-              <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '24pt', fontWeight: 'bold' }}>ใบแจ้งหนี้ / ใบเสร็จเรียกเก็บเงินค่าพิมพ์</h1>
+              <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '24pt', fontWeight: 'bold' }}>ใบกำกับ งานสั่งพิมพ์ ไปรษณียบัตรฯ</h1>
               <p style={{ margin: '0', fontSize: '12pt', color: '#333' }}>
                 สาขาที่รับสั่งทำ: {branchName} ({branchCode})
               </p>
@@ -4717,7 +4716,7 @@ export default function StaffPortal() {
                 ) : (
                   <div><strong>ชื่อผู้ชำระเงิน:</strong> .............................................................</div>
                 )}
-                <div><strong>กลุ่มการสั่งพิมพ์:</strong> ยอดสั่งพิมพ์ภายในบริษัท/กลุ่มพี่น้อง (คุณลุงเป็นตัวแทน)</div>
+                <div><strong>กลุ่มการสั่งพิมพ์:</strong> {payerName ? `${payerName}` : 'ยอดสั่งพิมพ์รวมแบบกลุ่ม'}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div><strong>วันที่พิมพ์บิล:</strong> {printDate}</div>
@@ -4726,7 +4725,7 @@ export default function StaffPortal() {
             </div>
 
             <p style={{ fontSize: '11pt', fontStyle: 'italic', marginBottom: '0.75rem', color: '#444' }}>
-              * รายละเอียดสรุปค่าพิมพ์ไปรษณียบัตรแยกตามรายชื่อ เพื่อให้คุณลุงสามารถนำไปเรียกเก็บเงินได้อย่างถูกต้อง ไม่สับสน
+              * รายละเอียดสรุปค่าพิมพ์ไปรษณียบัตรแยกตามรายชื่อ เพื่อความสะดวกและถูกต้องในการตรวจสอบเรียกเก็บเงิน
             </p>
 
             {/* Items Table */}
@@ -4734,8 +4733,7 @@ export default function StaffPortal() {
               <thead>
                 <tr style={{ borderTop: '1.5px solid #000', borderBottom: '1.5px solid #000', backgroundColor: '#f8f9fa' }}>
                   <th style={{ padding: '0.65rem 0.5rem', textAlign: 'center', width: '8%', border: '1px solid #ddd' }}>ลำดับ</th>
-                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left', width: '30%', border: '1px solid #ddd' }}>ชื่อผู้สั่ง/ผู้รับ</th>
-                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left', width: '32%', border: '1px solid #ddd' }}>ที่อยู่จัดส่ง / เบอร์โทร</th>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left', width: '62%', border: '1px solid #ddd' }}>ชื่อผู้สั่ง/ผู้รับ</th>
                   <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right', width: '12%', border: '1px solid #ddd' }}>จำนวน (ใบ)</th>
                   <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right', width: '18%', border: '1px solid #ddd' }}>รวมเงิน (บาท)</th>
                 </tr>
@@ -4745,9 +4743,6 @@ export default function StaffPortal() {
                   <tr key={r.id} style={{ borderBottom: '1px solid #ddd' }}>
                     <td style={{ padding: '0.65rem 0.5rem', textAlign: 'center', border: '1px solid #ddd' }}>{idx + 1}</td>
                     <td style={{ padding: '0.65rem 0.5rem', fontWeight: 'bold', border: '1px solid #ddd' }}>{r.name}</td>
-                    <td style={{ padding: '0.65rem 0.5rem', color: '#444', fontSize: '10pt', border: '1px solid #ddd' }}>
-                      {r.address} {r.zipcode} {r.phone && `(โทร: ${r.phone})`}
-                    </td>
                     <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>{r.quantity || 0}</td>
                     <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', fontWeight: '500', border: '1px solid #ddd' }}>
                       {((r.quantity || 0) * postcardRate).toLocaleString()}
@@ -4756,7 +4751,7 @@ export default function StaffPortal() {
                 ))}
                 {/* Total Row */}
                 <tr style={{ borderTop: '2px solid #000', borderBottom: '2px solid #000', fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>
-                  <td colSpan="3" style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>รวมทั้งสิ้น</td>
+                  <td colSpan="2" style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>รวมทั้งสิ้น</td>
                   <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>{totalQty.toLocaleString()}</td>
                   <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontSize: '12pt', color: '#000', border: '1px solid #ddd' }}>
                     {totalAmount.toLocaleString()} บาท
@@ -4785,7 +4780,7 @@ export default function StaffPortal() {
                 {bulkPaidStatus ? (
                   <span style={{ color: '#15803d', fontWeight: 'bold' }}>✓ ชำระเงินแล้วเมื่อ {bulkPaidDate ? new Date(bulkPaidDate).toLocaleDateString('th-TH') : '-'}</span>
                 ) : (
-                  <span style={{ color: '#ef4444', fontWeight: 'bold' }}>⏳ ยังไม่ชำระเงิน (รอลุงเรียกเก็บกลับมาส่งมอบร้าน)</span>
+                  <span style={{ color: '#ef4444', fontWeight: 'bold' }}>⏳ ยังไม่ชำระเงิน (รอเรียกเก็บและนำส่งร้าน)</span>
                 )}
               </div>
             </div>
@@ -4793,7 +4788,7 @@ export default function StaffPortal() {
             {/* Signature Block */}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', fontSize: '11pt' }}>
               <div style={{ width: '45%', textAlign: 'center' }}>
-                <p>ลงชื่อ ............................................................. ผู้รับมอบหมาย/คุณลุง</p>
+                <p>ลงชื่อ ............................................................. ผู้ประสานงาน / ผู้ชำระเงิน</p>
                 <p style={{ color: '#666', fontSize: '10pt', marginTop: '0.2rem' }}>( {payerName || '...................................................'} )</p>
               </div>
               <div style={{ width: '45%', textAlign: 'center' }}>
@@ -5186,7 +5181,7 @@ export default function StaffPortal() {
           }}>
             {/* Header */}
             <div style={{ textAlign: 'center', marginBottom: '2rem', borderBottom: '2px solid #000', paddingBottom: '1rem' }}>
-              <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '24pt', fontWeight: 'bold' }}>ใบแจ้งหนี้ / ใบเสร็จเรียกเก็บเงินค่าพิมพ์</h1>
+              <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '24pt', fontWeight: 'bold' }}>ใบกำกับ งานสั่งพิมพ์ ไปรษณียบัตรฯ</h1>
               <p style={{ margin: '0', fontSize: '12pt', color: '#333' }}>
                 สาขาที่รับสั่งทำ: {branchName} ({branchCode})
               </p>
@@ -5201,7 +5196,7 @@ export default function StaffPortal() {
                 ) : (
                   <div><strong>ชื่อผู้ชำระเงิน:</strong> .............................................................</div>
                 )}
-                <div><strong>กลุ่มการสั่งพิมพ์:</strong> ยอดสั่งพิมพ์ภายในบริษัท/กลุ่มพี่น้อง (คุณลุงเป็นตัวแทน)</div>
+                <div><strong>กลุ่มการสั่งพิมพ์:</strong> {payerName ? `${payerName}` : 'ยอดสั่งพิมพ์รวมแบบกลุ่ม'}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div><strong>วันที่พิมพ์บิล:</strong> {printDate}</div>
@@ -5210,7 +5205,7 @@ export default function StaffPortal() {
             </div>
 
             <p style={{ fontSize: '11pt', fontStyle: 'italic', marginBottom: '0.75rem', color: '#444' }}>
-              * รายละเอียดสรุปค่าพิมพ์ไปรษณียบัตรแยกตามรายชื่อ เพื่อให้คุณลุงสามารถนำไปเรียกเก็บเงินได้อย่างถูกต้อง ไม่สับสน
+              * รายละเอียดสรุปค่าพิมพ์ไปรษณียบัตรแยกตามรายชื่อ เพื่อความสะดวกและถูกต้องในการตรวจสอบเรียกเก็บเงิน
             </p>
 
             {/* Items Table */}
@@ -5218,8 +5213,7 @@ export default function StaffPortal() {
               <thead>
                 <tr style={{ borderTop: '1.5px solid #000', borderBottom: '1.5px solid #000', backgroundColor: '#f8f9fa' }}>
                   <th style={{ padding: '0.65rem 0.5rem', textAlign: 'center', width: '8%', border: '1px solid #ddd' }}>ลำดับ</th>
-                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left', width: '30%', border: '1px solid #ddd' }}>ชื่อผู้สั่ง/ผู้รับ</th>
-                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left', width: '32%', border: '1px solid #ddd' }}>ที่อยู่จัดส่ง / เบอร์โทร</th>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left', width: '62%', border: '1px solid #ddd' }}>ชื่อผู้สั่ง/ผู้รับ</th>
                   <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right', width: '12%', border: '1px solid #ddd' }}>จำนวน (ใบ)</th>
                   <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right', width: '18%', border: '1px solid #ddd' }}>รวมเงิน (บาท)</th>
                 </tr>
@@ -5229,9 +5223,6 @@ export default function StaffPortal() {
                   <tr key={r.id} style={{ borderBottom: '1px solid #ddd' }}>
                     <td style={{ padding: '0.65rem 0.5rem', textAlign: 'center', border: '1px solid #ddd' }}>{idx + 1}</td>
                     <td style={{ padding: '0.65rem 0.5rem', fontWeight: 'bold', border: '1px solid #ddd' }}>{r.name}</td>
-                    <td style={{ padding: '0.65rem 0.5rem', color: '#444', fontSize: '10pt', border: '1px solid #ddd' }}>
-                      {r.address} {r.zipcode} {r.phone && `(โทร: ${r.phone})`}
-                    </td>
                     <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>{r.quantity || 0}</td>
                     <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', fontWeight: '500', border: '1px solid #ddd' }}>
                       {((r.quantity || 0) * postcardRate).toLocaleString()}
@@ -5240,7 +5231,7 @@ export default function StaffPortal() {
                 ))}
                 {/* Total Row */}
                 <tr style={{ borderTop: '2px solid #000', borderBottom: '2px solid #000', fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>
-                  <td colSpan="3" style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>รวมทั้งสิ้น</td>
+                  <td colSpan="2" style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>รวมทั้งสิ้น</td>
                   <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>{totalQty.toLocaleString()}</td>
                   <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontSize: '12pt', color: '#000', border: '1px solid #ddd' }}>
                     {totalAmount.toLocaleString()} บาท
@@ -5269,7 +5260,7 @@ export default function StaffPortal() {
                 {bulkPaidStatus ? (
                   <span style={{ color: '#15803d', fontWeight: 'bold' }}>✓ ชำระเงินแล้วเมื่อ {bulkPaidDate ? new Date(bulkPaidDate).toLocaleDateString('th-TH') : '-'}</span>
                 ) : (
-                  <span style={{ color: '#ef4444', fontWeight: 'bold' }}>⏳ ยังไม่ชำระเงิน (รอลุงเรียกเก็บกลับมาส่งมอบร้าน)</span>
+                  <span style={{ color: '#ef4444', fontWeight: 'bold' }}>⏳ ยังไม่ชำระเงิน (รอเรียกเก็บและนำส่งร้าน)</span>
                 )}
               </div>
             </div>
@@ -5277,7 +5268,7 @@ export default function StaffPortal() {
             {/* Signature Block */}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', fontSize: '11pt' }}>
               <div style={{ width: '45%', textAlign: 'center' }}>
-                <p>ลงชื่อ ............................................................. ผู้รับมอบหมาย/คุณลุง</p>
+                <p>ลงชื่อ ............................................................. ผู้ประสานงาน / ผู้ชำระเงิน</p>
                 <p style={{ color: '#666', fontSize: '10pt', marginTop: '0.2rem' }}>( {payerName || '...................................................'} )</p>
               </div>
               <div style={{ width: '45%', textAlign: 'center' }}>
