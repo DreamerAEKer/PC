@@ -5318,8 +5318,8 @@ export default function StaffPortal() {
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '3px double #000', paddingBottom: '0.75rem' }}>
             <div style={{ textAlign: 'left', flex: 1 }}>
-              <h1 style={{ margin: '0 0 0.3rem 0', fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>แนะนำการร่วมลุ้นโชคไปรษณียบัตร</h1>
-              <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '14pt', fontWeight: 'bold', color: '#1e3a8a' }}>แคมเปญทายผลแชมป์ฟุตบอลระดับโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
+              <h1 style={{ margin: '0 0 0.3rem 0', fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>คำแนะนำการร่วมลุ้นโชคไปรษณียบัตร</h1>
+              <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '14pt', fontWeight: 'bold', color: '#1e3a8a' }}>ทายผลแชมป์ฟุตบอลระดับโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
               <p style={{ margin: '0', fontSize: '10pt', color: '#475569' }}>
                 บริการพิเศษสั่งพิมพ์ชื่อ-ที่อยู่ผู้ส่ง สะดวก พร้อมลุ้นโชค รวดเร็ว สวยงาม โดย {branchName}
               </p>
@@ -5337,7 +5337,7 @@ export default function StaffPortal() {
             </h3>
             <ol style={{ paddingLeft: '1.25rem', fontSize: '10.5pt', margin: '0', lineHeight: '1.5' }}>
               <li style={{ marginBottom: '0.4rem' }}>
-                <strong>เขียนชื่อทีมทายแชมป์:</strong> ในช่องว่างทายผล <strong>"แชมป์คือ..."</strong> บนไปรษณียบัตร ให้เขียน<strong>ชื่อประเทศที่คุณทายว่าจะเป็นแชมป์โลกเพียง 1 ทีมเท่านั้น</strong> (เขียนให้ตัวอักษรชัดเจนอ่านง่าย เช่น <em>อังกฤษ, ฝรั่งเศส, อาร์เจนตินา, สเปน, บราซิล</em> ฯลฯ)
+                <strong>เขียนชื่อทีมทายแชมป์:</strong> ในช่องว่างทายผล <strong>"แชมป์คือ..."</strong> บนไปรษณียบัตร ให้เขียน<strong>ชื่อประเทศที่คุณทายว่าจะได้เป็นแชมป์เพียง 1 ทีมเท่านั้น</strong> (เขียนให้ตัวอักษรชัดเจนอ่านง่าย เช่น <em>อังกฤษ, ฝรั่งเศส, อาร์เจนตินา, สเปน, บราซิล</em> ฯลฯ)
               </li>
               <li style={{ marginBottom: '0.4rem' }}>
                 <strong>ส่งชิงโชคได้ทันที:</strong> ตรวจสอบความถูกต้อง แล้วนำไปรษณียบัตรไปหยอดที่ตู้ไปรษณีย์ หรือฝากส่ง ณ ที่ทำการไปรษณีย์ทุกสาขาทั่วประเทศได้ทันที <strong>(ไม่ต้องติดแสตมป์เพิ่ม)</strong>
