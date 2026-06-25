@@ -137,6 +137,16 @@ export default function StaffPortal() {
   const [staffPhone, setStaffPhone] = useState('');
   const [isSettingsDirty, setIsSettingsDirty] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [postcardRate, setPostcardRate] = useState(3);
+  const [payerName, setPayerName] = useState('');
+  const [bulkPaidStatus, setBulkPaidStatus] = useState(true);
+  const [bulkPaidDate, setBulkPaidDate] = useState(() => {
+    const today = new Date();
+    const offset = today.getTimezoneOffset();
+    const localToday = new Date(today.getTime() - (offset * 60 * 1000));
+    return localToday.toISOString().split('T')[0];
+  });
+  const [isPrintingInvoice, setIsPrintingInvoice] = useState(false);
   const [touchStartX, setTouchStartX] = useState(null);
   const [swipeOffset, setSwipeOffset] = useState({});
   const [swipedItemId, setSwipedItemId] = useState(null);
@@ -177,6 +187,25 @@ export default function StaffPortal() {
     setSelectedIds(prev => 
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
+  };
+
+  const handleUpdatePaymentStatus = () => {
+    if (selectedIds.length === 0) return;
+    setHistory(prev => {
+      const updated = prev.map(r => {
+        if (selectedIds.includes(r.id)) {
+          return {
+            ...r,
+            paid: bulkPaidStatus,
+            paidDate: bulkPaidStatus ? bulkPaidDate : null
+          };
+        }
+        return r;
+      });
+      localStorage.setItem('staffHistory', JSON.stringify(updated));
+      return updated;
+    });
+    alert(`อัปเดตสถานะการชำระเงินของ ${selectedIds.length} รายการสำเร็จ!`);
   };
 
   const { filteredData, searchByField } = useThaiAddress();
@@ -3812,6 +3841,175 @@ export default function StaffPortal() {
               );
             })()}
 
+            {/* Billing & Payment Summary Card */}
+            {selectedIds.length > 0 && (() => {
+              const selectedRecords = history.filter(r => selectedIds.includes(r.id));
+              const totalQty = selectedRecords.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
+              const totalAmount = totalQty * postcardRate;
+
+              return (
+                <div className="card" style={{
+                  border: '1.5px solid #3b82f6',
+                  boxShadow: '0 4px 15px rgba(59, 130, 246, 0.12)',
+                  background: 'linear-gradient(to bottom right, #ffffff, #f0f7ff)',
+                  padding: '1.25rem'
+                }}>
+                  <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0', color: '#1d4ed8' }}>
+                    <span>💰 สรุปการเก็บเงิน ({selectedIds.length} รายการที่เลือก)</span>
+                  </h3>
+                  
+                  {/* Customer list table */}
+                  <div style={{ overflowX: 'auto', marginBottom: '1rem', border: '1px solid #dbeafe', borderRadius: '8px', backgroundColor: '#fff' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ backgroundColor: '#eff6ff', borderBottom: '1px solid #dbeafe' }}>
+                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af' }}>ชื่อผู้รับ</th>
+                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', textAlign: 'right' }}>จำนวน (ใบ)</th>
+                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', textAlign: 'right' }}>ค่าไปรษณียบัตร</th>
+                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', textAlign: 'center' }}>สถานะ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedRecords.map(r => (
+                          <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                            <td style={{ padding: '0.5rem 0.75rem', fontWeight: '500' }}>{r.name}</td>
+                            <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>{r.quantity || 0}</td>
+                            <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>{((r.quantity || 0) * postcardRate).toLocaleString()} บาท</td>
+                            <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                              {r.paid ? (
+                                <span style={{ color: '#15803d', fontSize: '0.75rem', fontWeight: 'bold' }}>✓ จ่ายแล้ว</span>
+                              ) : (
+                                <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold' }}>✗ ยังไม่จ่าย</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                        <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold', borderTop: '2px solid #dbeafe' }}>
+                          <td style={{ padding: '0.65rem 0.75rem', color: '#1e40af' }}>รวมทั้งสิ้น</td>
+                          <td style={{ padding: '0.65rem 0.75rem', textAlign: 'right', color: '#1e40af' }}>{totalQty.toLocaleString()}</td>
+                          <td style={{ padding: '0.65rem 0.75rem', textAlign: 'right', color: '#1d4ed8', fontSize: '0.95rem' }}>{totalAmount.toLocaleString()} บาท</td>
+                          <td></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Settings Controls */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#fff', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                      {/* Postcard fee setting */}
+                      <div style={{ flex: '1 1 180px' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>อัตราค่าไปรษณียบัตร (บาทต่อใบ)</label>
+                        <select 
+                          className="form-control"
+                          value={postcardRate} 
+                          onChange={(e) => setPostcardRate(parseFloat(e.target.value) || 0)}
+                          style={{ width: '100%', padding: '0.35rem 0.5rem', fontSize: '0.85rem' }}
+                        >
+                          <option value="2">2 บาท (ไปรษณียบัตรปกติ)</option>
+                          <option value="3">3 บาท (พิมพ์ + การ์ดสติกเกอร์/พิเศษ)</option>
+                          <option value="4">4 บาท</option>
+                          <option value="5">5 บาท</option>
+                        </select>
+                      </div>
+
+                      {/* Custom Payer name */}
+                      <div style={{ flex: '1 1 220px' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>ชื่อผู้จ่ายเงิน (ถ้าต้องการระบุในใบเรียกเก็บ)</label>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          placeholder="เช่น คุณลุง, คุณพ่อ, ครอบครัว..." 
+                          value={payerName} 
+                          onChange={(e) => setPayerName(e.target.value)} 
+                          style={{ width: '100%', padding: '0.35rem 0.5rem', fontSize: '0.85rem' }}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ borderTop: '1px dashed #e2e8f0', paddingTop: '0.75rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      {/* Bulk status toggler */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <input 
+                          type="checkbox" 
+                          id="bulkPaidCheckbox"
+                          checked={bulkPaidStatus} 
+                          onChange={(e) => setBulkPaidStatus(e.target.checked)} 
+                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                        />
+                        <label htmlFor="bulkPaidCheckbox" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#334155', cursor: 'pointer' }}>ทำเครื่องหมายว่า "จ่ายแล้ว"</label>
+                      </div>
+
+                      {/* Date picker */}
+                      {bulkPaidStatus && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>วันที่:</span>
+                          <input 
+                            type="date" 
+                            className="form-control"
+                            value={bulkPaidDate} 
+                            onChange={(e) => setBulkPaidDate(e.target.value)} 
+                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions buttons */}
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={handleUpdatePaymentStatus}
+                      style={{
+                        flex: '1 1 200px',
+                        padding: '0.6rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 'bold',
+                        backgroundColor: '#10b981',
+                        borderColor: '#059669',
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.35rem',
+                        cursor: 'pointer',
+                        margin: 0
+                      }}
+                    >
+                      💾 บันทึกสถานะชำระเงิน ({selectedIds.length} รายการ)
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        setIsPrintingInvoice(true);
+                        setTimeout(() => {
+                          window.print();
+                          setIsPrintingInvoice(false);
+                        }, 300);
+                      }}
+                      style={{
+                        flex: '1 1 180px',
+                        padding: '0.6rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.35rem',
+                        cursor: 'pointer',
+                        margin: 0
+                      }}
+                    >
+                      🖨️ พิมพ์บิลเรียกเก็บเงิน A4
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
             <div className="card" id="history-section">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, flexWrap: 'wrap' }}>
@@ -4067,7 +4265,20 @@ export default function StaffPortal() {
                         {/* Subtitle */}
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
                           {record.phone && <div>โทร: {record.phone}</div>}
-                          {record.quantity !== undefined && <div>จำนวน: {record.quantity} ใบ</div>}
+                          {record.quantity !== undefined && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.15rem' }}>
+                              <span>จำนวน: {record.quantity} ใบ</span>
+                              {record.paid ? (
+                                <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#15803d', backgroundColor: '#dcfce7', padding: '0.05rem 0.35rem', borderRadius: '4px', border: '1px solid #bbf7d0' }}>
+                                  💰 จ่ายแล้ว {record.paidDate && `(${new Date(record.paidDate).toLocaleDateString('th-TH')})`}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#ef4444', backgroundColor: '#fef2f2', padding: '0.05rem 0.35rem', borderRadius: '4px', border: '1px solid #fecdd3' }}>
+                                  ⏳ ยังไม่จ่าย
+                                </span>
+                              )}
+                            </div>
+                          )}
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.2rem' }}>
                             <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
                               {new Date(record.timestamp).toLocaleDateString('th-TH', { hour: '2-digit', minute: '2-digit' })}
@@ -4506,6 +4717,158 @@ export default function StaffPortal() {
           )}
         </div>
       )}
+
+      {/* Printable A4 Billing Invoice/Receipt (Rendered only on print layout) */}
+      {isPrintingInvoice && selectedIds.length > 0 && (() => {
+        const selectedRecords = history.filter(r => selectedIds.includes(r.id));
+        const totalQty = selectedRecords.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
+        const totalAmount = totalQty * postcardRate;
+        const printDate = new Date().toLocaleDateString('th-TH', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        return (
+          <div className="invoice-print-only" style={{
+            fontFamily: 'Sarabun, Inter, sans-serif',
+            color: '#000',
+            padding: '2cm 1.5cm',
+            backgroundColor: '#fff',
+            boxSizing: 'border-box',
+            width: '21cm', // standard A4 portrait width
+            minHeight: '29.7cm'
+          }}>
+            {/* Header */}
+            <div style={{ textAlign: 'center', marginBottom: '2rem', borderBottom: '2px solid #000', paddingBottom: '1rem' }}>
+              <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '24pt', fontWeight: 'bold' }}>ใบแจ้งหนี้ / ใบเสร็จเรียกเก็บเงินค่าพิมพ์</h1>
+              <p style={{ margin: '0', fontSize: '12pt', color: '#333' }}>
+                สาขาที่รับสั่งทำ: {branchName} ({branchCode})
+              </p>
+              {staffName && <p style={{ margin: '0.2rem 0 0 0', fontSize: '11pt' }}>ผู้ทำรายการ: {staffName} {staffPhone && `(โทร: ${staffPhone})`}</p>}
+            </div>
+
+            {/* Invoice Details */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '12pt', lineHeight: '1.6' }}>
+              <div>
+                {payerName ? (
+                  <div><strong>ชื่อผู้ชำระเงิน:</strong> <span style={{ fontSize: '13pt', textDecoration: 'underline', fontWeight: 'bold' }}>{payerName}</span></div>
+                ) : (
+                  <div><strong>ชื่อผู้ชำระเงิน:</strong> .............................................................</div>
+                )}
+                <div><strong>กลุ่มการสั่งพิมพ์:</strong> ยอดสั่งพิมพ์ภายในบริษัท/กลุ่มพี่น้อง (คุณลุงเป็นตัวแทน)</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div><strong>วันที่พิมพ์บิล:</strong> {printDate}</div>
+                <div><strong>จำนวนรายการ:</strong> {selectedIds.length} รายการ</div>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '11pt', fontStyle: 'italic', marginBottom: '0.75rem', color: '#444' }}>
+              * รายละเอียดสรุปค่าพิมพ์ไปรษณียบัตรแยกตามรายชื่อ เพื่อให้คุณลุงสามารถนำไปเรียกเก็บเงินได้อย่างถูกต้อง ไม่สับสน
+            </p>
+
+            {/* Items Table */}
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '2rem', fontSize: '11pt' }}>
+              <thead>
+                <tr style={{ borderTop: '1.5px solid #000', borderBottom: '1.5px solid #000', backgroundColor: '#f8f9fa' }}>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'center', width: '8%', border: '1px solid #ddd' }}>ลำดับ</th>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left', width: '30%', border: '1px solid #ddd' }}>ชื่อผู้สั่ง/ผู้รับ</th>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left', width: '32%', border: '1px solid #ddd' }}>ที่อยู่จัดส่ง / เบอร์โทร</th>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right', width: '12%', border: '1px solid #ddd' }}>จำนวน (ใบ)</th>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right', width: '18%', border: '1px solid #ddd' }}>รวมเงิน (บาท)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedRecords.map((r, idx) => (
+                  <tr key={r.id} style={{ borderBottom: '1px solid #ddd' }}>
+                    <td style={{ padding: '0.65rem 0.5rem', textAlign: 'center', border: '1px solid #ddd' }}>{idx + 1}</td>
+                    <td style={{ padding: '0.65rem 0.5rem', fontWeight: 'bold', border: '1px solid #ddd' }}>{r.name}</td>
+                    <td style={{ padding: '0.65rem 0.5rem', color: '#444', fontSize: '10pt', border: '1px solid #ddd' }}>
+                      {r.address} {r.zipcode} {r.phone && `(โทร: ${r.phone})`}
+                    </td>
+                    <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>{r.quantity || 0}</td>
+                    <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', fontWeight: '500', border: '1px solid #ddd' }}>
+                      {((r.quantity || 0) * postcardRate).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+                {/* Total Row */}
+                <tr style={{ borderTop: '2px solid #000', borderBottom: '2px solid #000', fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>
+                  <td colSpan="3" style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>รวมทั้งสิ้น</td>
+                  <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>{totalQty.toLocaleString()}</td>
+                  <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontSize: '12pt', color: '#000', border: '1px solid #ddd' }}>
+                    {totalAmount.toLocaleString()} บาท
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Payment status banner */}
+            <div style={{ 
+              border: '1.5px solid #000', 
+              padding: '1rem', 
+              borderRadius: '6px', 
+              backgroundColor: '#fafafa', 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '3rem',
+              fontSize: '11pt'
+            }}>
+              <div>
+                <strong>ราคาไปรษณียบัตรเฉลี่ย:</strong> {postcardRate} บาทต่อใบ
+              </div>
+              <div>
+                <strong>สถานะบิลนี้:</strong> {' '}
+                {bulkPaidStatus ? (
+                  <span style={{ color: '#15803d', fontWeight: 'bold' }}>✓ ชำระเงินแล้วเมื่อ {bulkPaidDate ? new Date(bulkPaidDate).toLocaleDateString('th-TH') : '-'}</span>
+                ) : (
+                  <span style={{ color: '#ef4444', fontWeight: 'bold' }}>⏳ ยังไม่ชำระเงิน (รอลุงเรียกเก็บกลับมาส่งมอบร้าน)</span>
+                )}
+              </div>
+            </div>
+
+            {/* Signature Block */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', fontSize: '11pt' }}>
+              <div style={{ width: '45%', textAlign: 'center' }}>
+                <p>ลงชื่อ ............................................................. ผู้รับมอบหมาย/คุณลุง</p>
+                <p style={{ color: '#666', fontSize: '10pt', marginTop: '0.2rem' }}>( {payerName || '...................................................'} )</p>
+              </div>
+              <div style={{ width: '45%', textAlign: 'center' }}>
+                <p>ลงชื่อ ............................................................. ผู้รับเงิน/ร้านค้า</p>
+                <p style={{ color: '#666', fontSize: '10pt', marginTop: '0.2rem' }}>( {staffName || '...................................................'} )</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Overriding style for A4 invoice printing */}
+      {isPrintingInvoice && (
+        <style>
+          {`
+            @media print {
+              @page {
+                size: A4 portrait !important;
+                margin: 1.5cm 1.2cm !important;
+              }
+              .staff-no-print {
+                display: none !important;
+              }
+              .print-only {
+                display: none !important;
+              }
+              .invoice-print-only {
+                display: block !important;
+              }
+            }
+          `}
+        </style>
+      )}
+
       {showQuickQrModal && (
         <div className="quick-qr-modal-overlay" onClick={() => setShowQuickQrModal(false)}>
           <div className="quick-qr-modal-content" onClick={(e) => e.stopPropagation()}>
