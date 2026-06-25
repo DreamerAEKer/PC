@@ -5308,34 +5308,34 @@ export default function StaffPortal() {
         <div className="guide-print-only" style={{
           fontFamily: 'Sarabun, Inter, sans-serif',
           color: '#000',
-          padding: '0.8cm 1.2cm',
+          padding: '1.1cm 1.4cm',
           backgroundColor: '#fff',
           boxSizing: 'border-box',
           width: '21cm',
           minHeight: '29.7cm',
-          lineHeight: '1.35'
+          lineHeight: '1.45'
         }}>
           {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', borderBottom: '3px double #000', paddingBottom: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '3px double #000', paddingBottom: '0.75rem' }}>
             <div style={{ textAlign: 'left', flex: 1 }}>
-              <h1 style={{ margin: '0 0 0.3rem 0', fontSize: '18pt', fontWeight: 'bold', color: '#b91c1c' }}>แนะนำการร่วมลุ้นโชคไปรษณียบัตร</h1>
-              <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '13pt', fontWeight: 'bold', color: '#1e3a8a' }}>แคมเปญทายผลแชมป์บอลโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
-              <p style={{ margin: '0', fontSize: '9.5pt', color: '#475569' }}>
+              <h1 style={{ margin: '0 0 0.3rem 0', fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>แนะนำการร่วมลุ้นโชคไปรษณียบัตร</h1>
+              <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '14pt', fontWeight: 'bold', color: '#1e3a8a' }}>แคมเปญทายผลแชมป์บอลโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
+              <p style={{ margin: '0', fontSize: '10pt', color: '#475569' }}>
                 บริการพิเศษสั่งพิมพ์ชื่อ-ที่อยู่ผู้ส่ง สะดวก รวดเร็ว สวยงาม โดย {branchName}
               </p>
             </div>
             <div style={{ textAlign: 'center', marginLeft: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <QRCodeCanvas value="https://www.thairath.co.th/sport/worldcup2026/thai-post-campaign-2026" size={70} level="H" includeMargin={true} />
-              <span style={{ fontSize: '7pt', fontWeight: 'bold', color: '#475569', marginTop: '0.2rem' }}>สแกนอ่านกติกาเพิ่มเติม</span>
+              <QRCodeCanvas value="https://www.thairath.co.th/sport/worldcup2026/thai-post-campaign-2026" size={80} level="H" includeMargin={true} />
+              <span style={{ fontSize: '7.5pt', fontWeight: 'bold', color: '#475569', marginTop: '0.2rem' }}>สแกนอ่านกติกาเพิ่มเติม</span>
             </div>
           </div>
 
           {/* Section 1: วิธีการส่ง */}
-          <div style={{ marginBottom: '0.75rem' }}>
-            <h3 style={{ fontSize: '11pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.4rem 0' }}>
+          <div style={{ marginBottom: '1rem' }}>
+            <h3 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.4rem 0' }}>
               📝 วิธีร่วมลุ้นสนุกง่ายๆ (ไปรษณียบัตรกระดาษ)
             </h3>
-            <ol style={{ paddingLeft: '1.25rem', fontSize: '10pt', margin: '0', lineHeight: '1.4' }}>
+            <ol style={{ paddingLeft: '1.25rem', fontSize: '10.5pt', margin: '0', lineHeight: '1.5' }}>
               <li style={{ marginBottom: '0.4rem' }}>
                 <strong>เขียนชื่อทีมทายแชมป์:</strong> ในช่องว่างทายผล <strong>"แชมป์คือ..."</strong> บนไปรษณียบัตร ให้เขียน<strong>ชื่อประเทศที่คุณทายว่าจะเป็นแชมป์โลกเพียง 1 ทีมเท่านั้น</strong> (เขียนให้ตัวอักษรชัดเจนอ่านง่าย เช่น <em>อังกฤษ, ฝรั่งเศส, อาร์เจนตินา, สเปน, บราซิล</em> ฯลฯ)
               </li>
@@ -5346,28 +5346,28 @@ export default function StaffPortal() {
           </div>
 
           {/* Section 2: วันหมดเขต */}
-          <div style={{ marginBottom: '0.75rem', border: '1.5px solid #b91c1c', padding: '0.5rem 0.75rem', borderRadius: '8px', backgroundColor: '#fff5f5' }}>
-            <h3 style={{ fontSize: '11pt', fontWeight: 'bold', margin: '0 0 0.2rem 0', color: '#b91c1c' }}>
+          <div style={{ marginBottom: '1rem', border: '1.5px solid #b91c1c', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#fff5f5' }}>
+            <h3 style={{ fontSize: '11.5pt', fontWeight: 'bold', margin: '0 0 0.25rem 0', color: '#b91c1c' }}>
               ⏳ วันหมดเขตรับไปรษณียบัตรชิงโชค
             </h3>
-            <p style={{ margin: '0', fontSize: '10.5pt', fontWeight: 'bold', color: '#7f1d1d' }}>
+            <p style={{ margin: '0', fontSize: '11pt', fontWeight: 'bold', color: '#7f1d1d' }}>
               หมดเขตรับชิงโชค ภายในวันที่ 19 กรกฎาคม 2569
             </p>
-            <p style={{ margin: '0.15rem 0 0 0', fontSize: '9pt', color: '#451a03' }}>
+            <p style={{ margin: '0.2rem 0 0 0', fontSize: '9.5pt', color: '#451a03' }}>
               * สำหรับไปรษณียบัตรกระดาษ ต้องหยอดตู้ไปรษณีย์หรือส่ง ณ ที่ทำการไปรษณีย์ ภายในเวลา <strong>18:00 น.</strong> ของวันที่ 19 กรกฎาคม 2569 เท่านั้น (ยึดตามวันตราประทับประจำวันของไปรษณีย์)
             </p>
           </div>
 
           {/* Section 3: รายละเอียดเงินรางวัล */}
-          <div style={{ marginBottom: '0.75rem' }}>
-            <h3 style={{ fontSize: '11pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.4rem 0' }}>
+          <div style={{ marginBottom: '1rem' }}>
+            <h3 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.4rem 0' }}>
               🎁 รายละเอียดของรางวัล (รวมมูลค่าของรางวัลกว่า 12,000,000 บาท)
             </h3>
             
-            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10pt', fontWeight: 'bold', color: '#334155' }}>
+            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10.5pt', fontWeight: 'bold', color: '#334155' }}>
               1. โชคชั้นที่ 1: รางวัลสำหรับผู้ทายชื่อประเทศที่เข้ารอบ 16 ทีมสุดท้ายได้ถูกต้อง (ส่งภายใน 28 มิ.ย. 2569)
             </p>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt', marginBottom: '0.75rem' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5pt', marginBottom: '0.75rem' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f1f5f9', borderTop: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}>
                   <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 'bold' }}>ประเภทของรางวัล</th>
@@ -5394,10 +5394,10 @@ export default function StaffPortal() {
               </tbody>
             </table>
 
-            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10pt', fontWeight: 'bold', color: '#334155' }}>
+            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10.5pt', fontWeight: 'bold', color: '#334155' }}>
               2. โชคชั้นที่ 2: รางวัลสำหรับผู้ทายผลแชมป์โลกได้ถูกต้อง (ส่งภายใน 19 ก.ค. 2569)
             </p>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5pt' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f1f5f9', borderTop: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}>
                   <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 'bold' }}>ประเภทของรางวัล</th>
