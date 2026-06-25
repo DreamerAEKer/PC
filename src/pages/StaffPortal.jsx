@@ -5319,7 +5319,7 @@ export default function StaffPortal() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '3px double #000', paddingBottom: '0.75rem' }}>
             <div style={{ textAlign: 'left', flex: 1 }}>
               <h1 style={{ margin: '0 0 0.3rem 0', fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>คำแนะนำการร่วมลุ้นโชคส่งไปรษณียบัตร</h1>
-              <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '14pt', fontWeight: 'bold', color: '#1e3a8a' }}>ทายผลแชมป์ฟุตบอลระดับโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
+              <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '12.5pt', fontWeight: 'bold', color: '#1e3a8a' }}>ทายผลแชมป์ฟุตบอลระดับโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
               <p style={{ margin: '0', fontSize: '10pt', color: '#475569' }}>
                 บริการพิเศษสั่งพิมพ์ชื่อ-ที่อยู่ผู้ส่ง สะดวก พร้อมลุ้นโชค โดย {branchName}
               </p>
