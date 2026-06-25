@@ -284,7 +284,6 @@ export default function StaffPortal() {
       setBranchCode(savedCode);
       setBranchName(savedBranch);
     } else {
-      // Backward compatibility: parse if it contains a 5-digit number
       const match = savedBranch.match(/\d{5}/);
       if (match) {
         setBranchCode(match[0]);
@@ -329,7 +328,6 @@ export default function StaffPortal() {
     } else {
       setQuantityFields(100);
     }
-    // Always enforce today's date on initial load/refresh
     setValue("orderDate", new Date().toISOString().split('T')[0]);
   }, [setValue]);
 
@@ -343,7 +341,7 @@ export default function StaffPortal() {
 
   const saveToHistory = (data) => {
     const newRecord = { ...data, id: Date.now(), timestamp: new Date().toISOString() };
-    const updatedHistory = [newRecord, ...history].slice(0, 50); // Keep last 50
+    const updatedHistory = [newRecord, ...history].slice(0, 50);
     setHistory(updatedHistory);
     localStorage.setItem('staffHistory', JSON.stringify(updatedHistory));
     return newRecord;
@@ -469,7 +467,7 @@ export default function StaffPortal() {
   const handleDirectPrintClick = (e) => {
     const form = e.target.closest('form');
     if (form && form.checkValidity()) {
-      e.preventDefault(); // Stop async react-hook-form submit
+      e.preventDefault();
       
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
@@ -524,7 +522,7 @@ export default function StaffPortal() {
       return sliced;
     });
     
-    reset(); // clear form
+    reset();
     setQuantityFields(100);
     setHasActiveData(false);
     setEditingRecordId(null);
@@ -590,7 +588,7 @@ export default function StaffPortal() {
         return sliced;
       });
       
-      reset(); // clear form
+      reset();
       setQuantityFields(100);
       setHasActiveData(false);
       setEditingRecordId(null);
@@ -739,7 +737,6 @@ export default function StaffPortal() {
             return sortedUnique;
           });
 
-          // Automatically select the imported items
           const importedIds = parsed.map(item => item.id).filter(Boolean);
           setSelectedIds(importedIds);
           setHistoryFilter('pending');
@@ -1183,7 +1180,6 @@ export default function StaffPortal() {
   }, [scanMode, cameraActive, restartKey]);
 
   const decodeQRFromImage = async (file) => {
-    // 1. Try to load image and scan using jsQR directly on the original image (highly reliable)
     let img = null;
     try {
       img = await new Promise((resolve, reject) => {
@@ -1214,7 +1210,6 @@ export default function StaffPortal() {
       console.warn("Direct jsQR scan failed:", err);
     }
 
-    // 2. Try BarcodeDetector on the original image (since it's fast)
     if ('BarcodeDetector' in window) {
       try {
         const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
@@ -1228,7 +1223,6 @@ export default function StaffPortal() {
       }
     }
 
-    // 3. Fallback to html5QrCode on original file
     let html5QrCode = globalHiddenScanner;
     if (!html5QrCode) {
       try {
@@ -1251,11 +1245,9 @@ export default function StaffPortal() {
       }
     }
 
-    // 4. Canvas Preprocessing (to solve moire patterns, glare, high resolution screen photos)
     if (img) {
       try {
         const scanCanvas = async (cv) => {
-          // jsQR first on preprocessed canvas (most robust engine)
           try {
             const ctx = cv.getContext('2d');
             if (ctx) {
@@ -1267,7 +1259,6 @@ export default function StaffPortal() {
             }
           } catch (e) {}
 
-          // BarcodeDetector on preprocessed canvas
           if ('BarcodeDetector' in window) {
             try {
               const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
@@ -1278,7 +1269,6 @@ export default function StaffPortal() {
             } catch (e) {}
           }
 
-          // html5QrCode on preprocessed canvas
           if (html5QrCode) {
             try {
               const blob = await new Promise(resolve => cv.toBlob(resolve, 'image/jpeg', 0.9));
@@ -1293,15 +1283,12 @@ export default function StaffPortal() {
           return null;
         };
 
-        // Try cropped areas first (extremely effective for screenshots with surrounding text like the ticket page)
         const cropRatios = [0.4, 0.3, 0.6, 0.8, 0.9];
         for (const ratio of cropRatios) {
           const cropSize = Math.min(img.width, img.height) * ratio;
           
-          // Define vertical centers to try
-          const verticalCenters = [img.height / 2]; // Always try exact center first
+          const verticalCenters = [img.height / 2]; 
           if (img.height > img.width) {
-            // For portrait screenshots, try upper-middle positions where the QR is typically located (roughly 25%-45% from the top)
             verticalCenters.push(img.height * 0.35);
             verticalCenters.push(img.height * 0.25);
             verticalCenters.push(img.height * 0.45);
@@ -1329,7 +1316,6 @@ export default function StaffPortal() {
           }
         }
 
-        // Try resized full images
         const sizes = [800, 1200, 600];
         for (const targetWidth of sizes) {
           const canvas = document.createElement('canvas');
@@ -1350,7 +1336,6 @@ export default function StaffPortal() {
             return result;
           }
 
-          // Try Grayscale ONLY (preserving details)
           try {
             const imgData = ctx.getImageData(0, 0, width, height);
             const data = imgData.data;
@@ -1369,9 +1354,7 @@ export default function StaffPortal() {
             }
           } catch (e) {}
 
-          // Try Grayscale + Binarization (as a last resort)
           try {
-            // Re-draw original image to get fresh color data
             ctx.drawImage(img, 0, 0, width, height);
             const imgData = ctx.getImageData(0, 0, width, height);
             const data = imgData.data;
@@ -1505,12 +1488,10 @@ export default function StaffPortal() {
   const handleFileDecode = async (file) => {
     if (!file) return;
 
-    // Helper to process parsed data
     const processDecodedData = (decodedText) => {
       try {
         const parsed = JSON.parse(decodedText);
         if (parsed && parsed.b === 1 && Array.isArray(parsed.r)) {
-          // Bulk import
           const newRecords = parsed.r.map(raw => {
             const mappedSubBookings = (raw.s || []).map((sub, sIdx) => ({
               id: Date.now() + Math.random() + sIdx,
@@ -1576,7 +1557,6 @@ export default function StaffPortal() {
         }
       } catch (e) {}
 
-      // Fallback to single import
       try {
         const data = parseQrPayload(decodedText);
         
@@ -1801,7 +1781,7 @@ export default function StaffPortal() {
                 });
                 if (isDup) {
                   duplicateCount++;
-                  continue; // ข้ามออเดอร์ที่มีอยู่แล้ว — ไม่นำเข้าซ้ำ และคงสถานะพิมพ์แล้วไว้
+                  continue; 
                 }
 
                 const mappedSubBookings = (recordRaw.s || []).map((sub, subIdx) => ({
@@ -1868,7 +1848,7 @@ export default function StaffPortal() {
               });
               if (isDup) {
                 duplicateCount++;
-                continue; // ข้ามออเดอร์ที่มีอยู่แล้ว — ไม่นำเข้าซ้ำ และคงสถานะพิมพ์แล้วไว้
+                continue; 
               }
 
               const prefixSubdist = singleData.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.';
@@ -1937,14 +1917,12 @@ export default function StaffPortal() {
       setHistory(prevHistory => {
         const safePrev = Array.isArray(prevHistory) ? prevHistory : [];
 
-        // สร้าง map ของข้อมูลเก่า keyed by orderCode เพื่อค้นหาสถานะ printed
         const prevMap = new Map();
         for (const r of safePrev) {
           const k = r.orderCode || `${r.name}-${r.phone}`;
           prevMap.set(k, r);
         }
 
-        // ใส่ข้อมูลใหม่ก่อน แต่ถ้าเก่ามีอยู่แล้วให้ใช้ข้อมูลเก่า (คงสถานะ printed)
         const merged = [...decodedRecords, ...safePrev];
         const unique = [];
         const seen = new Set();
@@ -2199,17 +2177,14 @@ export default function StaffPortal() {
     canvas.height = height;
     const ctx = canvas.getContext('2d');
 
-    // Fill white background
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
 
-    // 1. Title: 📲 สแกน QR Code พิมพ์ ชื่อ-ที่อยู่
     ctx.fillStyle = '#1e293b';
     ctx.textAlign = 'center';
     ctx.font = 'bold 48px "Sarabun", "Inter", "Tahoma", sans-serif';
     ctx.fillText('📲 สแกน QR Code พิมพ์ ชื่อ-ที่อยู่', width / 2, 75);
 
-    // 2. Subtitle: สาขา: ไปรษณีย์กลาง 10501
     ctx.font = 'bold 38px "Sarabun", "Inter", "Tahoma", sans-serif';
     const labelText = 'สาขา: ';
     const branchText = `${branchName} ${branchCode}`;
@@ -2228,7 +2203,6 @@ export default function StaffPortal() {
     ctx.fillStyle = '#ef4444';
     ctx.fillText(branchText, startX + labelWidth, 135);
 
-    // 3. QR Box Container (blue border)
     const boxWidth = 620;
     const boxHeight = 650;
     const boxX = (width - boxWidth) / 2;
@@ -2254,13 +2228,11 @@ export default function StaffPortal() {
     }
     ctx.stroke();
 
-    // Draw QR code inside the box (increased size from 480 to 500)
     const qrSize = 500;
     const qrX = boxX + (boxWidth - qrSize) / 2;
     const qrY = boxY + 90;
     ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
 
-    // 4. Overlapping badge: QR Customer (ลิงก์สำหรับลูกค้าสแกน)
     const badgeText = 'QR Customer (ลิงก์สำหรับลูกค้าสแกน)';
     ctx.font = 'bold 28px "Sarabun", "Inter", "Tahoma", sans-serif';
     const badgeTextWidth = ctx.measureText(badgeText).width;
@@ -2288,20 +2260,17 @@ export default function StaffPortal() {
     }
     ctx.fill();
 
-    // Badge Text
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(badgeText, width / 2, badgeY + (badgeHeight / 2));
-    ctx.textBaseline = 'alphabetic'; // reset
+    ctx.textBaseline = 'alphabetic'; 
 
-    // 5. Footer: เสร็จแล้ว แจ้งกับพี่ไปรได้เลย
     ctx.fillStyle = '#16a34a';
     ctx.textAlign = 'center';
     ctx.font = 'bold 46px "Sarabun", "Inter", "Tahoma", sans-serif';
     ctx.fillText('เสร็จแล้ว แจ้งกับพี่ไปรได้เลย', width / 2, 905);
 
-    // Trigger download
     const url = canvas.toDataURL("image/png");
     const link = document.createElement('a');
     link.href = url;
@@ -2510,7 +2479,6 @@ export default function StaffPortal() {
             max-height: 320px;
             object-fit: cover !important;
           }
-          /* Hide html5-qrcode default feedback banners, watermarks and dashboards */
           #reader a,
           #reader img,
           #reader__status_span {
@@ -2695,7 +2663,6 @@ export default function StaffPortal() {
 
 
         <div className="staff-columns" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-          {/* Left column: Entry */}
           <div className="staff-left-column" style={{ flex: '1 1 400px' }}>
             <div className="card glass-panel">
               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
@@ -2801,7 +2768,6 @@ export default function StaffPortal() {
 
               {(scanMode === 'camera' || scanMode === 'usb') && (
                 <div>
-                  {/* Segmented control for switching scan sub-modes */}
                   <div style={{
                     display: 'flex',
                     backgroundColor: '#f1f5f9',
@@ -2890,7 +2856,6 @@ export default function StaffPortal() {
                     </button>
                   </div>
 
-                  {/* 1. File Upload Sub-mode */}
                   {scanSubMode === 'file' && (
                     <div style={{ marginBottom: '1.5rem' }}>
                       <div 
@@ -2945,7 +2910,6 @@ export default function StaffPortal() {
                     </div>
                   )}
 
-                  {/* 2. USB Barcode Scanner Sub-mode */}
                   {scanSubMode === 'usb' && (
                     <div style={{ marginBottom: '1.5rem' }}>
                       <div style={{ 
@@ -3027,7 +2991,6 @@ export default function StaffPortal() {
                     </div>
                   )}
 
-                  {/* 3. Webcam Scanner Sub-mode */}
                   {scanSubMode === 'camera' && (
                     <div style={{ marginBottom: '1.5rem' }}>
                       <div id="reader" style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid #cbd5e1', display: cameraActive ? 'block' : 'none' }}></div>
@@ -3219,7 +3182,6 @@ export default function StaffPortal() {
                   })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
                   {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.phone.message}</span>}
                 </div>
-                {/* D-ID toggle button row and box inputs */}
                 <input type="hidden" {...register("did")} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -3289,7 +3251,6 @@ export default function StaffPortal() {
                     ตั้งค่าตำแหน่งและขนาดการพิมพ์ (ปรับแต่งเอง)
                   </h4>
 
-                  {/* Preset Manager */}
                   <div style={{ 
                     marginBottom: '1rem', 
                     paddingBottom: '1rem', 
@@ -3305,7 +3266,6 @@ export default function StaffPortal() {
                     </div>
                     
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                      {/* Select Preset */}
                       <select
                         id="preset-selector"
                         className="form-control"
@@ -3338,7 +3298,6 @@ export default function StaffPortal() {
                         ))}
                       </select>
 
-                      {/* Delete Preset */}
                       <button
                         type="button"
                         onClick={async () => {
@@ -3374,7 +3333,6 @@ export default function StaffPortal() {
                     </div>
 
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                      {/* Save current settings as preset */}
                       <input 
                         type="text"
                         className="form-control"
@@ -3422,7 +3380,6 @@ export default function StaffPortal() {
                           setNewPresetName('');
                           alert(`บันทึกพรีเซ็ต "${name}" สำเร็จเรียบร้อยแล้วครับ!`);
                           
-                          // Set select value after state update
                           setTimeout(() => {
                             const selectEl = document.getElementById('preset-selector');
                             if (selectEl) selectEl.value = name;
@@ -3557,7 +3514,6 @@ export default function StaffPortal() {
                     </div>
                   </div>
 
-                  {/* Live Preview Section */}
                   <div style={{ marginTop: '1.5rem' }}>
                     <h5 style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.5rem' }}>
                       ตัวอย่างพื้นที่การพิมพ์ ({printSettings.paperSize === 'A4' ? 'จำลองกระดาษ A4 แนวนอน 29.7 x 21 ซม. แบ่ง 4 ส่วน' : 'จำลองสัดส่วนไปรษณียบัตร 14.8 x 10.5 ซม.'})
@@ -3574,8 +3530,6 @@ export default function StaffPortal() {
                       overflow: 'hidden'
                     }}>
                       <div style={{ 
-                        /* 14.8cm = 559px, 10.5cm = 396px. At scale(0.5): 279.5px x 198px */
-                        /* A4 is 29.7cm x 21.0cm. At scale(0.25): 280.6px x 198.4px */
                         width: '280px', 
                         height: '198px',
                         position: 'relative'
@@ -3609,7 +3563,6 @@ export default function StaffPortal() {
                                 overflow: 'hidden',
                                 position: 'relative'
                               }}>
-                                {/* Ideal position template guide box (only visible when calibrated) */}
                                 {(printSettings.calX !== 0 || printSettings.calY !== 0) && (
                                   <div style={{
                                     position: 'absolute',
@@ -3692,7 +3645,6 @@ export default function StaffPortal() {
                             overflow: 'hidden',
                             position: 'relative'
                           }}>
-                            {/* Ideal position template guide box (only visible when calibrated) */}
                             {(printSettings.calX !== 0 || printSettings.calY !== 0) && (
                               <div style={{
                                 position: 'absolute',
@@ -3782,9 +3734,7 @@ export default function StaffPortal() {
             </div>
           </div>
 
-          {/* Right column: History */}
           <div className="staff-right-column" style={{ flex: '1 1 500px', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {/* Totals Summary */}
             {history.length > 0 && (() => {
               const pendingRecordsList = history.filter(r => !r.printed);
               const pendingCount = pendingRecordsList.length;
@@ -3796,7 +3746,6 @@ export default function StaffPortal() {
               const grandPrice = grandTotal * 3;
               return (
                 <div className="stats-grid">
-                  {/* Today Stats Card */}
                   <div className="stats-card" style={{
                     background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
                     border: '1.5px solid #fecdd3',
@@ -3825,7 +3774,6 @@ export default function StaffPortal() {
                     </div>
                   </div>
 
-                  {/* Grand Stats Card */}
                   <div className="stats-card" style={{
                     background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
                     border: '1.5px solid #bfdbfe',
@@ -3857,7 +3805,6 @@ export default function StaffPortal() {
               );
             })()}
 
-            {/* Billing & Payment Summary Card */}
             {selectedIds.length > 0 && (() => {
               const selectedRecords = history.filter(r => selectedIds.includes(r.id));
               const totalQty = selectedRecords.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
@@ -3874,7 +3821,6 @@ export default function StaffPortal() {
                     <span>💰 สรุปการเก็บเงิน ({selectedIds.length} รายการที่เลือก)</span>
                   </h3>
                   
-                  {/* Customer list table */}
                   <div style={{ overflowX: 'auto', marginBottom: '1rem', border: '1px solid #dbeafe', borderRadius: '8px', backgroundColor: '#fff' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
                       <thead>
@@ -3910,10 +3856,8 @@ export default function StaffPortal() {
                     </table>
                   </div>
 
-                  {/* Settings Controls */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#fff', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '1rem' }}>
                     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                      {/* Postcard fee setting */}
                       <div style={{ flex: '1 1 180px' }}>
                         <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>อัตราค่าไปรษณียบัตร (บาทต่อใบ)</label>
                         <select 
@@ -3929,7 +3873,6 @@ export default function StaffPortal() {
                         </select>
                       </div>
 
-                      {/* Custom Payer name */}
                       <div style={{ flex: '1 1 220px' }}>
                         <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>ชื่อผู้จ่ายเงิน (ถ้าต้องการระบุในใบเรียกเก็บ)</label>
                         <input 
@@ -3944,7 +3887,6 @@ export default function StaffPortal() {
                     </div>
 
                     <div style={{ borderTop: '1px dashed #e2e8f0', paddingTop: '0.75rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                      {/* Bulk status toggler */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <input 
                           type="checkbox" 
@@ -3956,7 +3898,6 @@ export default function StaffPortal() {
                         <label htmlFor="bulkPaidCheckbox" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#334155', cursor: 'pointer' }}>ทำเครื่องหมายว่า "จ่ายแล้ว"</label>
                       </div>
 
-                      {/* Date picker */}
                       {bulkPaidStatus && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                           <span style={{ fontSize: '0.8rem', color: '#64748b' }}>วันที่:</span>
@@ -3972,7 +3913,6 @@ export default function StaffPortal() {
                     </div>
                   </div>
 
-                  {/* Actions buttons */}
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <button
                       type="button"
@@ -4048,7 +3988,6 @@ export default function StaffPortal() {
                 )}
               </div>
 
-              {/* Export/Import Control Buttons */}
               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
                 <button 
                   onClick={() => exportHistory('download')} 
@@ -4503,20 +4442,24 @@ export default function StaffPortal() {
             
             <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border)', margin: '0 0.5rem' }}></div>
             
+            </button>
+            <Link to="/worldcup" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff' }}>
+              พิมพ์ชื่อแชมป์ <span role="img" aria-label="globe">🌍</span>
+            </Link>
             <button 
-              onClick={() => navigate('/print-blank-forms', { state: { branchName, branchCode, staffName, staffPhone } })} 
-              className="btn" 
-              style={{ 
-                padding: '0.4rem 0.8rem', 
-                fontSize: '0.85rem', 
-                border: '2px solid var(--primary)', 
-                color: 'var(--primary)', 
-                backgroundColor: '#fff',
-                fontWeight: '700'
+              type="button"
+              className="btn btn-secondary" 
+              onClick={() => {
+                setIsPrintingGuide(true);
+                setTimeout(() => {
+                  window.print();
+                  setIsPrintingGuide(false);
+                }, 300);
               }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#f59e0b', color: '#d97706', backgroundColor: '#fffbeb', cursor: 'pointer', margin: 0 }}
+              title="พิมพ์คู่มือแนะนำและกติกาสำหรับแนบไปกับไปรษณียบัตรของลูกค้า"
             >
-              <FileText size={16} />
-              แบบฟอร์ม สั่งพิมพ์ไปรษณียบัตร
+              🖨️ พิมพ์ใบแนะนำสำหรับลูกค้า (A4)
             </button>
           </div>
         </div>
@@ -5341,6 +5284,352 @@ export default function StaffPortal() {
           </div>
         </div>
       )}
+      {/* Printable A4 Billing Invoice/Receipt (Rendered only on print layout) */}
+      {isPrintingInvoice && selectedIds.length > 0 && (() => {
+        const selectedRecords = history.filter(r => selectedIds.includes(r.id));
+        const totalQty = selectedRecords.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
+        const totalAmount = totalQty * postcardRate;
+        const printDate = new Date().toLocaleDateString('th-TH', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        return (
+          <div className="invoice-print-only" style={{
+            fontFamily: 'Sarabun, Inter, sans-serif',
+            color: '#000',
+            padding: '2cm 1.5cm',
+            backgroundColor: '#fff',
+            boxSizing: 'border-box',
+            width: '21cm', // standard A4 portrait width
+            minHeight: '29.7cm'
+          }}>
+            {/* Header */}
+            <div style={{ textAlign: 'center', marginBottom: '2rem', borderBottom: '2px solid #000', paddingBottom: '1rem' }}>
+              <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '24pt', fontWeight: 'bold' }}>ใบแจ้งหนี้ / ใบเสร็จเรียกเก็บเงินค่าพิมพ์</h1>
+              <p style={{ margin: '0', fontSize: '12pt', color: '#333' }}>
+                สาขาที่รับสั่งทำ: {branchName} ({branchCode})
+              </p>
+              {staffName && <p style={{ margin: '0.2rem 0 0 0', fontSize: '11pt' }}>ผู้ทำรายการ: {staffName} {staffPhone && `(โทร: ${staffPhone})`}</p>}
+            </div>
+
+            {/* Invoice Details */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '12pt', lineHeight: '1.6' }}>
+              <div>
+                {payerName ? (
+                  <div><strong>ชื่อผู้ชำระเงิน:</strong> <span style={{ fontSize: '13pt', textDecoration: 'underline', fontWeight: 'bold' }}>{payerName}</span></div>
+                ) : (
+                  <div><strong>ชื่อผู้ชำระเงิน:</strong> .............................................................</div>
+                )}
+                <div><strong>กลุ่มการสั่งพิมพ์:</strong> ยอดสั่งพิมพ์ภายในบริษัท/กลุ่มพี่น้อง (คุณลุงเป็นตัวแทน)</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div><strong>วันที่พิมพ์บิล:</strong> {printDate}</div>
+                <div><strong>จำนวนรายการ:</strong> {selectedIds.length} รายการ</div>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '11pt', fontStyle: 'italic', marginBottom: '0.75rem', color: '#444' }}>
+              * รายละเอียดสรุปค่าพิมพ์ไปรษณียบัตรแยกตามรายชื่อ เพื่อให้คุณลุงสามารถนำไปเรียกเก็บเงินได้อย่างถูกต้อง ไม่สับสน
+            </p>
+
+            {/* Items Table */}
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '2rem', fontSize: '11pt' }}>
+              <thead>
+                <tr style={{ borderTop: '1.5px solid #000', borderBottom: '1.5px solid #000', backgroundColor: '#f8f9fa' }}>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'center', width: '8%', border: '1px solid #ddd' }}>ลำดับ</th>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left', width: '30%', border: '1px solid #ddd' }}>ชื่อผู้สั่ง/ผู้รับ</th>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left', width: '32%', border: '1px solid #ddd' }}>ที่อยู่จัดส่ง / เบอร์โทร</th>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right', width: '12%', border: '1px solid #ddd' }}>จำนวน (ใบ)</th>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right', width: '18%', border: '1px solid #ddd' }}>รวมเงิน (บาท)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedRecords.map((r, idx) => (
+                  <tr key={r.id} style={{ borderBottom: '1px solid #ddd' }}>
+                    <td style={{ padding: '0.65rem 0.5rem', textAlign: 'center', border: '1px solid #ddd' }}>{idx + 1}</td>
+                    <td style={{ padding: '0.65rem 0.5rem', fontWeight: 'bold', border: '1px solid #ddd' }}>{r.name}</td>
+                    <td style={{ padding: '0.65rem 0.5rem', color: '#444', fontSize: '10pt', border: '1px solid #ddd' }}>
+                      {r.address} {r.zipcode} {r.phone && `(โทร: ${r.phone})`}
+                    </td>
+                    <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>{r.quantity || 0}</td>
+                    <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', fontWeight: '500', border: '1px solid #ddd' }}>
+                      {((r.quantity || 0) * postcardRate).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+                {/* Total Row */}
+                <tr style={{ borderTop: '2px solid #000', borderBottom: '2px solid #000', fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>
+                  <td colSpan="3" style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>รวมทั้งสิ้น</td>
+                  <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>{totalQty.toLocaleString()}</td>
+                  <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontSize: '12pt', color: '#000', border: '1px solid #ddd' }}>
+                    {totalAmount.toLocaleString()} บาท
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Payment status banner */}
+            <div style={{ 
+              border: '1.5px solid #000', 
+              padding: '1rem', 
+              borderRadius: '6px', 
+              backgroundColor: '#fafafa', 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '3rem',
+              fontSize: '11pt'
+            }}>
+              <div>
+                <strong>ราคาไปรษณียบัตรเฉลี่ย:</strong> {postcardRate} บาทต่อใบ
+              </div>
+              <div>
+                <strong>สถานะบิลนี้:</strong> {' '}
+                {bulkPaidStatus ? (
+                  <span style={{ color: '#15803d', fontWeight: 'bold' }}>✓ ชำระเงินแล้วเมื่อ {bulkPaidDate ? new Date(bulkPaidDate).toLocaleDateString('th-TH') : '-'}</span>
+                ) : (
+                  <span style={{ color: '#ef4444', fontWeight: 'bold' }}>⏳ ยังไม่ชำระเงิน (รอลุงเรียกเก็บกลับมาส่งมอบร้าน)</span>
+                )}
+              </div>
+            </div>
+
+            {/* Signature Block */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', fontSize: '11pt' }}>
+              <div style={{ width: '45%', textAlign: 'center' }}>
+                <p>ลงชื่อ ............................................................. ผู้รับมอบหมาย/คุณลุง</p>
+                <p style={{ color: '#666', fontSize: '10pt', marginTop: '0.2rem' }}>( {payerName || '...................................................'} )</p>
+              </div>
+              <div style={{ width: '45%', textAlign: 'center' }}>
+                <p>ลงชื่อ ............................................................. ผู้รับเงิน/ร้านค้า</p>
+                <p style={{ color: '#666', fontSize: '10pt', marginTop: '0.2rem' }}>( {staffName || '...................................................'} )</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Overriding style for A4 invoice printing */}
+      {isPrintingInvoice && (
+        <style>
+          {`
+            @media print {
+              @page {
+                size: A4 portrait !important;
+                margin: 1.5cm 1.2cm !important;
+              }
+              .staff-no-print {
+                display: none !important;
+              }
+              .print-only {
+                display: none !important;
+              }
+              .invoice-print-only {
+                display: block !important;
+              }
+            }
+          `}
+        </style>
+      )}
+
+      {/* Printable A4 Customer Campaign Guide Sheet */}
+      {isPrintingGuide && (
+        <div className="guide-print-only" style={{
+          fontFamily: 'Sarabun, Inter, sans-serif',
+          color: '#000',
+          padding: '1.5cm 1.5cm',
+          backgroundColor: '#fff',
+          boxSizing: 'border-box',
+          width: '21cm',
+          minHeight: '29.7cm',
+          lineHeight: '1.5'
+        }}>
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '3px double #000', paddingBottom: '1rem' }}>
+            <div style={{ textAlign: 'left', flex: 1 }}>
+              <h1 style={{ margin: '0 0 0.3rem 0', fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>🏆 คู่มือแนะนำการร่วมลุ้นโชคไปรษณียบัตร 🏆</h1>
+              <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '14pt', fontWeight: 'bold', color: '#1e3a8a' }}>แคมเปญทายผลแชมป์บอลโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
+              <p style={{ margin: '0', fontSize: '10pt', color: '#475569' }}>
+                บริการพิเศษสั่งพิมพ์ชื่อ-ที่อยู่ผู้ส่ง สะดวก รวดเร็ว สวยงาม โดย {branchName}
+              </p>
+            </div>
+            <div style={{ textAlign: 'center', marginLeft: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <QRCodeCanvas value="https://www.thairath.co.th/sport/worldcup2026/thai-post-campaign-2026" size={80} level="H" includeMargin={true} />
+              <span style={{ fontSize: '7.5pt', fontWeight: 'bold', color: '#475569', marginTop: '0.2rem' }}>สแกนอ่านกติกาเพิ่มเติม</span>
+            </div>
+          </div>
+
+          {/* Section 1: วิธีการส่ง */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <h3 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.5rem 0' }}>
+              📝 วิธีร่วมลุ้นสนุกง่ายๆ (ไปรษณียบัตรกระดาษ)
+            </h3>
+            <ol style={{ paddingLeft: '1.25rem', fontSize: '10.5pt', margin: '0', lineHeight: '1.5' }}>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <strong>เขียนชื่อทีมทายแชมป์:</strong> ในช่องว่างทายผล <strong>"แชมป์คือ..."</strong> บนไปรษณียบัตร ให้เขียน<strong>ชื่อประเทศที่คุณทายว่าจะเป็นแชมป์โลกเพียง 1 ทีมเท่านั้น</strong> (เขียนให้ตัวอักษรชัดเจนอ่านง่าย เช่น <em>อังกฤษ, ฝรั่งเศส, อาร์เจนตินา, สเปน, บราซิล</em> ฯลฯ)
+              </li>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <strong>ส่งชิงโชคได้ทันที:</strong> ตรวจสอบความถูกต้อง แล้วนำไปรษณียบัตรไปหยอดที่ตู้ไปรษณีย์ หรือฝากส่ง ณ ที่ทำการไปรษณีย์ทุกสาขาทั่วประเทศได้ทันที <strong>(ไม่ต้องติดแสตมป์เพิ่ม)</strong>
+              </li>
+            </ol>
+          </div>
+
+          {/* Section 2: วันหมดเขต */}
+          <div style={{ marginBottom: '1.25rem', border: '1.5px solid #b91c1c', padding: '0.75rem', borderRadius: '8px', backgroundColor: '#fff5f5' }}>
+            <h3 style={{ fontSize: '11.5pt', fontWeight: 'bold', margin: '0 0 0.3rem 0', color: '#b91c1c' }}>
+              ⏳ วันหมดเขตรับไปรษณียบัตรชิงโชค
+            </h3>
+            <p style={{ margin: '0', fontSize: '11pt', fontWeight: 'bold', color: '#7f1d1d' }}>
+              หมดเขตรับชิงโชค ภายในวันที่ 19 กรกฎาคม 2569
+            </p>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '9.5pt', color: '#451a03' }}>
+              * สำหรับไปรษณียบัตรกระดาษ ต้องหยอดตู้ไปรษณีย์หรือส่ง ณ ที่ทำการไปรษณีย์ ภายในเวลา <strong>18:00 น.</strong> ของวันที่ 19 กรกฎาคม 2569 เท่านั้น (ยึดตามวันตราประทับประจำวันของไปรษณีย์)
+            </p>
+          </div>
+
+          {/* Section 3: รายละเอียดเงินรางวัล */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <h3 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.5rem 0' }}>
+              🎁 รายละเอียดของรางวัล (รวมมูลค่าของรางวัลกว่า 12,000,000 บาท)
+            </h3>
+            
+            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10pt', fontWeight: 'bold', color: '#334155' }}>
+              1. โชคชั้นที่ 1: รางวัลสำหรับผู้ทายผลแชมป์โลกได้ถูกต้อง (ส่งภายใน 19 ก.ค. 2569)
+            </p>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt', marginBottom: '0.75rem' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f1f5f9', borderTop: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}>
+                  <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 'bold' }}>ประเภทของรางวัล</th>
+                  <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold', width: '22%' }}>มูลค่าต่อรางวัล</th>
+                  <th style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 'bold', width: '15%' }}>จำนวนรางวัล</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '4px 8px', fontWeight: 'bold', color: '#b91c1c' }}>🏆 รางวัลที่ 1 ทองคำแท่ง</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold', color: '#b91c1c' }}>7,000,000 บาท</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 'bold', color: '#b91c1c' }}>1 รางวัล</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '4px 8px' }}>🚗 รางวัลที่ 2 รถกระบะ Toyota Hilux Travo</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>949,000 บาท</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>1 รางวัล</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '4px 8px' }}>🚗 รางวัลที่ 3 รถยนต์ Toyota Yaris ATIV</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>696,000 บาท</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>1 รางวัล</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '4px 8px' }}>🏍️ รางวัลที่ 4 รถจักรยานยนต์ Honda PCX</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>99,510 บาท</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>5 รางวัล</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '4px 8px' }}>📱 รางวัลที่ 5 สมาร์ตโฟน Samsung A17</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>8,999 บาท</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>50 รางวัล</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #cbd5e1' }}>
+                  <td style={{ padding: '4px 8px' }}>💳 รางวัลที่ 6 บัตรกำนัลช้อปปิ้ง Gift Card</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>5,000 บาท</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>100 รางวัล</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10pt', fontWeight: 'bold', color: '#334155' }}>
+              2. โชคชั้นพิเศษ: ส่งลุ้นก่อนมีสิทธิ์ลุ้นก่อนรอบ 16 ทีมสุดท้าย (ส่งภายใน 28 มิ.ย. 2569)
+            </p>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f1f5f9', borderTop: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}>
+                  <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 'bold' }}>ประเภทของรางวัล</th>
+                  <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold', width: '22%' }}>มูลค่าต่อรางวัล</th>
+                  <th style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 'bold', width: '15%' }}>จำนวนรางวัล</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '4px 8px' }}>🏅 รางวัลที่ 1 ทองคำแท่ง</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>70,000 บาท</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>16 รางวัล</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '4px 8px' }}>🏅 รางวัลที่ 2 ทองคำแท่ง</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>10,000 บาท</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>48 รางวัล</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #cbd5e1' }}>
+                  <td style={{ padding: '4px 8px' }}>💳 รางวัลที่ 3 บัตรกำนัลช้อปปิ้ง Gift Card</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>5,000 บาท</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>80 รางวัล</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Section 4: การติดตามผล */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.5rem 0' }}>
+              📢 ช่องทางการติดตามผลประกาศรายชื่อผู้โชคดี
+            </h3>
+            <p style={{ margin: '0 0 0.5rem 0', fontSize: '10pt' }}>
+              ท่านสามารถติดตามข้อมูลข่าวสารการจับรางวัลและรายชื่อผู้โชคดีอย่างเป็นทางการได้ทางช่องทางต่อไปนี้:
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', textAlign: 'center' }}>
+              <div style={{ border: '1px solid #e2e8f0', padding: '0.5rem', borderRadius: '6px', backgroundColor: '#f8fafc' }}>
+                <div style={{ fontSize: '14pt' }}>📰</div>
+                <strong style={{ fontSize: '9pt', display: 'block', marginTop: '0.15rem' }}>หนังสือพิมพ์ไทยรัฐ</strong>
+              </div>
+              <div style={{ border: '1px solid #e2e8f0', padding: '0.5rem', borderRadius: '6px', backgroundColor: '#f8fafc' }}>
+                <div style={{ fontSize: '14pt' }}>🌐</div>
+                <strong style={{ fontSize: '9pt', display: 'block', marginTop: '0.15rem' }}>ไทยรัฐออนไลน์</strong>
+              </div>
+              <div style={{ border: '1px solid #e2e8f0', padding: '0.5rem', borderRadius: '6px', backgroundColor: '#f8fafc' }}>
+                <div style={{ fontSize: '14pt' }}>📺</div>
+                <strong style={{ fontSize: '9pt', display: 'block', marginTop: '0.15rem' }}>ไทยรัฐทีวี ช่อง 32</strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer note */}
+          <div style={{ textAlign: 'center', fontSize: '9pt', color: '#64748b', borderTop: '1px dashed #cbd5e1', paddingTop: '0.75rem' }}>
+            ขอขอบพระคุณที่ใช้บริการสั่งพิมพ์ไปรษณียบัตรกับทางเรา<br/>
+            ขอให้ทุกท่านโชคดีและสนุกไปกับการเชียร์ฟุตบอลโลก 2026!
+          </div>
+        </div>
+      )}
+
+      {/* Overriding style for A4 guide printing */}
+      {isPrintingGuide && (
+        <style>
+          {`
+            @media print {
+              @page {
+                size: A4 portrait !important;
+                margin: 1.5cm 1.2cm !important;
+              }
+              .staff-no-print {
+                display: none !important;
+              }
+              .print-only {
+                display: none !important;
+              }
+              .invoice-print-only {
+                display: none !important;
+              }
+              .guide-print-only {
+                display: block !important;
+              }
+            }
+          `}
+        </style>
+      )}
+
       {cardRecord && (
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', zIndex: -10 }}>
           <div 
