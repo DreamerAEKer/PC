@@ -5365,9 +5365,39 @@ export default function StaffPortal() {
             </h3>
             
             <p style={{ margin: '0 0 0.4rem 0', fontSize: '10pt', fontWeight: 'bold', color: '#334155' }}>
-              1. โชคชั้นที่ 1: รางวัลสำหรับผู้ทายผลแชมป์โลกได้ถูกต้อง (ส่งภายใน 19 ก.ค. 2569)
+              1. โชคชั้นที่ 1: ส่งลุ้นก่อนมีสิทธิ์ลุ้นก่อนรอบ 16 ทีมสุดท้าย (ส่งภายใน 28 มิ.ย. 2569)
             </p>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt', marginBottom: '0.75rem' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f1f5f9', borderTop: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}>
+                  <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 'bold' }}>ประเภทของรางวัล</th>
+                  <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold', width: '22%' }}>มูลค่าต่อรางวัล</th>
+                  <th style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 'bold', width: '15%' }}>จำนวนรางวัล</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '4px 8px' }}>🏅 รางวัลที่ 1 ทองคำแท่ง</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>70,000 บาท</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>16 รางวัล</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '4px 8px' }}>🏅 รางวัลที่ 2 ทองคำแท่ง</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>10,000 บาท</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>48 รางวัล</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #cbd5e1' }}>
+                  <td style={{ padding: '4px 8px' }}>💳 รางวัลที่ 3 บัตรกำนัลช้อปปิ้ง Gift Card</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>5,000 บาท</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>80 รางวัล</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10pt', fontWeight: 'bold', color: '#334155' }}>
+              2. โชคชั้นที่ 2: รางวัลสำหรับผู้ทายผลแชมป์โลกได้ถูกต้อง (ส่งภายใน 19 ก.ค. 2569)
+            </p>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f1f5f9', borderTop: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}>
                   <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 'bold' }}>ประเภทของรางวัล</th>
@@ -5405,36 +5435,6 @@ export default function StaffPortal() {
                   <td style={{ padding: '4px 8px' }}>💳 รางวัลที่ 6 บัตรกำนัลช้อปปิ้ง Gift Card</td>
                   <td style={{ padding: '4px 8px', textAlign: 'right' }}>5,000 บาท</td>
                   <td style={{ padding: '4px 8px', textAlign: 'center' }}>100 รางวัล</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10pt', fontWeight: 'bold', color: '#334155' }}>
-              2. โชคชั้นพิเศษ: ส่งลุ้นก่อนมีสิทธิ์ลุ้นก่อนรอบ 16 ทีมสุดท้าย (ส่งภายใน 28 มิ.ย. 2569)
-            </p>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#f1f5f9', borderTop: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}>
-                  <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 'bold' }}>ประเภทของรางวัล</th>
-                  <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold', width: '22%' }}>มูลค่าต่อรางวัล</th>
-                  <th style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 'bold', width: '15%' }}>จำนวนรางวัล</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '4px 8px' }}>🏅 รางวัลที่ 1 ทองคำแท่ง</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>70,000 บาท</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>16 รางวัล</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '4px 8px' }}>🏅 รางวัลที่ 2 ทองคำแท่ง</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>10,000 บาท</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>48 รางวัล</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #cbd5e1' }}>
-                  <td style={{ padding: '4px 8px' }}>💳 รางวัลที่ 3 บัตรกำนัลช้อปปิ้ง Gift Card</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>5,000 บาท</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>80 รางวัล</td>
                 </tr>
               </tbody>
             </table>
