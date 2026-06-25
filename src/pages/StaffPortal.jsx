@@ -5345,15 +5345,23 @@ export default function StaffPortal() {
             <h3 style={{ fontSize: '11.5pt', fontWeight: 'bold', margin: '0 0 0.3rem 0', color: '#b91c1c' }}>
               📮 ส่งชิงโชคได้ทันที (ไม่ต้องติดแสตมป์เพิ่ม)
             </h3>
-            <p style={{ margin: '0', fontSize: '11pt', fontWeight: 'bold', color: '#7f1d1d' }}>
-              ภายในวันที่ 19 กรกฎาคม 2569 (ภายในเวลา 18:00 น. ยึดตราประทับไปรษณีย์)
-            </p>
-            <p style={{ margin: '0.3rem 0 0 0', fontSize: '9.5pt', color: '#451a03', lineHeight: '1.4' }}>
+            <p style={{ margin: '0 0 0.2rem 0', fontSize: '9.5pt', color: '#451a03', lineHeight: '1.4' }}>
               นำไปรษณียบัตรไปหยอดที่ตู้ไปรษณีย์ หรือฝากส่ง ณ ที่ทำการไปรษณีย์ทุกสาขาทั่วประเทศ
             </p>
-            <p style={{ margin: '0.3rem 0 0 0', fontSize: '9.5pt', fontWeight: 'bold', color: '#b91c1c', lineHeight: '1.4' }}>
-              * ยิ่งส่งเร็ว ยิ่งมีสิทธิ์ลุ้นโชคมากต่อ! (ส่งภายใน 28 มิ.ย. 2569 เพื่อลุ้นโชคชั้นที่ 1 รอบ 16 ทีม และได้ลุ้นต่อในโชคชั้นที่ 2 รอบแชมป์)
-            </p>
+            <div style={{ borderTop: '1px dashed #fca5a5', marginTop: '0.4rem', paddingTop: '0.4rem' }}>
+              <p style={{ margin: '0', fontSize: '10.5pt', fontWeight: 'bold', color: '#b91c1c' }}>
+                🔥 ส่งก่อน...ได้ลุ้นก่อนถึง 2 ต่อ! ภายในวันที่ 28 มิถุนายน 2569
+              </p>
+              <p style={{ margin: '0.1rem 0 0.3rem 0', fontSize: '9.5pt', color: '#7f1d1d', lineHeight: '1.4' }}>
+                เพื่อลุ้น<strong>โชคชั้นที่ 1</strong> (ทายรอบ 16 ทีม) และไปรษณียบัตรใบเดิมจะถูกนำไปรวมเพื่อลุ้นต่อใน<strong>โชคชั้นที่ 2</strong> (รอบแชมป์) ได้อีกรอบโดยอัตโนมัติ
+              </p>
+              <p style={{ margin: '0', fontSize: '10.5pt', fontWeight: 'bold', color: '#1e3a8a' }}>
+                🏆 หรือส่งลุ้นโชคใหญ่รอบแชมป์โลก (โชคชั้นที่ 2) ได้ถึง 19 กรกฎาคม 2569
+              </p>
+              <p style={{ margin: '0.1rem 0 0 0', fontSize: '9.5pt', color: '#1e3a8a', lineHeight: '1.4' }}>
+                ภายในเวลา 18:00 น. (ยึดตามวันตราประทับประจำวันของไปรษณีย์)
+              </p>
+            </div>
           </div>
 
           {/* Section 3: รายละเอียดเงินรางวัล */}
