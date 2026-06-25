@@ -5321,7 +5321,7 @@ export default function StaffPortal() {
               <h1 style={{ margin: '0 0 0.3rem 0', fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>คำแนะนำการร่วมลุ้นโชคส่งไปรษณียบัตร</h1>
               <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '12.5pt', fontWeight: 'bold', color: '#1e3a8a' }}>ทายผลแชมป์ฟุตบอลระดับโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
               <p style={{ margin: '0', fontSize: '10pt', color: '#475569' }}>
-                บริการพิเศษสั่งพิมพ์ชื่อ-ที่อยู่ผู้ส่ง สะดวก พร้อมลุ้นโชค โดย {branchName}
+                บริการพิเศษสั่งพิมพ์ชื่อ-ที่อยู่ผู้ส่ง สะดวก พร้อมลุ้นโชค ส่งก่อนมีสิทธิ์ลุ้นก่อน โดย {branchName}
               </p>
             </div>
             <div style={{ textAlign: 'center', marginLeft: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
