@@ -5335,26 +5335,24 @@ export default function StaffPortal() {
             <h3 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.4rem 0' }}>
               📝 ขั้นตอนการร่วมลุ้นโชค ง่ายๆ แค่
             </h3>
-            <ol style={{ paddingLeft: '1.25rem', fontSize: '10.5pt', margin: '0', lineHeight: '1.5' }}>
-              <li style={{ marginBottom: '0.4rem' }}>
-                <strong>เขียนชื่อประเทศ:</strong> ในช่องว่างทายผล <strong>"แชมป์คือ..."</strong> บนไปรษณียบัตร ให้เขียน<strong>ชื่อประเทศที่คุณทายว่าจะได้เป็นแชมป์เพียง 1 ประเทศเท่านั้น</strong>
-              </li>
-              <li style={{ marginBottom: '0.4rem' }}>
-                <strong>ส่งชิงโชคได้ทันที:</strong> ตรวจสอบความถูกต้อง แล้วนำไปรษณียบัตรไปหยอดที่ตู้ไปรษณีย์ หรือฝากส่ง ณ ที่ทำการไปรษณีย์ทุกสาขาทั่วประเทศได้ทันที <strong>(ไม่ต้องติดแสตมป์เพิ่ม)</strong>
-              </li>
-            </ol>
+            <p style={{ margin: '0', fontSize: '10.5pt', lineHeight: '1.5' }}>
+              <strong>เขียนชื่อประเทศ:</strong> ในช่องว่างทายผล <strong>"แชมป์คือ..."</strong> บนไปรษณียบัตร ให้เขียน<strong>ชื่อประเทศที่คุณทายว่าจะได้เป็นแชมป์เพียง 1 ประเทศเท่านั้น</strong>
+            </p>
           </div>
 
           {/* Section 2: วันหมดเขต */}
           <div style={{ marginBottom: '1rem', border: '1.5px solid #b91c1c', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#fff5f5' }}>
-            <h3 style={{ fontSize: '11.5pt', fontWeight: 'bold', margin: '0 0 0.25rem 0', color: '#b91c1c' }}>
-              ⏳ หมดเขตส่งไปรษณียบัตรเพื่อร่วมลุ้นโชค
+            <h3 style={{ fontSize: '11.5pt', fontWeight: 'bold', margin: '0 0 0.3rem 0', color: '#b91c1c' }}>
+              📮 ส่งชิงโชคได้ทันที (ไม่ต้องติดแสตมป์เพิ่ม)
             </h3>
             <p style={{ margin: '0', fontSize: '11pt', fontWeight: 'bold', color: '#7f1d1d' }}>
-              ภายในวันที่ 19 กรกฎาคม 2569
+              ภายในวันที่ 19 กรกฎาคม 2569 (ภายในเวลา 18:00 น. ยึดตราประทับไปรษณีย์)
             </p>
-            <p style={{ margin: '0.2rem 0 0 0', fontSize: '9.5pt', color: '#451a03' }}>
-              * สำหรับไปรษณียบัตรกระดาษ ต้องหยอดตู้ไปรษณีย์หรือส่ง ณ ที่ทำการไปรษณีย์ ภายในเวลา <strong>18:00 น.</strong> ของวันที่ 19 กรกฎาคม 2569 เท่านั้น (ยึดตามวันตราประทับประจำวันของไปรษณีย์)
+            <p style={{ margin: '0.3rem 0 0 0', fontSize: '9.5pt', color: '#451a03', lineHeight: '1.4' }}>
+              นำไปรษณียบัตรไปหยอดที่ตู้ไปรษณีย์ หรือฝากส่ง ณ ที่ทำการไปรษณีย์ทุกสาขาทั่วประเทศ
+            </p>
+            <p style={{ margin: '0.3rem 0 0 0', fontSize: '9.5pt', fontWeight: 'bold', color: '#b91c1c', lineHeight: '1.4' }}>
+              * ยิ่งส่งเร็ว ยิ่งมีสิทธิ์ลุ้นโชคมากต่อ! (ส่งภายใน 28 มิ.ย. 2569 เพื่อลุ้นโชคชั้นที่ 1 รอบ 16 ทีม และได้ลุ้นต่อในโชคชั้นที่ 2 รอบแชมป์)
             </p>
           </div>
 
