@@ -147,6 +147,7 @@ export default function StaffPortal() {
     return localToday.toISOString().split('T')[0];
   });
   const [isPrintingInvoice, setIsPrintingInvoice] = useState(false);
+  const [printLayoutType, setPrintLayoutType] = useState('grid'); // 'combined' or 'grid'
   const [isPrintingGuide, setIsPrintingGuide] = useState(false);
   const [touchStartX, setTouchStartX] = useState(null);
   const [swipeOffset, setSwipeOffset] = useState({});
@@ -3911,6 +3912,32 @@ export default function StaffPortal() {
                         </div>
                       )}
                     </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px dashed #e2e8f0', paddingTop: '0.75rem', marginTop: '0.75rem' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#334155' }}>รูปแบบพิมพ์บิล:</span>
+                      <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', margin: 0 }}>
+                        <input 
+                          type="radio" 
+                          name="printLayoutType" 
+                          value="grid" 
+                          checked={printLayoutType === 'grid'} 
+                          onChange={() => setPrintLayoutType('grid')} 
+                          style={{ cursor: 'pointer' }}
+                        />
+                        พิมพ์แยกใบ (2x2 บน A4)
+                      </label>
+                      <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', margin: 0 }}>
+                        <input 
+                          type="radio" 
+                          name="printLayoutType" 
+                          value="combined" 
+                          checked={printLayoutType === 'combined'} 
+                          onChange={() => setPrintLayoutType('combined')} 
+                          style={{ cursor: 'pointer' }}
+                        />
+                        พิมพ์รวมเป็นใบเดียว
+                      </label>
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -4689,6 +4716,137 @@ export default function StaffPortal() {
           minute: '2-digit'
         });
 
+        if (printLayoutType === 'grid') {
+          // Add a summary slip if printing multiple items
+          const renderRecords = [...selectedRecords];
+          if (selectedRecords.length > 1) {
+            renderRecords.push({
+              id: 'summary_total_slip',
+              isSummary: true,
+              name: payerName || 'ยอดรวมกลุ่มทั้งหมด',
+              quantity: totalQty,
+              totalAmount: totalAmount
+            });
+          }
+
+          return (
+            <div className="invoice-print-only" style={{
+              fontFamily: 'Sarabun, Inter, sans-serif',
+              color: '#000',
+              padding: '1.2cm 1cm',
+              backgroundColor: '#fff',
+              boxSizing: 'border-box',
+              width: '21cm',
+              minHeight: '29.7cm',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '0.6cm'
+            }}>
+              {renderRecords.map((r) => {
+                if (r.isSummary) {
+                  return (
+                    <div key={r.id} style={{
+                      border: '2px solid #b91c1c',
+                      borderRadius: '8px',
+                      padding: '0.5cm',
+                      boxSizing: 'border-box',
+                      width: '9.2cm',
+                      height: '13.0cm',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      pageBreakInside: 'avoid',
+                      backgroundColor: '#fff5f5'
+                    }}>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #b91c1c', paddingBottom: '0.2rem', marginBottom: '0.4rem' }}>
+                          <h1 style={{ margin: '0', fontSize: '11pt', fontWeight: 'bold', color: '#b91c1c' }}>📊 ใบสรุปยอดรวม (สำหรับเก็บเงิน)</h1>
+                          <span style={{ fontSize: '7.5pt', fontWeight: 'bold', color: '#7f1d1d' }}>{branchName}</span>
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8pt', marginBottom: '0.5rem', color: '#7f1d1d' }}>
+                          <div><strong>ผู้ประสานงาน:</strong> {r.name}</div>
+                          <div><strong>พิมพ์:</strong> {printDate}</div>
+                        </div>
+
+                        <div style={{ border: '1px solid #fca5a5', borderRadius: '4px', padding: '0.4cm', backgroundColor: '#fff', marginTop: '0.5cm' }}>
+                          <div style={{ fontSize: '12pt', marginBottom: '0.5rem', color: '#7f1d1d' }}>
+                            <strong>รายชื่อทั้งหมด:</strong> <span style={{ fontWeight: 'bold' }}>{selectedRecords.length} รายชื่อ</span>
+                          </div>
+                          <div style={{ fontSize: '12pt', color: '#7f1d1d' }}>
+                            <strong>จำนวนไปรษณียบัตร:</strong> <span style={{ fontWeight: 'bold' }}>{r.quantity.toLocaleString()} ใบ</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', borderTop: '2px solid #b91c1c', paddingTop: '0.4rem', marginTop: '0.4rem', textAlign: 'right' }}>
+                        <span style={{ fontSize: '10pt', fontWeight: 'bold', color: '#7f1d1d' }}>ยอดรวมเรียกเก็บทั้งสิ้น:</span>
+                        <span style={{ fontSize: '24pt', fontWeight: 'bold', color: '#b91c1c' }}>
+                          {r.totalAmount.toLocaleString()}.-
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+
+                const itemAmount = (parseInt(r.quantity, 10) || 0) * postcardRate;
+                return (
+                  <div key={r.id} style={{
+                    border: '1.5px dashed #000',
+                    borderRadius: '8px',
+                    padding: '0.5cm',
+                    boxSizing: 'border-box',
+                    width: '9.2cm',
+                    height: '13.0cm',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    pageBreakInside: 'avoid',
+                    backgroundColor: '#fff'
+                  }}>
+                    {/* Header */}
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #000', paddingBottom: '0.2rem', marginBottom: '0.4rem' }}>
+                        <h1 style={{ margin: '0', fontSize: '11pt', fontWeight: 'bold' }}>ใบกำกับ งานสั่งพิมพ์ ไปรษณียบัตรฯ</h1>
+                        <span style={{ fontSize: '8pt', fontWeight: 'bold', color: '#475569' }}>{branchName}</span>
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8.5pt', marginBottom: '0.5rem' }}>
+                        <div><strong>ผู้ประสานงาน:</strong> {payerName || 'ยอดรวมกลุ่ม'}</div>
+                        <div><strong>วันที่พิมพ์:</strong> {printDate}</div>
+                      </div>
+
+                      {/* Item Info */}
+                      <div style={{ border: '1px solid #cbd5e1', borderRadius: '4px', padding: '0.4cm', backgroundColor: '#f8fafc', marginTop: '0.5cm' }}>
+                        <div style={{ fontSize: '12pt', marginBottom: '0.5rem' }}>
+                          <strong>ชื่อผู้รับ:</strong> <span style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{r.name}</span>
+                        </div>
+                        <div style={{ fontSize: '12pt' }}>
+                          <strong>จำนวน:</strong> <span style={{ fontWeight: 'bold' }}>{r.quantity || 0} ใบ</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Total Section */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '2px solid #000', paddingTop: '0.4rem', marginTop: '0.4rem' }}>
+                      <div style={{ fontSize: '9.5pt', lineHeight: '1.2', color: '#475569' }}>
+                        อัตรา {postcardRate} บาท/ใบ
+                      </div>
+                      <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '11pt', fontWeight: 'bold', color: '#475569' }}>ราคารวม:</span>
+                        <span style={{ fontSize: '22pt', fontWeight: 'bold', color: '#b91c1c' }}>
+                          {itemAmount.toLocaleString()}.-
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+
+        // Default 'combined' layout
         return (
           <div className="invoice-print-only" style={{
             fontFamily: 'Sarabun, Inter, sans-serif',
@@ -4770,7 +4928,7 @@ export default function StaffPortal() {
                 display: none !important;
               }
               .invoice-print-only {
-                display: block !important;
+                display: ${printLayoutType === 'grid' ? 'grid' : 'block'} !important;
               }
             }
           `}
