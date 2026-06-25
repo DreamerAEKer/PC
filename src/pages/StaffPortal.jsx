@@ -5333,7 +5333,7 @@ export default function StaffPortal() {
           {/* Section 1: วิธีการส่ง */}
           <div style={{ marginBottom: '1rem' }}>
             <h3 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.4rem 0' }}>
-              📝 วิธีร่วมลุ้นสนุกง่ายๆ (ไปรษณียบัตรกระดาษ)
+              📝 ขั้นตอนการร่วมลุ้นโชค ง่ายๆ
             </h3>
             <ol style={{ paddingLeft: '1.25rem', fontSize: '10.5pt', margin: '0', lineHeight: '1.5' }}>
               <li style={{ marginBottom: '0.4rem' }}>
