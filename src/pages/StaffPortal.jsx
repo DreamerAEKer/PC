@@ -5321,7 +5321,7 @@ export default function StaffPortal() {
               <h1 style={{ margin: '0 0 0.3rem 0', fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>คำแนะนำการร่วมลุ้นโชคส่งไปรษณียบัตร</h1>
               <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '12.5pt', fontWeight: 'bold', color: '#1e3a8a' }}>ทายผลแชมป์ฟุตบอลระดับโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
               <p style={{ margin: '0', fontSize: '10pt', color: '#475569' }}>
-                บริการพิเศษสั่งพิมพ์ชื่อ-ที่อยู่ผู้ส่ง สะดวก พร้อมลุ้นโชค ส่งก่อนมีสิทธิ์ลุ้นก่อน โดย {branchName}
+                บริการพิเศษสั่งพิมพ์ชื่อ-ที่อยู่ผู้ส่ง สะดวก พร้อมลุ้นโชค โดย {branchName}
               </p>
             </div>
             <div style={{ textAlign: 'center', marginLeft: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -5370,8 +5370,8 @@ export default function StaffPortal() {
               🎁 รายละเอียดของรางวัล (รวมมูลค่าของรางวัลกว่า 12,000,000 บาท)
             </h3>
             
-            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10.5pt', fontWeight: 'bold', color: '#334155' }}>
-              โชคชั้นที่ 1: รางวัลสำหรับผู้ทายชื่อประเทศที่เข้ารอบ 16 ทีมสุดท้ายได้ถูกต้อง (ส่งภายใน 28 มิ.ย. 2569)
+            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10.5pt', fontWeight: 'bold', color: '#b91c1c' }}>
+              ส่งก่อนมีสิทธิ์ลุ้นก่อนรอบ 16 ทีม (ส่งภายใน 28 มิ.ย. 69)
             </p>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5pt', marginBottom: '0.75rem' }}>
               <thead>
@@ -5400,8 +5400,8 @@ export default function StaffPortal() {
               </tbody>
             </table>
 
-            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10.5pt', fontWeight: 'bold', color: '#334155' }}>
-              โชคชั้นที่ 2: รางวัลหากประเทศที่ท่านเลือกได้แชมป์ (ส่งภายใน 19 ก.ค. 2569)
+            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10.5pt', fontWeight: 'bold', color: '#b91c1c' }}>
+              ส่งลุ้นทีมแชมป์ (ส่งภายใน 19 ก.ค. 69)
             </p>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5pt' }}>
               <thead>
