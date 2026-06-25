@@ -4693,121 +4693,74 @@ export default function StaffPortal() {
           <div className="invoice-print-only" style={{
             fontFamily: 'Sarabun, Inter, sans-serif',
             color: '#000',
-            padding: '2cm 1.5cm',
+            padding: '0.4cm 0.5cm',
             backgroundColor: '#fff',
             boxSizing: 'border-box',
-            width: '21cm', // standard A4 portrait width
-            minHeight: '29.7cm'
+            width: '14.8cm',
+            height: '10.5cm',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            border: '1.5px dashed #000',
+            position: 'relative'
           }}>
             {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '2rem', borderBottom: '2px solid #000', paddingBottom: '1rem' }}>
-              <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '24pt', fontWeight: 'bold' }}>ใบกำกับ งานสั่งพิมพ์ ไปรษณียบัตรฯ</h1>
-              <p style={{ margin: '0', fontSize: '12pt', color: '#333' }}>
-                สาขาที่รับสั่งทำ: {branchName} ({branchCode})
-              </p>
-              {staffName && <p style={{ margin: '0.2rem 0 0 0', fontSize: '11pt' }}>ผู้ทำรายการ: {staffName} {staffPhone && `(โทร: ${staffPhone})`}</p>}
-            </div>
-
-            {/* Invoice Details */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '12pt', lineHeight: '1.6' }}>
-              <div>
-                {payerName ? (
-                  <div><strong>ชื่อผู้ชำระเงิน:</strong> <span style={{ fontSize: '13pt', textDecoration: 'underline', fontWeight: 'bold' }}>{payerName}</span></div>
-                ) : (
-                  <div><strong>ชื่อผู้ชำระเงิน:</strong> .............................................................</div>
-                )}
-                <div><strong>กลุ่มการสั่งพิมพ์:</strong> {payerName ? `${payerName}` : 'ยอดสั่งพิมพ์รวมแบบกลุ่ม'}</div>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1.5px solid #000', paddingBottom: '0.2rem', marginBottom: '0.3rem' }}>
+                <h1 style={{ margin: '0', fontSize: '11pt', fontWeight: 'bold' }}>ใบกำกับ งานสั่งพิมพ์ ไปรษณียบัตรฯ</h1>
+                <span style={{ fontSize: '8pt', fontWeight: 'bold', color: '#475569' }}>{branchName}</span>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div><strong>วันที่พิมพ์บิล:</strong> {printDate}</div>
-                <div><strong>จำนวนรายการ:</strong> {selectedIds.length} รายการ</div>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8.5pt', marginBottom: '0.3rem' }}>
+                <div><strong>ผู้ประสานงาน:</strong> {payerName || 'ยอดรวมกลุ่ม'}</div>
+                <div><strong>วันที่พิมพ์:</strong> {printDate}</div>
               </div>
-            </div>
 
-            <p style={{ fontSize: '11pt', fontStyle: 'italic', marginBottom: '0.75rem', color: '#444' }}>
-              * รายละเอียดสรุปค่าพิมพ์ไปรษณียบัตรแยกตามรายชื่อ เพื่อความสะดวกและถูกต้องในการตรวจสอบเรียกเก็บเงิน
-            </p>
-
-            {/* Items Table */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '2rem', fontSize: '11pt' }}>
-              <thead>
-                <tr style={{ borderTop: '1.5px solid #000', borderBottom: '1.5px solid #000', backgroundColor: '#f8f9fa' }}>
-                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'center', width: '8%', border: '1px solid #ddd' }}>ลำดับ</th>
-                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left', width: '62%', border: '1px solid #ddd' }}>ชื่อผู้สั่ง/ผู้รับ</th>
-                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right', width: '12%', border: '1px solid #ddd' }}>จำนวน (ใบ)</th>
-                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right', width: '18%', border: '1px solid #ddd' }}>รวมเงิน (บาท)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedRecords.map((r, idx) => (
-                  <tr key={r.id} style={{ borderBottom: '1px solid #ddd' }}>
-                    <td style={{ padding: '0.65rem 0.5rem', textAlign: 'center', border: '1px solid #ddd' }}>{idx + 1}</td>
-                    <td style={{ padding: '0.65rem 0.5rem', fontWeight: 'bold', border: '1px solid #ddd' }}>{r.name}</td>
-                    <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>{r.quantity || 0}</td>
-                    <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', fontWeight: '500', border: '1px solid #ddd' }}>
-                      {((r.quantity || 0) * postcardRate).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-                {/* Total Row */}
-                <tr style={{ borderTop: '2px solid #000', borderBottom: '2px solid #000', fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>
-                  <td colSpan="2" style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>รวมทั้งสิ้น</td>
-                  <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>{totalQty.toLocaleString()}</td>
-                  <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontSize: '12pt', color: '#000', border: '1px solid #ddd' }}>
-                    {totalAmount.toLocaleString()} บาท
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            {/* Payment status banner */}
-            <div style={{ 
-              border: '1.5px solid #000', 
-              padding: '1rem', 
-              borderRadius: '6px', 
-              backgroundColor: '#fafafa', 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '3rem',
-              fontSize: '11pt'
-            }}>
-              <div>
-                <strong>ราคาไปรษณียบัตรเฉลี่ย:</strong> {postcardRate} บาทต่อใบ
-              </div>
-              <div>
-                <strong>สถานะบิลนี้:</strong> {' '}
-                {bulkPaidStatus ? (
-                  <span style={{ color: '#15803d', fontWeight: 'bold' }}>✓ ชำระเงินแล้วเมื่อ {bulkPaidDate ? new Date(bulkPaidDate).toLocaleDateString('th-TH') : '-'}</span>
-                ) : (
-                  <span style={{ color: '#ef4444', fontWeight: 'bold' }}>⏳ ยังไม่ชำระเงิน (รอเรียกเก็บและนำส่งร้าน)</span>
-                )}
+              {/* Items List */}
+              <div style={{ overflowY: 'auto', maxHeight: '5.2cm', border: '1px solid #cbd5e1', borderRadius: '4px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1', position: 'sticky', top: 0 }}>
+                      <th style={{ padding: '4px 6px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #cbd5e1' }}>ชื่อผู้รับ</th>
+                      <th style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', width: '28%' }}>จำนวน (ใบ)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedRecords.map((r) => (
+                      <tr key={r.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                        <td style={{ padding: '4px 6px', fontWeight: 'bold', borderRight: '1px solid #cbd5e1' }}>{r.name}</td>
+                        <td style={{ padding: '4px 6px', textAlign: 'right' }}>{r.quantity || 0}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
 
-            {/* Signature Block */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', fontSize: '11pt' }}>
-              <div style={{ width: '45%', textAlign: 'center' }}>
-                <p>ลงชื่อ ............................................................. ผู้ประสานงาน / ผู้ชำระเงิน</p>
-                <p style={{ color: '#666', fontSize: '10pt', marginTop: '0.2rem' }}>( {payerName || '...................................................'} )</p>
+            {/* Total Section */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '2px solid #000', paddingTop: '0.3rem', marginTop: '0.2rem' }}>
+              <div style={{ fontSize: '8.5pt', lineHeight: '1.2' }}>
+                <strong>รวม:</strong> {selectedIds.length} รายชื่อ | <strong>ทั้งหมด:</strong> {totalQty.toLocaleString()} ใบ
               </div>
-              <div style={{ width: '45%', textAlign: 'center' }}>
-                <p>ลงชื่อ ............................................................. ผู้รับเงิน/ร้านค้า</p>
-                <p style={{ color: '#666', fontSize: '10pt', marginTop: '0.2rem' }}>( {staffName || '...................................................'} )</p>
+              <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '10pt', fontWeight: 'bold', color: '#475569' }}>ราคารวม:</span>
+                <span style={{ fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>
+                  {totalAmount.toLocaleString()}.-
+                </span>
               </div>
             </div>
           </div>
         );
       })()}
 
-      {/* Overriding style for A4 invoice printing */}
+      {/* Overriding style for postcard billing printing */}
       {isPrintingInvoice && (
         <style>
           {`
             @media print {
               @page {
-                size: A4 portrait !important;
-                margin: 1.5cm 1.2cm !important;
+                size: 14.8cm 10.5cm landscape !important;
+                margin: 0cm !important;
               }
               .staff-no-print {
                 display: none !important;
@@ -5157,151 +5110,7 @@ export default function StaffPortal() {
         </div>
       )}
       {/* Printable A4 Billing Invoice/Receipt (Rendered only on print layout) */}
-      {isPrintingInvoice && selectedIds.length > 0 && (() => {
-        const selectedRecords = history.filter(r => selectedIds.includes(r.id));
-        const totalQty = selectedRecords.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
-        const totalAmount = totalQty * postcardRate;
-        const printDate = new Date().toLocaleDateString('th-TH', { 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-
-        return (
-          <div className="invoice-print-only" style={{
-            fontFamily: 'Sarabun, Inter, sans-serif',
-            color: '#000',
-            padding: '2cm 1.5cm',
-            backgroundColor: '#fff',
-            boxSizing: 'border-box',
-            width: '21cm', // standard A4 portrait width
-            minHeight: '29.7cm'
-          }}>
-            {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '2rem', borderBottom: '2px solid #000', paddingBottom: '1rem' }}>
-              <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '24pt', fontWeight: 'bold' }}>ใบกำกับ งานสั่งพิมพ์ ไปรษณียบัตรฯ</h1>
-              <p style={{ margin: '0', fontSize: '12pt', color: '#333' }}>
-                สาขาที่รับสั่งทำ: {branchName} ({branchCode})
-              </p>
-              {staffName && <p style={{ margin: '0.2rem 0 0 0', fontSize: '11pt' }}>ผู้ทำรายการ: {staffName} {staffPhone && `(โทร: ${staffPhone})`}</p>}
-            </div>
-
-            {/* Invoice Details */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '12pt', lineHeight: '1.6' }}>
-              <div>
-                {payerName ? (
-                  <div><strong>ชื่อผู้ชำระเงิน:</strong> <span style={{ fontSize: '13pt', textDecoration: 'underline', fontWeight: 'bold' }}>{payerName}</span></div>
-                ) : (
-                  <div><strong>ชื่อผู้ชำระเงิน:</strong> .............................................................</div>
-                )}
-                <div><strong>กลุ่มการสั่งพิมพ์:</strong> {payerName ? `${payerName}` : 'ยอดสั่งพิมพ์รวมแบบกลุ่ม'}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div><strong>วันที่พิมพ์บิล:</strong> {printDate}</div>
-                <div><strong>จำนวนรายการ:</strong> {selectedIds.length} รายการ</div>
-              </div>
-            </div>
-
-            <p style={{ fontSize: '11pt', fontStyle: 'italic', marginBottom: '0.75rem', color: '#444' }}>
-              * รายละเอียดสรุปค่าพิมพ์ไปรษณียบัตรแยกตามรายชื่อ เพื่อความสะดวกและถูกต้องในการตรวจสอบเรียกเก็บเงิน
-            </p>
-
-            {/* Items Table */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '2rem', fontSize: '11pt' }}>
-              <thead>
-                <tr style={{ borderTop: '1.5px solid #000', borderBottom: '1.5px solid #000', backgroundColor: '#f8f9fa' }}>
-                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'center', width: '8%', border: '1px solid #ddd' }}>ลำดับ</th>
-                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left', width: '62%', border: '1px solid #ddd' }}>ชื่อผู้สั่ง/ผู้รับ</th>
-                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right', width: '12%', border: '1px solid #ddd' }}>จำนวน (ใบ)</th>
-                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right', width: '18%', border: '1px solid #ddd' }}>รวมเงิน (บาท)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedRecords.map((r, idx) => (
-                  <tr key={r.id} style={{ borderBottom: '1px solid #ddd' }}>
-                    <td style={{ padding: '0.65rem 0.5rem', textAlign: 'center', border: '1px solid #ddd' }}>{idx + 1}</td>
-                    <td style={{ padding: '0.65rem 0.5rem', fontWeight: 'bold', border: '1px solid #ddd' }}>{r.name}</td>
-                    <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>{r.quantity || 0}</td>
-                    <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', fontWeight: '500', border: '1px solid #ddd' }}>
-                      {((r.quantity || 0) * postcardRate).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-                {/* Total Row */}
-                <tr style={{ borderTop: '2px solid #000', borderBottom: '2px solid #000', fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>
-                  <td colSpan="2" style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>รวมทั้งสิ้น</td>
-                  <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', border: '1px solid #ddd' }}>{totalQty.toLocaleString()}</td>
-                  <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontSize: '12pt', color: '#000', border: '1px solid #ddd' }}>
-                    {totalAmount.toLocaleString()} บาท
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            {/* Payment status banner */}
-            <div style={{ 
-              border: '1.5px solid #000', 
-              padding: '1rem', 
-              borderRadius: '6px', 
-              backgroundColor: '#fafafa', 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '3rem',
-              fontSize: '11pt'
-            }}>
-              <div>
-                <strong>ราคาไปรษณียบัตรเฉลี่ย:</strong> {postcardRate} บาทต่อใบ
-              </div>
-              <div>
-                <strong>สถานะบิลนี้:</strong> {' '}
-                {bulkPaidStatus ? (
-                  <span style={{ color: '#15803d', fontWeight: 'bold' }}>✓ ชำระเงินแล้วเมื่อ {bulkPaidDate ? new Date(bulkPaidDate).toLocaleDateString('th-TH') : '-'}</span>
-                ) : (
-                  <span style={{ color: '#ef4444', fontWeight: 'bold' }}>⏳ ยังไม่ชำระเงิน (รอเรียกเก็บและนำส่งร้าน)</span>
-                )}
-              </div>
-            </div>
-
-            {/* Signature Block */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', fontSize: '11pt' }}>
-              <div style={{ width: '45%', textAlign: 'center' }}>
-                <p>ลงชื่อ ............................................................. ผู้ประสานงาน / ผู้ชำระเงิน</p>
-                <p style={{ color: '#666', fontSize: '10pt', marginTop: '0.2rem' }}>( {payerName || '...................................................'} )</p>
-              </div>
-              <div style={{ width: '45%', textAlign: 'center' }}>
-                <p>ลงชื่อ ............................................................. ผู้รับเงิน/ร้านค้า</p>
-                <p style={{ color: '#666', fontSize: '10pt', marginTop: '0.2rem' }}>( {staffName || '...................................................'} )</p>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Overriding style for A4 invoice printing */}
-      {isPrintingInvoice && (
-        <style>
-          {`
-            @media print {
-              @page {
-                size: A4 portrait !important;
-                margin: 1.5cm 1.2cm !important;
-              }
-              .staff-no-print {
-                display: none !important;
-              }
-              .print-only {
-                display: none !important;
-              }
-              .invoice-print-only {
-                display: block !important;
-              }
-            }
-          `}
-        </style>
-      )}
+      {false /* Duplicate block removed */}
 
       {/* Printable A4 Customer Campaign Guide Sheet */}
       {isPrintingGuide && (
