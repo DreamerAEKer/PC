@@ -4764,26 +4764,43 @@ export default function StaffPortal() {
                           <span style={{ fontSize: '7.5pt', fontWeight: 'bold', color: '#7f1d1d' }}>{branchName}</span>
                         </div>
                         
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8pt', marginBottom: '0.5rem', color: '#7f1d1d' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8pt', marginBottom: '0.3rem', color: '#7f1d1d' }}>
                           <div><strong>ผู้ประสานงาน:</strong> {r.name}</div>
                           <div><strong>พิมพ์:</strong> {printDate}</div>
                         </div>
 
-                        <div style={{ border: '1px solid #fca5a5', borderRadius: '4px', padding: '0.4cm', backgroundColor: '#fff', marginTop: '0.5cm' }}>
-                          <div style={{ fontSize: '12pt', marginBottom: '0.5rem', color: '#7f1d1d' }}>
-                            <strong>รายชื่อทั้งหมด:</strong> <span style={{ fontWeight: 'bold' }}>{selectedRecords.length} รายชื่อ</span>
-                          </div>
-                          <div style={{ fontSize: '12pt', color: '#7f1d1d' }}>
-                            <strong>จำนวนไปรษณียบัตร:</strong> <span style={{ fontWeight: 'bold' }}>{r.quantity.toLocaleString()} ใบ</span>
-                          </div>
+                        {/* Summary Items List Table */}
+                        <div style={{ border: '1px solid #fca5a5', borderRadius: '4px', overflow: 'hidden', marginTop: '0.3cm', backgroundColor: '#fff' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
+                            <thead>
+                              <tr style={{ backgroundColor: '#fee2e2', borderBottom: '1.5px solid #fca5a5' }}>
+                                <th style={{ padding: '4px 6px', textAlign: 'left', fontWeight: 'bold', color: '#7f1d1d', borderRight: '1px solid #fca5a5' }}>ชื่อผู้รับ</th>
+                                <th style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', color: '#7f1d1d', width: '30%' }}>จำนวน</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {selectedRecords.map((sr) => (
+                                <tr key={sr.id} style={{ borderBottom: '1px solid #fee2e2' }}>
+                                  <td style={{ padding: '4px 6px', fontWeight: 'bold', color: '#7f1d1d', borderRight: '1px solid #fca5a5', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '5.2cm' }}>{sr.name}</td>
+                                  <td style={{ padding: '4px 6px', textAlign: 'right', color: '#7f1d1d' }}>{sr.quantity || 0}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', borderTop: '2px solid #b91c1c', paddingTop: '0.4rem', marginTop: '0.4rem', textAlign: 'right' }}>
-                        <span style={{ fontSize: '10pt', fontWeight: 'bold', color: '#7f1d1d' }}>ยอดรวมเรียกเก็บทั้งสิ้น:</span>
-                        <span style={{ fontSize: '24pt', fontWeight: 'bold', color: '#b91c1c' }}>
-                          {r.totalAmount.toLocaleString()}.-
-                        </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', borderTop: '2px solid #b91c1c', paddingTop: '0.4rem', marginTop: '0.4rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '8.5pt', fontWeight: 'bold', color: '#7f1d1d' }}>
+                            รวม: {selectedRecords.length} รายชื่อ | ทั้งหมด: {r.quantity.toLocaleString()} ใบ
+                          </span>
+                          <div style={{ textAlign: 'right' }}>
+                            <span style={{ fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>
+                              {r.totalAmount.toLocaleString()}.-
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
@@ -4846,66 +4863,77 @@ export default function StaffPortal() {
           );
         }
 
-        // Default 'combined' layout
+        // Default 'combined' layout (now styled to fit perfectly on 4-grid A4 layout as well)
         return (
           <div className="invoice-print-only" style={{
             fontFamily: 'Sarabun, Inter, sans-serif',
             color: '#000',
-            padding: '0.6cm 0.8cm',
+            padding: '1.2cm 1cm',
             backgroundColor: '#fff',
             boxSizing: 'border-box',
-            width: '100%',
-            minHeight: '12cm',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            border: '2px dashed #000',
-            borderRadius: '8px',
-            pageBreakInside: 'avoid'
+            width: '21cm',
+            minHeight: '29.7cm',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '0.6cm'
           }}>
-            {/* Header */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #000', paddingBottom: '0.3rem', marginBottom: '0.4rem' }}>
-                <h1 style={{ margin: '0', fontSize: '15pt', fontWeight: 'bold' }}>ใบกำกับ งานสั่งพิมพ์ ไปรษณียบัตรฯ</h1>
-                <span style={{ fontSize: '11pt', fontWeight: 'bold', color: '#475569' }}>{branchName}</span>
-              </div>
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11pt', marginBottom: '0.5rem' }}>
-                <div><strong>ผู้ประสานงาน:</strong> {payerName || 'ยอดรวมกลุ่ม'}</div>
-                <div><strong>วันที่พิมพ์:</strong> {printDate}</div>
-              </div>
+            <div style={{
+              border: '1.5px dashed #000',
+              borderRadius: '8px',
+              padding: '0.5cm',
+              boxSizing: 'border-box',
+              width: '9.2cm',
+              height: '13.0cm',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              pageBreakInside: 'avoid',
+              backgroundColor: '#fff'
+            }}>
+              {/* Header */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #000', paddingBottom: '0.2rem', marginBottom: '0.4rem' }}>
+                  <h1 style={{ margin: '0', fontSize: '11pt', fontWeight: 'bold' }}>ใบกำกับ งานสั่งพิมพ์ ไปรษณียบัตรฯ</h1>
+                  <span style={{ fontSize: '8pt', fontWeight: 'bold', color: '#475569' }}>{branchName}</span>
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8.5pt', marginBottom: '0.5rem' }}>
+                  <div><strong>ผู้ประสานงาน:</strong> {payerName || 'ยอดรวมกลุ่ม'}</div>
+                  <div><strong>วันที่พิมพ์:</strong> {printDate}</div>
+                </div>
 
-              {/* Items List */}
-              <div style={{ overflowY: 'auto', maxHeight: '7.5cm', border: '1px solid #cbd5e1', borderRadius: '4px' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12pt' }}>
-                  <thead>
-                    <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1.5px solid #cbd5e1', position: 'sticky', top: 0 }}>
-                      <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #cbd5e1' }}>ชื่อผู้รับ</th>
-                      <th style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 'bold', width: '28%' }}>จำนวน (ใบ)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedRecords.map((r) => (
-                      <tr key={r.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                        <td style={{ padding: '6px 10px', fontWeight: 'bold', borderRight: '1px solid #cbd5e1' }}>{r.name}</td>
-                        <td style={{ padding: '6px 10px', textAlign: 'right' }}>{r.quantity || 0}</td>
+                {/* Items List Table */}
+                <div style={{ border: '1px solid #cbd5e1', borderRadius: '4px', overflow: 'hidden', marginTop: '0.3cm' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1.5px solid #cbd5e1' }}>
+                        <th style={{ padding: '4px 6px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #cbd5e1' }}>ชื่อผู้รับ</th>
+                        <th style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', width: '30%' }}>จำนวน</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {selectedRecords.map((r) => (
+                        <tr key={r.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '4px 6px', fontWeight: 'bold', borderRight: '1px solid #cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '5.5cm' }}>{r.name}</td>
+                          <td style={{ padding: '4px 6px', textAlign: 'right' }}>{r.quantity || 0}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
 
-            {/* Total Section */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '2px solid #000', paddingTop: '0.5rem', marginTop: '0.5rem' }}>
-              <div style={{ fontSize: '11pt', lineHeight: '1.4' }}>
-                <strong>รวม:</strong> {selectedIds.length} รายชื่อ | <strong>ทั้งหมด:</strong> {totalQty.toLocaleString()} ใบ
-              </div>
-              <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <span style={{ fontSize: '13pt', fontWeight: 'bold', color: '#475569' }}>ราคารวม:</span>
-                <span style={{ fontSize: '26pt', fontWeight: 'bold', color: '#b91c1c' }}>
-                  {totalAmount.toLocaleString()}.-
-                </span>
+              {/* Total Section */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '2px solid #000', paddingTop: '0.4rem', marginTop: '0.4rem' }}>
+                <div style={{ fontSize: '8.5pt', color: '#475569' }}>
+                  รวม: {selectedIds.length} รายชื่อ | ทั้งหมด: {totalQty.toLocaleString()} ใบ
+                </div>
+                <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <span style={{ fontSize: '10pt', fontWeight: 'bold', color: '#475569' }}>ราคารวม:</span>
+                  <span style={{ fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>
+                    {totalAmount.toLocaleString()}.-
+                  </span>
+                </div>
               </div>
             </div>
           </div>
