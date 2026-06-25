@@ -5308,59 +5308,59 @@ export default function StaffPortal() {
         <div className="guide-print-only" style={{
           fontFamily: 'Sarabun, Inter, sans-serif',
           color: '#000',
-          padding: '1.5cm 1.5cm',
+          padding: '0.8cm 1.2cm',
           backgroundColor: '#fff',
           boxSizing: 'border-box',
           width: '21cm',
           minHeight: '29.7cm',
-          lineHeight: '1.5'
+          lineHeight: '1.35'
         }}>
           {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '3px double #000', paddingBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', borderBottom: '3px double #000', paddingBottom: '0.5rem' }}>
             <div style={{ textAlign: 'left', flex: 1 }}>
-              <h1 style={{ margin: '0 0 0.3rem 0', fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>🏆 คู่มือแนะนำการร่วมลุ้นโชคไปรษณียบัตร 🏆</h1>
-              <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '14pt', fontWeight: 'bold', color: '#1e3a8a' }}>แคมเปญทายผลแชมป์บอลโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
-              <p style={{ margin: '0', fontSize: '10pt', color: '#475569' }}>
+              <h1 style={{ margin: '0 0 0.3rem 0', fontSize: '18pt', fontWeight: 'bold', color: '#b91c1c' }}>แนะนำการร่วมลุ้นโชคไปรษณียบัตร</h1>
+              <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '13pt', fontWeight: 'bold', color: '#1e3a8a' }}>แคมเปญทายผลแชมป์บอลโลก 2026: "เชียร์บอลให้มัน เฮลั่นรับโชค"</h2>
+              <p style={{ margin: '0', fontSize: '9.5pt', color: '#475569' }}>
                 บริการพิเศษสั่งพิมพ์ชื่อ-ที่อยู่ผู้ส่ง สะดวก รวดเร็ว สวยงาม โดย {branchName}
               </p>
             </div>
             <div style={{ textAlign: 'center', marginLeft: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <QRCodeCanvas value="https://www.thairath.co.th/sport/worldcup2026/thai-post-campaign-2026" size={80} level="H" includeMargin={true} />
-              <span style={{ fontSize: '7.5pt', fontWeight: 'bold', color: '#475569', marginTop: '0.2rem' }}>สแกนอ่านกติกาเพิ่มเติม</span>
+              <QRCodeCanvas value="https://www.thairath.co.th/sport/worldcup2026/thai-post-campaign-2026" size={70} level="H" includeMargin={true} />
+              <span style={{ fontSize: '7pt', fontWeight: 'bold', color: '#475569', marginTop: '0.2rem' }}>สแกนอ่านกติกาเพิ่มเติม</span>
             </div>
           </div>
 
           {/* Section 1: วิธีการส่ง */}
-          <div style={{ marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.5rem 0' }}>
+          <div style={{ marginBottom: '0.75rem' }}>
+            <h3 style={{ fontSize: '11pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.4rem 0' }}>
               📝 วิธีร่วมลุ้นสนุกง่ายๆ (ไปรษณียบัตรกระดาษ)
             </h3>
-            <ol style={{ paddingLeft: '1.25rem', fontSize: '10.5pt', margin: '0', lineHeight: '1.5' }}>
-              <li style={{ marginBottom: '0.5rem' }}>
+            <ol style={{ paddingLeft: '1.25rem', fontSize: '10pt', margin: '0', lineHeight: '1.4' }}>
+              <li style={{ marginBottom: '0.4rem' }}>
                 <strong>เขียนชื่อทีมทายแชมป์:</strong> ในช่องว่างทายผล <strong>"แชมป์คือ..."</strong> บนไปรษณียบัตร ให้เขียน<strong>ชื่อประเทศที่คุณทายว่าจะเป็นแชมป์โลกเพียง 1 ทีมเท่านั้น</strong> (เขียนให้ตัวอักษรชัดเจนอ่านง่าย เช่น <em>อังกฤษ, ฝรั่งเศส, อาร์เจนตินา, สเปน, บราซิล</em> ฯลฯ)
               </li>
-              <li style={{ marginBottom: '0.5rem' }}>
+              <li style={{ marginBottom: '0.4rem' }}>
                 <strong>ส่งชิงโชคได้ทันที:</strong> ตรวจสอบความถูกต้อง แล้วนำไปรษณียบัตรไปหยอดที่ตู้ไปรษณีย์ หรือฝากส่ง ณ ที่ทำการไปรษณีย์ทุกสาขาทั่วประเทศได้ทันที <strong>(ไม่ต้องติดแสตมป์เพิ่ม)</strong>
               </li>
             </ol>
           </div>
 
           {/* Section 2: วันหมดเขต */}
-          <div style={{ marginBottom: '1.25rem', border: '1.5px solid #b91c1c', padding: '0.75rem', borderRadius: '8px', backgroundColor: '#fff5f5' }}>
-            <h3 style={{ fontSize: '11.5pt', fontWeight: 'bold', margin: '0 0 0.3rem 0', color: '#b91c1c' }}>
+          <div style={{ marginBottom: '0.75rem', border: '1.5px solid #b91c1c', padding: '0.5rem 0.75rem', borderRadius: '8px', backgroundColor: '#fff5f5' }}>
+            <h3 style={{ fontSize: '11pt', fontWeight: 'bold', margin: '0 0 0.2rem 0', color: '#b91c1c' }}>
               ⏳ วันหมดเขตรับไปรษณียบัตรชิงโชค
             </h3>
-            <p style={{ margin: '0', fontSize: '11pt', fontWeight: 'bold', color: '#7f1d1d' }}>
+            <p style={{ margin: '0', fontSize: '10.5pt', fontWeight: 'bold', color: '#7f1d1d' }}>
               หมดเขตรับชิงโชค ภายในวันที่ 19 กรกฎาคม 2569
             </p>
-            <p style={{ margin: '0.25rem 0 0 0', fontSize: '9.5pt', color: '#451a03' }}>
+            <p style={{ margin: '0.15rem 0 0 0', fontSize: '9pt', color: '#451a03' }}>
               * สำหรับไปรษณียบัตรกระดาษ ต้องหยอดตู้ไปรษณีย์หรือส่ง ณ ที่ทำการไปรษณีย์ ภายในเวลา <strong>18:00 น.</strong> ของวันที่ 19 กรกฎาคม 2569 เท่านั้น (ยึดตามวันตราประทับประจำวันของไปรษณีย์)
             </p>
           </div>
 
           {/* Section 3: รายละเอียดเงินรางวัล */}
-          <div style={{ marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.5rem 0' }}>
+          <div style={{ marginBottom: '0.75rem' }}>
+            <h3 style={{ fontSize: '11pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.4rem 0' }}>
               🎁 รายละเอียดของรางวัล (รวมมูลค่าของรางวัลกว่า 12,000,000 บาท)
             </h3>
             
@@ -5441,31 +5441,31 @@ export default function StaffPortal() {
           </div>
 
           {/* Section 4: การติดตามผล */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.5rem 0' }}>
+          <div style={{ marginBottom: '0.75rem' }}>
+            <h3 style={{ fontSize: '11pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.4rem 0' }}>
               📢 ช่องทางการติดตามผลประกาศรายชื่อผู้โชคดี
             </h3>
-            <p style={{ margin: '0 0 0.5rem 0', fontSize: '10pt' }}>
+            <p style={{ margin: '0 0 0.4rem 0', fontSize: '9.5pt' }}>
               ท่านสามารถติดตามข้อมูลข่าวสารการจับรางวัลและรายชื่อผู้โชคดีอย่างเป็นทางการได้ทางช่องทางต่อไปนี้:
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', textAlign: 'center' }}>
-              <div style={{ border: '1px solid #e2e8f0', padding: '0.5rem', borderRadius: '6px', backgroundColor: '#f8fafc' }}>
-                <div style={{ fontSize: '14pt' }}>📰</div>
-                <strong style={{ fontSize: '9pt', display: 'block', marginTop: '0.15rem' }}>หนังสือพิมพ์ไทยรัฐ</strong>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', textAlign: 'center' }}>
+              <div style={{ border: '1px solid #e2e8f0', padding: '0.35rem', borderRadius: '6px', backgroundColor: '#f8fafc' }}>
+                <div style={{ fontSize: '12pt' }}>📰</div>
+                <strong style={{ fontSize: '8.5pt', display: 'block', marginTop: '0.1rem' }}>หนังสือพิมพ์ไทยรัฐ</strong>
               </div>
-              <div style={{ border: '1px solid #e2e8f0', padding: '0.5rem', borderRadius: '6px', backgroundColor: '#f8fafc' }}>
-                <div style={{ fontSize: '14pt' }}>🌐</div>
-                <strong style={{ fontSize: '9pt', display: 'block', marginTop: '0.15rem' }}>ไทยรัฐออนไลน์</strong>
+              <div style={{ border: '1px solid #e2e8f0', padding: '0.35rem', borderRadius: '6px', backgroundColor: '#f8fafc' }}>
+                <div style={{ fontSize: '12pt' }}>🌐</div>
+                <strong style={{ fontSize: '8.5pt', display: 'block', marginTop: '0.1rem' }}>ไทยรัฐออนไลน์</strong>
               </div>
-              <div style={{ border: '1px solid #e2e8f0', padding: '0.5rem', borderRadius: '6px', backgroundColor: '#f8fafc' }}>
-                <div style={{ fontSize: '14pt' }}>📺</div>
-                <strong style={{ fontSize: '9pt', display: 'block', marginTop: '0.15rem' }}>ไทยรัฐทีวี ช่อง 32</strong>
+              <div style={{ border: '1px solid #e2e8f0', padding: '0.35rem', borderRadius: '6px', backgroundColor: '#f8fafc' }}>
+                <div style={{ fontSize: '12pt' }}>📺</div>
+                <strong style={{ fontSize: '8.5pt', display: 'block', marginTop: '0.1rem' }}>ไทยรัฐทีวี ช่อง 32</strong>
               </div>
             </div>
           </div>
 
           {/* Footer note */}
-          <div style={{ textAlign: 'center', fontSize: '9pt', color: '#64748b', borderTop: '1px dashed #cbd5e1', paddingTop: '0.75rem' }}>
+          <div style={{ textAlign: 'center', fontSize: '8.5pt', color: '#64748b', borderTop: '1px dashed #cbd5e1', paddingTop: '0.5rem' }}>
             ขอขอบพระคุณที่ใช้บริการสั่งพิมพ์ไปรษณียบัตรกับทางเรา<br/>
             ขอให้ทุกท่านโชคดีและสนุกไปกับการเชียร์ฟุตบอลโลก 2026!
           </div>
@@ -5479,7 +5479,7 @@ export default function StaffPortal() {
             @media print {
               @page {
                 size: A4 portrait !important;
-                margin: 1.5cm 1.2cm !important;
+                margin: 0.8cm 1.0cm !important;
               }
               .staff-no-print {
                 display: none !important;
