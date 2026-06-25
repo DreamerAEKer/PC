@@ -5365,7 +5365,7 @@ export default function StaffPortal() {
             </h3>
             
             <p style={{ margin: '0 0 0.4rem 0', fontSize: '10pt', fontWeight: 'bold', color: '#334155' }}>
-              1. โชคชั้นที่ 1: ส่งลุ้นก่อนมีสิทธิ์ลุ้นก่อนรอบ 16 ทีมสุดท้าย (ส่งภายใน 28 มิ.ย. 2569)
+              1. โชคชั้นที่ 1: รางวัลสำหรับผู้ทายชื่อประเทศที่เข้ารอบ 16 ทีมสุดท้ายได้ถูกต้อง (ส่งภายใน 28 มิ.ย. 2569)
             </p>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt', marginBottom: '0.75rem' }}>
               <thead>
