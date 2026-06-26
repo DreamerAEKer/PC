@@ -4014,9 +4014,11 @@ export default function StaffPortal() {
                             <button
                               type="button"
                               onClick={() => {
-                                const nextQueue = invoiceQueue.filter(x => x.id !== inv.id);
-                                saveInvoiceQueue(nextQueue);
-                                setSelectedQueueIds(prev => prev.filter(id => id !== inv.id));
+                                if (window.confirm(`คุณต้องการลบใบกำกับของ "${inv.payerName}" ออกจากคิวใช่หรือไม่?`)) {
+                                  const nextQueue = invoiceQueue.filter(x => x.id !== inv.id);
+                                  saveInvoiceQueue(nextQueue);
+                                  setSelectedQueueIds(prev => prev.filter(id => id !== inv.id));
+                                }
                               }}
                               style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1rem', padding: '4px' }}
                               title="ลบออกจากคิว"
