@@ -164,6 +164,20 @@ export default function StaffPortal() {
     localStorage.setItem('staffInvoiceQueue', JSON.stringify(newQueue));
   };
   const [isPrintingGuide, setIsPrintingGuide] = useState(false);
+  const [staffProfiles, setStaffProfiles] = useState(() => {
+    try {
+      const saved = localStorage.getItem('staffProfiles');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [selectedProfileId, setSelectedProfileId] = useState('');
+
+  const saveStaffProfiles = (newProfiles) => {
+    setStaffProfiles(newProfiles);
+    localStorage.setItem('staffProfiles', JSON.stringify(newProfiles));
+  };
   const [touchStartX, setTouchStartX] = useState(null);
   const [swipeOffset, setSwipeOffset] = useState({});
   const [swipedItemId, setSwipedItemId] = useState(null);
@@ -4506,6 +4520,93 @@ export default function StaffPortal() {
                 style={{ width: '100%', padding: '0.3rem 0.5rem', fontSize: '0.85rem', borderColor: (!branchCode || branchCode.length < 5) ? 'var(--primary)' : 'var(--border)' }} 
               />
             </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flex: '0 0 auto', flexWrap: 'wrap' }}>
+              <select
+                className="form-control"
+                value={selectedProfileId}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setSelectedProfileId(id);
+                  if (id) {
+                    const prof = staffProfiles.find(p => String(p.id) === String(id));
+                    if (prof) {
+                      setStaffName(prof.name);
+                      setStaffPhone(prof.phone);
+                      setIsSettingsDirty(true);
+                    }
+                  } else {
+                    setStaffName('');
+                    setStaffPhone('');
+                  }
+                }}
+                style={{ padding: '0.3rem 0.5rem', fontSize: '0.85rem', backgroundColor: '#f1f5f9', cursor: 'pointer', minWidth: '120px', margin: 0 }}
+              >
+                <option value="">-- เลือกเจ้าหน้าที่ --</option>
+                {staffProfiles.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => {
+                  if (!staffName || !staffName.trim()) {
+                    alert('กรุณากรอกชื่อเจ้าหน้าที่ก่อนบันทึกโปรไฟล์');
+                    return;
+                  }
+                  const nameTrim = staffName.trim();
+                  const phoneTrim = (staffPhone || '').trim();
+                  
+                  const existing = staffProfiles.find(p => p.name === nameTrim);
+                  let updated;
+                  if (existing) {
+                    if (window.confirm(`มีโปรไฟล์ชื่อ "${nameTrim}" อยู่แล้ว ต้องการอัปเดตเบอร์โทรเป็น "${phoneTrim}" ใช่หรือไม่?`)) {
+                      updated = staffProfiles.map(p => p.name === nameTrim ? { ...p, phone: phoneTrim } : p);
+                    } else {
+                      return;
+                    }
+                  } else {
+                    const newProfile = {
+                      id: Date.now(),
+                      name: nameTrim,
+                      phone: phoneTrim
+                    };
+                    updated = [...staffProfiles, newProfile];
+                    setSelectedProfileId(newProfile.id);
+                  }
+                  saveStaffProfiles(updated);
+                  alert('💾 บันทึกโปรไฟล์เจ้าหน้าที่เรียบร้อย!');
+                }}
+                style={{ padding: '0.3rem 0.5rem', fontSize: '0.75rem', margin: 0, cursor: 'pointer', borderColor: '#6366f1', color: '#4f46e5', backgroundColor: '#e0e7ff', display: 'flex', alignItems: 'center' }}
+                title="บันทึกชื่อและเบอร์โทรนี้ลงในรายการโปรไฟล์"
+              >
+                💾 เก็บ
+              </button>
+              
+              {selectedProfileId && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    const prof = staffProfiles.find(p => String(p.id) === String(selectedProfileId));
+                    if (prof && window.confirm(`คุณต้องการลบโปรไฟล์ของ "${prof.name}" ใช่หรือไม่?`)) {
+                      const updated = staffProfiles.filter(p => String(p.id) !== String(selectedProfileId));
+                      saveStaffProfiles(updated);
+                      setSelectedProfileId('');
+                      setStaffName('');
+                      setStaffPhone('');
+                    }
+                  }}
+                  style={{ padding: '0.3rem 0.5rem', fontSize: '0.75rem', margin: 0, cursor: 'pointer', borderColor: '#ef4444', color: '#b91c1c', backgroundColor: '#fee2e2' }}
+                  title="ลบโปรไฟล์เจ้าหน้าที่นี้"
+                >
+                  🗑️
+                </button>
+              )}
+            </div>
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flex: '1 1 auto', minWidth: '110px', maxWidth: '200px' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>จนท:</span>
               <input 
