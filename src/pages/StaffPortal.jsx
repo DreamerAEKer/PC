@@ -2602,17 +2602,11 @@ export default function StaffPortal() {
               <button 
                 type="button"
                 className="btn btn-secondary" 
-                onClick={() => {
-                  setIsPrintingGuide(true);
-                  setTimeout(() => {
-                    window.print();
-                    setIsPrintingGuide(false);
-                  }, 300);
-                }}
+                onClick={() => navigate('/print-blank-forms', { state: { branchName, branchCode, staffName, staffPhone } })}
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#f59e0b', color: '#d97706', backgroundColor: '#fffbeb', cursor: 'pointer', margin: 0 }}
-                title="พิมพ์คู่มือแนะนำและกติกาสำหรับแนบไปกับไปรษณียบัตรของลูกค้า"
+                title="พิมพ์ใบกรอกการสั่งพิมพ์ (A4) สำหรับให้ลูกค้าเขียนด้วยมือ"
               >
-                🖨️ พิมพ์ใบแนะนำสำหรับลูกค้า (A4)
+                <FileText size={16} /> พิมพ์ใบกรอกการสั่งพิมพ์ (A4)
               </button>
             </div>
             
@@ -4562,17 +4556,11 @@ export default function StaffPortal() {
             <button 
               type="button"
               className="btn btn-secondary" 
-              onClick={() => {
-                setIsPrintingGuide(true);
-                setTimeout(() => {
-                  window.print();
-                  setIsPrintingGuide(false);
-                }, 300);
-              }}
+              onClick={() => navigate('/print-blank-forms', { state: { branchName, branchCode, staffName, staffPhone } })}
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#f59e0b', color: '#d97706', backgroundColor: '#fffbeb', cursor: 'pointer', margin: 0 }}
-              title="พิมพ์คู่มือแนะนำและกติกาสำหรับแนบไปกับไปรษณียบัตรของลูกค้า"
+              title="พิมพ์ใบกรอกการสั่งพิมพ์ (A4) สำหรับให้ลูกค้าเขียนด้วยมือ"
             >
-              🖨️ พิมพ์ใบแนะนำสำหรับลูกค้า (A4)
+              <FileText size={16} /> พิมพ์ใบกรอกการสั่งพิมพ์ (A4)
             </button>
           </div>
         </div>
