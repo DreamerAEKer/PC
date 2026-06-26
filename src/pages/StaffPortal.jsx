@@ -148,6 +148,21 @@ export default function StaffPortal() {
   });
   const [isPrintingInvoice, setIsPrintingInvoice] = useState(false);
   const [printLayoutType, setPrintLayoutType] = useState('grid'); // 'combined' or 'grid'
+  const [invoiceQueue, setInvoiceQueue] = useState(() => {
+    try {
+      const saved = localStorage.getItem('staffInvoiceQueue');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [selectedQueueIds, setSelectedQueueIds] = useState([]);
+  const [isPrintingQueue, setIsPrintingQueue] = useState(false);
+
+  const saveInvoiceQueue = (newQueue) => {
+    setInvoiceQueue(newQueue);
+    localStorage.setItem('staffInvoiceQueue', JSON.stringify(newQueue));
+  };
   const [isPrintingGuide, setIsPrintingGuide] = useState(false);
   const [touchStartX, setTouchStartX] = useState(null);
   const [swipeOffset, setSwipeOffset] = useState({});
@@ -3470,31 +3485,7 @@ export default function StaffPortal() {
                   </div>
 
                   <div style={{ width: '100%', borderTop: '1px solid #e2e8f0', marginTop: '1rem', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div>
-                      <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.5rem', color: '#475569' }}>ขนาดกระดาษและเลย์เอาต์การพิมพ์:</label>
-                      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                        <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                          <input 
-                            type="radio" 
-                            name="paperSize" 
-                            checked={printSettings.paperSize === 'A6'} 
-                            onChange={() => setPrintSettings(p => ({...p, paperSize: 'A6'}))} 
-                          />
-                          ไปรษณียบัตรเดี่ยว (A6)
-                        </label>
-                        <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                          <input 
-                            type="radio" 
-                            name="paperSize" 
-                            checked={printSettings.paperSize === 'A4'} 
-                            onChange={() => setPrintSettings(p => ({...p, paperSize: 'A4'}))} 
-                          />
-                          กระดาษ A4 (แบ่ง 4 ส่วน)
-                        </label>
-                      </div>
-                    </div>
-
-                    <div style={{ width: '100%', borderTop: '1px solid #e2e8f0', paddingTop: '1rem', backgroundColor: '#fffbeb', padding: '0.75rem', borderRadius: '8px', border: '1px solid #fef3c7' }}>
+                    <div style={{ width: '100%', backgroundColor: '#fffbeb', padding: '0.75rem', borderRadius: '8px', border: '1px solid #fef3c7' }}>
                       <label style={{ fontSize: '0.85rem', fontWeight: 700, display: 'block', marginBottom: '0.5rem', color: '#b45309' }}>⚙️ ปรับชดเชยระยะเครื่องพิมพ์ (สำหรับชดเชยระยะช่องใส่กระดาษเบี้ยว):</label>
                       <p style={{ fontSize: '0.75rem', color: '#d97706', margin: '0 0 0.75rem 0', lineHeight: '1.4' }}>
                         *แก้ปัญหางานพิมพ์เลื่อนไม่ตรงช่อง โดยที่การตั้งค่าจัดเลย์เอาต์หน้าจอหลักยังแสดงรูปภาพตรงสวยงามตามปกติ (ค่าชดเชยนี้จะผลต่อตอนกดพิมพ์ออกเครื่องพิมพ์เท่านั้น)
@@ -3517,7 +3508,7 @@ export default function StaffPortal() {
 
                   <div style={{ marginTop: '1.5rem' }}>
                     <h5 style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.5rem' }}>
-                      ตัวอย่างพื้นที่การพิมพ์ ({printSettings.paperSize === 'A4' ? 'จำลองกระดาษ A4 แนวนอน 29.7 x 21 ซม. แบ่ง 4 ส่วน' : 'จำลองสัดส่วนไปรษณียบัตร 14.8 x 10.5 ซม.'})
+                      ตัวอย่างพื้นที่การพิมพ์ (จำลองสัดส่วนไปรษณียบัตร 14.8 x 10.5 ซม.)
                     </h5>
                     <div style={{ 
                       width: '100%', 
@@ -3535,180 +3526,85 @@ export default function StaffPortal() {
                         height: '198px',
                         position: 'relative'
                       }}>
-                        {printSettings.paperSize === 'A4' ? (
-                          <div style={{
-                            width: '29.7cm',
-                            height: '21.0cm',
-                            backgroundColor: 'white',
-                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            transform: 'scale(0.25)',
-                            transformOrigin: 'top left',
-                            display: 'grid',
-                            gridTemplateColumns: '1fr 1fr',
-                            gridTemplateRows: '1fr 1fr',
-                            boxSizing: 'border-box'
-                          }}>
-                            {[0, 1, 2, 3].map((cellIdx) => (
-                              <div key={cellIdx} style={{
-                                width: '14.85cm',
-                                height: '10.5cm',
-                                borderRight: cellIdx % 2 === 0 ? '1px dashed #cbd5e1' : 'none',
-                                borderBottom: cellIdx < 2 ? '1px dashed #cbd5e1' : 'none',
-                                paddingTop: `${printSettings.top + (printSettings.calY || 0)}cm`,
-                                paddingLeft: `${printSettings.left + (printSettings.calX || 0)}cm`,
-                                paddingRight: '1cm',
-                                boxSizing: 'border-box',
-                                overflow: 'hidden',
-                                position: 'relative'
-                              }}>
-                                {(printSettings.calX !== 0 || printSettings.calY !== 0) && (
-                                  <div style={{
-                                    position: 'absolute',
-                                    top: `${printSettings.top}cm`,
-                                    left: `${printSettings.left}cm`,
-                                    width: '5cm',
-                                    height: '2.5cm',
-                                    border: '1px dashed #94a3b8',
-                                    borderRadius: '4px',
-                                    pointerEvents: 'none',
-                                    opacity: 0.5
-                                  }} />
+                        <div style={{
+                          width: '14.8cm',
+                          height: '10.5cm',
+                          backgroundColor: 'white',
+                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          transform: 'scale(0.5)',
+                          transformOrigin: 'top left',
+                          paddingTop: `${printSettings.top + (printSettings.calY || 0)}cm`,
+                          paddingLeft: `${printSettings.left + (printSettings.calX || 0)}cm`,
+                          paddingRight: '1cm',
+                          boxSizing: 'border-box',
+                          overflow: 'hidden',
+                          position: 'relative'
+                        }}>
+                          {(printSettings.calX !== 0 || printSettings.calY !== 0) && (
+                            <div style={{
+                              position: 'absolute',
+                              top: `${printSettings.top}cm`,
+                              left: `${printSettings.left}cm`,
+                              width: '5cm',
+                              height: '2.5cm',
+                              border: '1px dashed #94a3b8',
+                              borderRadius: '4px',
+                              pointerEvents: 'none',
+                              opacity: 0.5
+                            }} />
+                          )}
+                          <div 
+                            onMouseDown={handleDragStart}
+                            onTouchStart={handleDragStart}
+                            style={{ 
+                              fontSize: `${printSettings.fontSize}pt`, 
+                              lineHeight: '1.4', 
+                              fontFamily: 'Sarabun, Inter, sans-serif', 
+                              color: (printSettings.calX !== 0 || printSettings.calY !== 0) ? '#d97706' : '#111', 
+                              textAlign: 'left',
+                              cursor: 'grab',
+                              userSelect: 'none',
+                              pointerEvents: 'auto'
+                            }}
+                          >
+                            {formValues.did && printSettings.didPrintMode !== 'address' ? (
+                              <div>
+                                <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                                  {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
+                                </div>
+                                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                  โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
+                                </div>
+                                {!(formValues.did && formValues.did.trim().length === 6) && (
+                                  <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
+                                    {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}${printSettings.printCountry ? ' ' + printSettings.countryName : ''}`.trim()}
+                                  </div>
                                 )}
-                                <div 
-                                  onMouseDown={handleDragStart}
-                                  onTouchStart={handleDragStart}
-                                  style={{ 
-                                    fontSize: `${printSettings.fontSize}pt`, 
-                                    lineHeight: '1.4', 
-                                    fontFamily: 'Sarabun, Inter, sans-serif', 
-                                    color: (printSettings.calX !== 0 || printSettings.calY !== 0) ? '#d97706' : '#111', 
-                                    textAlign: 'left',
-                                    cursor: 'grab',
-                                    userSelect: 'none',
-                                    pointerEvents: 'auto'
-                                  }}
-                                >
-                                  {formValues.did && printSettings.didPrintMode !== 'address' ? (
-                                    <div>
-                                      <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
-                                        {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
-                                      </div>
-                                      <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                                        โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
-                                      </div>
-                                      {!(formValues.did && formValues.did.trim().length === 6) && (
-                                        <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
-                                          {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}${printSettings.printCountry ? ' ' + printSettings.countryName : ''}`.trim()}
-                                        </div>
-                                      )}
-                                      <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
-                                        {formValues.did}
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <>
-                                      <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
-                                        {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
-                                      </div>
-                                      <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                                        โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
-                                      </div>
-                                      <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
-                                        {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''}`.trim()}
-                                      </div>
-                                      <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
-                                        {`${formValues.zipcode || 'XXXXX'}${printSettings.printCountry ? ' ' + printSettings.countryName : ''}`}
-                                      </div>
-                                    </>
-                                  )}
+                                <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
+                                  {formValues.did}
                                 </div>
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div style={{
-                            width: '14.8cm',
-                            height: '10.5cm',
-                            backgroundColor: 'white',
-                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            transform: 'scale(0.5)',
-                            transformOrigin: 'top left',
-                            paddingTop: `${printSettings.top + (printSettings.calY || 0)}cm`,
-                            paddingLeft: `${printSettings.left + (printSettings.calX || 0)}cm`,
-                            paddingRight: '1cm',
-                            boxSizing: 'border-box',
-                            overflow: 'hidden',
-                            position: 'relative'
-                          }}>
-                            {(printSettings.calX !== 0 || printSettings.calY !== 0) && (
-                              <div style={{
-                                position: 'absolute',
-                                top: `${printSettings.top}cm`,
-                                left: `${printSettings.left}cm`,
-                                width: '5cm',
-                                height: '2.5cm',
-                                border: '1px dashed #94a3b8',
-                                borderRadius: '4px',
-                                pointerEvents: 'none',
-                                opacity: 0.5
-                              }} />
-                            )}
-                            <div 
-                              onMouseDown={handleDragStart}
-                              onTouchStart={handleDragStart}
-                              style={{ 
-                                fontSize: `${printSettings.fontSize}pt`, 
-                                lineHeight: '1.4', 
-                                fontFamily: 'Sarabun, Inter, sans-serif', 
-                                color: (printSettings.calX !== 0 || printSettings.calY !== 0) ? '#d97706' : '#111', 
-                                textAlign: 'left',
-                                cursor: 'grab',
-                                userSelect: 'none',
-                                pointerEvents: 'auto'
-                              }}
-                            >
-                              {formValues.did && printSettings.didPrintMode !== 'address' ? (
-                                <div>
-                                  <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
-                                    {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
-                                  </div>
-                                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                                    โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
-                                  </div>
-                                  {!(formValues.did && formValues.did.trim().length === 6) && (
-                                    <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
-                                      {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}${printSettings.printCountry ? ' ' + printSettings.countryName : ''}`.trim()}
-                                    </div>
-                                  )}
-                                  <div style={{ fontSize: `${printSettings.fontSize * 1.5}pt`, fontWeight: 'bold', letterSpacing: '0.05em', color: '#000', marginTop: '0.4em' }}>
-                                    {formValues.did}
-                                  </div>
+                            ) : (
+                              <>
+                                <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
+                                  {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
                                 </div>
-                              ) : (
-                                <>
-                                  <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
-                                    {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
-                                  </div>
-                                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                                    โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
-                                  </div>
-                                  <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
-                                    {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''}`.trim()}
-                                  </div>
-                                  <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
-                                    {`${formValues.zipcode || 'XXXXX'}${printSettings.printCountry ? ' ' + printSettings.countryName : ''}`}
-                                  </div>
-                                </>
-                              )}
-                            </div>
+                                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                  โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
+                                </div>
+                                <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
+                                  {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''}`.trim()}
+                                </div>
+                                <div style={{ marginTop: '0.2em', fontWeight: 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, letterSpacing: '0.05em' }}>
+                                  {`${formValues.zipcode || 'XXXXX'}${printSettings.printCountry ? ' ' + printSettings.countryName : ''}`}
+                                </div>
+                              </>
+                            )}
                           </div>
-                        )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -3988,10 +3884,201 @@ export default function StaffPortal() {
                     >
                       🖨️ พิมพ์บิลเรียกเก็บเงิน A4
                     </button>
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={() => {
+                        if (selectedIds.length === 0) return;
+                        const selectedRecords = history.filter(r => selectedIds.includes(r.id));
+                        const totalQty = selectedRecords.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
+                        const totalAmount = totalQty * postcardRate;
+                        
+                        const newInvoice = {
+                          id: Date.now() + Math.random(),
+                          timestamp: new Date().toISOString(),
+                          branchName: branchName,
+                          payerName: payerName || 'ยอดรวมกลุ่ม',
+                          postcardRate: postcardRate,
+                          records: selectedRecords,
+                          totalQty: totalQty,
+                          totalAmount: totalAmount
+                        };
+                        
+                        const updatedQueue = [...invoiceQueue, newInvoice];
+                        saveInvoiceQueue(updatedQueue);
+                        
+                        setSelectedIds([]);
+                        setPayerName('');
+                        alert('💾 บันทึกใบกำกับนี้เข้าคิวพิมพ์ค้างไว้สำเร็จ! คุณสามารถบันทึกเพิ่มหรือพิมพ์รวมกันที่คิวด้านล่างเพื่อประหยัดกระดาษ');
+                      }}
+                      style={{
+                        flex: '1 1 200px',
+                        padding: '0.6rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 'bold',
+                        backgroundColor: '#6366f1',
+                        borderColor: '#4f46e5',
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.35rem',
+                        cursor: 'pointer',
+                        margin: 0
+                      }}
+                    >
+                      📥 บันทึกเข้าคิวพิมพ์ใบกำกับ
+                    </button>
                   </div>
                 </div>
               );
             })()}
+
+            {invoiceQueue.length > 0 && (
+              <div className="card" style={{
+                border: '1.5px solid #6366f1',
+                boxShadow: '0 4px 15px rgba(99, 102, 241, 0.12)',
+                background: 'linear-gradient(to bottom right, #ffffff, #fafaff)',
+                padding: '1.25rem'
+              }}>
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0', color: '#4f46e5' }}>
+                  <span>🖨️ คิวพิมพ์ใบกำกับเพื่อประหยัดกระดาษ (พิมพ์รวมบน A4 ได้สูงสุด 4 ใบต่อหน้า)</span>
+                </h3>
+                
+                <div style={{ overflowX: 'auto', marginBottom: '1rem', border: '1px solid #e0e7ff', borderRadius: '8px', backgroundColor: '#fff' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#eef2ff', borderBottom: '1px solid #e0e7ff' }}>
+                        <th style={{ padding: '0.5rem 0.75rem', width: '40px', textAlign: 'center' }}>
+                          <input 
+                            type="checkbox"
+                            checked={selectedQueueIds.length === invoiceQueue.length}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedQueueIds(invoiceQueue.map(inv => inv.id));
+                              } else {
+                                setSelectedQueueIds([]);
+                              }
+                            }}
+                            style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                          />
+                        </th>
+                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#3730a3' }}>ผู้สั่งพิมพ์/ผู้จ่ายเงิน</th>
+                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#3730a3', textAlign: 'center' }}>รายการรายชื่อ</th>
+                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#3730a3', textAlign: 'right' }}>จำนวนรวม (ใบ)</th>
+                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#3730a3', textAlign: 'right' }}>ยอดเงินรวม</th>
+                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#3730a3', textAlign: 'center' }}>ลบ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {invoiceQueue.map(inv => (
+                        <tr key={inv.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                            <input 
+                              type="checkbox"
+                              checked={selectedQueueIds.includes(inv.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedQueueIds(prev => [...prev, inv.id]);
+                                } else {
+                                  setSelectedQueueIds(prev => prev.filter(id => id !== inv.id));
+                                }
+                              }}
+                              style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                            />
+                          </td>
+                          <td style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e1b4b' }}>
+                            {inv.payerName}
+                            <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 'normal' }}>
+                              {new Date(inv.timestamp).toLocaleString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: 'short' })}
+                            </div>
+                          </td>
+                          <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                            {inv.records.length} คน
+                          </td>
+                          <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: '600' }}>
+                            {inv.totalQty.toLocaleString()}
+                          </td>
+                          <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: '700', color: '#b91c1c' }}>
+                            {inv.totalAmount.toLocaleString()}.-
+                          </td>
+                          <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const nextQueue = invoiceQueue.filter(x => x.id !== inv.id);
+                                saveInvoiceQueue(nextQueue);
+                                setSelectedQueueIds(prev => prev.filter(id => id !== inv.id));
+                              }}
+                              style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1rem', padding: '4px' }}
+                              title="ลบออกจากคิว"
+                            >
+                              🗑️
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={selectedQueueIds.length === 0}
+                    onClick={() => {
+                      setIsPrintingQueue(true);
+                      setTimeout(() => {
+                        window.print();
+                        setIsPrintingQueue(false);
+                      }, 300);
+                    }}
+                    style={{
+                      flex: '1 1 220px',
+                      padding: '0.6rem 1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 'bold',
+                      backgroundColor: '#4f46e5',
+                      borderColor: '#4338ca',
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.35rem',
+                      cursor: selectedQueueIds.length > 0 ? 'pointer' : 'not-allowed',
+                      opacity: selectedQueueIds.length > 0 ? 1 : 0.6,
+                      margin: 0
+                    }}
+                  >
+                    🖨️ พิมพ์ใบกำกับที่เลือกพร้อมกัน (A4 แบ่ง 4) ({selectedQueueIds.length} ใบกำกับ)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      if (window.confirm('คุณต้องการล้างคิวพิมพ์ใบกำกับทั้งหมดใช่หรือไม่?')) {
+                        saveInvoiceQueue([]);
+                        setSelectedQueueIds([]);
+                      }
+                    }}
+                    style={{
+                      padding: '0.6rem 1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.35rem',
+                      cursor: 'pointer',
+                      margin: 0
+                    }}
+                  >
+                    🗑️ ล้างคิวทั้งหมด
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="card" id="history-section">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -4957,6 +5044,227 @@ export default function StaffPortal() {
               }
               .invoice-print-only {
                 display: ${printLayoutType === 'grid' ? 'grid' : 'block'} !important;
+              }
+            }
+          `}
+        </style>
+      )}
+
+      {isPrintingQueue && selectedQueueIds.length > 0 && (() => {
+        const queuedInvoices = invoiceQueue.filter(inv => selectedQueueIds.includes(inv.id));
+        
+        // Flatten slips from all selected queued invoices
+        const allSlips = [];
+        
+        queuedInvoices.forEach(inv => {
+          const formattedDate = new Date(inv.timestamp).toLocaleDateString('th-TH', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          
+          const isMulti = inv.records.length > 1;
+          
+          // Render a slip for each recipient in the invoice
+          inv.records.forEach(r => {
+            const itemAmount = (parseInt(r.quantity, 10) || 0) * inv.postcardRate;
+            allSlips.push({
+              id: `${inv.id}-${r.id}`,
+              isSummary: false,
+              branchName: inv.branchName,
+              payerName: inv.payerName,
+              printDate: formattedDate,
+              recipient: r,
+              itemAmount: itemAmount,
+              postcardRate: inv.postcardRate,
+              isMulti: isMulti
+            });
+          });
+          
+          // Add a summary slip if there are multiple items
+          if (isMulti) {
+            allSlips.push({
+              id: `${inv.id}-summary`,
+              isSummary: true,
+              branchName: inv.branchName,
+              payerName: inv.payerName,
+              printDate: formattedDate,
+              records: inv.records,
+              totalQty: inv.totalQty,
+              totalAmount: inv.totalAmount
+            });
+          }
+        });
+
+        // Split allSlips into pages of up to 4 slips each
+        const pages = [];
+        for (let i = 0; i < allSlips.length; i += 4) {
+          pages.push(allSlips.slice(i, i + 4));
+        }
+
+        return (
+          <div className="invoice-print-only" style={{ display: 'block' }}>
+            {pages.map((pageSlips, pageIdx) => (
+              <div 
+                key={pageIdx} 
+                style={{
+                  fontFamily: 'Sarabun, Inter, sans-serif',
+                  color: '#000',
+                  padding: '1.2cm 1cm',
+                  backgroundColor: '#fff',
+                  boxSizing: 'border-box',
+                  width: '21cm',
+                  height: '29.7cm',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gridTemplateRows: '1fr 1fr',
+                  gap: '0.6cm',
+                  pageBreakAfter: pageIdx === pages.length - 1 ? 'auto' : 'always',
+                  breakAfter: pageIdx === pages.length - 1 ? 'auto' : 'page',
+                }}
+              >
+                {pageSlips.map((slip) => {
+                  if (slip.isSummary) {
+                    return (
+                      <div key={slip.id} style={{
+                        border: '2px solid #b91c1c',
+                        borderRadius: '8px',
+                        padding: '0.5cm',
+                        boxSizing: 'border-box',
+                        width: '9.2cm',
+                        height: '13.0cm',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        pageBreakInside: 'avoid',
+                        backgroundColor: '#fff'
+                      }}>
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #b91c1c', paddingBottom: '0.2rem', marginBottom: '0.4rem' }}>
+                            <h1 style={{ margin: '0', fontSize: '11pt', fontWeight: 'bold', color: '#b91c1c' }}>📊 ใบสรุปยอดรวม (สำหรับเก็บเงิน)</h1>
+                            <span style={{ fontSize: '7.5pt', fontWeight: 'bold', color: '#7f1d1d' }}>{slip.branchName}</span>
+                          </div>
+                          
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8pt', marginBottom: '0.3rem', color: '#7f1d1d' }}>
+                            <div><strong>ผู้ประสานงาน:</strong> {slip.payerName}</div>
+                            <div><strong>พิมพ์:</strong> {slip.printDate}</div>
+                          </div>
+
+                          {/* Summary Items List Table */}
+                          <div style={{ border: '1px solid #fca5a5', borderRadius: '4px', overflow: 'hidden', marginTop: '0.3cm', backgroundColor: '#fff' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
+                              <thead>
+                                <tr style={{ backgroundColor: '#fee2e2', borderBottom: '1.5px solid #fca5a5' }}>
+                                  <th style={{ padding: '4px 6px', textAlign: 'left', fontWeight: 'bold', color: '#7f1d1d', borderRight: '1px solid #fca5a5' }}>ชื่อผู้รับ</th>
+                                  <th style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', color: '#7f1d1d', width: '30%' }}>จำนวน</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {slip.records.map((sr) => (
+                                  <tr key={sr.id} style={{ borderBottom: '1px solid #fee2e2' }}>
+                                    <td style={{ padding: '4px 6px', fontWeight: 'bold', color: '#7f1d1d', borderRight: '1px solid #fca5a5', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '5.2cm' }}>{sr.name}</td>
+                                    <td style={{ padding: '4px 6px', textAlign: 'right', color: '#7f1d1d' }}>{sr.quantity || 0}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', borderTop: '2px solid #b91c1c', paddingTop: '0.4rem', marginTop: '0.4rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '8.5pt', fontWeight: 'bold', color: '#7f1d1d' }}>
+                              รวม: {slip.records.length} รายชื่อ | ทั้งหมด: {slip.totalQty.toLocaleString()} ใบ
+                            </span>
+                            <div style={{ textAlign: 'right' }}>
+                              <span style={{ fontSize: '20pt', fontWeight: 'bold', color: '#b91c1c' }}>
+                                {slip.totalAmount.toLocaleString()}.-
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // Recipient Slip
+                  const r = slip.recipient;
+                  return (
+                    <div key={slip.id} style={{
+                      border: '1.5px dashed #000',
+                      borderRadius: '8px',
+                      padding: '0.5cm',
+                      boxSizing: 'border-box',
+                      width: '9.2cm',
+                      height: '13.0cm',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      pageBreakInside: 'avoid',
+                      backgroundColor: '#fff'
+                    }}>
+                      {/* Header */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #000', paddingBottom: '0.2rem', marginBottom: '0.4rem' }}>
+                          <h1 style={{ margin: '0', fontSize: '11pt', fontWeight: 'bold' }}>ใบกำกับ งานสั่งพิมพ์ ไปรษณียบัตรฯ</h1>
+                          <span style={{ fontSize: '8pt', fontWeight: 'bold', color: '#475569' }}>{slip.branchName}</span>
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8.5pt', marginBottom: '0.5rem' }}>
+                          <div><strong>ผู้ประสานงาน:</strong> {slip.payerName}</div>
+                          <div><strong>วันที่พิมพ์:</strong> {slip.printDate}</div>
+                        </div>
+
+                        {/* Item Info */}
+                        <div style={{ border: '1px solid #cbd5e1', borderRadius: '4px', padding: '0.4cm', backgroundColor: '#f8fafc', marginTop: '0.5cm' }}>
+                          <div style={{ fontSize: '12pt', marginBottom: '0.5rem' }}>
+                            <strong>ชื่อผู้รับ:</strong> <span style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{r.name}</span>
+                          </div>
+                          <div style={{ fontSize: '12pt' }}>
+                            <strong>จำนวน:</strong> <span style={{ fontWeight: 'bold' }}>{r.quantity || 0} ใบ</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Total Section */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '2px solid #000', paddingTop: '0.4rem', marginTop: '0.4rem' }}>
+                        <div style={{ fontSize: '9.5pt', lineHeight: '1.2', color: '#475569' }}>
+                          อัตรา {slip.postcardRate} บาท/ใบ
+                        </div>
+                        <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '11pt', fontWeight: 'bold', color: '#475569' }}>ราคารวม:</span>
+                          <span style={{ fontSize: '22pt', fontWeight: 'bold', color: '#b91c1c' }}>
+                            {slip.itemAmount.toLocaleString()}.-
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
+      {isPrintingQueue && (
+        <style>
+          {`
+            @media print {
+              @page {
+                size: A4 portrait !important;
+                margin: 0 !important;
+              }
+              .staff-no-print {
+                display: none !important;
+              }
+              .print-only {
+                display: none !important;
+              }
+              .invoice-print-only {
+                display: block !important;
               }
             }
           `}
