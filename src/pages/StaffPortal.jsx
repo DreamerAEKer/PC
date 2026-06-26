@@ -4941,7 +4941,9 @@ export default function StaffPortal() {
                         </div>
                         
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8pt', marginBottom: '0.3rem', color: '#7f1d1d' }}>
-                          <div><strong>ผู้ประสานงาน:</strong> {r.name}</div>
+                          {payerName && payerName !== 'ยอดรวมกลุ่ม' && payerName !== 'ยอดรวมกลุ่มทั้งหมด' ? (
+                            <div><strong>ผู้ประสานงาน:</strong> {payerName}</div>
+                          ) : <div />}
                           <div><strong>พิมพ์:</strong> {printDate}</div>
                         </div>
 
@@ -5005,7 +5007,9 @@ export default function StaffPortal() {
                       </div>
                       
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8.5pt', marginBottom: '0.5rem' }}>
-                        <div><strong>ผู้ประสานงาน:</strong> {payerName || 'ยอดรวมกลุ่ม'}</div>
+                        {payerName && payerName !== 'ยอดรวมกลุ่ม' ? (
+                          <div><strong>ผู้ประสานงาน:</strong> {payerName}</div>
+                        ) : <div />}
                         <div><strong>วันที่พิมพ์:</strong> {printDate}</div>
                       </div>
 
@@ -5074,7 +5078,9 @@ export default function StaffPortal() {
                 </div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8.5pt', marginBottom: '0.5rem' }}>
-                  <div><strong>ผู้ประสานงาน:</strong> {payerName || 'ยอดรวมกลุ่ม'}</div>
+                  {payerName && payerName !== 'ยอดรวมกลุ่ม' ? (
+                    <div><strong>ผู้ประสานงาน:</strong> {payerName}</div>
+                  ) : <div />}
                   <div><strong>วันที่พิมพ์:</strong> {printDate}</div>
                 </div>
 
@@ -5237,7 +5243,9 @@ export default function StaffPortal() {
                           </div>
                           
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8pt', marginBottom: '0.3rem', color: '#7f1d1d' }}>
-                            <div><strong>ผู้ประสานงาน:</strong> {slip.payerName}</div>
+                            {slip.payerName && slip.payerName !== 'ยอดรวมกลุ่ม' && slip.payerName !== 'ยอดรวมกลุ่มทั้งหมด' ? (
+                              <div><strong>ผู้ประสานงาน:</strong> {slip.payerName}</div>
+                            ) : <div />}
                             <div><strong>พิมพ์:</strong> {slip.printDate}</div>
                           </div>
 
@@ -5302,7 +5310,9 @@ export default function StaffPortal() {
                         </div>
                         
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8.5pt', marginBottom: '0.5rem' }}>
-                          <div><strong>ผู้ประสานงาน:</strong> {slip.payerName}</div>
+                          {slip.payerName && slip.payerName !== 'ยอดรวมกลุ่ม' ? (
+                            <div><strong>ผู้ประสานงาน:</strong> {slip.payerName}</div>
+                          ) : <div />}
                           <div><strong>วันที่พิมพ์:</strong> {slip.printDate}</div>
                         </div>
 
