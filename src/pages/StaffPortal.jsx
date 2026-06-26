@@ -52,6 +52,18 @@ const loadHandlesFromDB = async () => {
   });
 };
 
+const getSavedDate = (record) => {
+  if (record.timestamp) {
+    return record.timestamp.split('T')[0];
+  }
+  if (record.id && typeof record.id === 'number' && record.id > 1000000000000) {
+    try {
+      return new Date(record.id).toISOString().split('T')[0];
+    } catch (e) {}
+  }
+  return '';
+};
+
 export default function StaffPortal() {
   const { register, handleSubmit, setValue, getValues, reset, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
 
@@ -79,6 +91,10 @@ export default function StaffPortal() {
   };
   const [history, setHistory] = useState([]);
   const [historyFilter, setHistoryFilter] = useState('pending'); // 'all', 'pending', 'printed'
+  const [filterSender, setFilterSender] = useState('');
+  const [filterSavedDate, setFilterSavedDate] = useState('');
+  const [filterOrderDate, setFilterOrderDate] = useState('');
+  const [filterImportSource, setFilterImportSource] = useState('');
   const [latestRecordId, setLatestRecordId] = useState(null);
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
   const [cardRecord, setCardRecord] = useState(null);
@@ -752,7 +768,8 @@ export default function StaffPortal() {
                 const cleanedItem = {
                   ...item,
                   did: cleanedDid,
-                  address: constructFullAddress(item)
+                  address: constructFullAddress(item),
+                  importSource: item.importSource || file.name
                 };
 
                 if (prevItem) {
@@ -840,7 +857,7 @@ export default function StaffPortal() {
     }
   };
 
-  const onScanSuccess = (data) => {
+  const onScanSuccess = (data, sourceName = '') => {
     const code = data.oc || data.orderCode || '';
     const existing = history.find(r => 
       (code && (r.orderCode === code || r.oc === code)) || 
@@ -873,7 +890,8 @@ export default function StaffPortal() {
         orderCode: code,
         id: Date.now() + Math.random(),
         timestamp: new Date().toISOString(),
-        printed: false
+        printed: false,
+        importSource: sourceName || data.importSource || ''
       };
       setHistory(prev => {
         const safePrev = Array.isArray(prev) ? prev : [];
@@ -1561,7 +1579,8 @@ export default function StaffPortal() {
               zipcode: itemForAddress.zipcode,
               did: cleanedDid,
               isAdvancedMode: mappedSubBookings.length > 0,
-              subBookings: mappedSubBookings
+              subBookings: mappedSubBookings,
+              importSource: file.name
             };
           });
 
@@ -1591,7 +1610,7 @@ export default function StaffPortal() {
         const data = parseQrPayload(decodedText);
         
         if (targetScanCount > 0) {
-          onScanSuccess(data);
+          onScanSuccess(data, file.name);
           setCurrentScanCount(prev => {
             const next = prev + 1;
             if (next >= targetScanCount) {
@@ -1604,7 +1623,7 @@ export default function StaffPortal() {
             return next;
           });
         } else {
-          onScanSuccess(data);
+          onScanSuccess(data, file.name);
         }
         return true;
       } catch (err) {
@@ -3090,7 +3109,7 @@ export default function StaffPortal() {
                   </div>
                 )}
 
-                {(formValues.orderCode || formValues.senderNickname || formValues.senderPhone) && (
+                {formValues.orderCode && (
                   <div style={{
                     backgroundColor: '#f8fafc',
                     border: '1px solid #e2e8f0',
@@ -3101,36 +3120,16 @@ export default function StaffPortal() {
                     color: '#475569'
                   }}>
                     <div style={{ fontWeight: 'bold', color: '#1e293b', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      📋 ข้อมูลการสั่งพิมพ์จากลูกค้า
+                      📋 ข้อมูลรหัสสั่งพิมพ์จากลูกค้า
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.75rem' }}>
-                      <div>
-                        <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>รหัสสั่งพิมพ์</span>
-                        <input 
-                          type="text" 
-                          readOnly 
-                          {...register("orderCode")} 
-                          style={{ width: '100%', border: 'none', background: 'transparent', fontWeight: 'bold', color: '#0f172a', padding: 0, outline: 'none' }} 
-                        />
-                      </div>
-                      <div>
-                        <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>ผู้สั่ง (ชื่อเล่น)</span>
-                        <input 
-                          type="text" 
-                          readOnly 
-                          {...register("senderNickname")} 
-                          style={{ width: '100%', border: 'none', background: 'transparent', fontWeight: 'bold', color: '#0f172a', padding: 0, outline: 'none' }} 
-                        />
-                      </div>
-                      <div>
-                        <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>เบอร์โทรผู้สั่ง</span>
-                        <input 
-                          type="text" 
-                          readOnly 
-                          {...register("senderPhone")} 
-                          style={{ width: '100%', border: 'none', background: 'transparent', fontWeight: 'bold', color: '#0f172a', padding: 0, outline: 'none' }} 
-                        />
-                      </div>
+                    <div>
+                      <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>รหัสสั่งพิมพ์</span>
+                      <input 
+                        type="text" 
+                        readOnly 
+                        {...register("orderCode")} 
+                        style={{ width: '100%', border: 'none', background: 'transparent', fontWeight: 'bold', color: '#0f172a', padding: 0, outline: 'none' }} 
+                      />
                     </div>
                   </div>
                 )}
@@ -3190,6 +3189,27 @@ export default function StaffPortal() {
                     {selectQty === 'custom' && errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
                   </div>
                 </div>
+
+                {/* ข้อมูลผู้สั่ง (Sender Profile) */}
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem', background: '#f8fafc', padding: '1rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ flex: '1 1 180px' }}>
+                    <label className="form-label" style={{ fontWeight: '700', color: '#1e293b' }}>ชื่อเล่นผู้สั่ง <span style={{color:'red'}}>*</span></label>
+                    <input type="text" className={`form-control ${getFieldClass('senderNickname')}`} required {...register("senderNickname", { required: "กรุณาระบุชื่อเล่นผู้สั่ง" })} placeholder="ระบุชื่อเล่นผู้สั่ง" />
+                    {errors.senderNickname && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.senderNickname.message}</span>}
+                  </div>
+                  <div style={{ flex: '1 1 180px' }}>
+                    <label className="form-label" style={{ fontWeight: '700', color: '#1e293b' }}>เบอร์โทรผู้สั่ง</label>
+                    <input type="text" className={`form-control ${getFieldClass('senderPhone')}`} {...register("senderPhone", { 
+                      required: false,
+                      validate: value => {
+                        if (!value || value.trim() === '') return true;
+                        return /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i.test(value) || "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก)";
+                      }
+                    })} placeholder="ระบุเบอร์โทรผู้สั่ง (ถ้ามี)" />
+                    {errors.senderPhone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.senderPhone.message}</span>}
+                  </div>
+                </div>
+
                 <div className="form-group">
                   <label className="form-label">ชื่อ-นามสกุล <span style={{color:'red'}}>*</span></label>
                   <input type="text" className={`form-control ${getFieldClass('name')}`} required {...register("name", { required: true })} />
@@ -4254,6 +4274,94 @@ export default function StaffPortal() {
                 </button>
               </div>
 
+              {/* Filter Panel */}
+              <div style={{
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '0.75rem',
+                marginBottom: '1rem',
+                fontSize: '0.85rem'
+              }}>
+                <div style={{ fontWeight: 'bold', color: '#475569', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  🔍 ค้นหาและกรองข้อมูล
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.5rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '2px' }}>ผู้สั่งพิมพ์</label>
+                    <select
+                      value={filterSender}
+                      onChange={(e) => setFilterSender(e.target.value)}
+                      style={{ width: '100%', padding: '4px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem' }}
+                    >
+                      <option value="">ทั้งหมด</option>
+                      {Array.from(new Set(history.map(r => r.senderNickname || r.sn).filter(Boolean))).map(name => (
+                        <option key={name} value={name}>{name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '2px' }}>วันที่บันทึก (Staff)</label>
+                    <input
+                      type="date"
+                      value={filterSavedDate}
+                      onChange={(e) => setFilterSavedDate(e.target.value)}
+                      style={{ width: '100%', padding: '3px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '2px' }}>วันที่สั่งจอง (การ์ด)</label>
+                    <input
+                      type="date"
+                      value={filterOrderDate}
+                      onChange={(e) => setFilterOrderDate(e.target.value)}
+                      style={{ width: '100%', padding: '3px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '2px' }}>ไฟล์ Backup / แหล่งที่มา</label>
+                    <select
+                      value={filterImportSource}
+                      onChange={(e) => setFilterImportSource(e.target.value)}
+                      style={{ width: '100%', padding: '4px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem' }}
+                    >
+                      <option value="">ทั้งหมด</option>
+                      {Array.from(new Set(history.map(r => r.importSource).filter(Boolean))).map(source => (
+                        <option key={source} value={source}>{source}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {(filterSender || filterSavedDate || filterOrderDate || filterImportSource) && (
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFilterSender('');
+                        setFilterSavedDate('');
+                        setFilterOrderDate('');
+                        setFilterImportSource('');
+                      }}
+                      style={{
+                        padding: '2px 8px',
+                        fontSize: '0.75rem',
+                        color: '#ef4444',
+                        background: '#fef2f2',
+                        border: '1px solid #fca5a5',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ล้างตัวกรอง
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {selectedIds.length > 0 && (
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
                   <button
@@ -4283,8 +4391,31 @@ export default function StaffPortal() {
 
               {(() => {
                 const displayedHistory = history.filter(record => {
-                  if (historyFilter === 'pending') return !record.printed;
-                  if (historyFilter === 'printed') return record.printed;
+                  if (historyFilter === 'pending') {
+                    if (record.printed) return false;
+                  } else if (historyFilter === 'printed') {
+                    if (!record.printed) return false;
+                  }
+
+                  if (filterSender) {
+                    const sn = record.senderNickname || record.sn;
+                    if (sn !== filterSender) return false;
+                  }
+
+                  if (filterSavedDate) {
+                    const savedDate = getSavedDate(record);
+                    if (savedDate !== filterSavedDate) return false;
+                  }
+
+                  if (filterOrderDate) {
+                    const od = record.orderDate || record.d;
+                    if (od !== filterOrderDate) return false;
+                  }
+
+                  if (filterImportSource) {
+                    if (record.importSource !== filterImportSource) return false;
+                  }
+
                   return true;
                 });
 
