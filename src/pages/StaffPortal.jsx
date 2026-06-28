@@ -5899,15 +5899,9 @@ export default function StaffPortal() {
             <p style={{ margin: '0 0 0.2rem 0', fontSize: '9.5pt', color: '#451a03', lineHeight: '1.4' }}>
               นำไปรษณียบัตรไปหยอดที่ตู้ไปรษณีย์ หรือฝากส่ง ณ ที่ทำการไปรษณีย์ทุกสาขาทั่วประเทศ
             </p>
-            <div style={{ borderTop: '1px dashed #fca5a5', marginTop: '0.4rem', paddingTop: '0.4rem' }}>
-              <p style={{ margin: '0', fontSize: '10.5pt', fontWeight: 'bold', color: '#b91c1c' }}>
-                🔥 ส่งก่อน...ได้ลุ้นก่อนถึง 2 ต่อ! ภายในวันที่ 28 มิถุนายน 2569
-              </p>
-              <p style={{ margin: '0.1rem 0 0.3rem 0', fontSize: '9.5pt', color: '#7f1d1d', lineHeight: '1.4' }}>
-                เพื่อลุ้น<strong>โชคชั้นที่ 1</strong> (ทายรอบ 16 ทีม) และไปรษณียบัตรใบเดิมจะถูกนำไปรวมเพื่อลุ้นต่อใน<strong>โชคชั้นที่ 2</strong> (รอบแชมป์) ได้อีกรอบโดยอัตโนมัติ
-              </p>
+            <div style={{ borderTop: '1px dashed #cbd5e1', marginTop: '0.4rem', paddingTop: '0.4rem' }}>
               <p style={{ margin: '0', fontSize: '10.5pt', fontWeight: 'bold', color: '#1e3a8a' }}>
-                🏆 หรือส่งลุ้นโชคใหญ่รอบแชมป์โลก (โชคชั้นที่ 2) ได้ถึง 19 กรกฎาคม 2569
+                🏆 ส่งลุ้นโชคใหญ่รอบแชมป์โลก ได้ถึง 19 กรกฎาคม 2569
               </p>
               <p style={{ margin: '0.1rem 0 0 0', fontSize: '9.5pt', color: '#1e3a8a', lineHeight: '1.4' }}>
                 ภายในเวลา 18:00 น. (ยึดตามวันตราประทับประจำวันของไปรษณีย์)
@@ -5918,42 +5912,8 @@ export default function StaffPortal() {
           {/* Section 3: รายละเอียดเงินรางวัล */}
           <div style={{ marginBottom: '1rem' }}>
             <h3 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem', color: '#1e3a8a', margin: '0 0 0.4rem 0' }}>
-              🎁 รายละเอียดของรางวัล (รวมมูลค่าของรางวัลกว่า 12,000,000 บาท)
+              🎁 รายละเอียดของรางวัล (สำหรับทายผลแชมป์โลก ส่งภายใน 19 ก.ค. 69)
             </h3>
-            
-            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10.5pt', fontWeight: 'bold', color: '#b91c1c' }}>
-              ส่งก่อนมีสิทธิ์ลุ้นก่อนรอบ 16 ทีม (ส่งภายใน 28 มิ.ย. 69)
-            </p>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5pt', marginBottom: '0.75rem' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#f1f5f9', borderTop: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}>
-                  <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 'bold' }}>ประเภทของรางวัล</th>
-                  <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold', width: '22%' }}>มูลค่าต่อรางวัล</th>
-                  <th style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 'bold', width: '15%' }}>จำนวนรางวัล</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '4px 8px' }}>🏅 รางวัลที่ 1 ทองคำแท่ง</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>70,000 บาท</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>16 รางวัล</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '4px 8px' }}>🏅 รางวัลที่ 2 ทองคำแท่ง</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>10,000 บาท</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>48 รางวัล</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #cbd5e1' }}>
-                  <td style={{ padding: '4px 8px' }}>💳 รางวัลที่ 3 บัตรกำนัลช้อปปิ้ง Gift Card</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>5,000 บาท</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'center' }}>80 รางวัล</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <p style={{ margin: '0 0 0.4rem 0', fontSize: '10.5pt', fontWeight: 'bold', color: '#b91c1c' }}>
-              ส่งลุ้นทีมแชมป์ (ส่งภายใน 19 ก.ค. 69)
-            </p>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5pt' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f1f5f9', borderTop: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}>
