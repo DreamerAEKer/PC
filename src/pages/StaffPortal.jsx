@@ -5906,6 +5906,9 @@ export default function StaffPortal() {
               <p style={{ margin: '0.1rem 0 0 0', fontSize: '9.5pt', color: '#1e3a8a', lineHeight: '1.4' }}>
                 ภายในเวลา 18:00 น. (ยึดตามวันตราประทับประจำวันของไปรษณีย์)
               </p>
+              <p style={{ margin: '0.3rem 0 0 0', fontSize: '10.5pt', fontWeight: 'bold', color: '#b91c1c' }}>
+                🎉 กำหนดจับรางวัลและประกาศผล: วันที่ 6 สิงหาคม 2569
+              </p>
             </div>
           </div>
 
