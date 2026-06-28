@@ -2641,6 +2641,21 @@ export default function StaffPortal() {
               >
                 <FileText size={16} /> พิมพ์ใบกรอกการสั่งพิมพ์ (A4)
               </button>
+              <button 
+                type="button"
+                className="btn btn-secondary" 
+                onClick={() => {
+                  setIsPrintingGuide(true);
+                  setTimeout(() => {
+                    window.print();
+                    setIsPrintingGuide(false);
+                  }, 250);
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#ef4444', color: '#b91c1c', backgroundColor: '#fef2f2', cursor: 'pointer', margin: 0 }}
+                title="พิมพ์ใบคำแนะนำการร่วมสนุก/รายละเอียดของรางวัล (A4)"
+              >
+                <Printer size={16} /> พิมพ์ใบคำแนะนำ (A4)
+              </button>
             </div>
             
             {directoryHandles.length > 0 && (
