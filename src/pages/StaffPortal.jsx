@@ -3612,7 +3612,8 @@ export default function StaffPortal() {
                               textAlign: 'left',
                               cursor: 'grab',
                               userSelect: 'none',
-                              pointerEvents: 'auto'
+                              pointerEvents: 'auto',
+                              whiteSpace: 'pre-wrap'
                             }}
                           >
                             {formValues.did && printSettings.didPrintMode !== 'address' ? (
@@ -5038,7 +5039,8 @@ export default function StaffPortal() {
                         paddingRight: '1cm',
                         fontSize: `${printSettings.fontSize}pt`, 
                         lineHeight: '1.4', 
-                        fontFamily: 'Sarabun, Inter, sans-serif'
+                        fontFamily: 'Sarabun, Inter, sans-serif',
+                        whiteSpace: 'pre-wrap'
                       }}
                     >
                       {printItem.did && printSettings.didPrintMode !== 'address' ? (
