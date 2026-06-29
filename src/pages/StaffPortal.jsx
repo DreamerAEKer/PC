@@ -163,6 +163,7 @@ export default function StaffPortal() {
     return localToday.toISOString().split('T')[0];
   });
   const [isPrintingInvoice, setIsPrintingInvoice] = useState(false);
+  const [isPrintingControlSheet, setIsPrintingControlSheet] = useState(false);
   const [printLayoutType, setPrintLayoutType] = useState('grid'); // 'combined' or 'grid'
   const [invoiceQueue, setInvoiceQueue] = useState(() => {
     try {
@@ -3929,6 +3930,34 @@ export default function StaffPortal() {
                     </button>
                     <button
                       type="button"
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        setIsPrintingControlSheet(true);
+                        setTimeout(() => {
+                          window.print();
+                          setIsPrintingControlSheet(false);
+                        }, 300);
+                      }}
+                      style={{
+                        flex: '1 1 200px',
+                        padding: '0.6rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.35rem',
+                        cursor: 'pointer',
+                        margin: 0,
+                        backgroundColor: '#8b5cf6',
+                        borderColor: '#7c3aed',
+                        color: '#fff'
+                      }}
+                    >
+                      🖨️ พิมพ์ใบควบคุมการรับเงิน (รวมผู้สั่ง)
+                    </button>
+                    <button
+                      type="button"
                       className="btn"
                       onClick={() => {
                         if (selectedIds.length === 0) return;
@@ -5269,6 +5298,240 @@ export default function StaffPortal() {
           </div>
         );
       })()}
+
+      {isPrintingControlSheet && selectedIds.length > 0 && (() => {
+        const selectedRecords = history.filter(r => selectedIds.includes(r.id));
+        
+        // Group by sender (senderNickname + senderPhone)
+        const groupsMap = {};
+        selectedRecords.forEach(r => {
+          const sName = (r.senderNickname || r.sn || 'ไม่ระบุผู้ส่ง').trim();
+          const sPhone = (r.senderPhone || r.sp || '').trim();
+          const key = `${sName}___${sPhone}`;
+          if (!groupsMap[key]) {
+            groupsMap[key] = {
+              senderName: sName,
+              senderPhone: sPhone,
+              records: []
+            };
+          }
+          groupsMap[key].records.push(r);
+        });
+        
+        const groups = Object.values(groupsMap);
+        const totalQtyAll = selectedRecords.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
+        const totalAmountAll = totalQtyAll * postcardRate;
+        const printDate = new Date().toLocaleDateString('th-TH', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        return (
+          <div className="control-sheet-print-only" style={{
+            fontFamily: 'Sarabun, Inter, sans-serif',
+            color: '#000',
+            padding: '1cm',
+            backgroundColor: '#fff',
+            boxSizing: 'border-box',
+            width: '21cm',
+            minHeight: '29.7cm'
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px double #000', paddingBottom: '0.5rem', marginBottom: '0.8rem' }}>
+              <div>
+                <h1 style={{ margin: '0', fontSize: '14pt', fontWeight: 'bold' }}>📋 ใบควบคุมการรับเงิน (ตรวจสอบยอดสั่งพิมพ์กลุ่ม)</h1>
+                <div style={{ fontSize: '9pt', color: '#475569', marginTop: '0.1rem' }}>พิมพ์โดย: {branchName} ({branchCode})</div>
+              </div>
+              <div style={{ textAlign: 'right', fontSize: '9pt' }}>
+                <div><strong>วันที่พิมพ์:</strong> {printDate}</div>
+                <div><strong>ผู้ประสานงานหลัก:</strong> {payerName || '-'}</div>
+              </div>
+            </div>
+
+            {/* Table */}
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5pt', marginTop: '0.5cm' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f1f5f9', border: '1.5px solid #000' }}>
+                  <th style={{ border: '1px solid #000', padding: '6px 4px', textAlign: 'center', width: '5%' }}>ลำดับ</th>
+                  <th style={{ border: '1px solid #000', padding: '6px 6px', textAlign: 'left', width: '20%' }}>ชื่อผู้สั่ง (ตัวแทน)</th>
+                  <th style={{ border: '1px solid #000', padding: '6px 6px', textAlign: 'left', width: '22%' }}>ผู้รับ / ชื่อที่จะพิมพ์</th>
+                  <th style={{ border: '1px solid #000', padding: '6px 6px', textAlign: 'center', width: '13%' }}>เบอร์โทรผู้รับ</th>
+                  <th style={{ border: '1px solid #000', padding: '6px 6px', textAlign: 'right', width: '10%' }}>จำนวน (ใบ)</th>
+                  <th style={{ border: '1px solid #000', padding: '6px 6px', textAlign: 'right', width: '10%' }}>ราคา (บาท)</th>
+                  <th style={{ border: '1px solid #000', padding: '6px 6px', textAlign: 'center', width: '10%' }}>สรุปรวมจ่าย</th>
+                  <th style={{ border: '1px solid #000', padding: '6px 4px', textAlign: 'center', width: '10%' }}>ติ๊กจ่ายแล้ว</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  let globalIdx = 1;
+                  return groups.map((group) => {
+                    const groupQty = group.records.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
+                    const groupPrice = groupQty * postcardRate;
+                    const numRecords = group.records.length;
+                    
+                    return group.records.map((r, rIdx) => {
+                      const isFirst = rIdx === 0;
+                      return (
+                        <tr key={r.id} style={{ borderBottom: rIdx === numRecords - 1 ? '2px solid #000' : '1px solid #cbd5e1' }}>
+                          {/* 1. ลำดับ */}
+                          <td style={{ border: '1px solid #cbd5e1', padding: '6px 4px', textAlign: 'center', verticalAlign: 'middle' }}>
+                            {globalIdx++}
+                          </td>
+                          
+                          {/* 2. ชื่อผู้สั่ง (ตัวแทน) - RowSpan */}
+                          {isFirst && (
+                            <td 
+                              rowSpan={numRecords} 
+                              style={{ 
+                                border: '1px solid #cbd5e1', 
+                                borderRight: '1px solid #cbd5e1', 
+                                padding: '6px', 
+                                verticalAlign: 'middle',
+                                fontWeight: 'bold',
+                                backgroundColor: '#fafafa'
+                              }}
+                            >
+                              <div>{group.senderName}</div>
+                              {group.senderPhone && (
+                                <div style={{ fontSize: '8pt', color: '#475569', fontWeight: 'normal', marginTop: '2px' }}>
+                                  📞 {group.senderPhone}
+                                </div>
+                              )}
+                            </td>
+                          )}
+                          
+                          {/* 3. ผู้รับ / ชื่อที่จะพิมพ์ */}
+                          <td style={{ border: '1px solid #cbd5e1', padding: '6px', fontWeight: '500' }}>
+                            {r.name}
+                          </td>
+                          
+                          {/* 4. เบอร์โทรผู้รับ */}
+                          <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'center', color: '#475569' }}>
+                            {r.phone || r.p || '-'}
+                          </td>
+                          
+                          {/* 5. จำนวน */}
+                          <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right' }}>
+                            {r.quantity || 0}
+                          </td>
+                          
+                          {/* 6. ราคา */}
+                          <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right' }}>
+                            {((r.quantity || 0) * postcardRate).toLocaleString()}
+                          </td>
+                          
+                          {/* 7. สรุปรวมจ่าย - RowSpan */}
+                          {isFirst && (
+                            <td 
+                              rowSpan={numRecords} 
+                              style={{ 
+                                border: '1px solid #cbd5e1', 
+                                padding: '6px', 
+                                textAlign: 'right', 
+                                verticalAlign: 'middle',
+                                fontWeight: 'bold',
+                                backgroundColor: '#fef2f2',
+                                color: '#991b1b'
+                              }}
+                            >
+                              <div style={{ fontSize: '8.5pt', color: '#7f1d1d' }}>{groupQty} ใบ</div>
+                              <div style={{ fontSize: '11pt', marginTop: '2px' }}>{groupPrice.toLocaleString()}.-</div>
+                            </td>
+                          )}
+                          
+                          {/* 8. ติ๊กจ่ายแล้ว - RowSpan */}
+                          {isFirst && (
+                            <td 
+                              rowSpan={numRecords} 
+                              style={{ 
+                                border: '1px solid #cbd5e1', 
+                                padding: '6px', 
+                                textAlign: 'center', 
+                                verticalAlign: 'middle',
+                                backgroundColor: '#fcfcfc'
+                              }}
+                            >
+                              <div style={{ 
+                                width: '20px', 
+                                height: '20px', 
+                                border: '2px solid #475569', 
+                                borderRadius: '4px', 
+                                margin: '0 auto',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                {/* Empty box for manual print checklist ticking */}
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    });
+                  });
+                })()}
+                
+                {/* Grand Total Row */}
+                <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold', border: '2px solid #000' }}>
+                  <td colSpan={4} style={{ border: '1px solid #000', padding: '8px', textAlign: 'right' }}>
+                    ยอดรวมทั้งหมด ({selectedRecords.length} รายการ)
+                  </td>
+                  <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right' }}>
+                    {totalQtyAll.toLocaleString()}
+                  </td>
+                  <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right' }}>
+                    {totalAmountAll.toLocaleString()}
+                  </td>
+                  <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right', color: '#b91c1c', fontSize: '11pt' }}>
+                    {totalAmountAll.toLocaleString()}.-
+                  </td>
+                  <td style={{ border: '1px solid #000', padding: '8px' }}></td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Note Section */}
+            <div style={{ marginTop: '1.5cm', fontSize: '8.5pt', color: '#475569', borderTop: '1px dashed #cbd5e1', paddingTop: '0.4cm' }}>
+              <p style={{ margin: '0 0 0.2cm 0', fontWeight: 'bold' }}>คำชี้แจงการใช้งานใบเช็คยอด:</p>
+              <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                <li>ใบควบคุมนี้ใช้สรุปยอดเงินสำหรับผู้สั่งพิมพ์กลุ่มที่มีรายการย่อย เพื่ออำนวยความสะดวกในการติ๊กตรวจสอบความถูกต้อง</li>
+                <li>กรณีผู้สั่งเดียวกันมีรายการมากกว่า 1 รายการ ระบบจะแสดงรายการแยกบรรทัด แต่สรุปยอดรวมชำระเงินและช่องติ๊กไว้ที่บรรทัดรวมของสมาชิกร่วมกัน</li>
+              </ul>
+            </div>
+          </div>
+        );
+      })()}
+
+      {isPrintingControlSheet && (
+        <style>
+          {`
+            @media screen {
+              .control-sheet-print-only {
+                display: none !important;
+              }
+            }
+            @media print {
+              @page {
+                size: A4 portrait !important;
+                margin: 1.0cm 1.0cm !important;
+              }
+              .staff-no-print {
+                display: none !important;
+              }
+              .print-only {
+                display: none !important;
+              }
+              .control-sheet-print-only {
+                display: block !important;
+              }
+            }
+          `}
+        </style>
+      )}
 
       {/* Overriding style for postcard billing printing */}
       {isPrintingInvoice && (
