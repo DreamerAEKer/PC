@@ -5100,7 +5100,8 @@ export default function StaffPortal() {
                   paddingLeft: `${printSettings.left + (printSettings.calX || 0)}cm`,
                   height: '10.5cm',
                   width: '14.8cm',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  whiteSpace: 'pre-wrap'
                 }}
               >
                 {printItem.did && printSettings.didPrintMode !== 'address' ? (
