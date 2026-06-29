@@ -164,6 +164,7 @@ export default function StaffPortal() {
   });
   const [isPrintingInvoice, setIsPrintingInvoice] = useState(false);
   const [isPrintingControlSheet, setIsPrintingControlSheet] = useState(false);
+  const [groupSelectIds, setGroupSelectIds] = useState([]);
   const [printLayoutType, setPrintLayoutType] = useState('grid'); // 'combined' or 'grid'
   const [invoiceQueue, setInvoiceQueue] = useState(() => {
     try {
@@ -3751,6 +3752,15 @@ export default function StaffPortal() {
               const totalQty = selectedRecords.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
               const totalAmount = totalQty * postcardRate;
 
+              // Generate mapping for payment groups to display Group 1, Group 2, etc.
+              const groupMapping = {};
+              let groupCounter = 1;
+              selectedRecords.forEach(r => {
+                if (r.paymentGroupId && !groupMapping[r.paymentGroupId]) {
+                  groupMapping[r.paymentGroupId] = `กลุ่มที่ ${groupCounter++}`;
+                }
+              });
+
               return (
                 <div className="card" style={{
                   border: '1.5px solid #3b82f6',
@@ -3766,86 +3776,120 @@ export default function StaffPortal() {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
                       <thead>
                         <tr style={{ backgroundColor: '#eff6ff', borderBottom: '1px solid #dbeafe' }}>
+                          <th style={{ padding: '0.5rem 0.75rem', width: '50px', textAlign: 'center' }}>
+                            <input 
+                              type="checkbox"
+                              checked={groupSelectIds.length === selectedRecords.length && selectedRecords.length > 0}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setGroupSelectIds(selectedRecords.map(r => r.id));
+                                } else {
+                                  setGroupSelectIds([]);
+                                }
+                              }}
+                              style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                            />
+                          </th>
                           <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af' }}>ชื่อผู้รับ</th>
-                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', width: '220px' }}>ชื่อผู้สั่ง (แก้ไขได้ตรงนี้)</th>
                           <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', textAlign: 'right' }}>จำนวน (ใบ)</th>
                           <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', textAlign: 'right' }}>ค่าไปรษณียบัตร</th>
-                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', textAlign: 'center' }}>สถานะ</th>
+                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', textAlign: 'center' }}>กลุ่มร่วมจ่าย</th>
+                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', textAlign: 'center' }}>สถานะจ่าย</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedRecords.map(r => (
-                          <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                            <td style={{ padding: '0.5rem 0.75rem', fontWeight: '500' }}>{r.name}</td>
-                            <td style={{ padding: '0.35rem 0.75rem' }}>
-                              <input 
-                                type="text"
-                                className="form-control"
-                                value={r.senderNickname || r.sn || ''}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setHistory(prev => {
-                                    const updated = prev.map(item => item.id === r.id ? { ...item, senderNickname: val, sn: val } : item);
-                                    localStorage.setItem('staffHistory', JSON.stringify(updated));
-                                    return updated;
-                                  });
-                                }}
-                                placeholder="ลุงโชค, คุณวิมล (เว้นว่างไว้เขียนมือ)..."
-                                style={{ padding: '0.2rem 0.4rem', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box', height: '28px' }}
-                              />
-                            </td>
-                            <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>{r.quantity || 0}</td>
-                            <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>{((r.quantity || 0) * postcardRate).toLocaleString()} บาท</td>
-                            <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
-                              {r.paid ? (
-                                <span style={{ color: '#15803d', fontSize: '0.75rem', fontWeight: 'bold' }}>✓ จ่ายแล้ว</span>
-                              ) : (
-                                <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold' }}>✗ ยังไม่จ่าย</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
+                        {selectedRecords.map(r => {
+                          const isChecked = groupSelectIds.includes(r.id);
+                          const gName = r.paymentGroupId ? groupMapping[r.paymentGroupId] : null;
+                          return (
+                            <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                              <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                                <input 
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setGroupSelectIds(prev => [...prev, r.id]);
+                                    } else {
+                                      setGroupSelectIds(prev => prev.filter(id => id !== r.id));
+                                    }
+                                  }}
+                                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                                />
+                              </td>
+                              <td style={{ padding: '0.5rem 0.75rem', fontWeight: '500' }}>{r.name}</td>
+                              <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>{r.quantity || 0}</td>
+                              <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>{((r.quantity || 0) * postcardRate).toLocaleString()} บาท</td>
+                              <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                                {gName ? (
+                                  <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#6366f1', backgroundColor: '#e0e7ff', padding: '2px 8px', borderRadius: '4px', border: '1px solid #c7d2fe' }}>
+                                    🔗 {gName}
+                                  </span>
+                                ) : (
+                                  <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>แยกชำระเดี่ยว</span>
+                                )}
+                              </td>
+                              <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                                {r.paid ? (
+                                  <span style={{ color: '#15803d', fontSize: '0.75rem', fontWeight: 'bold' }}>✓ จ่ายแล้ว</span>
+                                ) : (
+                                  <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold' }}>✗ ยังไม่จ่าย</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
                         <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold', borderTop: '2px solid #dbeafe' }}>
                           <td style={{ padding: '0.65rem 0.75rem', color: '#1e40af' }}>รวมทั้งสิ้น</td>
                           <td></td>
                           <td style={{ padding: '0.65rem 0.75rem', textAlign: 'right', color: '#1e40af' }}>{totalQty.toLocaleString()}</td>
                           <td style={{ padding: '0.65rem 0.75rem', textAlign: 'right', color: '#1d4ed8', fontSize: '0.95rem' }}>{totalAmount.toLocaleString()} บาท</td>
                           <td></td>
+                          <td></td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#f0fdf4', padding: '0.75rem', borderRadius: '8px', border: '1px solid #bbf7d0', marginBottom: '1rem' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#166534' }}>🔗 รวมกลุ่มผู้สั่งด่วน:</span>
-                    <input 
-                      type="text" 
-                      id="batchSenderInput"
-                      placeholder="เช่น ลุงโชค, คุณวิมล..." 
-                      style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem', borderRadius: '4px', border: '1px solid #cbd5e1', width: '180px', height: '32px', boxSizing: 'border-box' }}
-                    />
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#eff6ff', padding: '0.75rem', borderRadius: '8px', border: '1px solid #bfdbfe', marginBottom: '1rem' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#1e40af' }}>🔗 จัดการรวมกลุ่มยอดจ่าย:</span>
                     <button
                       type="button"
                       className="btn"
+                      disabled={groupSelectIds.length < 2}
                       onClick={() => {
-                        const inputVal = document.getElementById('batchSenderInput').value.trim();
-                        if (!inputVal) {
-                          alert('กรุณากรอกชื่อผู้สั่งก่อนครับ');
-                          return;
-                        }
+                        const newGroupId = `grp_${Date.now()}`;
                         setHistory(prev => {
-                          const updated = prev.map(item => selectedIds.includes(item.id) ? { ...item, senderNickname: inputVal, sn: inputVal } : item);
+                          const updated = prev.map(item => groupSelectIds.includes(item.id) ? { ...item, paymentGroupId: newGroupId } : item);
                           localStorage.setItem('staffHistory', JSON.stringify(updated));
                           return updated;
                         });
-                        alert(`รวมรายการที่เลือกทั้งหมดเข้ากลุ่มผู้สั่ง "${inputVal}" เรียบร้อยแล้วครับ!`);
+                        setGroupSelectIds([]);
+                        alert(`รวมยอดชำระเงินของรายการที่เลือกเรียบร้อยแล้ว!`);
                       }}
-                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', margin: 0, height: '32px', backgroundColor: '#16a34a', borderColor: '#15803d', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
+                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', margin: 0, height: '32px', backgroundColor: '#3b82f6', borderColor: '#2563eb', color: '#fff', cursor: groupSelectIds.length >= 2 ? 'pointer' : 'not-allowed', opacity: groupSelectIds.length >= 2 ? 1 : 0.6, fontWeight: 'bold' }}
                     >
-                      ตั้งชื่อกลุ่มนี้ร่วมกัน ({selectedIds.length} รายการ)
+                      🔗 รวมยอดชำระร่วมกัน ({groupSelectIds.length} รายการ)
                     </button>
-                    <div style={{ fontSize: '0.75rem', color: '#15803d', marginLeft: '0.5rem' }}>
-                      💡 ติ๊กเลือกรายการในตารางด้านล่าง แล้วพิมพ์ชื่อเพื่อรวมยอดชำระเงินร่วมกันได้ทันที
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      disabled={groupSelectIds.length === 0}
+                      onClick={() => {
+                        setHistory(prev => {
+                          const updated = prev.map(item => groupSelectIds.includes(item.id) ? { ...item, paymentGroupId: null } : item);
+                          localStorage.setItem('staffHistory', JSON.stringify(updated));
+                          return updated;
+                        });
+                        setGroupSelectIds([]);
+                        alert(`ยกเลิกการรวมกลุ่มของรายการที่เลือกเรียบร้อยแล้ว!`);
+                      }}
+                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', margin: 0, height: '32px', cursor: groupSelectIds.length > 0 ? 'pointer' : 'not-allowed', opacity: groupSelectIds.length > 0 ? 1 : 0.6, fontWeight: 'bold' }}
+                    >
+                      🔓 แยกกลุ่มชำระเงินเดี่ยว
+                    </button>
+                    <div style={{ fontSize: '0.75rem', color: '#1e40af', marginLeft: '0.5rem' }}>
+                      💡 ติ๊กช่องด้านหน้าชื่อผู้รับที่ต้องการ แล้วกด "รวมยอดชำระร่วมกัน" เพื่อยุบรวมจ่ายบิลบรรทัดเดียวกัน
                     </div>
                   </div>
 
@@ -5354,15 +5398,14 @@ export default function StaffPortal() {
       {isPrintingControlSheet && selectedIds.length > 0 && (() => {
         const selectedRecords = history.filter(r => selectedIds.includes(r.id));
         
-        // Group by sender (Only group if senderNickname is explicitly set, otherwise treat as separate stand-alone records)
+        // Group by paymentGroupId if set, otherwise stand alone
         const groupsMap = {};
         selectedRecords.forEach(r => {
-          const sn = (r.senderNickname || r.sn || '').trim();
-          const sp = (r.senderPhone || r.sp || '').trim();
+          const pgId = r.paymentGroupId;
           
           let key = '';
-          if (sn) {
-            key = `sn_${sn}`;
+          if (pgId) {
+            key = pgId;
           } else {
             // Stand alone
             key = `id_${r.id}`;
@@ -5370,8 +5413,7 @@ export default function StaffPortal() {
           
           if (!groupsMap[key]) {
             groupsMap[key] = {
-              senderName: sn,
-              senderPhone: sp,
+              paymentGroupId: pgId,
               records: []
             };
           }
@@ -5415,12 +5457,10 @@ export default function StaffPortal() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13pt', marginTop: '0.6cm' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f1f5f9', border: '2px solid #000' }}>
-                  <th style={{ border: '1.5px solid #000', padding: '10px 6px', textAlign: 'center', width: '5%', fontSize: '12pt', fontWeight: 'bold' }}>ลำดับ</th>
-                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'left', width: '22%', fontSize: '12pt', fontWeight: 'bold' }}>ชื่อผู้สั่ง (ตัวแทน)</th>
-                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'left', width: '33%', fontSize: '12pt', fontWeight: 'bold' }}>รายชื่อที่จะพิมพ์ (และเบอร์โทร)</th>
-                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'right', width: '9%', fontSize: '12pt', fontWeight: 'bold' }}>จำนวน (ใบ)</th>
-                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'right', width: '11%', fontSize: '12pt', fontWeight: 'bold' }}>ราคา (บาท)</th>
-                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'center', width: '12%', fontSize: '12pt', fontWeight: 'bold' }}>รวมยอดชำระ</th>
+                  <th style={{ border: '1.5px solid #000', padding: '10px 6px', textAlign: 'center', width: '8%', fontSize: '12pt', fontWeight: 'bold' }}>ลำดับ</th>
+                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'left', width: '54%', fontSize: '12pt', fontWeight: 'bold' }}>รายชื่อที่จะพิมพ์ (และเบอร์โทร)</th>
+                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'right', width: '15%', fontSize: '12pt', fontWeight: 'bold' }}>จำนวน (ใบ)</th>
+                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'center', width: '15%', fontSize: '12pt', fontWeight: 'bold' }}>รวมยอดชำระ</th>
                   <th style={{ border: '1.5px solid #000', padding: '10px 6px', textAlign: 'center', width: '8%', fontSize: '12pt', fontWeight: 'bold' }}>จ่ายแล้ว</th>
                 </tr>
               </thead>
@@ -5441,39 +5481,7 @@ export default function StaffPortal() {
                             {globalIdx++}
                           </td>
                           
-                          {/* 2. ชื่อผู้สั่ง (ตัวแทน) - RowSpan */}
-                          {isFirst && (
-                            <td 
-                              rowSpan={numRecords} 
-                              style={{ 
-                                border: '1.5px solid #000', 
-                                padding: '10px 8px', 
-                                verticalAlign: 'middle',
-                                fontWeight: 'bold',
-                                backgroundColor: '#f8fafc',
-                                fontSize: '13pt'
-                              }}
-                            >
-                              {group.senderName && !/^\.+$/.test(group.senderName.trim()) ? (
-                                <div style={{ color: '#0f172a' }}>{group.senderName}</div>
-                              ) : (
-                                <div style={{ color: '#94a3b8', fontWeight: 'normal', letterSpacing: '2px' }}>...........................</div>
-                              )}
-                              {group.senderPhone ? (
-                                <div style={{ fontSize: '11pt', color: '#475569', fontWeight: 'bold', marginTop: '6px' }}>
-                                  📞 {group.senderPhone}
-                                </div>
-                              ) : (
-                                (!group.senderName || /^\.+$/.test(group.senderName.trim())) && (
-                                  <div style={{ fontSize: '10pt', color: '#cbd5e1', fontWeight: 'normal', marginTop: '6px', letterSpacing: '2px' }}>
-                                    📞 .......................
-                                  </div>
-                                )
-                              )}
-                            </td>
-                          )}
-                          
-                          {/* 3. รายชื่อที่จะพิมพ์ (และเบอร์โทร) */}
+                          {/* 2. รายชื่อที่จะพิมพ์ (และเบอร์โทร) */}
                           <td style={{ border: '1px solid #cbd5e1', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 'bold', color: '#1e293b' }}>
                             <div>{r.name}</div>
                             {(r.phone || r.p) && (
@@ -5483,17 +5491,12 @@ export default function StaffPortal() {
                             )}
                           </td>
                           
-                          {/* 4. จำนวน (ใบ) */}
+                          {/* 3. จำนวน (ใบ) */}
                           <td style={{ border: '1px solid #cbd5e1', padding: '10px 8px', textAlign: 'right', verticalAlign: 'middle', fontWeight: 'bold', color: '#0f172a' }}>
                             {r.quantity || 0}
                           </td>
-
-                          {/* 5. ราคา (บาท) */}
-                          <td style={{ border: '1px solid #cbd5e1', padding: '10px 8px', textAlign: 'right', verticalAlign: 'middle', fontWeight: 'bold', color: '#475569' }}>
-                            {((r.quantity || 0) * postcardRate).toLocaleString()}
-                          </td>
                           
-                          {/* 6. รวมยอดชำระ - RowSpan */}
+                          {/* 4. รวมยอดชำระ - RowSpan */}
                           {isFirst && (
                             <td 
                               rowSpan={numRecords} 
@@ -5513,7 +5516,7 @@ export default function StaffPortal() {
                             </td>
                           )}
                           
-                          {/* 7. จ่ายแล้ว (ช่องติ๊ก) - RowSpan */}
+                          {/* 5. จ่ายแล้ว (ช่องติ๊ก) - RowSpan */}
                           {isFirst && (
                             <td 
                               rowSpan={numRecords} 
@@ -5548,14 +5551,11 @@ export default function StaffPortal() {
                 
                 {/* Grand Total Row */}
                 <tr style={{ backgroundColor: '#f1f5f9', fontWeight: 'bold', border: '3px solid #000' }}>
-                  <td colSpan={3} style={{ border: '1.5px solid #000', padding: '12px 10px', textAlign: 'right', fontSize: '14pt', fontWeight: 'bold', color: '#0f172a' }}>
+                  <td colSpan={2} style={{ border: '1.5px solid #000', padding: '12px 10px', textAlign: 'right', fontSize: '14pt', fontWeight: 'bold', color: '#0f172a' }}>
                     ยอดรวมทั้งหมด ({selectedRecords.length} รายการ)
                   </td>
                   <td style={{ border: '1.5px solid #000', padding: '12px 8px', textAlign: 'right', fontSize: '14pt', fontWeight: 'bold', color: '#0f172a' }}>
                     {totalQtyAll.toLocaleString()}
-                  </td>
-                  <td style={{ border: '1.5px solid #000', padding: '12px 8px', textAlign: 'right', fontSize: '14pt', fontWeight: 'bold', color: '#0f172a' }}>
-                    {totalAmountAll.toLocaleString()}
                   </td>
                   <td style={{ border: '1.5px solid #000', padding: '12px 8px', textAlign: 'center', color: '#b91c1c', fontSize: '16pt', fontWeight: '900', backgroundColor: '#fee2e2' }}>
                     {totalAmountAll.toLocaleString()}.-
@@ -5570,7 +5570,7 @@ export default function StaffPortal() {
               <p style={{ margin: '0 0 0.3cm 0', fontWeight: 'bold' }}>⚠️ คำชี้แจงการใช้งานใบเช็คยอด:</p>
               <ul style={{ margin: 0, paddingLeft: '24px', lineHeight: '1.5' }}>
                 <li>ใบควบคุมนี้ใช้สำหรับสรุปยอดเงินเพื่ออำนวยความสะดวกในการติ๊กตรวจสอบความถูกต้องของการชำระเงิน</li>
-                <li>กรณีผู้สั่งเดียวกันมีรายการมากกว่า 1 รายชื่อ ระบบจะแยกบรรทัดแสดงชื่อผู้รับให้เห็นชัดเจน แต่จะรวมยอดเงินและช่องติ๊กชำระเงินไว้เป็นก้อนเดียวที่บรรทัดรวมของผู้สั่งรายนั้น</li>
+                <li>กรณีผู้สั่งเดียวกันมีการรวมยอดชำระ ระบบจะยุบช่องสรุปเงินและช่องติ๊กจ่ายเงินไว้เป็นก้อนเดียวที่ท้ายกลุ่ม</li>
               </ul>
             </div>
           </div>
