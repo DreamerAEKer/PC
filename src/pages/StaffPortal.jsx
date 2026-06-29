@@ -3831,9 +3831,35 @@ export default function StaffPortal() {
                               </td>
                               <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
                                 {r.paid ? (
-                                  <span style={{ color: '#15803d', fontSize: '0.75rem', fontWeight: 'bold' }}>✓ จ่ายแล้ว</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setHistory(prev => {
+                                        const updated = prev.map(item => item.id === r.id ? { ...item, paid: false, paidDate: null } : item);
+                                        localStorage.setItem('staffHistory', JSON.stringify(updated));
+                                        return updated;
+                                      });
+                                    }}
+                                    style={{ border: '1px solid #bbf7d0', backgroundColor: '#dcfce7', color: '#15803d', padding: '0.1rem 0.35rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer', outline: 'none' }}
+                                    title="คลิกเพื่อเปลี่ยนเป็น 'ยังไม่จ่าย'"
+                                  >
+                                    ✓ จ่ายแล้ว
+                                  </button>
                                 ) : (
-                                  <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold' }}>✗ ยังไม่จ่าย</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setHistory(prev => {
+                                        const updated = prev.map(item => item.id === r.id ? { ...item, paid: true, paidDate: new Date().toISOString() } : item);
+                                        localStorage.setItem('staffHistory', JSON.stringify(updated));
+                                        return updated;
+                                      });
+                                    }}
+                                    style={{ border: '1px solid #fecdd3', backgroundColor: '#fef2f2', color: '#ef4444', padding: '0.1rem 0.35rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer', outline: 'none' }}
+                                    title="คลิกเพื่อเปลี่ยนเป็น 'จ่ายแล้ว'"
+                                  >
+                                    ✗ ยังไม่จ่าย
+                                  </button>
                                 )}
                               </td>
                             </tr>
@@ -3887,6 +3913,43 @@ export default function StaffPortal() {
                       style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', margin: 0, height: '32px', cursor: groupSelectIds.length > 0 ? 'pointer' : 'not-allowed', opacity: groupSelectIds.length > 0 ? 1 : 0.6, fontWeight: 'bold' }}
                     >
                       🔓 แยกกลุ่มชำระเงินเดี่ยว
+                    </button>
+
+                    <div style={{ width: '100%', height: '1px', backgroundColor: '#bfdbfe', margin: '0.25rem 0' }}></div>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#166534' }}>💵 จัดการสถานะการชำระเงิน:</span>
+                    <button
+                      type="button"
+                      className="btn"
+                      disabled={groupSelectIds.length === 0}
+                      onClick={() => {
+                        setHistory(prev => {
+                          const updated = prev.map(item => groupSelectIds.includes(item.id) ? { ...item, paid: true, paidDate: new Date().toISOString() } : item);
+                          localStorage.setItem('staffHistory', JSON.stringify(updated));
+                          return updated;
+                        });
+                        setGroupSelectIds([]);
+                        alert(`เปลี่ยนสถานะรายการที่เลือกเป็น "จ่ายแล้ว" เรียบร้อยแล้ว!`);
+                      }}
+                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', margin: 0, height: '32px', backgroundColor: '#16a34a', borderColor: '#15803d', color: '#fff', cursor: groupSelectIds.length > 0 ? 'pointer' : 'not-allowed', opacity: groupSelectIds.length > 0 ? 1 : 0.6, fontWeight: 'bold' }}
+                    >
+                      ✓ จ่ายแล้ว ({groupSelectIds.length} รายการ)
+                    </button>
+                    <button
+                      type="button"
+                      className="btn"
+                      disabled={groupSelectIds.length === 0}
+                      onClick={() => {
+                        setHistory(prev => {
+                          const updated = prev.map(item => groupSelectIds.includes(item.id) ? { ...item, paid: false, paidDate: null } : item);
+                          localStorage.setItem('staffHistory', JSON.stringify(updated));
+                          return updated;
+                        });
+                        setGroupSelectIds([]);
+                        alert(`เปลี่ยนสถานะรายการที่เลือกเป็น "ยังไม่จ่าย" เรียบร้อยแล้ว!`);
+                      }}
+                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', margin: 0, height: '32px', backgroundColor: '#ef4444', borderColor: '#dc2626', color: '#fff', cursor: groupSelectIds.length > 0 ? 'pointer' : 'not-allowed', opacity: groupSelectIds.length > 0 ? 1 : 0.6, fontWeight: 'bold' }}
+                    >
+                      ✗ ยังไม่จ่าย ({groupSelectIds.length} รายการ)
                     </button>
                     <div style={{ fontSize: '0.75rem', color: '#1e40af', marginLeft: '0.5rem' }}>
                       💡 ติ๊กช่องด้านหน้าชื่อผู้รับที่ต้องการ แล้วกด "รวมยอดชำระร่วมกัน" เพื่อยุบรวมจ่ายบิลบรรทัดเดียวกัน
@@ -4619,13 +4682,37 @@ export default function StaffPortal() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.15rem' }}>
                               <span>จำนวน: {record.quantity} ใบ</span>
                               {record.paid ? (
-                                <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#15803d', backgroundColor: '#dcfce7', padding: '0.05rem 0.35rem', borderRadius: '4px', border: '1px solid #bbf7d0' }}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setHistory(prev => {
+                                      const updated = prev.map(item => item.id === record.id ? { ...item, paid: false, paidDate: null } : item);
+                                      localStorage.setItem('staffHistory', JSON.stringify(updated));
+                                      return updated;
+                                    });
+                                  }}
+                                  style={{ border: '1px solid #bbf7d0', backgroundColor: '#dcfce7', color: '#15803d', padding: '0.1rem 0.35rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold', cursor: 'pointer', outline: 'none', display: 'inline-flex', alignItems: 'center' }}
+                                  title="คลิกเพื่อเปลี่ยนเป็น 'ยังไม่จ่าย'"
+                                >
                                   💰 จ่ายแล้ว {record.paidDate && `(${new Date(record.paidDate).toLocaleDateString('th-TH')})`}
-                                </span>
+                                </button>
                               ) : (
-                                <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#ef4444', backgroundColor: '#fef2f2', padding: '0.05rem 0.35rem', borderRadius: '4px', border: '1px solid #fecdd3' }}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setHistory(prev => {
+                                      const updated = prev.map(item => item.id === record.id ? { ...item, paid: true, paidDate: new Date().toISOString() } : item);
+                                      localStorage.setItem('staffHistory', JSON.stringify(updated));
+                                      return updated;
+                                    });
+                                  }}
+                                  style={{ border: '1px solid #fecdd3', backgroundColor: '#fef2f2', color: '#ef4444', padding: '0.1rem 0.35rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold', cursor: 'pointer', outline: 'none', display: 'inline-flex', alignItems: 'center' }}
+                                  title="คลิกเพื่อเปลี่ยนเป็น 'จ่ายแล้ว'"
+                                >
                                   ⏳ ยังไม่จ่าย
-                                </span>
+                                </button>
                               )}
                             </div>
                           )}
