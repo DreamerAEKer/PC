@@ -3767,6 +3767,7 @@ export default function StaffPortal() {
                       <thead>
                         <tr style={{ backgroundColor: '#eff6ff', borderBottom: '1px solid #dbeafe' }}>
                           <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af' }}>ชื่อผู้รับ</th>
+                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', width: '220px' }}>ชื่อผู้สั่ง (แก้ไขได้ตรงนี้)</th>
                           <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', textAlign: 'right' }}>จำนวน (ใบ)</th>
                           <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', textAlign: 'right' }}>ค่าไปรษณียบัตร</th>
                           <th style={{ padding: '0.5rem 0.75rem', fontWeight: 'bold', color: '#1e40af', textAlign: 'center' }}>สถานะ</th>
@@ -3776,6 +3777,23 @@ export default function StaffPortal() {
                         {selectedRecords.map(r => (
                           <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                             <td style={{ padding: '0.5rem 0.75rem', fontWeight: '500' }}>{r.name}</td>
+                            <td style={{ padding: '0.35rem 0.75rem' }}>
+                              <input 
+                                type="text"
+                                className="form-control"
+                                value={r.senderNickname || r.sn || ''}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setHistory(prev => {
+                                    const updated = prev.map(item => item.id === r.id ? { ...item, senderNickname: val, sn: val } : item);
+                                    localStorage.setItem('staffHistory', JSON.stringify(updated));
+                                    return updated;
+                                  });
+                                }}
+                                placeholder="ลุงโชค, คุณวิมล (เว้นว่างไว้เขียนมือ)..."
+                                style={{ padding: '0.2rem 0.4rem', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box', height: '28px' }}
+                              />
+                            </td>
                             <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>{r.quantity || 0}</td>
                             <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>{((r.quantity || 0) * postcardRate).toLocaleString()} บาท</td>
                             <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
@@ -3789,12 +3807,46 @@ export default function StaffPortal() {
                         ))}
                         <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold', borderTop: '2px solid #dbeafe' }}>
                           <td style={{ padding: '0.65rem 0.75rem', color: '#1e40af' }}>รวมทั้งสิ้น</td>
+                          <td></td>
                           <td style={{ padding: '0.65rem 0.75rem', textAlign: 'right', color: '#1e40af' }}>{totalQty.toLocaleString()}</td>
                           <td style={{ padding: '0.65rem 0.75rem', textAlign: 'right', color: '#1d4ed8', fontSize: '0.95rem' }}>{totalAmount.toLocaleString()} บาท</td>
                           <td></td>
                         </tr>
                       </tbody>
                     </table>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#f0fdf4', padding: '0.75rem', borderRadius: '8px', border: '1px solid #bbf7d0', marginBottom: '1rem' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#166534' }}>🔗 รวมกลุ่มผู้สั่งด่วน:</span>
+                    <input 
+                      type="text" 
+                      id="batchSenderInput"
+                      placeholder="เช่น ลุงโชค, คุณวิมล..." 
+                      style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem', borderRadius: '4px', border: '1px solid #cbd5e1', width: '180px', height: '32px', boxSizing: 'border-box' }}
+                    />
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={() => {
+                        const inputVal = document.getElementById('batchSenderInput').value.trim();
+                        if (!inputVal) {
+                          alert('กรุณากรอกชื่อผู้สั่งก่อนครับ');
+                          return;
+                        }
+                        setHistory(prev => {
+                          const updated = prev.map(item => selectedIds.includes(item.id) ? { ...item, senderNickname: inputVal, sn: inputVal } : item);
+                          localStorage.setItem('staffHistory', JSON.stringify(updated));
+                          return updated;
+                        });
+                        alert(`รวมรายการที่เลือกทั้งหมดเข้ากลุ่มผู้สั่ง "${inputVal}" เรียบร้อยแล้วครับ!`);
+                      }}
+                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', margin: 0, height: '32px', backgroundColor: '#16a34a', borderColor: '#15803d', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                      ตั้งชื่อกลุ่มนี้ร่วมกัน ({selectedIds.length} รายการ)
+                    </button>
+                    <div style={{ fontSize: '0.75rem', color: '#15803d', marginLeft: '0.5rem' }}>
+                      💡 ติ๊กเลือกรายการในตารางด้านล่าง แล้วพิมพ์ชื่อเพื่อรวมยอดชำระเงินร่วมกันได้ทันที
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#fff', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '1rem' }}>
@@ -5302,16 +5354,24 @@ export default function StaffPortal() {
       {isPrintingControlSheet && selectedIds.length > 0 && (() => {
         const selectedRecords = history.filter(r => selectedIds.includes(r.id));
         
-        // Group by sender (senderNickname + senderPhone)
+        // Group by sender (Only group if senderNickname is explicitly set, otherwise treat as separate stand-alone records)
         const groupsMap = {};
         selectedRecords.forEach(r => {
-          const sName = (r.senderNickname || r.sn || 'ไม่ระบุผู้ส่ง').trim();
-          const sPhone = (r.senderPhone || r.sp || '').trim();
-          const key = `${sName}___${sPhone}`;
+          const sn = (r.senderNickname || r.sn || '').trim();
+          const sp = (r.senderPhone || r.sp || '').trim();
+          
+          let key = '';
+          if (sn) {
+            key = `sn_${sn}`;
+          } else {
+            // Stand alone
+            key = `id_${r.id}`;
+          }
+          
           if (!groupsMap[key]) {
             groupsMap[key] = {
-              senderName: sName,
-              senderPhone: sPhone,
+              senderName: sn,
+              senderPhone: sp,
               records: []
             };
           }
@@ -5394,11 +5454,21 @@ export default function StaffPortal() {
                                 fontSize: '13pt'
                               }}
                             >
-                              <div style={{ color: '#0f172a' }}>{group.senderName}</div>
-                              {group.senderPhone && (
+                              {group.senderName ? (
+                                <div style={{ color: '#0f172a' }}>{group.senderName}</div>
+                              ) : (
+                                <div style={{ color: '#94a3b8', fontWeight: 'normal', letterSpacing: '2px' }}>...........................</div>
+                              )}
+                              {group.senderPhone ? (
                                 <div style={{ fontSize: '11pt', color: '#475569', fontWeight: 'bold', marginTop: '6px' }}>
                                   📞 {group.senderPhone}
                                 </div>
+                              ) : (
+                                !group.senderName && (
+                                  <div style={{ fontSize: '10pt', color: '#cbd5e1', fontWeight: 'normal', marginTop: '6px', letterSpacing: '2px' }}>
+                                    📞 .......................
+                                  </div>
+                                )
                               )}
                             </td>
                           )}
