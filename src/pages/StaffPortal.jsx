@@ -5476,10 +5476,15 @@ export default function StaffPortal() {
                       const isFirst = rIdx === 0;
                       return (
                         <tr key={r.id} style={{ borderBottom: rIdx === numRecords - 1 ? '2.5px solid #000' : '1px solid #94a3b8' }}>
-                          {/* 1. ลำดับ */}
-                          <td style={{ border: '1px solid #cbd5e1', padding: '10px 6px', textAlign: 'center', verticalAlign: 'middle', fontWeight: 'bold' }}>
-                            {globalIdx++}
-                          </td>
+                          {/* 1. ลำดับ - RowSpan */}
+                          {isFirst && (
+                            <td 
+                              rowSpan={numRecords}
+                              style={{ border: '1.5px solid #000', padding: '10px 6px', textAlign: 'center', verticalAlign: 'middle', fontWeight: 'bold', backgroundColor: '#f8fafc' }}
+                            >
+                              {globalIdx++}
+                            </td>
+                          )}
                           
                           {/* 2. รายชื่อที่จะพิมพ์ (และเบอร์โทร) */}
                           <td style={{ border: '1px solid #cbd5e1', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 'bold', color: '#1e293b' }}>
@@ -5564,15 +5569,7 @@ export default function StaffPortal() {
                 </tr>
               </tbody>
             </table>
-
-            {/* Note Section */}
-            <div style={{ marginTop: '1.2cm', fontSize: '11pt', color: '#334155', borderTop: '2px dashed #94a3b8', paddingTop: '0.5cm' }}>
-              <p style={{ margin: '0 0 0.3cm 0', fontWeight: 'bold' }}>⚠️ คำชี้แจงการใช้งานใบเช็คยอด:</p>
-              <ul style={{ margin: 0, paddingLeft: '24px', lineHeight: '1.5' }}>
-                <li>ใบควบคุมนี้ใช้สำหรับสรุปยอดเงินเพื่ออำนวยความสะดวกในการติ๊กตรวจสอบความถูกต้องของการชำระเงิน</li>
-                <li>กรณีผู้สั่งเดียวกันมีการรวมยอดชำระ ระบบจะยุบช่องสรุปเงินและช่องติ๊กจ่ายเงินไว้เป็นก้อนเดียวที่ท้ายกลุ่ม</li>
-              </ul>
-            </div>
+            
           </div>
         );
       })()}
