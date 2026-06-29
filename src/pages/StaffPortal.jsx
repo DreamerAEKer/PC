@@ -5333,36 +5333,35 @@ export default function StaffPortal() {
           <div className="control-sheet-print-only" style={{
             fontFamily: 'Sarabun, Inter, sans-serif',
             color: '#000',
-            padding: '1cm',
+            padding: '0.8cm',
             backgroundColor: '#fff',
             boxSizing: 'border-box',
             width: '21cm',
             minHeight: '29.7cm'
           }}>
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px double #000', paddingBottom: '0.5rem', marginBottom: '0.8rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3.5px double #000', paddingBottom: '0.6rem', marginBottom: '1rem' }}>
               <div>
-                <h1 style={{ margin: '0', fontSize: '14pt', fontWeight: 'bold' }}>📋 ใบควบคุมการรับเงิน (ตรวจสอบยอดสั่งพิมพ์กลุ่ม)</h1>
-                <div style={{ fontSize: '9pt', color: '#475569', marginTop: '0.1rem' }}>พิมพ์โดย: {branchName} ({branchCode})</div>
+                <h1 style={{ margin: '0', fontSize: '18pt', fontWeight: 'bold', color: '#000' }}>📋 ใบควบคุมการรับเงิน (ตรวจสอบยอดสั่งพิมพ์กลุ่ม)</h1>
+                <div style={{ fontSize: '11pt', color: '#334155', marginTop: '0.3rem', fontWeight: 'bold' }}>พิมพ์โดย: {branchName} ({branchCode})</div>
               </div>
-              <div style={{ textAlign: 'right', fontSize: '9pt' }}>
+              <div style={{ textAlign: 'right', fontSize: '11pt', color: '#334155' }}>
                 <div><strong>วันที่พิมพ์:</strong> {printDate}</div>
                 <div><strong>ผู้ประสานงานหลัก:</strong> {payerName || '-'}</div>
               </div>
             </div>
 
             {/* Table */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5pt', marginTop: '0.5cm' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13pt', marginTop: '0.6cm' }}>
               <thead>
-                <tr style={{ backgroundColor: '#f1f5f9', border: '1.5px solid #000' }}>
-                  <th style={{ border: '1px solid #000', padding: '6px 4px', textAlign: 'center', width: '5%' }}>ลำดับ</th>
-                  <th style={{ border: '1px solid #000', padding: '6px 6px', textAlign: 'left', width: '20%' }}>ชื่อผู้สั่ง (ตัวแทน)</th>
-                  <th style={{ border: '1px solid #000', padding: '6px 6px', textAlign: 'left', width: '22%' }}>ผู้รับ / ชื่อที่จะพิมพ์</th>
-                  <th style={{ border: '1px solid #000', padding: '6px 6px', textAlign: 'center', width: '13%' }}>เบอร์โทรผู้รับ</th>
-                  <th style={{ border: '1px solid #000', padding: '6px 6px', textAlign: 'right', width: '10%' }}>จำนวน (ใบ)</th>
-                  <th style={{ border: '1px solid #000', padding: '6px 6px', textAlign: 'right', width: '10%' }}>ราคา (บาท)</th>
-                  <th style={{ border: '1px solid #000', padding: '6px 6px', textAlign: 'center', width: '10%' }}>สรุปรวมจ่าย</th>
-                  <th style={{ border: '1px solid #000', padding: '6px 4px', textAlign: 'center', width: '10%' }}>ติ๊กจ่ายแล้ว</th>
+                <tr style={{ backgroundColor: '#f1f5f9', border: '2px solid #000' }}>
+                  <th style={{ border: '1.5px solid #000', padding: '10px 6px', textAlign: 'center', width: '5%', fontSize: '12pt', fontWeight: 'bold' }}>ลำดับ</th>
+                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'left', width: '22%', fontSize: '12pt', fontWeight: 'bold' }}>ชื่อผู้สั่ง (ตัวแทน)</th>
+                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'left', width: '33%', fontSize: '12pt', fontWeight: 'bold' }}>รายชื่อที่จะพิมพ์ (และเบอร์โทร)</th>
+                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'right', width: '9%', fontSize: '12pt', fontWeight: 'bold' }}>จำนวน (ใบ)</th>
+                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'right', width: '11%', fontSize: '12pt', fontWeight: 'bold' }}>ราคา (บาท)</th>
+                  <th style={{ border: '1.5px solid #000', padding: '10px 8px', textAlign: 'center', width: '12%', fontSize: '12pt', fontWeight: 'bold' }}>รวมยอดชำระ</th>
+                  <th style={{ border: '1.5px solid #000', padding: '10px 6px', textAlign: 'center', width: '8%', fontSize: '12pt', fontWeight: 'bold' }}>จ่ายแล้ว</th>
                 </tr>
               </thead>
               <tbody>
@@ -5376,9 +5375,9 @@ export default function StaffPortal() {
                     return group.records.map((r, rIdx) => {
                       const isFirst = rIdx === 0;
                       return (
-                        <tr key={r.id} style={{ borderBottom: rIdx === numRecords - 1 ? '2px solid #000' : '1px solid #cbd5e1' }}>
+                        <tr key={r.id} style={{ borderBottom: rIdx === numRecords - 1 ? '2.5px solid #000' : '1px solid #94a3b8' }}>
                           {/* 1. ลำดับ */}
-                          <td style={{ border: '1px solid #cbd5e1', padding: '6px 4px', textAlign: 'center', verticalAlign: 'middle' }}>
+                          <td style={{ border: '1px solid #cbd5e1', padding: '10px 6px', textAlign: 'center', verticalAlign: 'middle', fontWeight: 'bold' }}>
                             {globalIdx++}
                           </td>
                           
@@ -5387,83 +5386,85 @@ export default function StaffPortal() {
                             <td 
                               rowSpan={numRecords} 
                               style={{ 
-                                border: '1px solid #cbd5e1', 
-                                borderRight: '1px solid #cbd5e1', 
-                                padding: '6px', 
+                                border: '1.5px solid #000', 
+                                padding: '10px 8px', 
                                 verticalAlign: 'middle',
                                 fontWeight: 'bold',
-                                backgroundColor: '#fafafa'
+                                backgroundColor: '#f8fafc',
+                                fontSize: '13pt'
                               }}
                             >
-                              <div>{group.senderName}</div>
+                              <div style={{ color: '#0f172a' }}>{group.senderName}</div>
                               {group.senderPhone && (
-                                <div style={{ fontSize: '8pt', color: '#475569', fontWeight: 'normal', marginTop: '2px' }}>
+                                <div style={{ fontSize: '11pt', color: '#475569', fontWeight: 'bold', marginTop: '6px' }}>
                                   📞 {group.senderPhone}
                                 </div>
                               )}
                             </td>
                           )}
                           
-                          {/* 3. ผู้รับ / ชื่อที่จะพิมพ์ */}
-                          <td style={{ border: '1px solid #cbd5e1', padding: '6px', fontWeight: '500' }}>
-                            {r.name}
+                          {/* 3. รายชื่อที่จะพิมพ์ (และเบอร์โทร) */}
+                          <td style={{ border: '1px solid #cbd5e1', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 'bold', color: '#1e293b' }}>
+                            <div>{r.name}</div>
+                            {(r.phone || r.p) && (
+                              <span style={{ fontSize: '11pt', color: '#64748b', fontWeight: 'normal', display: 'block', marginTop: '2px' }}>
+                                โทร: {r.phone || r.p}
+                              </span>
+                            )}
                           </td>
                           
-                          {/* 4. เบอร์โทรผู้รับ */}
-                          <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'center', color: '#475569' }}>
-                            {r.phone || r.p || '-'}
-                          </td>
-                          
-                          {/* 5. จำนวน */}
-                          <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right' }}>
+                          {/* 4. จำนวน (ใบ) */}
+                          <td style={{ border: '1px solid #cbd5e1', padding: '10px 8px', textAlign: 'right', verticalAlign: 'middle', fontWeight: 'bold', color: '#0f172a' }}>
                             {r.quantity || 0}
                           </td>
-                          
-                          {/* 6. ราคา */}
-                          <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right' }}>
+
+                          {/* 5. ราคา (บาท) */}
+                          <td style={{ border: '1px solid #cbd5e1', padding: '10px 8px', textAlign: 'right', verticalAlign: 'middle', fontWeight: 'bold', color: '#475569' }}>
                             {((r.quantity || 0) * postcardRate).toLocaleString()}
                           </td>
                           
-                          {/* 7. สรุปรวมจ่าย - RowSpan */}
+                          {/* 6. รวมยอดชำระ - RowSpan */}
                           {isFirst && (
                             <td 
                               rowSpan={numRecords} 
                               style={{ 
-                                border: '1px solid #cbd5e1', 
-                                padding: '6px', 
-                                textAlign: 'right', 
+                                border: '1.5px solid #000', 
+                                padding: '10px 8px', 
+                                textAlign: 'center', 
                                 verticalAlign: 'middle',
                                 fontWeight: 'bold',
-                                backgroundColor: '#fef2f2',
-                                color: '#991b1b'
+                                backgroundColor: '#fee2e2',
+                                color: '#991b1b',
+                                fontSize: '13pt'
                               }}
                             >
-                              <div style={{ fontSize: '8.5pt', color: '#7f1d1d' }}>{groupQty} ใบ</div>
-                              <div style={{ fontSize: '11pt', marginTop: '2px' }}>{groupPrice.toLocaleString()}.-</div>
+                              <div style={{ fontSize: '11pt', color: '#991b1b' }}>รวม {groupQty} ใบ</div>
+                              <div style={{ fontSize: '16pt', marginTop: '4px', color: '#b91c1c', fontWeight: '900' }}>{groupPrice.toLocaleString()}.-</div>
                             </td>
                           )}
                           
-                          {/* 8. ติ๊กจ่ายแล้ว - RowSpan */}
+                          {/* 7. จ่ายแล้ว (ช่องติ๊ก) - RowSpan */}
                           {isFirst && (
                             <td 
                               rowSpan={numRecords} 
                               style={{ 
-                                border: '1px solid #cbd5e1', 
-                                padding: '6px', 
+                                border: '1.5px solid #000', 
+                                padding: '10px 6px', 
                                 textAlign: 'center', 
                                 verticalAlign: 'middle',
-                                backgroundColor: '#fcfcfc'
+                                backgroundColor: '#fff'
                               }}
                             >
                               <div style={{ 
-                                width: '20px', 
-                                height: '20px', 
-                                border: '2px solid #475569', 
-                                borderRadius: '4px', 
+                                width: '28px', 
+                                height: '28px', 
+                                border: '3px solid #1e293b', 
+                                borderRadius: '6px', 
                                 margin: '0 auto',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+                                backgroundColor: '#fff'
                               }}>
                                 {/* Empty box for manual print checklist ticking */}
                               </div>
@@ -5476,30 +5477,30 @@ export default function StaffPortal() {
                 })()}
                 
                 {/* Grand Total Row */}
-                <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold', border: '2px solid #000' }}>
-                  <td colSpan={4} style={{ border: '1px solid #000', padding: '8px', textAlign: 'right' }}>
+                <tr style={{ backgroundColor: '#f1f5f9', fontWeight: 'bold', border: '3px solid #000' }}>
+                  <td colSpan={3} style={{ border: '1.5px solid #000', padding: '12px 10px', textAlign: 'right', fontSize: '14pt', fontWeight: 'bold', color: '#0f172a' }}>
                     ยอดรวมทั้งหมด ({selectedRecords.length} รายการ)
                   </td>
-                  <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right' }}>
+                  <td style={{ border: '1.5px solid #000', padding: '12px 8px', textAlign: 'right', fontSize: '14pt', fontWeight: 'bold', color: '#0f172a' }}>
                     {totalQtyAll.toLocaleString()}
                   </td>
-                  <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right' }}>
+                  <td style={{ border: '1.5px solid #000', padding: '12px 8px', textAlign: 'right', fontSize: '14pt', fontWeight: 'bold', color: '#0f172a' }}>
                     {totalAmountAll.toLocaleString()}
                   </td>
-                  <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right', color: '#b91c1c', fontSize: '11pt' }}>
+                  <td style={{ border: '1.5px solid #000', padding: '12px 8px', textAlign: 'center', color: '#b91c1c', fontSize: '16pt', fontWeight: '900', backgroundColor: '#fee2e2' }}>
                     {totalAmountAll.toLocaleString()}.-
                   </td>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}></td>
+                  <td style={{ border: '1.5px solid #000', padding: '12px 6px' }}></td>
                 </tr>
               </tbody>
             </table>
 
             {/* Note Section */}
-            <div style={{ marginTop: '1.5cm', fontSize: '8.5pt', color: '#475569', borderTop: '1px dashed #cbd5e1', paddingTop: '0.4cm' }}>
-              <p style={{ margin: '0 0 0.2cm 0', fontWeight: 'bold' }}>คำชี้แจงการใช้งานใบเช็คยอด:</p>
-              <ul style={{ margin: 0, paddingLeft: '20px' }}>
-                <li>ใบควบคุมนี้ใช้สรุปยอดเงินสำหรับผู้สั่งพิมพ์กลุ่มที่มีรายการย่อย เพื่ออำนวยความสะดวกในการติ๊กตรวจสอบความถูกต้อง</li>
-                <li>กรณีผู้สั่งเดียวกันมีรายการมากกว่า 1 รายการ ระบบจะแสดงรายการแยกบรรทัด แต่สรุปยอดรวมชำระเงินและช่องติ๊กไว้ที่บรรทัดรวมของสมาชิกร่วมกัน</li>
+            <div style={{ marginTop: '1.2cm', fontSize: '11pt', color: '#334155', borderTop: '2px dashed #94a3b8', paddingTop: '0.5cm' }}>
+              <p style={{ margin: '0 0 0.3cm 0', fontWeight: 'bold' }}>⚠️ คำชี้แจงการใช้งานใบเช็คยอด:</p>
+              <ul style={{ margin: 0, paddingLeft: '24px', lineHeight: '1.5' }}>
+                <li>ใบควบคุมนี้ใช้สำหรับสรุปยอดเงินเพื่ออำนวยความสะดวกในการติ๊กตรวจสอบความถูกต้องของการชำระเงิน</li>
+                <li>กรณีผู้สั่งเดียวกันมีรายการมากกว่า 1 รายชื่อ ระบบจะแยกบรรทัดแสดงชื่อผู้รับให้เห็นชัดเจน แต่จะรวมยอดเงินและช่องติ๊กชำระเงินไว้เป็นก้อนเดียวที่บรรทัดรวมของผู้สั่งรายนั้น</li>
               </ul>
             </div>
           </div>
