@@ -3831,35 +3831,9 @@ export default function StaffPortal() {
                               </td>
                               <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
                                 {r.paid ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setHistory(prev => {
-                                        const updated = prev.map(item => item.id === r.id ? { ...item, paid: false, paidDate: null } : item);
-                                        localStorage.setItem('staffHistory', JSON.stringify(updated));
-                                        return updated;
-                                      });
-                                    }}
-                                    style={{ border: '1px solid #bbf7d0', backgroundColor: '#dcfce7', color: '#15803d', padding: '0.1rem 0.35rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer', outline: 'none' }}
-                                    title="คลิกเพื่อเปลี่ยนเป็น 'ยังไม่จ่าย'"
-                                  >
-                                    ✓ จ่ายแล้ว
-                                  </button>
+                                  <span style={{ color: '#15803d', fontWeight: 'bold', fontSize: '0.75rem' }}>✓ จ่ายแล้ว</span>
                                 ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setHistory(prev => {
-                                        const updated = prev.map(item => item.id === r.id ? { ...item, paid: true, paidDate: new Date().toISOString() } : item);
-                                        localStorage.setItem('staffHistory', JSON.stringify(updated));
-                                        return updated;
-                                      });
-                                    }}
-                                    style={{ border: '1px solid #fecdd3', backgroundColor: '#fef2f2', color: '#ef4444', padding: '0.1rem 0.35rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer', outline: 'none' }}
-                                    title="คลิกเพื่อเปลี่ยนเป็น 'จ่ายแล้ว'"
-                                  >
-                                    ✗ ยังไม่จ่าย
-                                  </button>
+                                  <span style={{ color: '#ef4444', fontWeight: 'bold', fontSize: '0.75rem' }}>✗ ยังไม่จ่าย</span>
                                 )}
                               </td>
                             </tr>
@@ -3914,46 +3888,6 @@ export default function StaffPortal() {
                     >
                       🔓 แยกกลุ่มชำระเงินเดี่ยว
                     </button>
-
-                    <div style={{ width: '100%', height: '1px', backgroundColor: '#bfdbfe', margin: '0.25rem 0' }}></div>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#166534' }}>💵 จัดการสถานะการชำระเงิน:</span>
-                    <button
-                      type="button"
-                      className="btn"
-                      disabled={groupSelectIds.length === 0}
-                      onClick={() => {
-                        setHistory(prev => {
-                          const updated = prev.map(item => groupSelectIds.includes(item.id) ? { ...item, paid: true, paidDate: new Date().toISOString() } : item);
-                          localStorage.setItem('staffHistory', JSON.stringify(updated));
-                          return updated;
-                        });
-                        setGroupSelectIds([]);
-                        alert(`เปลี่ยนสถานะรายการที่เลือกเป็น "จ่ายแล้ว" เรียบร้อยแล้ว!`);
-                      }}
-                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', margin: 0, height: '32px', backgroundColor: '#16a34a', borderColor: '#15803d', color: '#fff', cursor: groupSelectIds.length > 0 ? 'pointer' : 'not-allowed', opacity: groupSelectIds.length > 0 ? 1 : 0.6, fontWeight: 'bold' }}
-                    >
-                      ✓ จ่ายแล้ว ({groupSelectIds.length} รายการ)
-                    </button>
-                    <button
-                      type="button"
-                      className="btn"
-                      disabled={groupSelectIds.length === 0}
-                      onClick={() => {
-                        setHistory(prev => {
-                          const updated = prev.map(item => groupSelectIds.includes(item.id) ? { ...item, paid: false, paidDate: null } : item);
-                          localStorage.setItem('staffHistory', JSON.stringify(updated));
-                          return updated;
-                        });
-                        setGroupSelectIds([]);
-                        alert(`เปลี่ยนสถานะรายการที่เลือกเป็น "ยังไม่จ่าย" เรียบร้อยแล้ว!`);
-                      }}
-                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', margin: 0, height: '32px', backgroundColor: '#ef4444', borderColor: '#dc2626', color: '#fff', cursor: groupSelectIds.length > 0 ? 'pointer' : 'not-allowed', opacity: groupSelectIds.length > 0 ? 1 : 0.6, fontWeight: 'bold' }}
-                    >
-                      ✗ ยังไม่จ่าย ({groupSelectIds.length} รายการ)
-                    </button>
-                    <div style={{ fontSize: '0.75rem', color: '#1e40af', marginLeft: '0.5rem' }}>
-                      💡 ติ๊กช่องด้านหน้าชื่อผู้รับที่ต้องการ แล้วกด "รวมยอดชำระร่วมกัน" เพื่อยุบรวมจ่ายบิลบรรทัดเดียวกัน
-                    </div>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#fff', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '1rem' }}>
@@ -3986,34 +3920,8 @@ export default function StaffPortal() {
                       </div>
                     </div>
 
-                    <div style={{ borderTop: '1px dashed #e2e8f0', paddingTop: '0.75rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <input 
-                          type="checkbox" 
-                          id="bulkPaidCheckbox"
-                          checked={bulkPaidStatus} 
-                          onChange={(e) => setBulkPaidStatus(e.target.checked)} 
-                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                        />
-                        <label htmlFor="bulkPaidCheckbox" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#334155', cursor: 'pointer' }}>ทำเครื่องหมายว่า "จ่ายแล้ว"</label>
-                      </div>
-
-                      {bulkPaidStatus && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>วันที่:</span>
-                          <input 
-                            type="date" 
-                            className="form-control"
-                            value={bulkPaidDate} 
-                            onChange={(e) => setBulkPaidDate(e.target.value)} 
-                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px dashed #e2e8f0', paddingTop: '0.75rem', marginTop: '0.75rem' }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#334155' }}>รูปแบบพิมพ์บิล:</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px dashed #e2e8f0', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#334155' }}>รูปแบบพิมพ์บิลเดี่ยว:</span>
                       <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', margin: 0 }}>
                         <input 
                           type="radio" 
@@ -4039,127 +3947,120 @@ export default function StaffPortal() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <button
-                      type="button"
-                      className="btn"
-                      onClick={handleUpdatePaymentStatus}
-                      style={{
-                        flex: '1 1 200px',
-                        padding: '0.6rem 1rem',
-                        fontSize: '0.875rem',
-                        fontWeight: 'bold',
-                        backgroundColor: '#10b981',
-                        borderColor: '#059669',
-                        color: '#fff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.35rem',
-                        cursor: 'pointer',
-                        margin: 0
-                      }}
-                    >
-                      💾 บันทึกสถานะชำระเงิน ({selectedIds.length} รายการ)
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => {
-                        setIsPrintingInvoice(true);
-                        setTimeout(() => {
-                          window.print();
-                          setIsPrintingInvoice(false);
-                        }, 300);
-                      }}
-                      style={{
-                        flex: '1 1 180px',
-                        padding: '0.6rem 1rem',
-                        fontSize: '0.875rem',
-                        fontWeight: 'bold',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.35rem',
-                        cursor: 'pointer',
-                        margin: 0
-                      }}
-                    >
-                      🖨️ พิมพ์บิลเรียกเก็บเงิน A4
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => {
-                        setIsPrintingControlSheet(true);
-                        setTimeout(() => {
-                          window.print();
-                          setIsPrintingControlSheet(false);
-                        }, 300);
-                      }}
-                      style={{
-                        flex: '1 1 200px',
-                        padding: '0.6rem 1rem',
-                        fontSize: '0.875rem',
-                        fontWeight: 'bold',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.35rem',
-                        cursor: 'pointer',
-                        margin: 0,
-                        backgroundColor: '#8b5cf6',
-                        borderColor: '#7c3aed',
-                        color: '#fff'
-                      }}
-                    >
-                      🖨️ พิมพ์ใบควบคุมการรับเงิน (รวมผู้สั่ง)
-                    </button>
-                    <button
-                      type="button"
-                      className="btn"
-                      onClick={() => {
-                        if (selectedIds.length === 0) return;
-                        const selectedRecords = history.filter(r => selectedIds.includes(r.id));
-                        const totalQty = selectedRecords.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
-                        const totalAmount = totalQty * postcardRate;
-                        
-                        const newInvoice = {
-                          id: Date.now() + Math.random(),
-                          timestamp: new Date().toISOString(),
-                          branchName: branchName,
-                          payerName: payerName || 'ยอดรวมกลุ่ม',
-                          postcardRate: postcardRate,
-                          records: selectedRecords,
-                          totalQty: totalQty,
-                          totalAmount: totalAmount
-                        };
-                        
-                        const updatedQueue = [...invoiceQueue, newInvoice];
-                        saveInvoiceQueue(updatedQueue);
-                        
-                        setSelectedIds([]);
-                        setPayerName('');
-                        alert('💾 บันทึกใบกำกับนี้เข้าคิวพิมพ์ค้างไว้สำเร็จ! คุณสามารถบันทึกเพิ่มหรือพิมพ์รวมกันที่คิวด้านล่างเพื่อประหยัดกระดาษ');
-                      }}
-                      style={{
-                        flex: '1 1 200px',
-                        padding: '0.6rem 1rem',
-                        fontSize: '0.875rem',
-                        fontWeight: 'bold',
-                        backgroundColor: '#6366f1',
-                        borderColor: '#4f46e5',
-                        color: '#fff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.35rem',
-                        cursor: 'pointer',
-                        margin: 0
-                      }}
-                    >
-                      📥 บันทึกเข้าคิวพิมพ์ใบกำกับ
-                    </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '2px solid #cbd5e1', paddingTop: '1rem' }}>
+                    
+                    {/* SECTION 1: FOR INDIVIDUAL BILLS */}
+                    <div style={{ border: '1.5px solid #cbd5e1', borderRadius: '8px', padding: '0.75rem', backgroundColor: '#fff' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', marginBottom: '0.5rem' }}>🎫 1. สำหรับพิมพ์บิลแจกรายชื่อลูกค้าแยกรายบุคคล (กระดาษแบ่ง 4 ส่วน)</div>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => {
+                            setIsPrintingInvoice(true);
+                            setTimeout(() => {
+                              window.print();
+                              setIsPrintingInvoice(false);
+                            }, 300);
+                          }}
+                          style={{
+                            flex: '1 1 180px',
+                            padding: '0.65rem 1rem',
+                            fontSize: '0.9rem',
+                            fontWeight: 'bold',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.35rem',
+                            cursor: 'pointer',
+                            margin: 0
+                          }}
+                        >
+                          🖨️ พิมพ์บิลเรียกเก็บเงิน A4 (พิมพ์เลย)
+                        </button>
+                        <button
+                          type="button"
+                          className="btn"
+                          onClick={() => {
+                            if (selectedIds.length === 0) return;
+                            const selectedRecords = history.filter(r => selectedIds.includes(r.id));
+                            const totalQty = selectedRecords.reduce((sum, r) => sum + (parseInt(r.quantity, 10) || 0), 0);
+                            const totalAmount = totalQty * postcardRate;
+                            
+                            const newInvoice = {
+                              id: Date.now() + Math.random(),
+                              timestamp: new Date().toISOString(),
+                              branchName: branchName,
+                              branchCode: branchCode,
+                              payerName: payerName || 'ยอดรวมกลุ่ม',
+                              postcardRate: postcardRate,
+                              records: selectedRecords,
+                              totalQty: totalQty,
+                              totalAmount: totalAmount
+                            };
+                            
+                            const updatedQueue = [...invoiceQueue, newInvoice];
+                            saveInvoiceQueue(updatedQueue);
+                            
+                            setSelectedIds([]);
+                            setPayerName('');
+                            alert('💾 บันทึกใบกำกับนี้เข้าคิวพิมพ์ค้างไว้สำเร็จ! คุณสามารถสะสมไว้รวมคิวพิมพ์บิลด้านล่างเพื่อประหยัดกระดาษได้ครับ');
+                          }}
+                          style={{
+                            flex: '1 1 200px',
+                            padding: '0.65rem 1rem',
+                            fontSize: '0.9rem',
+                            fontWeight: 'bold',
+                            backgroundColor: '#6366f1',
+                            borderColor: '#4f46e5',
+                            color: '#fff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.35rem',
+                            cursor: 'pointer',
+                            margin: 0
+                          }}
+                        >
+                          📥 เก็บใส่คิวพิมพ์สะสมไว้ (ประหยัดกระดาษ)
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* SECTION 2: FOR GROUP CONTROL SHEET */}
+                    <div style={{ border: '1.5px dashed #8b5cf6', borderRadius: '8px', padding: '0.75rem', backgroundColor: '#f5f3ff' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#6d28d9', marginBottom: '0.5rem' }}>📋 2. สำหรับพิมพ์ใบตรวจเช็คยอดเก็บเงินรวม (สำหรับผู้แทน/ผู้ประสานงานกลุ่ม)</div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          type="button"
+                          className="btn"
+                          onClick={() => {
+                            setIsPrintingControlSheet(true);
+                            setTimeout(() => {
+                              window.print();
+                              setIsPrintingControlSheet(false);
+                            }, 300);
+                          }}
+                          style={{
+                            flex: '1',
+                            padding: '0.75rem 1rem',
+                            fontSize: '1rem',
+                            fontWeight: 'bold',
+                            backgroundColor: '#8b5cf6',
+                            borderColor: '#7c3aed',
+                            color: '#fff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.5rem',
+                            cursor: 'pointer',
+                            margin: 0
+                          }}
+                        >
+                          🖨️ พิมพ์ใบควบคุมการรับเงิน (A4 ใบเดียว)
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
