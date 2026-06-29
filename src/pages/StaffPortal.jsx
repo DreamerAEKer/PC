@@ -5454,7 +5454,7 @@ export default function StaffPortal() {
                                 fontSize: '13pt'
                               }}
                             >
-                              {group.senderName ? (
+                              {group.senderName && !/^\.+$/.test(group.senderName.trim()) ? (
                                 <div style={{ color: '#0f172a' }}>{group.senderName}</div>
                               ) : (
                                 <div style={{ color: '#94a3b8', fontWeight: 'normal', letterSpacing: '2px' }}>...........................</div>
@@ -5464,7 +5464,7 @@ export default function StaffPortal() {
                                   📞 {group.senderPhone}
                                 </div>
                               ) : (
-                                !group.senderName && (
+                                (!group.senderName || /^\.+$/.test(group.senderName.trim())) && (
                                   <div style={{ fontSize: '10pt', color: '#cbd5e1', fontWeight: 'normal', marginTop: '6px', letterSpacing: '2px' }}>
                                     📞 .......................
                                   </div>
