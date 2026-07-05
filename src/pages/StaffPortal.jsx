@@ -448,6 +448,10 @@ export default function StaffPortal() {
             playNotificationSound();
             setNotification(`มีออเดอร์ใหม่จากคุณ ${newOrders[0].name || 'ลูกค้า'}`);
             setTimeout(() => setNotification(null), 5000);
+            
+            // Switch tab to pending
+            setActiveTab('history');
+            setHistoryFilter('pending');
          }
          
          const merged = Array.from(mergedMap.values());
