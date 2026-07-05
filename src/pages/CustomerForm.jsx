@@ -401,7 +401,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';export 
      // --- Firebase Integration ---
      try {
        const urlParams = new URLSearchParams(window.location.search);
-       const deptCode = urlParams.get('branch') || 'MAIN';
+       const deptCode = urlParams.get('branch') || '10501';
        
        await addDoc(collection(db, "orders"), {
          ...newRecord,

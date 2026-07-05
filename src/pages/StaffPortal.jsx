@@ -415,7 +415,7 @@ export default function StaffPortal() {
     if (branchCode === '379773') {
        q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
     } else {
-       const targetDept = branchCode && branchCode.length >= 2 ? branchCode : 'MAIN';
+       const targetDept = branchCode && branchCode.length >= 2 ? branchCode : '10501';
        q = query(collection(db, "orders"), where("dept", "==", targetDept));
     }
     
