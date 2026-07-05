@@ -12,7 +12,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { useThaiAddress } from 'use-thai-address';
 import jsQR from 'jsqr';
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, where, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, where, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 let globalHiddenScanner = null;
 
 const playNotificationSound = () => {
@@ -1538,7 +1538,14 @@ export default function StaffPortal() {
   };
 
   const handleDeleteRecord = async (id) => {
-    if (await window.showConfirm("คุณต้องการลบรายการประวัตินี้ใช่หรือไม่?")) {
+    if (await window.showConfirm("คุณต้องการนำรายการประวัตินี้ทิ้งลงถังขยะใช่หรือไม่? (สามารถกู้คืนได้)")) {
+      const recordToDelete = history.find(r => r.id === id);
+      if (recordToDelete?.firestoreId) {
+         try {
+            await updateDoc(doc(db, "orders", recordToDelete.firestoreId), { deleted: true });
+         } catch(e) { console.error("Error deleting document:", e); }
+      }
+      
       setHistory(prev => {
         const next = prev.filter(r => r.id !== id);
         localStorage.setItem('staffHistory', JSON.stringify(next));
@@ -1554,7 +1561,14 @@ export default function StaffPortal() {
   };
 
   const handleDeleteSelected = async () => {
-    if (await window.showConfirm(`⚠️ คำเตือน: คุณต้องการลบรายการที่เลือกทั้งหมดจำนวน ${selectedIds.length} รายการออกจากระบบใช่หรือไม่?\n(ข้อมูลประวัติทั้งหมดที่เลือกจะถูกลบอย่างถาวรและไม่สามารถเรียกคืนได้)`)) {
+    if (await window.showConfirm(`⚠️ คำเตือน: คุณต้องการนำรายการที่เลือกทั้งหมดจำนวน ${selectedIds.length} รายการทิ้งลงถังขยะใช่หรือไม่?`)) {
+      const recordsToDelete = history.filter(r => selectedIds.includes(r.id));
+      for (const r of recordsToDelete) {
+         if (r.firestoreId) {
+            try { await updateDoc(doc(db, "orders", r.firestoreId), { deleted: true }); } catch(e){ console.error(e); }
+         }
+      }
+      
       setHistory(prev => {
         const next = prev.filter(r => !selectedIds.includes(r.id));
         localStorage.setItem('staffHistory', JSON.stringify(next));
@@ -1564,6 +1578,42 @@ export default function StaffPortal() {
       setSwipeOffset({});
     }
   };
+
+  const handleRestoreRecord = async (id) => {
+    const recordToRestore = history.find(r => r.id === id);
+    if (recordToRestore?.firestoreId) {
+       try {
+          await updateDoc(doc(db, "orders", recordToRestore.firestoreId), { deleted: false });
+       } catch(e) { console.error("Error restoring document:", e); }
+    }
+    
+    // We don't need to manually update local history state here 
+    // because onSnapshot will fetch the update and push it to history.
+  };
+
+  const handlePermanentDelete = async (id) => {
+    if (await window.showConfirm("❌ คำเตือน: คุณต้องการลบรายการนี้อย่างถาวรใช่หรือไม่? (ไม่สามารถกู้คืนได้อีก)")) {
+      const recordToDelete = history.find(r => r.id === id);
+      if (recordToDelete?.firestoreId) {
+         try {
+            await deleteDoc(doc(db, "orders", recordToDelete.firestoreId));
+         } catch(e) { console.error("Error permanently deleting document:", e); }
+      }
+      
+      setHistory(prev => {
+        const next = prev.filter(r => r.id !== id);
+        localStorage.setItem('staffHistory', JSON.stringify(next));
+        return next;
+      });
+      setSelectedIds(prev => prev.filter(i => i !== id));
+      setSwipeOffset(prev => {
+        const copy = { ...prev };
+        delete copy[id];
+        return copy;
+      });
+    }
+  };
+
 
   const handleTouchStart = (id, e) => {
     setTouchStartX(e.touches[0].clientX);
@@ -4432,7 +4482,7 @@ export default function StaffPortal() {
                     gap: '4px'
                   }}
                 >
-                  ⏳ รอพิมพ์ ({history.filter(r => !r.printed).length})
+                  ⏳ รอพิมพ์ ({history.filter(r => !r.printed && !r.deleted).length})
                 </button>
                 <button
                   type="button"
@@ -4458,7 +4508,7 @@ export default function StaffPortal() {
                     gap: '4px'
                   }}
                 >
-                  ✅ พิมพ์แล้ว ({history.filter(r => r.printed).length})
+                  ✅ พิมพ์แล้ว ({history.filter(r => r.printed && !r.deleted).length})
                 </button>
                 <button
                   type="button"
@@ -4480,7 +4530,29 @@ export default function StaffPortal() {
                     transition: 'all 0.15s'
                   }}
                 >
-                  ทั้งหมด ({history.length})
+                  ทั้งหมด ({history.filter(r => !r.deleted).length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHistoryFilter('trash');
+                    setSelectedIds([]);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '6px 10px',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    borderRadius: '6px',
+                    border: 'none',
+                    backgroundColor: historyFilter === 'trash' ? '#fff' : 'transparent',
+                    color: historyFilter === 'trash' ? '#ef4444' : 'var(--text-muted)',
+                    boxShadow: historyFilter === 'trash' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s'
+                  }}
+                >
+                  🗑️ ถังขยะ ({history.filter(r => r.deleted).length})
                 </button>
               </div>
 
@@ -4601,10 +4673,15 @@ export default function StaffPortal() {
 
               {(() => {
                 const displayedHistory = history.filter(record => {
-                  if (historyFilter === 'pending') {
-                    if (record.printed) return false;
-                  } else if (historyFilter === 'printed') {
-                    if (!record.printed) return false;
+                  if (historyFilter === 'trash') {
+                     if (!record.deleted) return false;
+                  } else {
+                     if (record.deleted) return false;
+                     if (historyFilter === 'pending') {
+                       if (record.printed) return false;
+                     } else if (historyFilter === 'printed') {
+                       if (!record.printed) return false;
+                     }
                   }
 
                   if (filterSender) {
@@ -4791,69 +4868,116 @@ export default function StaffPortal() {
 
                       {/* Control buttons - always right, never wrap */}
                       <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, alignItems: 'center' }}>
-                        <button 
-                          onClick={() => handlePrintHistory(record)} 
-                          className="btn btn-secondary" 
-                          style={{ 
-                            width: '32px',
-                            height: '32px',
-                            padding: 0, 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center', 
-                            margin: 0,
-                            borderColor: record.printed ? '#cbd5e1' : '#b45309',
-                            color: record.printed ? 'var(--text-main)' : '#b45309',
-                            backgroundColor: record.printed ? '' : '#fffbeb',
-                            cursor: 'pointer'
-                          }}
-                          title={record.printed ? 'พิมพ์ซ้ำ' : 'สั่งพิมพ์'}
-                        >
-                          <Printer size={15} />
-                        </button>
-                        <button 
-                          onClick={() => {
-                            populateFromScan(record);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          }} 
-                          className="btn" 
-                          style={{ 
-                            width: '32px',
-                            height: '32px',
-                            padding: 0, 
-                            borderColor: '#3b82f6', 
-                            color: '#1d4ed8', 
-                            backgroundColor: '#eff6ff', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center', 
-                            margin: 0, 
-                            cursor: 'pointer'
-                          }}
-                          title="แก้ไข"
-                        >
-                          ✏️
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteRecord(record.id)} 
-                          className="btn" 
-                          style={{ 
-                            width: '32px',
-                            height: '32px',
-                            padding: 0, 
-                            borderColor: '#ef4444', 
-                            color: '#ef4444', 
-                            backgroundColor: '#fef2f2', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center', 
-                            margin: 0, 
-                            cursor: 'pointer'
-                          }}
-                          title="ลบ"
-                        >
-                          🗑️
-                        </button>
+                        {historyFilter === 'trash' ? (
+                          <>
+                            <button 
+                              onClick={() => handleRestoreRecord(record.id)} 
+                              className="btn" 
+                              style={{ 
+                                width: '32px',
+                                height: '32px',
+                                padding: 0, 
+                                borderColor: '#10b981', 
+                                color: '#10b981', 
+                                backgroundColor: '#ecfdf5', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                margin: 0, 
+                                cursor: 'pointer'
+                              }}
+                              title="กู้คืน"
+                            >
+                              ♻️
+                            </button>
+                            <button 
+                              onClick={() => handlePermanentDelete(record.id)} 
+                              className="btn" 
+                              style={{ 
+                                width: '32px',
+                                height: '32px',
+                                padding: 0, 
+                                borderColor: '#ef4444', 
+                                color: '#ef4444', 
+                                backgroundColor: '#fef2f2', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                margin: 0, 
+                                cursor: 'pointer'
+                              }}
+                              title="ลบถาวร"
+                            >
+                              ❌
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button 
+                              onClick={() => handlePrintHistory(record)} 
+                              className="btn btn-secondary" 
+                              style={{ 
+                                width: '32px',
+                                height: '32px',
+                                padding: 0, 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                margin: 0,
+                                borderColor: record.printed ? '#cbd5e1' : '#b45309',
+                                color: record.printed ? 'var(--text-main)' : '#b45309',
+                                backgroundColor: record.printed ? '' : '#fffbeb',
+                                cursor: 'pointer'
+                              }}
+                              title={record.printed ? 'พิมพ์ซ้ำ' : 'สั่งพิมพ์'}
+                            >
+                              <Printer size={15} />
+                            </button>
+                            <button 
+                              onClick={() => {
+                                populateFromScan(record);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }} 
+                              className="btn" 
+                              style={{ 
+                                width: '32px',
+                                height: '32px',
+                                padding: 0, 
+                                borderColor: '#3b82f6', 
+                                color: '#1d4ed8', 
+                                backgroundColor: '#eff6ff', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                margin: 0, 
+                                cursor: 'pointer'
+                              }}
+                              title="แก้ไข"
+                            >
+                              ✏️
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteRecord(record.id)} 
+                              className="btn" 
+                              style={{ 
+                                width: '32px',
+                                height: '32px',
+                                padding: 0, 
+                                borderColor: '#ef4444', 
+                                color: '#ef4444', 
+                                backgroundColor: '#fef2f2', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                margin: 0, 
+                                cursor: 'pointer'
+                              }}
+                              title="ลบ (ทิ้งลงถังขยะ)"
+                            >
+                              🗑️
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}
