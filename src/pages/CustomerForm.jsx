@@ -8,10 +8,8 @@ import SubAddressFields from '../components/SubAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import ThaiDatePicker, { formatThaiDate } from '../components/ThaiDatePicker';
 import { useThaiAddress } from 'use-thai-address';
-
-
-
-export default function CustomerForm() {
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';export default function CustomerForm() {
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ 
     mode: 'onChange',
     defaultValues: {
@@ -399,6 +397,25 @@ export default function CustomerForm() {
      const updatedHistory = [newRecord, ...history].slice(0, 10); // Keep last 10
      setHistory(updatedHistory);
      localStorage.setItem('customerHistory', JSON.stringify(updatedHistory));
+
+     // --- Firebase Integration ---
+     try {
+       const urlParams = new URLSearchParams(window.location.search);
+       const deptCode = urlParams.get('branch') || 'MAIN';
+       
+       await addDoc(collection(db, "orders"), {
+         ...newRecord,
+         createdAt: serverTimestamp(),
+         printed: false,
+         status: 'pending',
+         importSource: 'customer_app',
+         dept: deptCode
+       });
+       console.log("Order saved to Firebase successfully");
+     } catch (e) {
+       console.error("Error adding document to Firebase: ", e);
+     }
+     // ---------------------------
 
      // Reset form but retain sender's name and phone
      reset({

@@ -4,15 +4,42 @@ import { flushSync } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { Html5QrcodeScanner, Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload, RefreshCw, Camera, FolderOpen } from 'lucide-react';
+import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload, RefreshCw, Camera, FolderOpen, Bell } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import ThaiDatePicker from '../components/ThaiDatePicker';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useThaiAddress } from 'use-thai-address';
 import jsQR from 'jsqr';
-
+import { db } from '../firebase';
+import { collection, query, orderBy, onSnapshot, where, updateDoc, doc } from 'firebase/firestore';
 let globalHiddenScanner = null;
+
+const playNotificationSound = () => {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.05);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+    
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.5);
+  } catch(e) {
+    console.error("Audio play failed", e);
+  }
+};
 
 const DB_NAME = 'StaffPortalDB';
 const STORE_NAME = 'FolderHandles';
@@ -65,6 +92,9 @@ const getSavedDate = (record) => {
 };
 
 export default function StaffPortal() {
+  const [notification, setNotification] = useState(null);
+  const isFirstLoad = useRef(true);
+  const [activeTab, setActiveTab] = useState('history');
   const { register, handleSubmit, setValue, getValues, reset, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ mode: 'onChange' });
 
   const selectQty = watch("selectQuantity", "100");
@@ -379,6 +409,61 @@ export default function StaffPortal() {
     setValue("orderDate", new Date().toISOString().split('T')[0]);
   }, [setValue]);
 
+  useEffect(() => {
+    // Listen to Firebase orders collection
+    let q;
+    if (branchCode === '379773') {
+       q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+    } else {
+       const targetDept = branchCode && branchCode.length >= 2 ? branchCode : 'MAIN';
+       q = query(collection(db, "orders"), where("dept", "==", targetDept));
+    }
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const newOrders = [];
+      snapshot.forEach((d) => {
+        newOrders.push({ firestoreId: d.id, ...d.data() });
+      });
+      
+      // Sort newOrders desc
+      newOrders.sort((a, b) => {
+         const tA = a.createdAt?.toMillis() || Date.now();
+         const tB = b.createdAt?.toMillis() || Date.now();
+         return tB - tA;
+      });
+
+      // Merge new/updated orders into history
+      setHistory((prev) => {
+         const safePrev = Array.isArray(prev) ? prev : [];
+         const mergedMap = new Map(safePrev.map(r => [r.id, r]));
+         
+         let hasNew = false;
+         newOrders.forEach(o => {
+            if (!mergedMap.has(o.id)) hasNew = true;
+            // Overwrite with fresh data from Firebase
+            mergedMap.set(o.id, { ...mergedMap.get(o.id), ...o });
+         });
+         
+         if (hasNew && !isFirstLoad.current && newOrders.length > 0) {
+            playNotificationSound();
+            setNotification(`มีออเดอร์ใหม่จากคุณ ${newOrders[0].name || 'ลูกค้า'}`);
+            setTimeout(() => setNotification(null), 5000);
+         }
+         
+         const merged = Array.from(mergedMap.values());
+         merged.sort((a, b) => b.id - a.id); // sort by id (timestamp)
+         
+         localStorage.setItem('staffHistory', JSON.stringify(merged));
+         isFirstLoad.current = false;
+         return merged;
+      });
+    }, (error) => {
+       console.error("Firebase listen error:", error);
+    });
+
+    return () => unsubscribe();
+  }, [branchCode]);
+
   const formValues = watch();
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -636,6 +721,11 @@ export default function StaffPortal() {
         return sliced;
       });
       
+      if (newRecord.firestoreId) {
+         updateDoc(doc(db, "orders", newRecord.firestoreId), { printed: true, ...processedData })
+           .catch(e => console.error("Firebase update error:", e));
+      }
+      
       reset();
       setQuantityFields(100);
       setHasActiveData(false);
@@ -653,6 +743,11 @@ export default function StaffPortal() {
         localStorage.setItem('staffHistory', JSON.stringify(updated));
         return updated;
       });
+      
+      if (record.firestoreId) {
+         updateDoc(doc(db, "orders", record.firestoreId), { printed: true })
+           .catch(e => console.error("Firebase update error:", e));
+      }
     };
     window.addEventListener('afterprint', handleAfterPrint);
 
@@ -2359,6 +2454,12 @@ export default function StaffPortal() {
 
   return (
     <>
+      {notification && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce">
+          <Bell className="w-6 h-6 animate-pulse" />
+          <div className="font-semibold">{notification}</div>
+        </div>
+      )}
       <style>
         {`
           @media print {
@@ -4575,6 +4676,9 @@ export default function StaffPortal() {
                             <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#15803d', backgroundColor: '#dcfce7', padding: '0.1rem 0.35rem', borderRadius: '10px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap', flexShrink: 0 }}>✅ พิมพ์แล้ว</span>
                           ) : (
                             <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#b45309', backgroundColor: '#fef3c7', padding: '0.1rem 0.35rem', borderRadius: '10px', border: '1px solid #fde68a', whiteSpace: 'nowrap', flexShrink: 0 }}>⏳ รอพิมพ์</span>
+                          )}
+                          {branchCode === '379773' && record.dept && (
+                             <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#fff', backgroundColor: '#6366f1', padding: '0.1rem 0.35rem', borderRadius: '10px', whiteSpace: 'nowrap', flexShrink: 0 }}>🏢 {record.dept}</span>
                           )}
                         </div>
                         {/* Subtitle */}
