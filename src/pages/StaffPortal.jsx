@@ -4645,7 +4645,46 @@ export default function StaffPortal() {
               </div>
 
               {selectedIds.length > 0 && (
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (await window.showConfirm(`คุณต้องการเปลี่ยนสถานะรายการที่เลือกทั้งหมด (${selectedIds.length} รายการ) เป็น "พิมพ์แล้ว" ใช่หรือไม่?`)) {
+                        setHistory(prev => {
+                          const updated = prev.map(r => selectedIds.includes(r.id) ? { ...r, printed: true } : r);
+                          localStorage.setItem('staffHistory', JSON.stringify(updated));
+                          return updated;
+                        });
+                        const selectedRecords = history.filter(r => selectedIds.includes(r.id));
+                        for (const r of selectedRecords) {
+                           if (r.firestoreId) {
+                              try { updateDoc(doc(db, "orders", r.firestoreId), { printed: true }); } catch(e){}
+                           }
+                        }
+                        setSelectedIds([]);
+                        alert('อัพเดทสถานะสำเร็จ!');
+                      }
+                    }}
+                    className="btn btn-primary"
+                    style={{
+                      flex: 1,
+                      padding: '0.6rem 1rem',
+                      fontSize: '0.9rem',
+                      fontWeight: 'bold',
+                      backgroundColor: '#dcfce7',
+                      borderColor: '#bbf7d0',
+                      color: '#15803d',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      cursor: 'pointer',
+                      margin: 0,
+                      minWidth: '200px'
+                    }}
+                  >
+                    ✅ เปลี่ยนสถานะเป็น "พิมพ์แล้ว"
+                  </button>
                   <button
                     type="button"
                     onClick={handleDeleteSelected}
@@ -4721,8 +4760,25 @@ export default function StaffPortal() {
                       justifyContent: 'space-between',
                       alignItems: 'center'
                     }}>
-                      <div style={{ fontWeight: 'bold', color: '#0369a1', fontSize: '0.85rem' }}>
-                        📊 ยอดรวมจากรายการที่แสดง
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <input
+                          type="checkbox"
+                          checked={displayedHistory.length > 0 && displayedHistory.every(r => selectedIds.includes(r.id))}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              const newIds = new Set([...selectedIds, ...displayedHistory.map(r => r.id)]);
+                              setSelectedIds(Array.from(newIds));
+                            } else {
+                              const displayedIds = new Set(displayedHistory.map(r => r.id));
+                              setSelectedIds(selectedIds.filter(id => !displayedIds.has(id)));
+                            }
+                          }}
+                          style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
+                          title="เลือกทั้งหมดในหน้านี้"
+                        />
+                        <div style={{ fontWeight: 'bold', color: '#0369a1', fontSize: '0.85rem' }}>
+                          📊 ยอดรวมจากรายการที่แสดง
+                        </div>
                       </div>
                       <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem', color: '#0c4a6e' }}>
                         <div>จำนวน: <strong>{totalCards.toLocaleString()} ใบ</strong></div>
