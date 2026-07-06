@@ -121,7 +121,6 @@ export default function StaffPortal() {
   };
   const [history, setHistory] = useState([]);
   const [historyFilter, setHistoryFilter] = useState('pending'); // 'all', 'pending', 'printed'
-  const [sortBy, setSortBy] = useState('newest');
   const [filterSender, setFilterSender] = useState('');
   const [filterSavedDate, setFilterSavedDate] = useState('');
   const [filterOrderDate, setFilterOrderDate] = useState('');
@@ -4617,21 +4616,9 @@ export default function StaffPortal() {
                       ))}
                     </select>
                   </div>
-
-                  <div>
-                    <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '2px' }}>จัดเรียงข้อมูล</label>
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      style={{ width: '100%', padding: '4px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem' }}
-                    >
-                      <option value="newest">ใหม่ล่าสุด (ค่าเริ่มต้น)</option>
-                      <option value="sender">ตามรายชื่อผู้สั่ง</option>
-                    </select>
-                  </div>
                 </div>
 
-                {(filterSender || filterSavedDate || filterOrderDate || filterImportSource || sortBy !== 'newest') && (
+                {(filterSender || filterSavedDate || filterOrderDate || filterImportSource) && (
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
                     <button
                       type="button"
@@ -4640,7 +4627,6 @@ export default function StaffPortal() {
                         setFilterSavedDate('');
                         setFilterOrderDate('');
                         setFilterImportSource('');
-                        setSortBy('newest');
                       }}
                       style={{
                         padding: '2px 8px',
@@ -4720,16 +4706,6 @@ export default function StaffPortal() {
                   return true;
                 });
 
-                if (sortBy === 'sender') {
-                  displayedHistory = [...displayedHistory].sort((a, b) => {
-                    const nameA = (a.senderNickname || a.sn || '').toLowerCase();
-                    const nameB = (b.senderNickname || b.sn || '').toLowerCase();
-                    if (nameA < nameB) return -1;
-                    if (nameA > nameB) return 1;
-                    return b.id - a.id;
-                  });
-                }
-
                 const totalCards = displayedHistory.reduce((sum, record) => sum + (Number(record.quantity) || 0), 0);
                 const totalPriceStr = (totalCards * postcardRate).toLocaleString();
 
@@ -4758,36 +4734,6 @@ export default function StaffPortal() {
                       <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem 0' }}>
                         {historyFilter === 'pending' ? 'ไม่มีรายการรอพิมพ์ในขณะนี้' : historyFilter === 'printed' ? 'ยังไม่มีประวัติการพิมพ์สำเร็จ' : 'ยังไม่มีข้อมูลในระบบประวัติ'}
                       </p>
-                    ) : sortBy === 'sender' ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '60vh', overflowY: 'auto', paddingRight: '2px' }}>
-                        {Object.values(displayedHistory.reduce((acc, record) => {
-                          const name = record.senderNickname || record.sn || 'ไม่ระบุชื่อผู้สั่ง';
-                          if (!acc[name]) acc[name] = { name, count: 0, cards: 0, price: 0 };
-                          acc[name].count += 1;
-                          acc[name].cards += (Number(record.quantity) || 0);
-                          acc[name].price += (Number(record.quantity) || 0) * postcardRate;
-                          return acc;
-                        }, {})).sort((a, b) => a.name.localeCompare(b.name)).map(group => (
-                          <div key={group.name} style={{
-                            padding: '1rem',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '8px',
-                            background: '#f8fafc',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
-                          }}>
-                            <div>
-                              <div style={{ fontWeight: 'bold', fontSize: '1rem', color: '#0f172a' }}>ผู้สั่งพิมพ์: {group.name}</div>
-                              <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.25rem' }}>จำนวนออเดอร์: {group.count} รายการ</div>
-                            </div>
-                            <div style={{ textAlign: 'right' }}>
-                              <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#0369a1' }}>{group.cards.toLocaleString()} ใบ</div>
-                              <div style={{ fontSize: '0.85rem', color: '#16a34a', fontWeight: 'bold' }}>{group.price.toLocaleString()} บาท</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '60vh', overflowY: 'auto', paddingRight: '2px' }}>
                         {displayedHistory.map((record) => (
