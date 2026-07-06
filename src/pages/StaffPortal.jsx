@@ -121,6 +121,7 @@ export default function StaffPortal() {
   };
   const [history, setHistory] = useState([]);
   const [historyFilter, setHistoryFilter] = useState('pending'); // 'all', 'pending', 'printed'
+  const [sortBy, setSortBy] = useState('newest');
   const [filterSender, setFilterSender] = useState('');
   const [filterSavedDate, setFilterSavedDate] = useState('');
   const [filterOrderDate, setFilterOrderDate] = useState('');
@@ -4616,9 +4617,21 @@ export default function StaffPortal() {
                       ))}
                     </select>
                   </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '2px' }}>จัดเรียงข้อมูล</label>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      style={{ width: '100%', padding: '4px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem' }}
+                    >
+                      <option value="newest">ใหม่ล่าสุด (ค่าเริ่มต้น)</option>
+                      <option value="sender">ตามรายชื่อผู้สั่ง</option>
+                    </select>
+                  </div>
                 </div>
 
-                {(filterSender || filterSavedDate || filterOrderDate || filterImportSource) && (
+                {(filterSender || filterSavedDate || filterOrderDate || filterImportSource || sortBy !== 'newest') && (
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
                     <button
                       type="button"
@@ -4627,6 +4640,7 @@ export default function StaffPortal() {
                         setFilterSavedDate('');
                         setFilterOrderDate('');
                         setFilterImportSource('');
+                        setSortBy('newest');
                       }}
                       style={{
                         padding: '2px 8px',
@@ -4672,7 +4686,7 @@ export default function StaffPortal() {
               )}
 
               {(() => {
-                const displayedHistory = history.filter(record => {
+                let displayedHistory = history.filter(record => {
                   if (historyFilter === 'trash') {
                      if (!record.deleted) return false;
                   } else {
@@ -4706,17 +4720,47 @@ export default function StaffPortal() {
                   return true;
                 });
 
-                if (displayedHistory.length === 0) {
-                  return (
-                    <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem 0' }}>
-                      {historyFilter === 'pending' ? 'ไม่มีรายการรอพิมพ์ในขณะนี้' : historyFilter === 'printed' ? 'ยังไม่มีประวัติการพิมพ์สำเร็จ' : 'ยังไม่มีข้อมูลในระบบประวัติ'}
-                    </p>
-                  );
+                if (sortBy === 'sender') {
+                  displayedHistory = [...displayedHistory].sort((a, b) => {
+                    const nameA = (a.senderNickname || a.sn || '').toLowerCase();
+                    const nameB = (b.senderNickname || b.sn || '').toLowerCase();
+                    if (nameA < nameB) return -1;
+                    if (nameA > nameB) return 1;
+                    return b.id - a.id;
+                  });
                 }
 
+                const totalCards = displayedHistory.reduce((sum, record) => sum + (Number(record.quantity) || 0), 0);
+                const totalPriceStr = (totalCards * postcardRate).toLocaleString();
+
                 return (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '60vh', overflowY: 'auto', paddingRight: '2px' }}>
-                    {displayedHistory.map((record) => (
+                  <>
+                    <div style={{
+                      backgroundColor: '#e0f2fe',
+                      border: '1px solid #bae6fd',
+                      borderRadius: '8px',
+                      padding: '0.75rem',
+                      marginBottom: '1rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div style={{ fontWeight: 'bold', color: '#0369a1', fontSize: '0.85rem' }}>
+                        📊 ยอดรวมจากรายการที่แสดง
+                      </div>
+                      <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem', color: '#0c4a6e' }}>
+                        <div>จำนวน: <strong>{totalCards.toLocaleString()} ใบ</strong></div>
+                        <div>ราคารวม: <strong>{totalPriceStr} บาท</strong></div>
+                      </div>
+                    </div>
+
+                    {displayedHistory.length === 0 ? (
+                      <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem 0' }}>
+                        {historyFilter === 'pending' ? 'ไม่มีรายการรอพิมพ์ในขณะนี้' : historyFilter === 'printed' ? 'ยังไม่มีประวัติการพิมพ์สำเร็จ' : 'ยังไม่มีข้อมูลในระบบประวัติ'}
+                      </p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '60vh', overflowY: 'auto', paddingRight: '2px' }}>
+                        {displayedHistory.map((record) => (
                     <div 
                       key={record.id}
                       id={`record-row-${record.id}`}
@@ -4982,6 +5026,8 @@ export default function StaffPortal() {
                     </div>
                   ))}
                   </div>
+                  )}
+                  </>
                 );
 
               })()}
