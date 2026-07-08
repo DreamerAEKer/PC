@@ -3375,7 +3375,7 @@ export default function StaffPortal() {
                       required: false,
                       validate: value => {
                         if (!value || value.trim() === '') return true;
-                        return /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i.test(value) || "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก)";
+                        return /(?:^|\\D)0([-\\s]?\\d){8,9}(?!\\d)(\\s*(ต่อ|ext\\.?|x)\\s*\\d{1,5})?/i.test(value) || "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก)";
                       }
                     })} placeholder="ระบุเบอร์โทรผู้สั่ง (ถ้ามี)" />
                     {errors.senderPhone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.senderPhone.message}</span>}
@@ -3392,7 +3392,7 @@ export default function StaffPortal() {
                   <input type="text" className={`form-control ${getFieldClass('phone')}`} required {...register("phone", { 
                     required: "กรุณาระบุเบอร์โทรศัพท์",
                     pattern: {
-                      value: /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i,
+                      value: /(?:^|\\D)0([-\\s]?\\d){8,9}(?!\\d)(\\s*(ต่อ|ext\\.?|x)\\s*\\d{1,5})?/i,
                       message: "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก เช่น 0812345678 หรือ 021234567 ต่อ 12)"
                     }
                   })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />

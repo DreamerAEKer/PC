@@ -74,7 +74,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';export 
     setValue("customQuantity", String(qtyVal || 100), { shouldValidate: true, shouldDirty: true });
   };
 
-  const PHONE_REGEX = /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i;
+  const PHONE_REGEX = /(?:^|\D)0([-\s]?\d){8,9}(?!\d)(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?/i;
 
   const validateSubPhone = (id, value) => {
     const isValid = PHONE_REGEX.test(value) || value.trim() === '';
