@@ -2727,7 +2727,7 @@ export default function StaffPortal() {
                 <Download size={16} /> นำเข้าข้อมูลลูกค้า (.json)
                 <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
               </label>
-              <div style={{ display: 'flex', alignItems: 'stretch' }}>
+              <div style={{ display: 'none', alignItems: 'stretch' }}>
                 <button 
                   type="button"
                   className="btn btn-secondary" 
