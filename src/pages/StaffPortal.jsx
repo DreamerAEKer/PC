@@ -110,8 +110,8 @@ export default function StaffPortal() {
     try {
       const q = query(
         collection(db, 'users'),
-        where('username', '==', loginUsername.toLowerCase()),
-        where('password', '==', loginPassword)
+        where('username', '==', loginUsername.trim().toLowerCase()),
+        where('password', '==', loginPassword.trim())
       );
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {

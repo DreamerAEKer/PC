@@ -39,7 +39,7 @@ export default function AdminPortal() {
     setLoginError('');
     
     // Hardcoded master admin fallback (useful for first-time setup)
-    if (loginUsername === 'admin' && loginPassword === 'Gpo10501') {
+    if (loginUsername.trim().toLowerCase() === 'admin' && loginPassword.trim() === 'Gpo10501') {
       setIsLoggedIn(true);
       sessionStorage.setItem('adminLoggedIn', 'true');
       fetchUsers();
