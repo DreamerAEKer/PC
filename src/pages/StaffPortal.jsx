@@ -3,11 +3,13 @@ import html2canvas from 'html2canvas';
 import { flushSync } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
-import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload, RefreshCw, Camera, FolderOpen, Bell } from 'lucide-react';
+import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload, RefreshCw, Camera, FolderOpen, Bell, Archive } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import ThaiDatePicker from '../components/ThaiDatePicker';
 import { QRCodeCanvas } from 'qrcode.react';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 import { useThaiAddress } from 'use-thai-address';
 import jsQR from 'jsqr';
 const Html5Qrcode = class { constructor() {} async clear() {} async scanFile() { return null; } };
@@ -856,6 +858,70 @@ export default function StaffPortal() {
     link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const exportZipHistory = async () => {
+    const recordsToExport = selectedIds.length > 0
+      ? history.filter(r => selectedIds.includes(r.id))
+      : history;
+
+    if (recordsToExport.length === 0) {
+      alert("ไม่มีข้อมูลที่จะส่งออกครับ");
+      return;
+    }
+
+    if (!window.confirm(`ระบบกำลังเตรียมสร้างไฟล์รูปภาพจำนวน ${recordsToExport.length} รูป และจัดลงโฟลเดอร์ \nอาจใช้เวลาโหลดสักครู่ คุณต้องการดำเนินการต่อหรือไม่?`)) {
+      return;
+    }
+
+    const zip = new JSZip();
+    
+    // Create a toast/alert or just let them know
+    const oldNotification = notification;
+    setNotification(`กำลังสร้างไฟล์ ZIP (${recordsToExport.length} รายการ)...`);
+
+    for (let i = 0; i < recordsToExport.length; i++) {
+      const record = recordsToExport[i];
+      setCardRecord(record);
+      // Wait for React to render the hidden card
+      await new Promise(resolve => setTimeout(resolve, 350));
+      
+      const el = document.getElementById('hidden-capture-card');
+      if (el) {
+        try {
+          const canvas = await html2canvas(el, { 
+            scale: 2,
+            useCORS: true,
+            allowTaint: true
+          });
+          const url = canvas.toDataURL('image/png');
+          const base64Data = url.replace(/^data:image\/(png|jpg);base64,/, "");
+          
+          const customerName = (record.name || 'ไม่ระบุชื่อ').replace(/[\\/:*?"<>|]/g, "_");
+          const dateStr = record.orderDate || new Date().toISOString().split('T')[0];
+          const filename = `postcard-${customerName}-${record.id || dateStr}.png`;
+          
+          // Add to zip in a folder named after the customer
+          zip.folder(customerName).file(filename, base64Data, {base64: true});
+        } catch (e) {
+          console.error("Failed to generate card for", record, e);
+        }
+      }
+    }
+    setCardRecord(null);
+
+    try {
+      const content = await zip.generateAsync({type:"blob"});
+      saveAs(content, `PrintCards-${branchName}-${new Date().toISOString().split('T')[0]}.zip`);
+      setNotification(`✅ สร้างไฟล์ ZIP สำเร็จแล้ว! ดาวน์โหลดลงเครื่องเรียบร้อย`);
+    } catch(err) {
+      alert("เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP: " + err.message);
+      setNotification(oldNotification);
+    }
+    
+    setTimeout(() => {
+      setNotification(null);
+    }, 5000);
   };
 
   const generateAndDownloadCard = async (record) => {
@@ -4113,66 +4179,13 @@ export default function StaffPortal() {
 
               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
                 <button 
-                  onClick={() => exportHistory('download')} 
+                  onClick={exportZipHistory} 
                   className="btn btn-secondary" 
-                  style={{ flex: '1 1 180px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', borderColor: selectedIds.length > 0 ? 'var(--primary)' : 'var(--border)', backgroundColor: selectedIds.length > 0 ? '#fff1f2' : '' }}
-                  title="ดาวน์โหลดประวัติเป็นไฟล์ลงเครื่องคอมพิวเตอร์"
+                  style={{ flex: '1 1 100%', padding: '0.75rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', fontWeight: 'bold' }}
+                  title="ดาวน์โหลดรูปร่างหน้าการ์ดสั่งพิมพ์แยกตามรายชื่อลงเครื่อง (ไฟล์ ZIP)"
                 >
-                  💾 บันทึกลงเครื่อง {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
+                  <Archive size={18} /> ส่งออกการ์ด (แยกโฟลเดอร์ผู้สั่ง) {selectedIds.length > 0 ? `(${selectedIds.length} รายการ)` : ''}
                 </button>
-                <label 
-                  className="btn btn-secondary" 
-                  style={{ flex: '1 1 150px', padding: '0.5rem', fontSize: '0.825rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', cursor: 'pointer', margin: 0 }}
-                  title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
-                >
-                  <Download size={14} /> นำเข้าข้อมูล (.json)
-                  <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
-                </label>
-                <div style={{ display: 'flex', alignItems: 'stretch', flex: '1 1 200px' }}>
-                  <button 
-                    type="button"
-                    className="btn btn-secondary" 
-                    onClick={() => refreshFromDirectoryHandles(directoryHandles)}
-                    disabled={isRefreshingFolder || directoryHandles.length === 0}
-                    style={{ 
-                      padding: '0.5rem', 
-                      fontSize: '0.825rem', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      cursor: directoryHandles.length > 0 ? 'pointer' : 'default', 
-                      margin: 0, 
-                      borderTopRightRadius: 0,
-                      borderBottomRightRadius: 0,
-                      borderRight: 'none',
-                      opacity: directoryHandles.length === 0 ? 0.4 : (isRefreshingFolder ? 0.7 : 1)
-                    }}
-                    title={directoryHandles.length > 0 ? `ดึงข้อมูลล่าสุดจาก ${directoryHandles.length} โฟลเดอร์` : "กรุณาเชื่อมต่อโฟลเดอร์ก่อน"}
-                  >
-                    <RefreshCw size={14} style={{ animation: isRefreshingFolder ? 'spin 1s linear infinite' : 'none' }} />
-                  </button>
-                  <button 
-                    type="button"
-                    className="btn btn-secondary" 
-                    onClick={handleFolderPickerClick}
-                    style={{ 
-                      flex: 1,
-                      padding: '0.5rem', 
-                      fontSize: '0.825rem', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      gap: '0.35rem', 
-                      cursor: 'pointer', 
-                      margin: 0, 
-                      borderTopLeftRadius: 0,
-                      borderBottomLeftRadius: 0
-                    }}
-                    title="เลือกหรือเพิ่มโฟลเดอร์สำหรับดึงข้อมูลสั่งพิมพ์"
-                  >
-                    <FolderOpen size={14} /> โฟล์เดอร์เก็บข้อมูลสั่งพิมพ์ {directoryHandles.length > 0 ? `(${directoryHandles.length})` : ''}
-                  </button>
-                </div>
               </div>
 
               {/* Segmented Filter Tabs for History */}
