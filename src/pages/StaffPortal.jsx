@@ -183,6 +183,8 @@ export default function StaffPortal() {
   const [isRefreshingFolder, setIsRefreshingFolder] = useState(false);
   const [restartKey, setRestartKey] = useState(0);
   const [scanResultModal, setScanResultModal] = useState(null);
+  const [isExportingZip, setIsExportingZip] = useState(false);
+  const [exportProgress, setExportProgress] = useState({ current: 0, total: 0 });
 
   useEffect(() => {
     if (didValue && didValue.trim().length > 0) {
@@ -876,13 +878,13 @@ export default function StaffPortal() {
 
     const zip = new JSZip();
     
-    // Create a toast/alert or just let them know
-    const oldNotification = notification;
-    setNotification(`กำลังสร้างไฟล์ ZIP (${recordsToExport.length} รายการ)...`);
+    setIsExportingZip(true);
+    setExportProgress({ current: 0, total: recordsToExport.length });
 
     for (let i = 0; i < recordsToExport.length; i++) {
       const record = recordsToExport[i];
       setCardRecord(record);
+      setExportProgress({ current: i + 1, total: recordsToExport.length });
       // Wait for React to render the hidden card
       await new Promise(resolve => setTimeout(resolve, 350));
       
@@ -909,6 +911,7 @@ export default function StaffPortal() {
       }
     }
     setCardRecord(null);
+    setExportProgress(prev => ({ ...prev, current: 'saving' }));
 
     try {
       const content = await zip.generateAsync({type:"blob"});
@@ -916,8 +919,9 @@ export default function StaffPortal() {
       setNotification(`✅ สร้างไฟล์ ZIP สำเร็จแล้ว! ดาวน์โหลดลงเครื่องเรียบร้อย`);
     } catch(err) {
       alert("เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP: " + err.message);
-      setNotification(oldNotification);
     }
+    
+    setIsExportingZip(false);
     
     setTimeout(() => {
       setNotification(null);
@@ -2650,6 +2654,16 @@ export default function StaffPortal() {
 
   return (
     <>
+      {isExportingZip && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.9)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <RefreshCw size={48} color="#3b82f6" style={{ animation: 'spin 2s linear infinite', marginBottom: '1rem' }} />
+          <h2 style={{ margin: 0, color: '#1e293b' }}>กำลังสร้างรูปภาพการ์ดสั่งพิมพ์...</h2>
+          <p style={{ color: '#64748b', fontSize: '1.2rem', marginTop: '0.5rem', fontWeight: 'bold' }}>
+            {exportProgress.current === 'saving' ? 'กำลังบีบอัดไฟล์ ZIP...' : `ประมวลผล ${exportProgress.current} จาก ${exportProgress.total} รายการ`}
+          </p>
+          <p style={{ color: '#ef4444', fontSize: '0.9rem', marginTop: '1rem' }}>กรุณาอย่าปิดหน้าต่างนี้จนกว่าจะเสร็จสิ้น</p>
+        </div>
+      )}
       {notification && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce">
           <Bell className="w-6 h-6 animate-pulse" />
