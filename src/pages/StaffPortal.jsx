@@ -7,6 +7,7 @@ import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Uploa
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import ThaiDatePicker from '../components/ThaiDatePicker';
+import OrderSummaryCard from '../components/OrderSummaryCard';
 import { QRCodeCanvas } from 'qrcode.react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -6399,96 +6400,8 @@ export default function StaffPortal() {
 
       {cardRecord && (
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', zIndex: -10 }}>
-          <div 
-            id="hidden-capture-card" 
-            style={{ 
-              backgroundColor: '#ffffff', 
-              borderRadius: '12px', 
-              padding: '1.25rem', 
-              width: '360px', 
-              boxSizing: 'border-box',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-              color: '#0f172a'
-            }}
-          >
-            <div style={{ textAlign: 'center', borderBottom: '2px solid var(--primary)', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>
-              <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.15rem', fontWeight: 'bold' }}>
-                PostcardApp จองพิมพ์ผ่านพี่ไปร
-              </h3>
-              <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.15rem' }}>
-                * สำหรับนำยื่นให้เจ้าหน้าที่สแกนสั่งพิมพ์
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#fff', padding: '1rem', borderRadius: '12px', border: '2px solid var(--primary)', marginBottom: '1rem' }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--primary)', marginBottom: '0.5rem' }}>
-                QR สำหรับสั่งพิมพ์
-              </div>
-              <QRCodeCanvas 
-                value={JSON.stringify({
-                  oc: cardRecord.orderCode || cardRecord.oc || '',
-                  sn: cardRecord.senderNickname || cardRecord.sn || '',
-                  sp: cardRecord.senderPhone || cardRecord.sp || '',
-                  d: cardRecord.orderDate || '',
-                  q: cardRecord.quantity || 100,
-                  n: cardRecord.name || '',
-                  p: cardRecord.phone || '',
-                  a: cardRecord.addressLine1 || cardRecord.address || '',
-                  sd: cardRecord.subdistrict || '',
-                  dt: cardRecord.district || '',
-                  pv: cardRecord.province || '',
-                  zp: cardRecord.zipcode || '',
-                  id: cardRecord.did || '',
-                  idx: 1,
-                  tot: 1,
-                  s: cardRecord.subBookings ? cardRecord.subBookings.map(sub => ({
-                    n: sub.name,
-                    p: sub.phone,
-                    q: sub.quantity,
-                    m: sub.useMainAddress ? 1 : 0,
-                    a: sub.address
-                  })) : []
-                })} 
-                size={220} 
-                level="L" 
-              />
-            </div>
-
-            <div style={{ backgroundColor: '#f8fafc', borderRadius: '8px', padding: '0.85rem', border: '1px solid #e2e8f0', fontSize: '0.85rem', lineHeight: '1.5' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #cbd5e1', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
-                <span style={{ color: '#64748b' }}>รหัสสั่งพิมพ์:</span>
-                <strong style={{ color: '#1e40af', fontFamily: 'monospace' }}>{cardRecord.orderCode || cardRecord.oc || '-'}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#64748b' }}>ชื่อผู้รับ:</span>
-                <strong>{cardRecord.name}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#64748b' }}>เบอร์โทร:</span>
-                <strong>{cardRecord.phone || '-'}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#64748b' }}>จำนวน:</span>
-                <strong style={{ color: 'var(--primary)' }}>{cardRecord.quantity} ใบ</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#64748b' }}>วันที่สั่งจอง:</span>
-                <strong>{cardRecord.orderDate || ''}</strong>
-              </div>
-              {cardRecord.did ? (
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #e2e8f0', marginTop: '0.3rem', paddingTop: '0.3rem' }}>
-                  <span style={{ color: '#64748b' }}>D-ID:</span>
-                  <strong style={{ color: '#dc2626' }}>{cardRecord.did}</strong>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #e2e8f0', marginTop: '0.3rem', paddingTop: '0.3rem' }}>
-                  <span style={{ color: '#64748b' }}>ที่อยู่:</span>
-                  <strong style={{ textAlign: 'right', fontSize: '0.8rem', wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '200px' }}>
-                    {cardRecord.addressLine1 || cardRecord.address || ''} {cardRecord.zipcode}
-                  </strong>
-                </div>
-              )}
-            </div>
+          <div id="hidden-capture-card" style={{ display: 'inline-block', backgroundColor: 'transparent' }}>
+            <OrderSummaryCard record={cardRecord} />
           </div>
         </div>
       )}

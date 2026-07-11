@@ -7,6 +7,7 @@ import ThaiAddressFields from '../components/ThaiAddressFields';
 import SubAddressFields from '../components/SubAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import ThaiDatePicker, { formatThaiDate } from '../components/ThaiDatePicker';
+import OrderSummaryCard from '../components/OrderSummaryCard';
 import { useThaiAddress } from 'use-thai-address';
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';export default function CustomerForm() {
@@ -1742,169 +1743,12 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';export 
             )}
 
             {/* Capture area: QR + info only (no buttons) */}
-            <div ref={captureRef} style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '0.5rem 0.5rem 0', overflow: 'visible' }}>
-
-            {/* QR Code Container with Animation Wrapper */}
-            <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
-              <div 
-                key={bulkIndex}
-                className="qr-card-bounce"
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  backgroundColor: '#fff',
-                  padding: '1.25rem 1rem 1rem 1rem',
-                  borderRadius: '12px',
-                  border: '2px solid var(--primary)',
-                  width: '100%',
-                  maxWidth: '300px',
-                  boxSizing: 'border-box',
-                  margin: '1rem auto 1.25rem auto',
-                  boxShadow: '0 4px 12px rgba(225, 29, 72, 0.15)',
-                  position: 'relative'
-                }}
-              >
-                <div style={{ 
-                  position: 'absolute', 
-                  top: '-0.75rem', 
-                  backgroundColor: 'var(--primary)', 
-                  color: '#fff', 
-                  fontSize: '0.75rem', 
-                  fontWeight: 'bold', 
-                  padding: '0.15rem 0.6rem', 
-                  borderRadius: '20px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {bulkRecords.length > 1 ? `QR ลำดับที่ ${bulkIndex + 1} / ทั้งหมด ${bulkRecords.length}` : 'QR สำหรับสั่งพิมพ์'}
-                </div>
-                <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                  <QRCodeCanvas 
-                    value={generatedData.payload} 
-                    size={350} 
-                    level="L" 
-                    fgColor="#000000" 
-                    bgColor="#ffffff" 
-                    style={{ 
-                      width: '100%', 
-                      height: 'auto', 
-                      maxWidth: '240px', 
-                      aspectRatio: '1/1',
-                      display: 'block'
-                    }} 
-                  />
-                  <div style={{ 
-                    marginTop: '0.75rem', 
-                    fontSize: '0.75rem', 
-                    color: '#e11d48', 
-                    fontWeight: 'bold', 
-                    backgroundColor: '#fff1f2', 
-                    padding: '0.25rem 0.5rem', 
-                    borderRadius: '6px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.25rem',
-                    textAlign: 'center'
-                  }}>
-                    💡 แนะนำ: เร่งแสงหน้าจอให้สว่างสุดเพื่อสแกนเร็วขึ้น
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* End of Sequence Indicator */}
-            {bulkRecords.length > 1 && bulkIndex === bulkRecords.length - 1 && (
-              <div style={{
-                backgroundColor: '#dcfce7',
-                color: '#15803d',
-                fontSize: '0.9rem',
-                fontWeight: 'bold',
-                padding: '0.5rem',
-                borderRadius: '8px',
-                marginBottom: '1rem',
-                animation: 'pulse 2s infinite',
-                border: '1px solid #bbf7d0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.35rem'
-              }}>
-                <span>✨ รายการสุดท้ายแล้ว (ครบถ้วน)</span>
-              </div>
-            )}
-
-            {/* Short Details with fixed height to prevent button shifting */}
-            <div style={{
-              backgroundColor: '#f8fafc',
-              borderRadius: '12px',
-              padding: '1rem',
-              textAlign: 'left',
-              marginBottom: '1.5rem',
-              border: '1px solid #e2e8f0',
-              fontSize: '0.95rem',
-              lineHeight: '1.6',
-              minHeight: '185px',
-              height: 'auto',
-              boxSizing: 'border-box',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between'
-            }}>
-              <div>
-                <div style={{ borderBottom: '1px dashed #cbd5e1', paddingBottom: '0.4rem', marginBottom: '0.4rem', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
-                  📍 รับพิมพ์โดย: {generatedData.branch || 'ไปรษณีย์กลาง 10501'}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>รหัสสั่งพิมพ์:</span>
-                  <strong style={{ color: '#0f172a' }}>{generatedData.orderCode || generatedData.oc || '-'}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>ผู้สั่ง (ชื่อเล่น):</span>
-                  <strong style={{ color: '#0f172a' }}>{generatedData.senderNickname || generatedData.sn || '-'}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>เบอร์โทรผู้สั่ง:</span>
-                  <strong style={{ color: '#0f172a' }}>{generatedData.senderPhone || generatedData.sp || '-'}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #cbd5e1', marginTop: '0.4rem', paddingTop: '0.4rem' }}>
-                  <span style={{ color: '#64748b' }}>ชื่อผู้รับ:</span>
-                  <strong style={{ color: '#0f172a' }}>{generatedData.name}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>เบอร์โทร:</span>
-                  <strong style={{ color: '#0f172a' }}>{generatedData.phone}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>จำนวนที่จอง:</span>
-                  <strong style={{ color: 'var(--primary)', fontSize: '1.05rem' }}>{generatedData.quantity} ใบ</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>วันที่สั่งจอง:</span>
-                  <strong style={{ color: '#0f172a' }}>{formatThaiDate(generatedData.orderDate)}</strong>
-                </div>
-                {generatedData.address && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #e2e8f0', marginTop: '0.4rem', paddingTop: '0.4rem' }}>
-                    <span style={{ color: '#64748b', minWidth: '60px' }}>ที่อยู่:</span>
-                    <strong style={{ color: '#0f172a', textAlign: 'right', fontSize: '0.85rem', fontWeight: 600, wordBreak: 'break-word', overflowWrap: 'break-word' }}>{generatedData.address} {generatedData.zipcode}</strong>
-                  </div>
-                )}
-              </div>
-              <div style={{ 
-                borderTop: '1px solid #e2e8f0', 
-                marginTop: '0.4rem', 
-                paddingTop: '0.4rem',
-                minHeight: '26px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                visibility: generatedData.did ? 'visible' : 'hidden' // Keeps layout space even when hidden
-              }}>
-                <span style={{ color: '#64748b' }}>D-ID:</span>
-                <strong style={{ color: 'var(--secondary)' }}>{generatedData.did || '-'}</strong>
-              </div>
-            </div>
-
+            {/* Capture area: Order Summary Card */}
+            <div ref={captureRef} style={{ padding: '0.5rem 0.5rem 0', overflow: 'visible', backgroundColor: 'transparent' }}>
+              <OrderSummaryCard 
+                record={generatedData} 
+                indexInfo={bulkRecords.length > 1 ? `รายการที่ ${bulkIndex + 1} / ${bulkRecords.length}` : null} 
+              />
             </div>{/* end captureRef */}
 
             {/* Stepper Buttons for Bulk Send */}
