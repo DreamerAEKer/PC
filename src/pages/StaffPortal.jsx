@@ -2789,14 +2789,14 @@ export default function StaffPortal() {
                 onChange={handleFolderImport} 
                 style={{ display: 'none' }} 
               />
-              <Link to="/worldcup" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff' }}>
+              <Link to="/worldcup" className="btn btn-secondary" style={{ display: 'none', alignItems: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff' }}>
                 พิมพ์ชื่อแชมป์ <span role="img" aria-label="globe">🌍</span>
               </Link>
               <button 
                 type="button"
                 className="btn btn-secondary" 
                 onClick={() => navigate('/print-blank-forms', { state: { branchName, branchCode, staffName, staffPhone } })}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#f59e0b', color: '#d97706', backgroundColor: '#fffbeb', cursor: 'pointer', margin: 0 }}
+                style={{ display: 'none', alignItems: 'center', gap: '0.5rem', borderColor: '#f59e0b', color: '#d97706', backgroundColor: '#fffbeb', cursor: 'pointer', margin: 0 }}
                 title="พิมพ์ใบกรอกการสั่งพิมพ์ (A4) สำหรับให้ลูกค้าเขียนด้วยมือ"
               >
                 <FileText size={16} /> พิมพ์ใบกรอกการสั่งพิมพ์ (A4)
