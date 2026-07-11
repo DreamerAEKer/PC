@@ -317,4 +317,7 @@ a:hover {
   .stats-footer strong {
     font-size: 1rem !important;
   }
+  .staff-settings-container-row {
+    display: none !important;
+  }
 }
