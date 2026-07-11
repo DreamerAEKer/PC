@@ -132,9 +132,9 @@ export default function StaffPortal() {
   const [cardRecord, setCardRecord] = useState(null);
   const [directoryHandles, setDirectoryHandles] = useState([]);
   const [editingRecordId, setEditingRecordId] = useState(null);
-  const [scanMode, setScanMode] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768 ? 'camera' : 'manual');
-  const [cameraActive, setCameraActive] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
-  const [scanSubMode, setScanSubMode] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768 ? 'camera' : 'file'); // 'file', 'usb', 'camera'
+  const [scanMode, setScanMode] = useState('manual');
+  const [cameraActive, setCameraActive] = useState(false);
+  const [scanSubMode, setScanSubMode] = useState('file'); // 'file', 'usb', 'camera'
   const didValue = watch("did", "");
   const isDidActive = (didValue || "").trim().length === 6;
   const [showDidInput, setShowDidInput] = useState(false);
@@ -2518,6 +2518,7 @@ export default function StaffPortal() {
       )}
       <style>
         {`
+          .mobile-only-scan-helper { display: none !important; }
           @media print {
             @page {
               size: ${printSettings.paperSize === 'A4' ? '29.7cm 21.0cm' : '14.8cm 10.5cm'};
