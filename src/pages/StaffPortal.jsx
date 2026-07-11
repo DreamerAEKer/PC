@@ -14,7 +14,7 @@ const Html5Qrcode = class { constructor() {} async clear() {} async scanFile() {
 const Html5QrcodeSupportedFormats = { QR_CODE: 1 };
 let Html5QrcodeScanner = class { render() {} clear() {} };
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, where, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, where, updateDoc, doc, deleteDoc, getDocs } from 'firebase/firestore';
 let globalHiddenScanner = null;
 
 const playNotificationSound = () => {
@@ -94,6 +94,46 @@ const getSavedDate = (record) => {
 };
 
 export default function StaffPortal() {
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('staffCurrentUser');
+      return saved ? JSON.parse(saved) : null;
+    } catch(e) { return null; }
+  });
+  const [loginUsername, setLoginUsername] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+
+  const handleStaffLogin = async (e) => {
+    e.preventDefault();
+    setLoginError('');
+    try {
+      const q = query(
+        collection(db, 'users'),
+        where('username', '==', loginUsername.toLowerCase()),
+        where('password', '==', loginPassword)
+      );
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        const userData = snapshot.docs[0].data();
+        setCurrentUser(userData);
+        sessionStorage.setItem('staffCurrentUser', JSON.stringify(userData));
+        setBranchCode(userData.username);
+        if (userData.displayName) setBranchName(userData.displayName);
+      } else {
+        setLoginError('รหัสผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+      }
+    } catch (err) {
+      console.error(err);
+      setLoginError('เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล');
+    }
+  };
+
+  const handleStaffLogout = () => {
+    setCurrentUser(null);
+    sessionStorage.removeItem('staffCurrentUser');
+  };
+
   const [notification, setNotification] = useState(null);
   const isFirstLoad = useRef(true);
   const [activeTab, setActiveTab] = useState('history');
@@ -180,7 +220,16 @@ export default function StaffPortal() {
 
   const [hasActiveData, setHasActiveData] = useState(false);
   const [branchName, setBranchName] = useState('ไปรษณีย์กลาง');
-  const [branchCode, setBranchCode] = useState('10501');
+  const [branchCode, setBranchCode] = useState(() => {
+    try {
+      const savedUser = sessionStorage.getItem('staffCurrentUser');
+      if (savedUser) {
+        const u = JSON.parse(savedUser);
+        return u.username || '10501';
+      }
+    } catch(e) {}
+    return '10501';
+  });
   const [staffName, setStaffName] = useState('');
   const [staffPhone, setStaffPhone] = useState('');
   const [isSettingsDirty, setIsSettingsDirty] = useState(false);
@@ -2508,6 +2557,31 @@ export default function StaffPortal() {
     setTimeout(() => setShowSaveSuccess(false), 3000);
   };
 
+  if (!currentUser) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9', padding: '1rem' }}>
+        <div style={{ background: 'white', padding: '2.5rem 2rem', borderRadius: '16px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', width: '100%', maxWidth: '400px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <h2 style={{ margin: 0, color: '#1e293b', fontSize: '1.5rem' }}>เข้าสู่ระบบเจ้าหน้าที่</h2>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>กรุณาล็อกอินเพื่อเข้าใช้งานระบบจัดการ</p>
+          </div>
+          <form onSubmit={handleStaffLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 'bold', color: '#475569' }}>Username (รหัสสาขา / แผนก)</label>
+              <input type="text" className="form-control" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} placeholder="เช่น 10501" required style={{ padding: '0.75rem' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 'bold', color: '#475569' }}>Password (รหัสผ่าน)</label>
+              <input type="password" className="form-control" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="••••••••" required style={{ padding: '0.75rem' }} />
+            </div>
+            {loginError && <div style={{ color: '#ef4444', fontSize: '0.85rem', textAlign: 'center', backgroundColor: '#fef2f2', padding: '0.5rem', borderRadius: '8px' }}>{loginError}</div>}
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.875rem', marginTop: '0.5rem', fontSize: '1rem', fontWeight: 'bold' }}>เข้าสู่ระบบ</button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {notification && (
@@ -2704,7 +2778,19 @@ export default function StaffPortal() {
       
       <div className="staff-no-print staff-dashboard-wrapper">
         <div className="staff-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-          <h2>แดชบอร์ดเจ้าหน้าที่ ปณ.</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2>แดชบอร์ดเจ้าหน้าที่ ปณ.</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <span style={{ fontSize: '0.9rem', color: '#64748b' }}>ผู้ใช้: <strong>{currentUser?.username}</strong></span>
+              <button 
+                onClick={handleStaffLogout}
+                className="btn btn-secondary"
+                style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+              >
+                ออกจากระบบ
+              </button>
+            </div>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-end' }}>
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <label 
@@ -4722,7 +4808,8 @@ export default function StaffPortal() {
                 value={branchCode} 
                 onChange={handleBranchCodeChange} 
                 placeholder="5 หลัก"
-                style={{ width: '100%', padding: '0.3rem 0.5rem', fontSize: '0.85rem', borderColor: (!branchCode || branchCode.length < 5) ? 'var(--primary)' : 'var(--border)' }} 
+                disabled={currentUser?.role !== 'admin'}
+                style={{ width: '100%', padding: '0.3rem 0.5rem', fontSize: '0.85rem', backgroundColor: currentUser?.role !== 'admin' ? '#f1f5f9' : 'white', borderColor: (!branchCode || branchCode.length < 5) ? 'var(--primary)' : 'var(--border)' }} 
               />
             </div>
             

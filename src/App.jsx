@@ -7,6 +7,7 @@ import StaffPortal from './pages/StaffPortal';
 import PrintPostcard from './pages/PrintPostcard';
 import PrintBlankForms from './pages/PrintBlankForms';
 import WorldCupPortal from './pages/WorldCupPortal';
+import AdminPortal from './pages/AdminPortal';
 
 function Navigation() {
   const location = useLocation();
@@ -80,6 +81,7 @@ function App() {
             <Route path="/" element={<CustomerForm />} />
             <Route path="/staff" element={<StaffPortal />} />
             <Route path="/worldcup" element={<WorldCupPortal />} />
+            <Route path="/admin" element={<AdminPortal />} />
             <Route path="/print-postcard" element={<PrintPostcard />} />
             <Route path="/print-blank-forms" element={<PrintBlankForms />} />
           </Routes>
