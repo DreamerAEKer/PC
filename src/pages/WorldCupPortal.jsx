@@ -542,7 +542,7 @@ function WorldCupPortal() {
                     }}>
                       {/* Dash lines representing A4 divisions */}
                       <div style={{ position: 'absolute', top: 0, left: 0, width: '29.7cm', height: '21.0cm', display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr' }}>
-                        <div style={{ borderRight: '1px dashed #cbd5e1', borderBottom: '1px dashed #cbd5e1', position: 'relative', overflow: 'hidden' }}>
+                        <div style={{ borderRight: '1px dashed #cbd5e1', borderBottom: '1px dashed #cbd5e1', position: 'relative' }}>
                           {/* Ideal Position guide (if calibrated) */}
                           {(wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) && (
                             <div 
@@ -607,8 +607,7 @@ function WorldCupPortal() {
                       position: 'absolute',
                       top: 0,
                       left: 0,
-                      boxSizing: 'border-box',
-                      overflow: 'hidden'
+                      boxSizing: 'border-box'
                     }}>
                       {/* Ideal Position guide (if calibrated) */}
                       {(wcPrintSettings.calX !== 0 || wcPrintSettings.calY !== 0) && (
