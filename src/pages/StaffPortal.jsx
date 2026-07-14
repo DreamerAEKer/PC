@@ -348,6 +348,25 @@ export default function StaffPortal() {
     );
   };
 
+  const matchSecondaryFilters = (record) => {
+    if (filterSender) {
+      const sn = record.senderNickname || record.sn;
+      if (sn !== filterSender) return false;
+    }
+    if (filterSavedDate) {
+      const savedDate = getSavedDate(record);
+      if (savedDate !== filterSavedDate) return false;
+    }
+    if (filterOrderDate) {
+      const od = record.orderDate || record.d;
+      if (od !== filterOrderDate) return false;
+    }
+    if (filterImportSource) {
+      if (record.importSource !== filterImportSource) return false;
+    }
+    return true;
+  };
+
   const handleUpdatePaymentStatus = () => {
     if (selectedIds.length === 0) return;
     setHistory(prev => {
@@ -4250,7 +4269,7 @@ export default function StaffPortal() {
                     gap: '4px'
                   }}
                 >
-                  ⏳ รอพิมพ์ ({history.filter(r => !r.printed && !r.deleted).length})
+                  ⏳ รอพิมพ์ ({history.filter(r => !r.printed && !r.deleted && matchSecondaryFilters(r)).length})
                 </button>
                 <button
                   type="button"
@@ -4276,7 +4295,7 @@ export default function StaffPortal() {
                     gap: '4px'
                   }}
                 >
-                  ✅ พิมพ์แล้ว ({history.filter(r => r.printed && !r.deleted).length})
+                  ✅ พิมพ์แล้ว ({history.filter(r => r.printed && !r.deleted && matchSecondaryFilters(r)).length})
                 </button>
                 <button
                   type="button"
@@ -4298,7 +4317,7 @@ export default function StaffPortal() {
                     transition: 'all 0.15s'
                   }}
                 >
-                  ทั้งหมด ({history.filter(r => !r.deleted).length})
+                  ทั้งหมด ({history.filter(r => !r.deleted && matchSecondaryFilters(r)).length})
                 </button>
                 <button
                   type="button"
@@ -4320,7 +4339,7 @@ export default function StaffPortal() {
                     transition: 'all 0.15s'
                   }}
                 >
-                  🗑️ ถังขยะ ({history.filter(r => r.deleted).length})
+                  🗑️ ถังขยะ ({history.filter(r => r.deleted && matchSecondaryFilters(r)).length})
                 </button>
               </div>
 
@@ -4491,26 +4510,7 @@ export default function StaffPortal() {
                      }
                   }
 
-                  if (filterSender) {
-                    const sn = record.senderNickname || record.sn;
-                    if (sn !== filterSender) return false;
-                  }
-
-                  if (filterSavedDate) {
-                    const savedDate = getSavedDate(record);
-                    if (savedDate !== filterSavedDate) return false;
-                  }
-
-                  if (filterOrderDate) {
-                    const od = record.orderDate || record.d;
-                    if (od !== filterOrderDate) return false;
-                  }
-
-                  if (filterImportSource) {
-                    if (record.importSource !== filterImportSource) return false;
-                  }
-
-                  return true;
+                  return matchSecondaryFilters(record);
                 });
 
                 const totalCards = displayedHistory.reduce((sum, record) => sum + (Number(record.quantity) || 0), 0);
