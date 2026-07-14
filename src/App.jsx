@@ -180,7 +180,13 @@ function Navigation() {
                 ) : (
                   <>
                     {notifications.newCustomerOrders > 0 && (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f0fdf4', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #22c55e' }}>
+                      <div 
+                        onClick={() => {
+                          setShowModal(false);
+                          navigate('/staff?filter=customer_app');
+                        }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f0fdf4', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #22c55e', cursor: 'pointer' }}
+                      >
                         <div>
                           <div style={{ fontWeight: 'bold', color: '#166534' }}>ออเดอร์ใหม่จากลูกค้า</div>
                           <div style={{ fontSize: '0.85rem', color: '#15803d' }}>รายการรอพิมพ์ที่บันทึกโดยลูกค้า</div>
@@ -192,7 +198,13 @@ function Navigation() {
                     )}
                     
                     {notifications.invalidPhoneOrders > 0 && (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fffbeb', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #f59e0b' }}>
+                      <div 
+                        onClick={() => {
+                          setShowModal(false);
+                          navigate('/staff?filter=invalid_phone');
+                        }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fffbeb', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #f59e0b', cursor: 'pointer' }}
+                      >
                         <div>
                           <div style={{ fontWeight: 'bold', color: '#b45309' }}>เบอร์โทรศัพท์ไม่สมบูรณ์</div>
                           <div style={{ fontSize: '0.85rem', color: '#d97706' }}>ออเดอร์รอพิมพ์ที่เบอร์ไม่ครบ</div>

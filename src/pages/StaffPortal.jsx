@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import { flushSync } from 'react-dom';
 import { useForm } from 'react-hook-form';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { QrCode, Keyboard, History, Printer, FileText, Settings, Download, Upload, RefreshCw, Camera, FolderOpen, Bell, Archive } from 'lucide-react';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
@@ -178,6 +178,22 @@ export default function StaffPortal() {
   const [filterSavedDate, setFilterSavedDate] = useState('');
   const [filterOrderDate, setFilterOrderDate] = useState('');
   const [filterImportSource, setFilterImportSource] = useState('');
+  const [filterWarning, setFilterWarning] = useState('');
+  const location = useLocation();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const filterParam = searchParams.get('filter');
+    if (filterParam === 'customer_app') {
+      setFilterImportSource('customer_app');
+      setFilterWarning('');
+      setActiveTab(0);
+    } else if (filterParam === 'invalid_phone') {
+      setFilterWarning('invalid_phone');
+      setFilterImportSource('');
+      setActiveTab(0);
+    }
+  }, [location.search]);
   const [latestRecordId, setLatestRecordId] = useState(null);
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
   const [cardRecord, setCardRecord] = useState(null);
@@ -3185,11 +3201,7 @@ export default function StaffPortal() {
                   <div style={{ flex: '1 1 180px' }}>
                     <label className="form-label" style={{ fontWeight: '700', color: '#1e293b' }}>เบอร์โทรผู้สั่ง</label>
                     <input type="text" className={`form-control ${getFieldClass('senderPhone')}`} {...register("senderPhone", { 
-                      required: false,
-                      validate: value => {
-                        if (!value || value.trim() === '') return true;
-                        return /(?:^|\\D)0([-\\s]?\\d){8,9}(?!\\d)(\\s*(ต่อ|ext\\.?|x)\\s*\\d{1,5})?/i.test(value) || "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก)";
-                      }
+                      required: false
                     })} placeholder="ระบุเบอร์โทรผู้สั่ง (ถ้ามี)" />
                     {errors.senderPhone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.senderPhone.message}</span>}
                   </div>
@@ -3203,11 +3215,7 @@ export default function StaffPortal() {
                 <div className="form-group">
                   <label className="form-label">เบอร์โทรศัพท์ <span style={{color:'red'}}>*</span></label>
                   <input type="text" className={`form-control ${getFieldClass('phone')}`} required {...register("phone", { 
-                    required: "กรุณาระบุเบอร์โทรศัพท์",
-                    pattern: {
-                      value: /(?:^|\\D)0([-\\s]?\\d){8,9}(?!\\d)(\\s*(ต่อ|ext\\.?|x)\\s*\\d{1,5})?/i,
-                      message: "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก เช่น 0812345678 หรือ 021234567 ต่อ 12)"
-                    }
+                    required: "กรุณาระบุเบอร์โทรศัพท์"
                   })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
                   {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.phone.message}</span>}
                 </div>
