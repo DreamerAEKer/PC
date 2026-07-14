@@ -3174,7 +3174,12 @@ export default function StaffPortal() {
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem', background: '#f8fafc', padding: '1rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                   <div style={{ flex: '1 1 180px' }}>
                     <label className="form-label" style={{ fontWeight: '700', color: '#1e293b' }}>ชื่อเล่นผู้สั่ง <span style={{color:'red'}}>*</span></label>
-                    <input type="text" className={`form-control ${getFieldClass('senderNickname')}`} required {...register("senderNickname", { required: "กรุณาระบุชื่อเล่นผู้สั่ง" })} placeholder="ระบุชื่อเล่นผู้สั่ง" />
+                    <input type="text" list="sender-nicknames-list" className={`form-control ${getFieldClass('senderNickname')}`} required {...register("senderNickname", { required: "กรุณาระบุชื่อเล่นผู้สั่ง" })} placeholder="ระบุชื่อเล่นผู้สั่ง" />
+                    <datalist id="sender-nicknames-list">
+                      {Array.from(new Set(history.map(r => r.senderNickname || r.sn).filter(Boolean))).map((name, idx) => (
+                        <option key={idx} value={name} />
+                      ))}
+                    </datalist>
                     {errors.senderNickname && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.senderNickname.message}</span>}
                   </div>
                   <div style={{ flex: '1 1 180px' }}>
