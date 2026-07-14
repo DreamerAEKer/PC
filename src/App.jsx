@@ -1,4 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from './firebase';
+
+const checkPhoneStatus = (val) => {
+  if (!val || typeof val !== 'string' || val.trim() === '') return 'empty';
+  const digits = val.replace(/\D/g, '');
+  if (digits.length >= 9 && digits.length <= 10 && digits.startsWith('0')) return 'valid';
+  if (digits.length === 11 && digits.startsWith('66')) return 'valid';
+  return 'invalid';
+};
 import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Package, User, Bell } from 'lucide-react';
 import { version } from '../package.json';
@@ -16,6 +26,61 @@ function Navigation() {
   
   const [clickCount, setClickCount] = useState(0);
   const clickTimeoutRef = useRef(null);
+
+  const [showModal, setShowModal] = useState(false);
+  const [notifications, setNotifications] = useState({
+    newCustomerOrders: 0,
+    invalidPhoneOrders: 0,
+    total: 0
+  });
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const staffParam = searchParams.get('staff');
+    const branchParam = searchParams.get('branch');
+    const deptCode = branchParam || staffParam || '10501';
+
+    const q = query(
+      collection(db, 'orders'),
+      where('dept', '==', deptCode),
+      where('printed', '==', false),
+      where('status', '==', 'pending')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      let newCustomerCount = 0;
+      let invalidCount = 0;
+      
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.importSource === 'customer_app') {
+          newCustomerCount++;
+        }
+        
+        // Check phone validity (main)
+        let isInvalid = false;
+        if (data.phone && checkPhoneStatus(data.phone) === 'invalid') {
+          isInvalid = true;
+        } else if (data.subBookings && Array.isArray(data.subBookings)) {
+          isInvalid = data.subBookings.some(sub => sub.phone && checkPhoneStatus(sub.phone) === 'invalid');
+        }
+        
+        if (isInvalid) {
+          invalidCount++;
+        }
+      });
+      
+      setNotifications({
+        newCustomerOrders: newCustomerCount,
+        invalidPhoneOrders: invalidCount,
+        total: newCustomerCount + invalidCount
+      });
+    }, (error) => {
+      console.error("Error fetching notifications:", error);
+    });
+
+    return () => unsubscribe();
+  }, [location.search, location.pathname]);
 
   useEffect(() => {
     // Some apps like LINE browser might strip the #/staff hash fragment.
@@ -52,7 +117,7 @@ function Navigation() {
       </Link>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <button 
-          onClick={() => alert('ไม่มีการแจ้งเตือนใหม่')} 
+          onClick={() => setShowModal(true)} 
           title="การแจ้งเตือน"
           style={{ 
             background: 'none', 
@@ -63,11 +128,94 @@ function Navigation() {
             alignItems: 'center', 
             justifyContent: 'center',
             padding: '8px',
-            borderRadius: '50%'
+            borderRadius: '50%',
+            position: 'relative'
           }}
         >
           <Bell size={20} />
+          {notifications.total > 0 && (
+            <span style={{
+              position: 'absolute',
+              top: '0px',
+              right: '0px',
+              background: '#e11d48',
+              color: 'white',
+              fontSize: '0.65rem',
+              fontWeight: 'bold',
+              borderRadius: '10px',
+              padding: '1px 5px',
+              pointerEvents: 'none'
+            }}>
+              {notifications.total}
+            </span>
+          )}
         </button>
+
+        {showModal && (
+          <>
+            <div 
+              style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9998 }}
+              onClick={() => setShowModal(false)}
+            />
+            <div style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              background: 'white',
+              padding: '1.5rem',
+              borderRadius: '12px',
+              zIndex: 9999,
+              width: '90%',
+              maxWidth: '400px',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+            }}>
+              <h3 style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem', color: '#1e293b' }}>
+                <Bell size={20} color="#f59e0b" /> การแจ้งเตือน
+              </h3>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', margin: '1.25rem 0' }}>
+                {notifications.total === 0 ? (
+                  <div style={{ textAlign: 'center', color: '#64748b', padding: '1rem 0' }}>ไม่มีการแจ้งเตือนใหม่</div>
+                ) : (
+                  <>
+                    {notifications.newCustomerOrders > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f0fdf4', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #22c55e' }}>
+                        <div>
+                          <div style={{ fontWeight: 'bold', color: '#166534' }}>ออเดอร์ใหม่จากลูกค้า</div>
+                          <div style={{ fontSize: '0.85rem', color: '#15803d' }}>รายการรอพิมพ์ที่บันทึกโดยลูกค้า</div>
+                        </div>
+                        <div style={{ background: '#22c55e', color: 'white', padding: '4px 10px', borderRadius: '12px', fontWeight: 'bold', fontSize: '1rem' }}>
+                          {notifications.newCustomerOrders}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {notifications.invalidPhoneOrders > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fffbeb', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #f59e0b' }}>
+                        <div>
+                          <div style={{ fontWeight: 'bold', color: '#b45309' }}>เบอร์โทรศัพท์ไม่สมบูรณ์</div>
+                          <div style={{ fontSize: '0.85rem', color: '#d97706' }}>ออเดอร์รอพิมพ์ที่เบอร์ไม่ครบ</div>
+                        </div>
+                        <div style={{ background: '#f59e0b', color: 'white', padding: '4px 10px', borderRadius: '12px', fontWeight: 'bold', fontSize: '1rem' }}>
+                          {notifications.invalidPhoneOrders}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+              
+              <button 
+                onClick={() => setShowModal(false)}
+                className="btn"
+                style={{ width: '100%', background: '#f1f5f9', color: '#475569', fontWeight: 'bold', border: 'none', padding: '0.75rem', borderRadius: '8px', cursor: 'pointer' }}
+              >
+                ปิดหน้าต่าง
+              </button>
+            </div>
+          </>
+        )}
         <div 
           onClick={handleSecretClick}
           style={{ 
