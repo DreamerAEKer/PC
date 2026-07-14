@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Package, User } from 'lucide-react';
+import { Package, User, Bell } from 'lucide-react';
 import { version } from '../package.json';
 import CustomerForm from './pages/CustomerForm';
 import StaffPortal from './pages/StaffPortal';
@@ -50,22 +50,41 @@ function Navigation() {
         <Package size={28} />
         <span>PostcardApp</span>
       </Link>
-      <div 
-        onClick={handleSecretClick}
-        style={{ 
-          fontSize: '0.7rem', 
-          color: 'var(--text-muted)', 
-          opacity: 0.3, 
-          fontWeight: 500, 
-          cursor: 'pointer', 
-          userSelect: 'none',
-          textAlign: 'right',
-          lineHeight: '1.2'
-        }}
-        title="Secret Portal Entrance"
-      >
-        <div>© MrAEK 10501</div>
-        <div style={{ fontSize: '0.6rem', marginTop: '0.1rem' }}>v{version}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <button 
+          onClick={() => alert('ไม่มีการแจ้งเตือนใหม่')} 
+          title="การแจ้งเตือน"
+          style={{ 
+            background: 'none', 
+            border: 'none', 
+            cursor: 'pointer', 
+            color: 'var(--text-color)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            padding: '8px',
+            borderRadius: '50%'
+          }}
+        >
+          <Bell size={20} />
+        </button>
+        <div 
+          onClick={handleSecretClick}
+          style={{ 
+            fontSize: '0.7rem', 
+            color: 'var(--text-muted)', 
+            opacity: 0.3, 
+            fontWeight: 500, 
+            cursor: 'pointer', 
+            userSelect: 'none',
+            textAlign: 'right',
+            lineHeight: '1.2'
+          }}
+          title="Secret Portal Entrance"
+        >
+          <div>© MrAEK 10501</div>
+          <div style={{ fontSize: '0.6rem', marginTop: '0.1rem' }}>v{version}</div>
+        </div>
       </div>
     </header>
   );
