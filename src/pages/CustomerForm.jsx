@@ -10,7 +10,17 @@ import ThaiDatePicker, { formatThaiDate } from '../components/ThaiDatePicker';
 import OrderSummaryCard from '../components/OrderSummaryCard';
 import { useThaiAddress } from 'use-thai-address';
 import { db } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';export default function CustomerForm() {
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+const checkPhoneStatus = (val) => {
+  if (!val || typeof val !== 'string' || val.trim() === '') return 'empty';
+  const digits = val.replace(/\D/g, '');
+  if (digits.length >= 9 && digits.length <= 10 && digits.startsWith('0')) return 'valid';
+  if (digits.length === 11 && digits.startsWith('66')) return 'valid';
+  return 'invalid';
+};
+
+export default function CustomerForm() {
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, dirtyFields, touchedFields } } = useForm({ 
     mode: 'onChange',
     defaultValues: {
@@ -75,11 +85,12 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';export 
     setValue("customQuantity", String(qtyVal || 100), { shouldValidate: true, shouldDirty: true });
   };
 
-  const PHONE_REGEX = /(?:^|\D)0([-\s]?\d){8,9}(?!\d)(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?/i;
-
   const validateSubPhone = (id, value) => {
-    const isValid = PHONE_REGEX.test(value) || value.trim() === '';
-    setSubPhoneErrors(prev => ({ ...prev, [id]: isValid ? null : 'รูปแบบเบอร์โทรไม่ถูกต้อง (9-10 หลัก เช่น 0812345678)' }));
+    const status = checkPhoneStatus(value);
+    setSubPhoneErrors(prev => ({ 
+      ...prev, 
+      [id]: status === 'invalid' ? '⚠️ อาจเป็นเบอร์โทรที่ไม่สมบูรณ์ (ปกติจะมี 9-10 หลัก)' : null 
+    }));
   };
 
   const didValue = watch("did", "");
@@ -940,14 +951,15 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';export 
             </div>
             <div className="form-group">
               <label className="form-label">เบอร์โทรศัพท์</label>
-              <input type="text" list="recipient-phones-list" className={`form-control ${getFieldClass('phone')}`} {...register("phone", { 
-                required: false,
-                validate: value => {
-                  if (!value || value.trim() === '') return true;
-                  return /^\s*0([-\s]?\d){8,9}(\s*(ต่อ|ext\.?|x)\s*\d{1,5})?\s*$/i.test(value) || "รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 9-10 หลัก เช่น 0812345678 หรือ 021234567 ต่อ 12)";
-                }
-              })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123 (ถ้ามี)" />
+              <input type="text" list="recipient-phones-list" className={`form-control ${checkPhoneStatus(watch("phone")) === 'valid' ? 'input-success' : getFieldClass('phone')}`} {...register("phone", { 
+                required: false
+              })} placeholder="เช่น นิกกี้ 08X-XXX-XXXX" />
               {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.phone.message}</span>}
+              {!errors.phone && checkPhoneStatus(watch("phone")) === 'invalid' && (
+                <span style={{ color: '#d97706', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>
+                  ⚠️ อาจเป็นเบอร์โทรที่ไม่สมบูรณ์ (ปกติจะมี 9-10 หลัก) แต่สามารถบันทึกได้
+                </span>
+              )}
             </div>
             {/* D-ID toggle button row and box inputs */}
             <input type="hidden" {...register("did")} />

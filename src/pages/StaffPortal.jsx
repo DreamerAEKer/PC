@@ -96,6 +96,14 @@ const getSavedDate = (record) => {
   return '';
 };
 
+const checkPhoneStatus = (val) => {
+  if (!val || typeof val !== 'string' || val.trim() === '') return 'empty';
+  const digits = val.replace(/\D/g, '');
+  if (digits.length >= 9 && digits.length <= 10 && digits.startsWith('0')) return 'valid';
+  if (digits.length === 11 && digits.startsWith('66')) return 'valid';
+  return 'invalid';
+};
+
 export default function StaffPortal() {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
