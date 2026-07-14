@@ -3675,11 +3675,11 @@ export default function StaffPortal() {
                     </div>
                     <div className="stats-subgrid">
                       <div className="stats-subcard" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวน</div>
+                        <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวน (ใบ)</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{pendingCount} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>รายการ</span></div>
                       </div>
                       <div className="stats-subcard" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', border: '1px solid rgba(225, 29, 72, 0.1)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวน</div>
+                        <div style={{ fontSize: '0.75rem', color: '#9f1239', fontWeight: 'bold' }}>จำนวน (ใบ)</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', marginTop: '0.15rem' }}>{pendingTotal} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>ใบ</span></div>
                       </div>
                     </div>
@@ -3703,11 +3703,11 @@ export default function StaffPortal() {
                     </div>
                     <div className="stats-subgrid">
                       <div className="stats-subcard" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวน</div>
+                        <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวน (ใบ)</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1d4ed8', marginTop: '0.15rem' }}>{grandCount} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>รายการ</span></div>
                       </div>
                       <div className="stats-subcard" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวน</div>
+                        <div style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 'bold' }}>จำนวน (ใบ)</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1d4ed8', marginTop: '0.15rem' }}>{grandTotal.toLocaleString()} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>ใบ</span></div>
                       </div>
                     </div>
@@ -5296,7 +5296,7 @@ export default function StaffPortal() {
                             <thead>
                               <tr style={{ backgroundColor: '#fee2e2', borderBottom: '1.5px solid #fca5a5' }}>
                                 <th style={{ padding: '4px 6px', textAlign: 'left', fontWeight: 'bold', color: '#7f1d1d', borderRight: '1px solid #fca5a5' }}>ชื่อผู้รับ</th>
-                                <th style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', color: '#7f1d1d', width: '30%' }}>จำนวน</th>
+                                <th style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', color: '#7f1d1d', width: '30%' }}>จำนวน (ใบ)</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -5433,7 +5433,7 @@ export default function StaffPortal() {
                     <thead>
                       <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1.5px solid #cbd5e1' }}>
                         <th style={{ padding: '4px 6px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #cbd5e1' }}>ชื่อผู้รับ</th>
-                        <th style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', width: '30%' }}>จำนวน</th>
+                        <th style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', width: '30%' }}>จำนวน (ใบ)</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -5804,7 +5804,7 @@ export default function StaffPortal() {
                               <thead>
                                 <tr style={{ backgroundColor: '#fee2e2', borderBottom: '1.5px solid #fca5a5' }}>
                                   <th style={{ padding: '4px 6px', textAlign: 'left', fontWeight: 'bold', color: '#7f1d1d', borderRight: '1px solid #fca5a5' }}>ชื่อผู้รับ</th>
-                                  <th style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', color: '#7f1d1d', width: '30%' }}>จำนวน</th>
+                                  <th style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', color: '#7f1d1d', width: '30%' }}>จำนวน (ใบ)</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -6049,7 +6049,7 @@ export default function StaffPortal() {
                       <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
                         <th style={{ padding: '0.4rem 0.5rem' }}>ชื่อ</th>
                         <th style={{ padding: '0.4rem 0.5rem' }}>เบอร์โทร</th>
-                        <th style={{ padding: '0.4rem 0.5rem', textAlign: 'center' }}>จำนวน</th>
+                        <th style={{ padding: '0.4rem 0.5rem', textAlign: 'center' }}>จำนวน (ใบ)</th>
                         <th style={{ padding: '0.4rem 0.5rem' }}>ที่อยู่</th>
                       </tr>
                     </thead>
