@@ -87,7 +87,10 @@ const mergeRecord = (existing, incoming) => {
 /** Merge an authoritative Firestore snapshot into the local cache. */
 export function mergeOrderHistory(previousHistory, incomingOrders) {
   const previous = Array.isArray(previousHistory) ? previousHistory : [];
-  const incoming = Array.isArray(incomingOrders) ? incomingOrders : [];
+  // Keep a Firestore tombstone for permanent deletion. This works with
+  // deployments whose security rules allow updates but not document deletes.
+  const incoming = (Array.isArray(incomingOrders) ? incomingOrders : [])
+    .filter((record) => record?.purged !== true);
   const previousMap = new Map(previous.map((record) => [record.id, record]));
   const incomingIds = new Set(incoming.map((record) => record.id));
   let hasNew = false;

@@ -62,6 +62,15 @@ test('removes Firestore-backed records absent from the authoritative snapshot', 
   assert.deepEqual(result.history.map((record) => record.id), [200]);
 });
 
+test('hides permanently deleted Firestore tombstones on every device', () => {
+  const result = mergeOrderHistory(
+    [{ id: 100, firestoreId: 'trash', deleted: true }],
+    [{ id: 100, firestoreId: 'trash', deleted: true, purged: true }],
+  );
+
+  assert.deepEqual(result.history, []);
+});
+
 test('accepts missing or invalid local history safely', () => {
   const result = mergeOrderHistory(null, [{ id: 100 }]);
   assert.deepEqual(result.history, [{ id: 100 }]);

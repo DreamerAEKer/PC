@@ -18,7 +18,7 @@ const Html5Qrcode = class { constructor() {} async clear() {} async scanFile() {
 const Html5QrcodeSupportedFormats = { QR_CODE: 1 };
 let Html5QrcodeScanner = class { render() {} clear() {} };
 import { db } from '../firebase';
-import { addDoc, collection, query, orderBy, onSnapshot, where, updateDoc, doc, deleteDoc, getDocs, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { addDoc, collection, query, orderBy, onSnapshot, where, updateDoc, doc, getDocs, serverTimestamp, writeBatch } from 'firebase/firestore';
 let globalHiddenScanner = null;
 
 const playNotificationSound = () => {
@@ -1872,8 +1872,14 @@ export default function StaffPortal() {
       const recordToDelete = history.find(r => r.id === id);
       if (recordToDelete?.firestoreId) {
          try {
-            await deleteDoc(doc(db, "orders", recordToDelete.firestoreId));
-         } catch(e) { console.error("Error permanently deleting document:", e); }
+            await updateDoc(doc(db, "orders", recordToDelete.firestoreId), {
+              purged: true,
+              updatedAt: serverTimestamp()
+            });
+         } catch(e) {
+           console.error("Error permanently deleting document:", e);
+           return;
+         }
       }
       
       setHistory(prev => {
