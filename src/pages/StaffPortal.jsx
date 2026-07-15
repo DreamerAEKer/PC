@@ -540,7 +540,18 @@ export default function StaffPortal() {
          newOrders.forEach(o => {
             if (!mergedMap.has(o.id)) hasNew = true;
             // Overwrite with fresh data from Firebase
-            mergedMap.set(o.id, { ...mergedMap.get(o.id), ...o });
+            const existing = mergedMap.get(o.id);
+            const mergedRecord = { ...existing, ...o };
+            
+            // Prevent Firebase from reverting printed or deleted status due to race conditions
+            if (existing && existing.printed && !o.printed) {
+              mergedRecord.printed = true;
+            }
+            if (existing && existing.deleted && !o.deleted) {
+              mergedRecord.deleted = true;
+            }
+            
+            mergedMap.set(o.id, mergedRecord);
          });
          
          if (hasNew && !isFirstLoad.current && newOrders.length > 0) {
@@ -4511,6 +4522,15 @@ export default function StaffPortal() {
                   }
 
                   return matchSecondaryFilters(record);
+                });
+
+                // Sort: pending = oldest first (เด้งมาก่อนอยู่บน), printed/others = newest first (ล่าสุดอยู่บน)
+                displayedHistory.sort((a, b) => {
+                  if (historyFilter === 'pending') {
+                    return a.id - b.id; // Ascending
+                  } else {
+                    return b.id - a.id; // Descending
+                  }
                 });
 
                 const totalCards = displayedHistory.reduce((sum, record) => sum + (Number(record.quantity) || 0), 0);

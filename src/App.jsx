@@ -31,6 +31,7 @@ function Navigation() {
   const [showModal, setShowModal] = useState(false);
   const [notifications, setNotifications] = useState({
     newCustomerOrders: 0,
+    newCustomerOrdersList: [],
     invalidPhoneOrders: 0,
     total: 0
   });
@@ -50,12 +51,14 @@ function Navigation() {
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       let newCustomerCount = 0;
+      let newCustomerList = [];
       let invalidCount = 0;
       
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
         if (data.importSource === 'customer_app') {
           newCustomerCount++;
+          newCustomerList.push({ id: docSnap.id, ...data });
         }
         
         // Check phone validity (main)
@@ -73,6 +76,7 @@ function Navigation() {
       
       setNotifications({
         newCustomerOrders: newCustomerCount,
+        newCustomerOrdersList: newCustomerList,
         invalidPhoneOrders: invalidCount,
         total: newCustomerCount + invalidCount
       });
@@ -183,20 +187,30 @@ function Navigation() {
                     ) : (
                       <>
                         {notifications.newCustomerOrders > 0 && (
-                          <div 
-                            onClick={() => {
-                              setShowModal(false);
-                              navigate('/staff?filter=customer_app');
-                            }}
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f0fdf4', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #22c55e', cursor: 'pointer' }}
-                          >
-                            <div>
-                              <div style={{ fontWeight: 'bold', color: '#166534' }}>ออเดอร์ใหม่จากลูกค้า</div>
-                              <div style={{ fontSize: '0.85rem', color: '#15803d' }}>รายการรอพิมพ์ที่บันทึกโดยลูกค้า</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <div style={{ fontWeight: 'bold', color: '#166534', paddingBottom: '0.25rem', borderBottom: '1px solid #bbf7d0', fontSize: '0.9rem' }}>
+                              ออเดอร์ใหม่จากลูกค้า ({notifications.newCustomerOrders} รายการ)
                             </div>
-                            <div style={{ background: '#22c55e', color: 'white', padding: '4px 10px', borderRadius: '12px', fontWeight: 'bold', fontSize: '1rem' }}>
-                              {notifications.newCustomerOrders}
-                            </div>
+                            {notifications.newCustomerOrdersList.map((order, idx) => (
+                              <div 
+                                key={order.id || idx}
+                                onClick={() => {
+                                  setShowModal(false);
+                                  navigate('/staff?filter=customer_app');
+                                }}
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f0fdf4', padding: '0.75rem', borderRadius: '8px', borderLeft: '4px solid #22c55e', cursor: 'pointer', transition: 'background 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = '#dcfce7'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = '#f0fdf4'}
+                              >
+                                <div>
+                                  <div style={{ fontWeight: 'bold', color: '#166534', fontSize: '0.95rem' }}>{order.name || order.senderNickname || 'ไม่ระบุชื่อ'}</div>
+                                  <div style={{ fontSize: '0.8rem', color: '#15803d', marginTop: '2px' }}>จำนวน {order.quantity || 0} ใบ</div>
+                                </div>
+                                <div style={{ background: '#22c55e', color: 'white', padding: '3px 8px', borderRadius: '12px', fontWeight: 'bold', fontSize: '0.75rem' }}>
+                                  ใหม่
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         )}
                         
