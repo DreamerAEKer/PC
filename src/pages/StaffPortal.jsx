@@ -8,6 +8,7 @@ import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import ThaiDatePicker from '../components/ThaiDatePicker';
 import OrderSummaryCard from '../components/OrderSummaryCard';
+import { mergeOrderHistory } from '../utils/orderHistory';
 import { QRCodeCanvas } from 'qrcode.react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -533,26 +534,7 @@ export default function StaffPortal() {
 
       // Merge new/updated orders into history
       setHistory((prev) => {
-         const safePrev = Array.isArray(prev) ? prev : [];
-         const mergedMap = new Map(safePrev.map(r => [r.id, r]));
-         
-         let hasNew = false;
-         newOrders.forEach(o => {
-            if (!mergedMap.has(o.id)) hasNew = true;
-            // Overwrite with fresh data from Firebase
-            const existing = mergedMap.get(o.id);
-            const mergedRecord = { ...existing, ...o };
-            
-            // Prevent Firebase from reverting printed or deleted status due to race conditions
-            if (existing && existing.printed && !o.printed) {
-              mergedRecord.printed = true;
-            }
-            if (existing && existing.deleted && !o.deleted) {
-              mergedRecord.deleted = true;
-            }
-            
-            mergedMap.set(o.id, mergedRecord);
-         });
+         const { history: merged, hasNew } = mergeOrderHistory(prev, newOrders);
          
          if (hasNew && !isFirstLoad.current && newOrders.length > 0) {
             playNotificationSound();
@@ -563,9 +545,6 @@ export default function StaffPortal() {
             setActiveTab('history');
             setHistoryFilter('pending');
          }
-         
-         const merged = Array.from(mergedMap.values());
-         merged.sort((a, b) => b.id - a.id); // sort by id (timestamp)
          
          localStorage.setItem('staffHistory', JSON.stringify(merged));
          isFirstLoad.current = false;
@@ -3582,7 +3561,6 @@ export default function StaffPortal() {
                           height: '10.5cm',
                           backgroundColor: 'white',
                           boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                          position: 'absolute',
                           top: 0,
                           left: 0,
                           transform: 'scale(0.5)',
