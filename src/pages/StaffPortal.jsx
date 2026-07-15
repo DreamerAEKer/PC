@@ -4324,7 +4324,7 @@ export default function StaffPortal() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, flexWrap: 'wrap' }}>
                   <History size={20} />
-                  <span>ประวัติการพิมพ์ (เครื่องนี้)</span>
+                  <span>ประวัติการพิมพ์ (ระบบกลาง)</span>
                   <span style={{ fontSize: '0.7rem', color: '#1e40af', fontWeight: 'bold', marginLeft: '0.5rem', backgroundColor: '#eff6ff', padding: '2px 8px', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
                     💡 ติ๊กถูกเลือกรายการด้านล่าง เพื่อเปิดใช้งานระบบสรุปการเก็บเงินและพิมพ์บิล A4
                   </span>
