@@ -1,16 +1,35 @@
-# React + Vite
+# PC ช่วยงานขายไปรษณียบัตร
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+เว็บสำหรับรับคำสั่งซื้อ จัดการรายการ พิมพ์ไปรษณียบัตร และติดตามประวัติของแต่ละหน่วยงาน
 
-Currently, two official plugins are available:
+## การพัฒนา
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+ตรวจสอบก่อนส่งงาน:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm run check
+```
 
-## Expanding the ESLint configuration
+## การเผยแพร่อย่างปลอดภัย
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. สร้างสาขาใหม่จาก `main`
+2. แก้ไขและรัน `npm run check`
+3. ส่งสาขาเพื่อให้ Vercel สร้าง Preview
+4. ทดลองรับรายการ พิมพ์ ลบ กู้คืน และเปิดจากอีกเครื่อง
+5. รวมเข้า `main` เมื่อผลทดสอบผ่านเท่านั้น
+
+ห้ามทดสอบการลบหรือแก้ข้อมูลด้วยฐานข้อมูล Production หากยังไม่มีข้อมูลสำรอง
+
+## ข้อมูลสำคัญ
+
+- Production: `https://pc-biz.vercel.app`
+- ฐานข้อมูล: Firebase Firestore
+- ข้อมูลใน `localStorage` เป็นแคชของเครื่อง ไม่ควรใช้แทนข้อมูลหลักใน Firestore
+- ห้ามบันทึกรหัสผ่าน คีย์ผู้ดูแล หรือข้อมูลลูกค้าลงในเอกสารและ Git
+
+ดูแผนด้านความปลอดภัยใน [SECURITY.md](SECURITY.md)

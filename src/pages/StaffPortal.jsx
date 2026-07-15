@@ -8,6 +8,7 @@ import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import ThaiDatePicker from '../components/ThaiDatePicker';
 import OrderSummaryCard from '../components/OrderSummaryCard';
+import { analyzeHistoryMigration, buildFirestoreOrder, markOrderPendingUpdate, mergeOrderHistory } from '../utils/orderHistory';
 import { QRCodeCanvas } from 'qrcode.react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -17,7 +18,7 @@ const Html5Qrcode = class { constructor() {} async clear() {} async scanFile() {
 const Html5QrcodeSupportedFormats = { QR_CODE: 1 };
 let Html5QrcodeScanner = class { render() {} clear() {} };
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, where, updateDoc, doc, deleteDoc, getDocs } from 'firebase/firestore';
+import { addDoc, collection, query, orderBy, onSnapshot, where, updateDoc, doc, deleteDoc, getDocs, serverTimestamp, writeBatch } from 'firebase/firestore';
 let globalHiddenScanner = null;
 
 const playNotificationSound = () => {
@@ -533,26 +534,7 @@ export default function StaffPortal() {
 
       // Merge new/updated orders into history
       setHistory((prev) => {
-         const safePrev = Array.isArray(prev) ? prev : [];
-         const mergedMap = new Map(safePrev.map(r => [r.id, r]));
-         
-         let hasNew = false;
-         newOrders.forEach(o => {
-            if (!mergedMap.has(o.id)) hasNew = true;
-            // Overwrite with fresh data from Firebase
-            const existing = mergedMap.get(o.id);
-            const mergedRecord = { ...existing, ...o };
-            
-            // Prevent Firebase from reverting printed or deleted status due to race conditions
-            if (existing && existing.printed && !o.printed) {
-              mergedRecord.printed = true;
-            }
-            if (existing && existing.deleted && !o.deleted) {
-              mergedRecord.deleted = true;
-            }
-            
-            mergedMap.set(o.id, mergedRecord);
-         });
+         const { history: merged, hasNew } = mergeOrderHistory(prev, newOrders);
          
          if (hasNew && !isFirstLoad.current && newOrders.length > 0) {
             playNotificationSound();
@@ -563,9 +545,6 @@ export default function StaffPortal() {
             setActiveTab('history');
             setHistoryFilter('pending');
          }
-         
-         const merged = Array.from(mergedMap.values());
-         merged.sort((a, b) => b.id - a.id); // sort by id (timestamp)
          
          localStorage.setItem('staffHistory', JSON.stringify(merged));
          isFirstLoad.current = false;
@@ -737,7 +716,7 @@ export default function StaffPortal() {
     }
   };
 
-  const onSubmitSaveOnly = (data) => {
+  const onSubmitSaveOnly = async (data) => {
     const isBKK = data.province === 'กรุงเทพมหานคร';
     const subTitle = isBKK ? `แขวง${data.subdistrict}` : `ต.${data.subdistrict}`;
     const distTitle = isBKK ? `เขต${data.district}` : `อ.${data.district}`;
@@ -755,19 +734,43 @@ export default function StaffPortal() {
     delete processedData.selectQuantity;
     delete processedData.customQuantity;
     
+    const existingRecord = editingRecordId ? history.find(r => r.id === editingRecordId) : null;
+    const savedRecord = existingRecord
+      ? { ...existingRecord, ...processedData, printed: false, timestamp: new Date().toISOString() }
+      : { ...processedData, id: Date.now(), timestamp: new Date().toISOString(), printed: false, deleted: false };
+
     setHistory(prevHistory => {
       const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
-      let updatedHistory;
-      if (editingRecordId) {
-        updatedHistory = safeHistory.map(r => r.id === editingRecordId ? { ...r, ...processedData, printed: false, timestamp: new Date().toISOString() } : r);
-      } else {
-        const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString(), printed: false };
-        updatedHistory = [newRecord, ...safeHistory];
-      }
+      const updatedHistory = editingRecordId
+        ? safeHistory.map(r => r.id === editingRecordId ? savedRecord : r)
+        : [savedRecord, ...safeHistory];
       const sliced = updatedHistory.slice(0, 100);
       localStorage.setItem('staffHistory', JSON.stringify(sliced));
       return sliced;
     });
+
+    try {
+      if (savedRecord.firestoreId) {
+        await updateDoc(doc(db, "orders", savedRecord.firestoreId), {
+          ...processedData,
+          printed: false,
+          updatedAt: serverTimestamp(),
+        });
+      } else {
+        const created = await addDoc(collection(db, "orders"), buildFirestoreOrder(
+          savedRecord,
+          { dept: branchCode, createdAt: serverTimestamp(), updatedAt: serverTimestamp() },
+        ));
+        setHistory(prev => {
+          const next = prev.map(r => r.id === savedRecord.id ? { ...r, firestoreId: created.id } : r);
+          localStorage.setItem('staffHistory', JSON.stringify(next));
+          return next;
+        });
+      }
+    } catch (error) {
+      console.error("Firebase save error:", error);
+      alert("บันทึกไว้ในเครื่องแล้ว แต่ยังส่งขึ้นระบบกลางไม่สำเร็จ กรุณาตรวจอินเทอร์เน็ตแล้วลองแก้ไขและบันทึกอีกครั้ง");
+    }
     
     reset();
     setQuantityFields(100);
@@ -821,7 +824,7 @@ export default function StaffPortal() {
     
     window.print();
     
-    setTimeout(() => {
+    setTimeout(async () => {
       setHistory(prevHistory => {
         const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
         let updatedHistory;
@@ -835,9 +838,23 @@ export default function StaffPortal() {
         return sliced;
       });
       
-      if (newRecord.firestoreId) {
-         updateDoc(doc(db, "orders", newRecord.firestoreId), { printed: true, ...processedData })
-           .catch(e => console.error("Firebase update error:", e));
+      try {
+        if (newRecord.firestoreId) {
+          await updateDoc(doc(db, "orders", newRecord.firestoreId), { printed: true, ...processedData, updatedAt: serverTimestamp() });
+        } else {
+          const created = await addDoc(collection(db, "orders"), buildFirestoreOrder(
+            { ...newRecord, printed: true },
+            { dept: branchCode, createdAt: serverTimestamp(), updatedAt: serverTimestamp() },
+          ));
+          setHistory(prev => {
+            const next = prev.map(r => r.id === newRecord.id ? { ...r, firestoreId: created.id } : r);
+            localStorage.setItem('staffHistory', JSON.stringify(next));
+            return next;
+          });
+        }
+      } catch (error) {
+        console.error("Firebase save error:", error);
+        alert("พิมพ์แล้วและเก็บไว้ในเครื่อง แต่ยังส่งขึ้นระบบกลางไม่สำเร็จ");
       }
       
       reset();
@@ -853,14 +870,21 @@ export default function StaffPortal() {
       setPrintDataList([]);
       window.removeEventListener('afterprint', handleAfterPrint);
       setHistory(prev => {
-        const updated = prev.map(r => r.id === record.id ? { ...r, printed: true } : r);
+        const updated = prev.map(r => r.id === record.id ? markOrderPendingUpdate(r, { printed: true }) : r);
         localStorage.setItem('staffHistory', JSON.stringify(updated));
         return updated;
       });
       
       if (record.firestoreId) {
-         updateDoc(doc(db, "orders", record.firestoreId), { printed: true })
-           .catch(e => console.error("Firebase update error:", e));
+         updateDoc(doc(db, "orders", record.firestoreId), { printed: true, updatedAt: serverTimestamp() })
+           .catch(e => {
+             console.error("Firebase update error:", e);
+             setHistory(prev => {
+               const next = prev.map(r => r.id === record.id ? record : r);
+               localStorage.setItem('staffHistory', JSON.stringify(next));
+               return next;
+             });
+           });
       }
     };
     window.addEventListener('afterprint', handleAfterPrint);
@@ -1075,6 +1099,59 @@ export default function StaffPortal() {
         }
       } catch (err) {
         alert("ไม่สามารถอ่านไฟล์ได้ กรุณาใช้ไฟล์ .json ที่ส่งออกมาจากระบบนี้เท่านั้น");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const migrateHistoryToFirestore = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (!Array.isArray(parsed)) {
+          alert('รูปแบบไฟล์ไม่ถูกต้อง ต้องเป็นรายการประวัติ JSON');
+          return;
+        }
+
+        const migration = analyzeHistoryMigration(history, parsed);
+        const message = `ตรวจพบ ${migration.total} รายการ\n` +
+          `จะเพิ่มเข้าระบบกลาง ${migration.toCreate.length} รายการ\n` +
+          `ข้ามรายการที่มีอยู่แล้วหรือไม่สมบูรณ์ ${migration.skipped.length} รายการ\n\n` +
+          'ยืนยันการเพิ่มเฉพาะรายการที่ขาดหรือไม่?';
+
+        if (!migration.toCreate.length) {
+          alert('ไม่มีรายการใหม่ที่ต้องย้ายเข้าระบบกลาง');
+          return;
+        }
+        if (!(await window.showConfirm(message))) return;
+
+        const batch = writeBatch(db);
+        migration.toCreate.forEach((item) => {
+          const createdDate = new Date(item.timestamp || item.orderDate || 0);
+          const createdAt = Number.isNaN(createdDate.getTime()) ? serverTimestamp() : createdDate;
+          const cleanedItem = {
+            ...item,
+            did: (item.did && (item.did === item.id || item.did === item.orderCode || item.did.length > 10)) ? '' : (item.did || ''),
+            address: constructFullAddress(item),
+            importSource: item.importSource || file.name,
+          };
+          const newRef = doc(collection(db, 'orders'));
+          batch.set(newRef, buildFirestoreOrder(cleanedItem, {
+            dept: item.dept || branchCode,
+            createdAt,
+            updatedAt: serverTimestamp(),
+          }));
+        });
+        await batch.commit();
+        alert(`ย้ายข้อมูลสำเร็จ ${migration.toCreate.length} รายการ และข้าม ${migration.skipped.length} รายการ`);
+      } catch (err) {
+        console.error('History migration failed:', err);
+        alert('ย้ายข้อมูลไม่สำเร็จ ยังไม่มีการลบข้อมูลเดิม กรุณาตรวจไฟล์และลองอีกครั้ง');
       }
     };
     reader.readAsText(file);
@@ -1716,17 +1793,23 @@ export default function StaffPortal() {
   const handleDeleteRecord = async (id) => {
     if (await window.showConfirm("คุณต้องการนำรายการประวัตินี้ทิ้งลงถังขยะใช่หรือไม่? (สามารถกู้คืนได้)")) {
       const recordToDelete = history.find(r => r.id === id);
-      if (recordToDelete?.firestoreId) {
-         try {
-            await updateDoc(doc(db, "orders", recordToDelete.firestoreId), { deleted: true });
-         } catch(e) { console.error("Error deleting document:", e); }
-      }
-      
       setHistory(prev => {
-        const next = prev.map(r => r.id === id ? { ...r, deleted: true } : r);
+        const next = prev.map(r => r.id === id ? markOrderPendingUpdate(r, { deleted: true }) : r);
         localStorage.setItem('staffHistory', JSON.stringify(next));
         return next;
       });
+      if (recordToDelete?.firestoreId) {
+         try {
+            await updateDoc(doc(db, "orders", recordToDelete.firestoreId), { deleted: true, updatedAt: serverTimestamp() });
+         } catch(e) {
+           console.error("Error deleting document:", e);
+           setHistory(prev => {
+             const next = prev.map(r => r.id === id ? recordToDelete : r);
+             localStorage.setItem('staffHistory', JSON.stringify(next));
+             return next;
+           });
+         }
+      }
       setSelectedIds(prev => prev.filter(i => i !== id));
       setSwipeOffset(prev => {
         const copy = { ...prev };
@@ -1739,17 +1822,25 @@ export default function StaffPortal() {
   const handleDeleteSelected = async () => {
     if (await window.showConfirm(`⚠️ คำเตือน: คุณต้องการนำรายการที่เลือกทั้งหมดจำนวน ${selectedIds.length} รายการทิ้งลงถังขยะใช่หรือไม่?`)) {
       const recordsToDelete = history.filter(r => selectedIds.includes(r.id));
-      for (const r of recordsToDelete) {
-         if (r.firestoreId) {
-            try { await updateDoc(doc(db, "orders", r.firestoreId), { deleted: true }); } catch(e){ console.error(e); }
-         }
-      }
-      
       setHistory(prev => {
-        const next = prev.map(r => selectedIds.includes(r.id) ? { ...r, deleted: true } : r);
+        const next = prev.map(r => selectedIds.includes(r.id) ? markOrderPendingUpdate(r, { deleted: true }) : r);
         localStorage.setItem('staffHistory', JSON.stringify(next));
         return next;
       });
+      for (const r of recordsToDelete) {
+         if (r.firestoreId) {
+            try {
+              await updateDoc(doc(db, "orders", r.firestoreId), { deleted: true, updatedAt: serverTimestamp() });
+            } catch(e) {
+              console.error(e);
+              setHistory(prev => {
+                const next = prev.map(item => item.id === r.id ? r : item);
+                localStorage.setItem('staffHistory', JSON.stringify(next));
+                return next;
+              });
+            }
+         }
+      }
       setSelectedIds([]);
       setSwipeOffset({});
     }
@@ -1757,14 +1848,23 @@ export default function StaffPortal() {
 
   const handleRestoreRecord = async (id) => {
     const recordToRestore = history.find(r => r.id === id);
+    setHistory(prev => {
+      const next = prev.map(r => r.id === id ? markOrderPendingUpdate(r, { deleted: false }) : r);
+      localStorage.setItem('staffHistory', JSON.stringify(next));
+      return next;
+    });
     if (recordToRestore?.firestoreId) {
        try {
-          await updateDoc(doc(db, "orders", recordToRestore.firestoreId), { deleted: false });
-       } catch(e) { console.error("Error restoring document:", e); }
+          await updateDoc(doc(db, "orders", recordToRestore.firestoreId), { deleted: false, updatedAt: serverTimestamp() });
+       } catch(e) {
+         console.error("Error restoring document:", e);
+         setHistory(prev => {
+           const next = prev.map(r => r.id === id ? recordToRestore : r);
+           localStorage.setItem('staffHistory', JSON.stringify(next));
+           return next;
+         });
+       }
     }
-    
-    // We don't need to manually update local history state here 
-    // because onSnapshot will fetch the update and push it to history.
   };
 
   const handlePermanentDelete = async (id) => {
@@ -2947,7 +3047,7 @@ export default function StaffPortal() {
                 title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
               >
                 <Download size={16} /> นำเข้าข้อมูลลูกค้า (.json)
-                <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
+                <input type="file" accept=".json" onChange={migrateHistoryToFirestore} style={{ display: 'none' }} />
               </label>
               <div style={{ display: 'none', alignItems: 'stretch' }}>
                 <button 
@@ -3582,7 +3682,6 @@ export default function StaffPortal() {
                           height: '10.5cm',
                           backgroundColor: 'white',
                           boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                          position: 'absolute',
                           top: 0,
                           left: 0,
                           transform: 'scale(0.5)',
@@ -4225,7 +4324,7 @@ export default function StaffPortal() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, flexWrap: 'wrap' }}>
                   <History size={20} />
-                  <span>ประวัติการพิมพ์ (เครื่องนี้)</span>
+                  <span>ประวัติการพิมพ์ (ระบบกลาง)</span>
                   <span style={{ fontSize: '0.7rem', color: '#1e40af', fontWeight: 'bold', marginLeft: '0.5rem', backgroundColor: '#eff6ff', padding: '2px 8px', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
                     💡 ติ๊กถูกเลือกรายการด้านล่าง เพื่อเปิดใช้งานระบบสรุปการเก็บเงินและพิมพ์บิล A4
                   </span>
@@ -4457,14 +4556,14 @@ export default function StaffPortal() {
                     onClick={async () => {
                       if (await window.showConfirm(`คุณต้องการเปลี่ยนสถานะรายการที่เลือกทั้งหมด (${selectedIds.length} รายการ) เป็น "พิมพ์แล้ว" ใช่หรือไม่?`)) {
                         setHistory(prev => {
-                          const updated = prev.map(r => selectedIds.includes(r.id) ? { ...r, printed: true } : r);
+                          const updated = prev.map(r => selectedIds.includes(r.id) ? markOrderPendingUpdate(r, { printed: true }) : r);
                           localStorage.setItem('staffHistory', JSON.stringify(updated));
                           return updated;
                         });
                         const selectedRecords = history.filter(r => selectedIds.includes(r.id));
                         for (const r of selectedRecords) {
                            if (r.firestoreId) {
-                              try { updateDoc(doc(db, "orders", r.firestoreId), { printed: true }); } catch(e){}
+                              try { await updateDoc(doc(db, "orders", r.firestoreId), { printed: true, updatedAt: serverTimestamp() }); } catch(e){}
                            }
                         }
                         setSelectedIds([]);
