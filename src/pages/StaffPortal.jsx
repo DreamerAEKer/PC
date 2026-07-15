@@ -8,7 +8,7 @@ import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import ThaiDatePicker from '../components/ThaiDatePicker';
 import OrderSummaryCard from '../components/OrderSummaryCard';
-import { buildFirestoreOrder, markOrderPendingUpdate, mergeOrderHistory } from '../utils/orderHistory';
+import { analyzeHistoryMigration, buildFirestoreOrder, markOrderPendingUpdate, mergeOrderHistory } from '../utils/orderHistory';
 import { QRCodeCanvas } from 'qrcode.react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -18,7 +18,7 @@ const Html5Qrcode = class { constructor() {} async clear() {} async scanFile() {
 const Html5QrcodeSupportedFormats = { QR_CODE: 1 };
 let Html5QrcodeScanner = class { render() {} clear() {} };
 import { db } from '../firebase';
-import { addDoc, collection, query, orderBy, onSnapshot, where, updateDoc, doc, deleteDoc, getDocs, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, query, orderBy, onSnapshot, where, updateDoc, doc, deleteDoc, getDocs, serverTimestamp, writeBatch } from 'firebase/firestore';
 let globalHiddenScanner = null;
 
 const playNotificationSound = () => {
@@ -1099,6 +1099,59 @@ export default function StaffPortal() {
         }
       } catch (err) {
         alert("ไม่สามารถอ่านไฟล์ได้ กรุณาใช้ไฟล์ .json ที่ส่งออกมาจากระบบนี้เท่านั้น");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const migrateHistoryToFirestore = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (!Array.isArray(parsed)) {
+          alert('รูปแบบไฟล์ไม่ถูกต้อง ต้องเป็นรายการประวัติ JSON');
+          return;
+        }
+
+        const migration = analyzeHistoryMigration(history, parsed);
+        const message = `ตรวจพบ ${migration.total} รายการ\n` +
+          `จะเพิ่มเข้าระบบกลาง ${migration.toCreate.length} รายการ\n` +
+          `ข้ามรายการที่มีอยู่แล้วหรือไม่สมบูรณ์ ${migration.skipped.length} รายการ\n\n` +
+          'ยืนยันการเพิ่มเฉพาะรายการที่ขาดหรือไม่?';
+
+        if (!migration.toCreate.length) {
+          alert('ไม่มีรายการใหม่ที่ต้องย้ายเข้าระบบกลาง');
+          return;
+        }
+        if (!(await window.showConfirm(message))) return;
+
+        const batch = writeBatch(db);
+        migration.toCreate.forEach((item) => {
+          const createdDate = new Date(item.timestamp || item.orderDate || 0);
+          const createdAt = Number.isNaN(createdDate.getTime()) ? serverTimestamp() : createdDate;
+          const cleanedItem = {
+            ...item,
+            did: (item.did && (item.did === item.id || item.did === item.orderCode || item.did.length > 10)) ? '' : (item.did || ''),
+            address: constructFullAddress(item),
+            importSource: item.importSource || file.name,
+          };
+          const newRef = doc(collection(db, 'orders'));
+          batch.set(newRef, buildFirestoreOrder(cleanedItem, {
+            dept: item.dept || branchCode,
+            createdAt,
+            updatedAt: serverTimestamp(),
+          }));
+        });
+        await batch.commit();
+        alert(`ย้ายข้อมูลสำเร็จ ${migration.toCreate.length} รายการ และข้าม ${migration.skipped.length} รายการ`);
+      } catch (err) {
+        console.error('History migration failed:', err);
+        alert('ย้ายข้อมูลไม่สำเร็จ ยังไม่มีการลบข้อมูลเดิม กรุณาตรวจไฟล์และลองอีกครั้ง');
       }
     };
     reader.readAsText(file);
@@ -2994,7 +3047,7 @@ export default function StaffPortal() {
                 title="เลือกไฟล์ข้อมูลที่ส่งออกมาเพื่อนำเข้าในเครื่องนี้"
               >
                 <Download size={16} /> นำเข้าข้อมูลลูกค้า (.json)
-                <input type="file" accept=".json" onChange={importHistory} style={{ display: 'none' }} />
+                <input type="file" accept=".json" onChange={migrateHistoryToFirestore} style={{ display: 'none' }} />
               </label>
               <div style={{ display: 'none', alignItems: 'stretch' }}>
                 <button 

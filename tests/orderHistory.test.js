@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildFirestoreOrder, markOrderPendingUpdate, mergeOrderHistory } from '../src/utils/orderHistory.js';
+import { analyzeHistoryMigration, buildFirestoreOrder, markOrderPendingUpdate, mergeOrderHistory } from '../src/utils/orderHistory.js';
 
 test('adds new orders and sorts newest first', () => {
   const result = mergeOrderHistory([{ id: 100, name: 'เดิม' }], [{ id: 200, name: 'ใหม่' }]);
@@ -81,4 +81,19 @@ test('builds a cross-device Firestore record for a newly created order', () => {
     createdAt: 'created',
     updatedAt: 'updated',
   });
+});
+
+test('migration creates only records missing from Firestore history', () => {
+  const result = analyzeHistoryMigration(
+    [{ id: 1, firestoreId: 'remote-1' }, { id: 2, orderCode: 'PC-2' }],
+    [{ id: 1, firestoreId: 'remote-1' }, { id: 2, orderCode: 'PC-2' }, { id: 3 }, { id: 4, deleted: true }],
+  );
+  assert.deepEqual(result.toCreate.map((record) => record.id), [3, 4]);
+  assert.deepEqual(result.skipped.map((record) => record.id), [1, 2]);
+});
+
+test('migration rejects duplicate and unidentifiable imported records', () => {
+  const result = analyzeHistoryMigration([], [{ id: 3 }, { id: 3 }, { name: 'missing id' }]);
+  assert.deepEqual(result.toCreate.map((record) => record.id), [3]);
+  assert.equal(result.skipped.length, 2);
 });

@@ -32,6 +32,36 @@ export function buildFirestoreOrder(record, { dept, createdAt, updatedAt }) {
   };
 }
 
+const recordKeys = (record) => {
+  const keys = [];
+  if (record?.firestoreId) keys.push(`firestore:${record.firestoreId}`);
+  if (record?.id != null) keys.push(`id:${record.id}`);
+  if (record?.orderCode) keys.push(`order:${record.orderCode}`);
+  return keys;
+};
+
+export function analyzeHistoryMigration(existingHistory, importedHistory) {
+  const existing = Array.isArray(existingHistory) ? existingHistory : [];
+  const imported = Array.isArray(importedHistory) ? importedHistory.filter(Boolean) : [];
+  const existingKeys = new Set(existing.flatMap(recordKeys));
+  const seenImportKeys = new Set();
+  const toCreate = [];
+  const skipped = [];
+
+  imported.forEach((record) => {
+    const keys = recordKeys(record);
+    const duplicate = keys.length === 0
+      || keys.some((key) => existingKeys.has(key) || seenImportKeys.has(key));
+    if (duplicate) {
+      skipped.push(record);
+      return;
+    }
+    keys.forEach((key) => seenImportKeys.add(key));
+    toCreate.push(record);
+  });
+  return { total: imported.length, toCreate, skipped };
+}
+
 const mergeRecord = (existing, incoming) => {
   if (!existing) return incoming;
 
