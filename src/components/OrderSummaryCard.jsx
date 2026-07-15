@@ -141,6 +141,12 @@ export default function OrderSummaryCard({ record, indexInfo = null }) {
           </div>
         </div>
 
+        {/* Payment QR Section */}
+        <div style={{ marginTop: '1rem', padding: '0.75rem', border: '2px dashed #0369a1', borderRadius: '12px', backgroundColor: '#f0f9ff', textAlign: 'center' }}>
+          <img src="/qr-payment.png" alt="QR Payment" style={{ width: '150px', height: 'auto', margin: '0 auto 0.5rem auto', display: 'block', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
+          <p style={{ margin: 0, fontWeight: 'bold', fontSize: '0.9rem', color: '#0c4a6e', lineHeight: '1.4' }}>โปรดส่งสลิปในไลน์<br/>พร้อมการ์ดสั่งพิมพ์</p>
+        </div>
+
       </div>
     </div>
   );
