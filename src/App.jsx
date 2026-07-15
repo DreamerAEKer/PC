@@ -56,6 +56,8 @@ function Navigation() {
       
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
+        if (data.deleted) return; // Skip soft-deleted items
+        
         if (data.importSource === 'customer_app') {
           newCustomerCount++;
           newCustomerList.push({ id: docSnap.id, ...data });

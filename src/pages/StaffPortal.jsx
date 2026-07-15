@@ -1723,7 +1723,7 @@ export default function StaffPortal() {
       }
       
       setHistory(prev => {
-        const next = prev.filter(r => r.id !== id);
+        const next = prev.map(r => r.id === id ? { ...r, deleted: true } : r);
         localStorage.setItem('staffHistory', JSON.stringify(next));
         return next;
       });
@@ -1746,7 +1746,7 @@ export default function StaffPortal() {
       }
       
       setHistory(prev => {
-        const next = prev.filter(r => !selectedIds.includes(r.id));
+        const next = prev.map(r => selectedIds.includes(r.id) ? { ...r, deleted: true } : r);
         localStorage.setItem('staffHistory', JSON.stringify(next));
         return next;
       });
