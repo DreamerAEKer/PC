@@ -4245,12 +4245,20 @@ export default function StaffPortal() {
 
               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
                 <button 
+                  onClick={() => exportHistory('download')} 
+                  className="btn btn-secondary" 
+                  style={{ flex: '1 1 calc(50% - 0.25rem)', padding: '0.75rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderColor: '#10b981', color: '#047857', backgroundColor: '#ecfdf5', fontWeight: 'bold' }}
+                  title="ดาวน์โหลดข้อมูลลูกค้า (ไฟล์ JSON)"
+                >
+                  <Download size={18} /> ส่งออกข้อมูล (JSON) {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
+                </button>
+                <button 
                   onClick={exportZipHistory} 
                   className="btn btn-secondary" 
-                  style={{ flex: '1 1 100%', padding: '0.75rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', fontWeight: 'bold' }}
+                  style={{ flex: '1 1 calc(50% - 0.25rem)', padding: '0.75rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderColor: '#3b82f6', color: '#1d4ed8', backgroundColor: '#eff6ff', fontWeight: 'bold' }}
                   title="ดาวน์โหลดรูปร่างหน้าการ์ดสั่งพิมพ์แยกตามรายชื่อลงเครื่อง (ไฟล์ ZIP)"
                 >
-                  <Archive size={18} /> ส่งออกการ์ด (แยกโฟลเดอร์ผู้สั่ง) {selectedIds.length > 0 ? `(${selectedIds.length} รายการ)` : ''}
+                  <Archive size={18} /> ส่งออกการ์ด {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
                 </button>
               </div>
 
