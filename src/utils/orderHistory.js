@@ -32,6 +32,16 @@ export function buildFirestoreOrder(record, { dept, createdAt, updatedAt }) {
   };
 }
 
+/** Stable values used to find legacy history records without a Firestore id. */
+export function getHistoryLookupValues(record) {
+  return {
+    id: record?.id ?? null,
+    orderCode: typeof record?.orderCode === 'string' && record.orderCode.trim()
+      ? record.orderCode.trim()
+      : null,
+  };
+}
+
 const recordKeys = (record) => {
   const keys = [];
   if (record?.firestoreId) keys.push(`firestore:${record.firestoreId}`);
