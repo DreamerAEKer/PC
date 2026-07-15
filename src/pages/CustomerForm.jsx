@@ -1264,7 +1264,7 @@ export default function CustomerForm() {
                 }}>
                   <div style={{ fontWeight: 'bold', color: '#1e3a8a', marginBottom: '0.5rem' }}>QR ชำระเงิน (พร้อมเพย์)</div>
                   <QRCodeSVG 
-                    value={generatePayload(watch("senderPhone") || "0999999999", { amount: totalPrice })} 
+                    value={generatePayload("3102200272042", { amount: totalPrice })} 
                     size={160} 
                   />
                   <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem' }}>
