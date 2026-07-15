@@ -21,6 +21,17 @@ export function markOrderPendingUpdate(record, changes) {
   };
 }
 
+export function buildFirestoreOrder(record, { dept, createdAt, updatedAt }) {
+  const { firestoreId, _pendingHistoryUpdate, ...data } = record;
+  return {
+    ...data,
+    dept: data.dept || dept,
+    deleted: data.deleted ?? false,
+    createdAt,
+    updatedAt,
+  };
+}
+
 const mergeRecord = (existing, incoming) => {
   if (!existing) return incoming;
 

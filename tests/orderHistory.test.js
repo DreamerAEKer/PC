@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { markOrderPendingUpdate, mergeOrderHistory } from '../src/utils/orderHistory.js';
+import { buildFirestoreOrder, markOrderPendingUpdate, mergeOrderHistory } from '../src/utils/orderHistory.js';
 
 test('adds new orders and sorts newest first', () => {
   const result = mergeOrderHistory([{ id: 100, name: 'เดิม' }], [{ id: 200, name: 'ใหม่' }]);
@@ -65,4 +65,20 @@ test('removes Firestore-backed records absent from the authoritative snapshot', 
 test('accepts missing or invalid local history safely', () => {
   const result = mergeOrderHistory(null, [{ id: 100 }]);
   assert.deepEqual(result.history, [{ id: 100 }]);
+});
+
+test('builds a cross-device Firestore record for a newly created order', () => {
+  const record = buildFirestoreOrder(
+    { id: 123, name: 'ลูกค้า', printed: false, firestoreId: 'cache-only', _pendingHistoryUpdate: {} },
+    { dept: '10501', createdAt: 'created', updatedAt: 'updated' },
+  );
+  assert.deepEqual(record, {
+    id: 123,
+    name: 'ลูกค้า',
+    printed: false,
+    dept: '10501',
+    deleted: false,
+    createdAt: 'created',
+    updatedAt: 'updated',
+  });
 });

@@ -8,7 +8,7 @@ import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import ThaiDatePicker from '../components/ThaiDatePicker';
 import OrderSummaryCard from '../components/OrderSummaryCard';
-import { markOrderPendingUpdate, mergeOrderHistory } from '../utils/orderHistory';
+import { buildFirestoreOrder, markOrderPendingUpdate, mergeOrderHistory } from '../utils/orderHistory';
 import { QRCodeCanvas } from 'qrcode.react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -18,7 +18,7 @@ const Html5Qrcode = class { constructor() {} async clear() {} async scanFile() {
 const Html5QrcodeSupportedFormats = { QR_CODE: 1 };
 let Html5QrcodeScanner = class { render() {} clear() {} };
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, where, updateDoc, doc, deleteDoc, getDocs, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, query, orderBy, onSnapshot, where, updateDoc, doc, deleteDoc, getDocs, serverTimestamp } from 'firebase/firestore';
 let globalHiddenScanner = null;
 
 const playNotificationSound = () => {
@@ -716,7 +716,7 @@ export default function StaffPortal() {
     }
   };
 
-  const onSubmitSaveOnly = (data) => {
+  const onSubmitSaveOnly = async (data) => {
     const isBKK = data.province === 'กรุงเทพมหานคร';
     const subTitle = isBKK ? `แขวง${data.subdistrict}` : `ต.${data.subdistrict}`;
     const distTitle = isBKK ? `เขต${data.district}` : `อ.${data.district}`;
@@ -734,19 +734,43 @@ export default function StaffPortal() {
     delete processedData.selectQuantity;
     delete processedData.customQuantity;
     
+    const existingRecord = editingRecordId ? history.find(r => r.id === editingRecordId) : null;
+    const savedRecord = existingRecord
+      ? { ...existingRecord, ...processedData, printed: false, timestamp: new Date().toISOString() }
+      : { ...processedData, id: Date.now(), timestamp: new Date().toISOString(), printed: false, deleted: false };
+
     setHistory(prevHistory => {
       const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
-      let updatedHistory;
-      if (editingRecordId) {
-        updatedHistory = safeHistory.map(r => r.id === editingRecordId ? { ...r, ...processedData, printed: false, timestamp: new Date().toISOString() } : r);
-      } else {
-        const newRecord = { ...processedData, id: Date.now(), timestamp: new Date().toISOString(), printed: false };
-        updatedHistory = [newRecord, ...safeHistory];
-      }
+      const updatedHistory = editingRecordId
+        ? safeHistory.map(r => r.id === editingRecordId ? savedRecord : r)
+        : [savedRecord, ...safeHistory];
       const sliced = updatedHistory.slice(0, 100);
       localStorage.setItem('staffHistory', JSON.stringify(sliced));
       return sliced;
     });
+
+    try {
+      if (savedRecord.firestoreId) {
+        await updateDoc(doc(db, "orders", savedRecord.firestoreId), {
+          ...processedData,
+          printed: false,
+          updatedAt: serverTimestamp(),
+        });
+      } else {
+        const created = await addDoc(collection(db, "orders"), buildFirestoreOrder(
+          savedRecord,
+          { dept: branchCode, createdAt: serverTimestamp(), updatedAt: serverTimestamp() },
+        ));
+        setHistory(prev => {
+          const next = prev.map(r => r.id === savedRecord.id ? { ...r, firestoreId: created.id } : r);
+          localStorage.setItem('staffHistory', JSON.stringify(next));
+          return next;
+        });
+      }
+    } catch (error) {
+      console.error("Firebase save error:", error);
+      alert("บันทึกไว้ในเครื่องแล้ว แต่ยังส่งขึ้นระบบกลางไม่สำเร็จ กรุณาตรวจอินเทอร์เน็ตแล้วลองแก้ไขและบันทึกอีกครั้ง");
+    }
     
     reset();
     setQuantityFields(100);
@@ -800,7 +824,7 @@ export default function StaffPortal() {
     
     window.print();
     
-    setTimeout(() => {
+    setTimeout(async () => {
       setHistory(prevHistory => {
         const safeHistory = Array.isArray(prevHistory) ? prevHistory : [];
         let updatedHistory;
@@ -814,9 +838,23 @@ export default function StaffPortal() {
         return sliced;
       });
       
-      if (newRecord.firestoreId) {
-         updateDoc(doc(db, "orders", newRecord.firestoreId), { printed: true, ...processedData, updatedAt: serverTimestamp() })
-           .catch(e => console.error("Firebase update error:", e));
+      try {
+        if (newRecord.firestoreId) {
+          await updateDoc(doc(db, "orders", newRecord.firestoreId), { printed: true, ...processedData, updatedAt: serverTimestamp() });
+        } else {
+          const created = await addDoc(collection(db, "orders"), buildFirestoreOrder(
+            { ...newRecord, printed: true },
+            { dept: branchCode, createdAt: serverTimestamp(), updatedAt: serverTimestamp() },
+          ));
+          setHistory(prev => {
+            const next = prev.map(r => r.id === newRecord.id ? { ...r, firestoreId: created.id } : r);
+            localStorage.setItem('staffHistory', JSON.stringify(next));
+            return next;
+          });
+        }
+      } catch (error) {
+        console.error("Firebase save error:", error);
+        alert("พิมพ์แล้วและเก็บไว้ในเครื่อง แต่ยังส่งขึ้นระบบกลางไม่สำเร็จ");
       }
       
       reset();
@@ -839,7 +877,14 @@ export default function StaffPortal() {
       
       if (record.firestoreId) {
          updateDoc(doc(db, "orders", record.firestoreId), { printed: true, updatedAt: serverTimestamp() })
-           .catch(e => console.error("Firebase update error:", e));
+           .catch(e => {
+             console.error("Firebase update error:", e);
+             setHistory(prev => {
+               const next = prev.map(r => r.id === record.id ? record : r);
+               localStorage.setItem('staffHistory', JSON.stringify(next));
+               return next;
+             });
+           });
       }
     };
     window.addEventListener('afterprint', handleAfterPrint);
@@ -1703,7 +1748,14 @@ export default function StaffPortal() {
       if (recordToDelete?.firestoreId) {
          try {
             await updateDoc(doc(db, "orders", recordToDelete.firestoreId), { deleted: true, updatedAt: serverTimestamp() });
-         } catch(e) { console.error("Error deleting document:", e); }
+         } catch(e) {
+           console.error("Error deleting document:", e);
+           setHistory(prev => {
+             const next = prev.map(r => r.id === id ? recordToDelete : r);
+             localStorage.setItem('staffHistory', JSON.stringify(next));
+             return next;
+           });
+         }
       }
       setSelectedIds(prev => prev.filter(i => i !== id));
       setSwipeOffset(prev => {
@@ -1724,7 +1776,16 @@ export default function StaffPortal() {
       });
       for (const r of recordsToDelete) {
          if (r.firestoreId) {
-            try { await updateDoc(doc(db, "orders", r.firestoreId), { deleted: true, updatedAt: serverTimestamp() }); } catch(e){ console.error(e); }
+            try {
+              await updateDoc(doc(db, "orders", r.firestoreId), { deleted: true, updatedAt: serverTimestamp() });
+            } catch(e) {
+              console.error(e);
+              setHistory(prev => {
+                const next = prev.map(item => item.id === r.id ? r : item);
+                localStorage.setItem('staffHistory', JSON.stringify(next));
+                return next;
+              });
+            }
          }
       }
       setSelectedIds([]);
@@ -1742,7 +1803,14 @@ export default function StaffPortal() {
     if (recordToRestore?.firestoreId) {
        try {
           await updateDoc(doc(db, "orders", recordToRestore.firestoreId), { deleted: false, updatedAt: serverTimestamp() });
-       } catch(e) { console.error("Error restoring document:", e); }
+       } catch(e) {
+         console.error("Error restoring document:", e);
+         setHistory(prev => {
+           const next = prev.map(r => r.id === id ? recordToRestore : r);
+           localStorage.setItem('staffHistory', JSON.stringify(next));
+           return next;
+         });
+       }
     }
   };
 
