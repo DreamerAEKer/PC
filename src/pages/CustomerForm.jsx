@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import { Download, CheckCircle, Clock, Share2 } from 'lucide-react';
+import generatePayload from 'promptpay-qr';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import SubAddressFields from '../components/SubAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
@@ -1233,17 +1234,42 @@ export default function CustomerForm() {
             {quantity > 0 && (
               <div style={{
                 marginTop: '1.5rem',
-                padding: '1rem',
+                padding: '1.5rem',
                 backgroundColor: '#f0fdf4',
                 border: '2px dashed #22c55e',
                 borderRadius: '12px',
-                textAlign: 'center'
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1rem'
               }}>
-                <div style={{ fontSize: '0.9rem', color: '#166534', marginBottom: '0.25rem' }}>ราคาไปรษณียบัตร (ใบละ 3 บาท)</div>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '1.1rem', fontWeight: 600, color: '#15803d' }}>จำนวน {quantity} ใบ</span>
-                  <span style={{ fontSize: '1.1rem', color: '#15803d' }}>=</span>
-                  <span style={{ fontSize: '1.75rem', fontWeight: 800, color: '#16a34a' }}>{totalPrice.toLocaleString()} บาท</span>
+                <div>
+                  <div style={{ fontSize: '0.9rem', color: '#166534', marginBottom: '0.25rem' }}>ราคาไปรษณียบัตร (ใบละ 3 บาท)</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '1.1rem', fontWeight: 600, color: '#15803d' }}>จำนวน {quantity} ใบ</span>
+                    <span style={{ fontSize: '1.1rem', color: '#15803d' }}>=</span>
+                    <span style={{ fontSize: '1.75rem', fontWeight: 800, color: '#16a34a' }}>{totalPrice.toLocaleString()} บาท</span>
+                  </div>
+                </div>
+
+                <div style={{
+                  padding: '1rem',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '8px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center'
+                }}>
+                  <div style={{ fontWeight: 'bold', color: '#1e3a8a', marginBottom: '0.5rem' }}>QR ชำระเงิน (พร้อมเพย์)</div>
+                  <QRCodeSVG 
+                    value={generatePayload(watch("senderPhone") || "0999999999", { amount: totalPrice })} 
+                    size={160} 
+                  />
+                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem' }}>
+                    สแกนเพื่อชำระเงิน {totalPrice.toLocaleString()} บาท
+                  </div>
                 </div>
               </div>
             )}
