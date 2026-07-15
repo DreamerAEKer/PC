@@ -1,33 +1,68 @@
-/**
- * Merge Firestore orders into the local history cache.
- *
- * Local printed/deleted flags are preserved to avoid a delayed Firestore
- * snapshot undoing an action that the user has just completed.
- */
+const toMillis = (value) => {
+  if (value == null) return 0;
+  if (typeof value?.toMillis === 'function') return value.toMillis();
+  if (typeof value?.seconds === 'number') {
+    return (value.seconds * 1000) + Math.floor((value.nanoseconds || 0) / 1e6);
+  }
+  if (typeof value === 'number') return value;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+export function markOrderPendingUpdate(record, changes) {
+  const cleanRecord = record && typeof record === 'object' ? record : {};
+  return {
+    ...cleanRecord,
+    ...changes,
+    _pendingHistoryUpdate: {
+      baseUpdatedAt: toMillis(cleanRecord.updatedAt),
+      changes: { ...changes },
+    },
+  };
+}
+
+const mergeRecord = (existing, incoming) => {
+  if (!existing) return incoming;
+
+  const pending = existing._pendingHistoryUpdate;
+  if (pending) {
+    const confirmed = Object.entries(pending.changes).every(
+      ([key, value]) => incoming[key] === value,
+    );
+    const hasNewerServerState = toMillis(incoming.updatedAt) > pending.baseUpdatedAt;
+
+    if (!confirmed && !hasNewerServerState) {
+      return { ...existing, ...incoming, ...pending.changes, _pendingHistoryUpdate: pending };
+    }
+  }
+
+  // Firestore is authoritative. This also lets legacy records without
+  // updatedAt restore correctly instead of preserving stale cache flags.
+  const merged = { ...existing, ...incoming };
+  delete merged._pendingHistoryUpdate;
+  return merged;
+};
+
+/** Merge an authoritative Firestore snapshot into the local cache. */
 export function mergeOrderHistory(previousHistory, incomingOrders) {
   const previous = Array.isArray(previousHistory) ? previousHistory : [];
   const incoming = Array.isArray(incomingOrders) ? incomingOrders : [];
-  const mergedMap = new Map(previous.map((record) => [record.id, record]));
+  const previousMap = new Map(previous.map((record) => [record.id, record]));
+  const incomingIds = new Set(incoming.map((record) => record.id));
   let hasNew = false;
 
-  incoming.forEach((order) => {
-    if (!mergedMap.has(order.id)) hasNew = true;
-
-    const existing = mergedMap.get(order.id);
-    const mergedRecord = { ...existing, ...order };
-
-    if (existing?.printed && !order.printed) {
-      mergedRecord.printed = true;
-    }
-    if (existing?.deleted && !order.deleted) {
-      mergedRecord.deleted = true;
-    }
-
-    mergedMap.set(order.id, mergedRecord);
+  const history = incoming.map((order) => {
+    const existing = previousMap.get(order.id);
+    if (!existing) hasNew = true;
+    return mergeRecord(existing, order);
   });
 
-  const history = Array.from(mergedMap.values());
-  history.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+  // Records created only on this device are retained for compatibility.
+  // Firestore-backed records absent from the snapshot are removed from cache.
+  previous.forEach((record) => {
+    if (!record.firestoreId && !incomingIds.has(record.id)) history.push(record);
+  });
 
+  history.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
   return { history, hasNew };
 }

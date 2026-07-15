@@ -8,7 +8,7 @@ import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import ThaiDatePicker from '../components/ThaiDatePicker';
 import OrderSummaryCard from '../components/OrderSummaryCard';
-import { mergeOrderHistory } from '../utils/orderHistory';
+import { markOrderPendingUpdate, mergeOrderHistory } from '../utils/orderHistory';
 import { QRCodeCanvas } from 'qrcode.react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -18,7 +18,7 @@ const Html5Qrcode = class { constructor() {} async clear() {} async scanFile() {
 const Html5QrcodeSupportedFormats = { QR_CODE: 1 };
 let Html5QrcodeScanner = class { render() {} clear() {} };
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, where, updateDoc, doc, deleteDoc, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, where, updateDoc, doc, deleteDoc, getDocs, serverTimestamp } from 'firebase/firestore';
 let globalHiddenScanner = null;
 
 const playNotificationSound = () => {
@@ -815,7 +815,7 @@ export default function StaffPortal() {
       });
       
       if (newRecord.firestoreId) {
-         updateDoc(doc(db, "orders", newRecord.firestoreId), { printed: true, ...processedData })
+         updateDoc(doc(db, "orders", newRecord.firestoreId), { printed: true, ...processedData, updatedAt: serverTimestamp() })
            .catch(e => console.error("Firebase update error:", e));
       }
       
@@ -832,13 +832,13 @@ export default function StaffPortal() {
       setPrintDataList([]);
       window.removeEventListener('afterprint', handleAfterPrint);
       setHistory(prev => {
-        const updated = prev.map(r => r.id === record.id ? { ...r, printed: true } : r);
+        const updated = prev.map(r => r.id === record.id ? markOrderPendingUpdate(r, { printed: true }) : r);
         localStorage.setItem('staffHistory', JSON.stringify(updated));
         return updated;
       });
       
       if (record.firestoreId) {
-         updateDoc(doc(db, "orders", record.firestoreId), { printed: true })
+         updateDoc(doc(db, "orders", record.firestoreId), { printed: true, updatedAt: serverTimestamp() })
            .catch(e => console.error("Firebase update error:", e));
       }
     };
@@ -1695,17 +1695,16 @@ export default function StaffPortal() {
   const handleDeleteRecord = async (id) => {
     if (await window.showConfirm("คุณต้องการนำรายการประวัตินี้ทิ้งลงถังขยะใช่หรือไม่? (สามารถกู้คืนได้)")) {
       const recordToDelete = history.find(r => r.id === id);
-      if (recordToDelete?.firestoreId) {
-         try {
-            await updateDoc(doc(db, "orders", recordToDelete.firestoreId), { deleted: true });
-         } catch(e) { console.error("Error deleting document:", e); }
-      }
-      
       setHistory(prev => {
-        const next = prev.map(r => r.id === id ? { ...r, deleted: true } : r);
+        const next = prev.map(r => r.id === id ? markOrderPendingUpdate(r, { deleted: true }) : r);
         localStorage.setItem('staffHistory', JSON.stringify(next));
         return next;
       });
+      if (recordToDelete?.firestoreId) {
+         try {
+            await updateDoc(doc(db, "orders", recordToDelete.firestoreId), { deleted: true, updatedAt: serverTimestamp() });
+         } catch(e) { console.error("Error deleting document:", e); }
+      }
       setSelectedIds(prev => prev.filter(i => i !== id));
       setSwipeOffset(prev => {
         const copy = { ...prev };
@@ -1718,17 +1717,16 @@ export default function StaffPortal() {
   const handleDeleteSelected = async () => {
     if (await window.showConfirm(`⚠️ คำเตือน: คุณต้องการนำรายการที่เลือกทั้งหมดจำนวน ${selectedIds.length} รายการทิ้งลงถังขยะใช่หรือไม่?`)) {
       const recordsToDelete = history.filter(r => selectedIds.includes(r.id));
-      for (const r of recordsToDelete) {
-         if (r.firestoreId) {
-            try { await updateDoc(doc(db, "orders", r.firestoreId), { deleted: true }); } catch(e){ console.error(e); }
-         }
-      }
-      
       setHistory(prev => {
-        const next = prev.map(r => selectedIds.includes(r.id) ? { ...r, deleted: true } : r);
+        const next = prev.map(r => selectedIds.includes(r.id) ? markOrderPendingUpdate(r, { deleted: true }) : r);
         localStorage.setItem('staffHistory', JSON.stringify(next));
         return next;
       });
+      for (const r of recordsToDelete) {
+         if (r.firestoreId) {
+            try { await updateDoc(doc(db, "orders", r.firestoreId), { deleted: true, updatedAt: serverTimestamp() }); } catch(e){ console.error(e); }
+         }
+      }
       setSelectedIds([]);
       setSwipeOffset({});
     }
@@ -1736,14 +1734,16 @@ export default function StaffPortal() {
 
   const handleRestoreRecord = async (id) => {
     const recordToRestore = history.find(r => r.id === id);
+    setHistory(prev => {
+      const next = prev.map(r => r.id === id ? markOrderPendingUpdate(r, { deleted: false }) : r);
+      localStorage.setItem('staffHistory', JSON.stringify(next));
+      return next;
+    });
     if (recordToRestore?.firestoreId) {
        try {
-          await updateDoc(doc(db, "orders", recordToRestore.firestoreId), { deleted: false });
+          await updateDoc(doc(db, "orders", recordToRestore.firestoreId), { deleted: false, updatedAt: serverTimestamp() });
        } catch(e) { console.error("Error restoring document:", e); }
     }
-    
-    // We don't need to manually update local history state here 
-    // because onSnapshot will fetch the update and push it to history.
   };
 
   const handlePermanentDelete = async (id) => {
@@ -4427,14 +4427,14 @@ export default function StaffPortal() {
                     onClick={async () => {
                       if (await window.showConfirm(`คุณต้องการเปลี่ยนสถานะรายการที่เลือกทั้งหมด (${selectedIds.length} รายการ) เป็น "พิมพ์แล้ว" ใช่หรือไม่?`)) {
                         setHistory(prev => {
-                          const updated = prev.map(r => selectedIds.includes(r.id) ? { ...r, printed: true } : r);
+                          const updated = prev.map(r => selectedIds.includes(r.id) ? markOrderPendingUpdate(r, { printed: true }) : r);
                           localStorage.setItem('staffHistory', JSON.stringify(updated));
                           return updated;
                         });
                         const selectedRecords = history.filter(r => selectedIds.includes(r.id));
                         for (const r of selectedRecords) {
                            if (r.firestoreId) {
-                              try { updateDoc(doc(db, "orders", r.firestoreId), { printed: true }); } catch(e){}
+                              try { await updateDoc(doc(db, "orders", r.firestoreId), { printed: true, updatedAt: serverTimestamp() }); } catch(e){}
                            }
                         }
                         setSelectedIds([]);
