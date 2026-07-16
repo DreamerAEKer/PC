@@ -8,7 +8,7 @@ import ThaiAddressFields from '../components/ThaiAddressFields';
 import DidBoxInput from '../components/DidBoxInput';
 import ThaiDatePicker from '../components/ThaiDatePicker';
 import OrderSummaryCard from '../components/OrderSummaryCard';
-import { analyzeHistoryMigration, buildFirestoreOrder, markOrderPendingUpdate, mergeOrderHistory } from '../utils/orderHistory';
+import { analyzeHistoryMigration, buildFirestoreOrder, getHistoryLookupValues, markOrderPendingUpdate, mergeOrderHistory } from '../utils/orderHistory';
 import { QRCodeCanvas } from 'qrcode.react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -1870,16 +1870,46 @@ export default function StaffPortal() {
   const handlePermanentDelete = async (id) => {
     if (await window.showConfirm("❌ คำเตือน: คุณต้องการลบรายการนี้อย่างถาวรใช่หรือไม่? (ไม่สามารถกู้คืนได้อีก)")) {
       const recordToDelete = history.find(r => r.id === id);
-      if (recordToDelete?.firestoreId) {
-         try {
-            await updateDoc(doc(db, "orders", recordToDelete.firestoreId), {
-              purged: true,
-              updatedAt: serverTimestamp()
-            });
-         } catch(e) {
-           console.error("Error permanently deleting document:", e);
-           return;
-         }
+      if (!recordToDelete) return;
+
+      try {
+        const firestoreIds = new Set();
+        const lookupValues = getHistoryLookupValues(recordToDelete);
+        if (recordToDelete.firestoreId) firestoreIds.add(recordToDelete.firestoreId);
+
+        // Legacy cache records may not have a Firestore document id. Locate the
+        // authoritative document by stable business identifiers before purging.
+        if (firestoreIds.size === 0 && lookupValues.id != null) {
+          const idSnapshot = await getDocs(query(
+            collection(db, "orders"),
+            where("id", "==", lookupValues.id)
+          ));
+          idSnapshot.forEach((item) => firestoreIds.add(item.id));
+        }
+
+        if (firestoreIds.size === 0 && lookupValues.orderCode) {
+          const codeSnapshot = await getDocs(query(
+            collection(db, "orders"),
+            where("orderCode", "==", lookupValues.orderCode)
+          ));
+          codeSnapshot.forEach((item) => firestoreIds.add(item.id));
+        }
+
+        if (firestoreIds.size === 0) {
+          window.alert("ไม่พบรายการนี้ในระบบกลาง จึงยังไม่ได้ลบ กรุณาแจ้งผู้ดูแลพร้อมรหัสสั่งพิมพ์");
+          return;
+        }
+
+        await Promise.all(Array.from(firestoreIds).map((firestoreId) =>
+          updateDoc(doc(db, "orders", firestoreId), {
+            purged: true,
+            updatedAt: serverTimestamp()
+          })
+        ));
+      } catch(e) {
+        console.error("Error permanently deleting document:", e);
+        window.alert(`ลบรายการไม่สำเร็จ (${e?.code || 'unknown'}) กรุณาลองใหม่อีกครั้ง`);
+        return;
       }
       
       setHistory(prev => {

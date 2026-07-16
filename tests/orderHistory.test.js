@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { analyzeHistoryMigration, buildFirestoreOrder, markOrderPendingUpdate, mergeOrderHistory } from '../src/utils/orderHistory.js';
+import { analyzeHistoryMigration, buildFirestoreOrder, getHistoryLookupValues, markOrderPendingUpdate, mergeOrderHistory } from '../src/utils/orderHistory.js';
 
 test('adds new orders and sorts newest first', () => {
   const result = mergeOrderHistory([{ id: 100, name: 'เดิม' }], [{ id: 200, name: 'ใหม่' }]);
@@ -69,6 +69,14 @@ test('hides permanently deleted Firestore tombstones on every device', () => {
   );
 
   assert.deepEqual(result.history, []);
+});
+
+test('finds stable lookup values for legacy records without a Firestore id', () => {
+  assert.deepEqual(
+    getHistoryLookupValues({ id: 123, orderCode: '  PC-123  ' }),
+    { id: 123, orderCode: 'PC-123' },
+  );
+  assert.deepEqual(getHistoryLookupValues({}), { id: null, orderCode: null });
 });
 
 test('accepts missing or invalid local history safely', () => {
