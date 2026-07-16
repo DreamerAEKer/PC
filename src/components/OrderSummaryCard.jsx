@@ -2,6 +2,7 @@ import React from 'react';
 import { Package, Calendar, Phone, MapPin, Hash, User } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import generatePayload from 'promptpay-qr';
+import { hasPhoneValue } from '../utils/contact';
 
 export default function OrderSummaryCard({ record, indexInfo = null }) {
   if (!record) return null;
@@ -9,7 +10,7 @@ export default function OrderSummaryCard({ record, indexInfo = null }) {
   // Fallback defaults
   const orderCode = record.orderCode || record.oc || '-';
   const name = record.name || record.n || '-';
-  const phone = record.phone || record.p || '-';
+  const phone = record.phone || record.p || '';
   const quantity = record.quantity || record.q || 100;
   const orderDate = record.orderDate || record.d || new Date().toISOString().split('T')[0];
   const finalPrediction = record.finalPrediction || record.pr || null;
@@ -113,14 +114,16 @@ export default function OrderSummaryCard({ record, indexInfo = null }) {
         </div>
         
         {/* Phone */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: '90px' }}>
-            <Phone size={14} /> เบอร์โทร
+        {hasPhoneValue(phone) && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: '90px' }}>
+              <Phone size={14} /> เบอร์โทร
+            </div>
+            <div style={{ fontWeight: '600', textAlign: 'right' }}>
+              {phone}
+            </div>
           </div>
-          <div style={{ fontWeight: '600', textAlign: 'right' }}>
-            {phone}
-          </div>
-        </div>
+        )}
         
         {/* Address */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

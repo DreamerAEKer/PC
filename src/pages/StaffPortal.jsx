@@ -10,6 +10,7 @@ import ThaiDatePicker from '../components/ThaiDatePicker';
 import OrderSummaryCard from '../components/OrderSummaryCard';
 import { analyzeHistoryMigration, buildFirestoreOrder, getHistoryLookupValues, markOrderPendingUpdate, mergeOrderHistory } from '../utils/orderHistory';
 import { DEFAULT_FINALIST_SETTINGS, getFinalistSettingsDocId, normalizeFinalistSettings } from '../utils/finalPrediction';
+import { hasPhoneValue } from '../utils/contact';
 import { QRCodeCanvas } from 'qrcode.react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -746,6 +747,9 @@ export default function StaffPortal() {
   };
 
   const onSubmitSaveOnly = async (data) => {
+    if (!hasPhoneValue(data.phone)) {
+      alert('ไม่ได้ระบุเบอร์โทร ระบบจะบันทึกต่อและไม่แสดงบรรทัด โทร.');
+    }
     const isBKK = data.province === 'กรุงเทพมหานคร';
     const subTitle = isBKK ? `แขวง${data.subdistrict}` : `ต.${data.subdistrict}`;
     const distTitle = isBKK ? `เขต${data.district}` : `อ.${data.district}`;
@@ -816,6 +820,9 @@ export default function StaffPortal() {
   };
 
   const onSubmit = (data) => {
+    if (!hasPhoneValue(data.phone)) {
+      alert('ไม่ได้ระบุเบอร์โทร ระบบจะพิมพ์ต่อโดยไม่แสดงบรรทัด โทร.');
+    }
     const isBKK = data.province === 'กรุงเทพมหานคร';
     const subTitle = isBKK ? `แขวง${data.subdistrict}` : `ต.${data.subdistrict}`;
     const distTitle = isBKK ? `เขต${data.district}` : `อ.${data.district}`;
@@ -3410,10 +3417,8 @@ export default function StaffPortal() {
                   {errors.name && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>กรุณาระบุชื่อ-นามสกุล</span>}
                 </div>
                 <div className="form-group">
-                  <label className="form-label">เบอร์โทรศัพท์ <span style={{color:'red'}}>*</span></label>
-                  <input type="text" className={`form-control ${getFieldClass('phone')}`} required {...register("phone", { 
-                    required: "กรุณาระบุเบอร์โทรศัพท์"
-                  })} placeholder="เช่น 08X-XXX-XXXX หรือ 02-XXX-XXXX ต่อ 123" />
+                  <label className="form-label">เบอร์โทรศัพท์ <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>(ไม่บังคับ)</span></label>
+                  <input type="text" className={`form-control ${getFieldClass('phone')}`} {...register("phone", { required: false })} placeholder="เว้นว่างได้ หากไม่มีเบอร์โทร" />
                   {errors.phone && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>{errors.phone.message}</span>}
                 </div>
                 <input type="hidden" {...register("did")} />
@@ -3793,9 +3798,11 @@ export default function StaffPortal() {
                                 <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                                   {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
                                 </div>
-                                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                                  โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
-                                </div>
+                                {hasPhoneValue(formValues.phone) && (
+                                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                    โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone}</span>
+                                  </div>
+                                )}
                                 {!(formValues.did && formValues.did.trim().length === 6) && (
                                   <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
                                     {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''} ${formValues.zipcode || 'XXXXX'}${printSettings.printCountry ? ' ' + printSettings.countryName : ''}`.trim()}
@@ -3810,9 +3817,11 @@ export default function StaffPortal() {
                                 <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                                   {formValues.name || 'ชื่อ-นามสกุล ผู้รับ'}
                                 </div>
-                                <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                                  โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone || '08X-XXX-XXXX'}</span>
-                                </div>
+                                {hasPhoneValue(formValues.phone) && (
+                                  <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                                    โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{formValues.phone}</span>
+                                  </div>
+                                )}
                                 <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
                                   {`${formValues.addressLine1 || 'บ้านเลขที่/ถนน'} ${formValues.subdistrict ? (formValues.province === 'กรุงเทพมหานคร' ? 'แขวง' : 'ต.') + formValues.subdistrict : ''} ${formValues.district ? (formValues.province === 'กรุงเทพมหานคร' ? 'เขต' : 'อ.') + formValues.district : ''} ${formValues.province ? (formValues.province === 'กรุงเทพมหานคร' ? '' : 'จ.') + formValues.province : ''}`.trim()}
                                 </div>
@@ -5343,9 +5352,11 @@ export default function StaffPortal() {
                           <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                             {printItem.name}
                           </div>
-                          <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                            โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
-                          </div>
+                          {hasPhoneValue(printItem.phone) && (
+                            <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                              โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
+                            </div>
+                          )}
                           {!(printItem.did && printItem.did.trim().length === 6) && (
                             <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
                               {printItem.address} {printItem.zipcode}{printSettings.printCountry && ` ${printSettings.countryName}`}
@@ -5360,9 +5371,11 @@ export default function StaffPortal() {
                           <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                             {printItem.name}
                           </div>
-                          <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                            โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
-                          </div>
+                          {hasPhoneValue(printItem.phone) && (
+                            <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                              โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
+                            </div>
+                          )}
                           <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
                             {printItem.address}
                           </div>
@@ -5404,9 +5417,11 @@ export default function StaffPortal() {
                     <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                       {printItem.name}
                     </div>
-                    <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                      โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
-                    </div>
+                    {hasPhoneValue(printItem.phone) && (
+                      <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                        โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
+                      </div>
+                    )}
                     {!(printItem.did && printItem.did.trim().length === 6) && (
                       <div style={{ fontSize: `${Math.max(4, printSettings.fontSize - 1)}pt`, color: '#111', lineHeight: '1.3', marginBottom: '0.4em' }}>
                         {printItem.address} {printItem.zipcode}{printSettings.printCountry && ` ${printSettings.countryName}`}
@@ -5421,9 +5436,11 @@ export default function StaffPortal() {
                     <div style={{ fontWeight: printSettings.isNameBold ? 'bold' : 'normal', fontSize: `${printSettings.fontSize + 0.5}pt`, marginBottom: '0.2em' }}>
                       {printItem.name}
                     </div>
-                    <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
-                      โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
-                    </div>
+                    {hasPhoneValue(printItem.phone) && (
+                      <div style={{ fontSize: `${printSettings.fontSize}pt`, marginBottom: '0.4em' }}>
+                        โทร. <span style={{ fontWeight: printSettings.isPhoneBold ? 'bold' : 'normal' }}>{printItem.phone}</span>
+                      </div>
+                    )}
                     <div style={{ fontSize: `${printSettings.fontSize}pt`, lineHeight: '1.3' }}>
                       {printItem.address}
                     </div>

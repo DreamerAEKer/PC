@@ -4,6 +4,7 @@ import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import { Download, CheckCircle, Clock, Share2 } from 'lucide-react';
 import { DEFAULT_FINALIST_SETTINGS, getFinalistCountries, getFinalistSettingsDocId, normalizeFinalistSettings, validateFinalPrediction } from '../utils/finalPrediction';
+import { hasPhoneValue } from '../utils/contact';
 import generatePayload from 'promptpay-qr';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import SubAddressFields from '../components/SubAddressFields';
@@ -281,14 +282,9 @@ export default function CustomerForm() {
 
   const onSubmit = async (data) => {
     // Check if phone (for printing on postcard) is missing
-    const hasPhone = data.phone && data.phone.trim().length > 0;
+    const hasPhone = hasPhoneValue(data.phone);
     
-    if (!hasPhone) {
-      const confirmProceed = await window.showConfirm("คุณยังไม่ได้กรอก เบอร์โทร ยืนยันข้อมูลโดยไม่ใส่ เบอร์โทร");
-      if (!confirmProceed) {
-        return; // Stop form submission
-      }
-    }
+    if (!hasPhone) showToast('ไม่ได้ระบุเบอร์โทร ระบบจะดำเนินการต่อและไม่แสดงบรรทัดเบอร์โทร');
 
     const isDidActive = data.did && data.did.trim().length === 6;
     let fullAddress = "";
@@ -1391,9 +1387,11 @@ export default function CustomerForm() {
                 <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: '600' }}>
                   ชื่อ: {generatedData.name}
                 </div>
-                <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                  เบอร์โทร: {generatedData.phone}
-                </div>
+                {hasPhoneValue(generatedData.phone) && (
+                  <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
+                    เบอร์โทร: {generatedData.phone}
+                  </div>
+                )}
                 {generatedData.address && (
                   <div style={{ fontSize: '1.1rem', marginBottom: '0.75rem', lineHeight: '1.6' }}>
                     ที่อยู่: {generatedData.address} {generatedData.zipcode}
