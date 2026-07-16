@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import { Download, CheckCircle, Clock, Share2 } from 'lucide-react';
+import { FINALIST_COUNTRIES, validateFinalPrediction } from '../utils/finalPrediction';
 import generatePayload from 'promptpay-qr';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import SubAddressFields from '../components/SubAddressFields';
@@ -26,6 +27,8 @@ export default function CustomerForm() {
     mode: 'onChange',
     defaultValues: {
       customQuantity: "100",
+      predictionSpain: "",
+      predictionArgentina: "",
       orderDate: new Date().toISOString().split('T')[0],
       senderNickname: localStorage.getItem('customerSenderNickname') || '',
       senderPhone: localStorage.getItem('customerSenderPhone') || ''
@@ -290,6 +293,15 @@ export default function CustomerForm() {
     }
     
     const resolvedQty = parseInt(data.customQuantity, 10) || 0;
+    const finalPrediction = validateFinalPrediction({
+      spain: data.predictionSpain,
+      argentina: data.predictionArgentina,
+    }, resolvedQty);
+
+    if (!finalPrediction.isValid) {
+      alert(`กรุณาระบุจำนวนที่ทายให้ครบ ${resolvedQty} ใบ (สเปน + อาร์เจนตินา)`);
+      return;
+    }
 
     // Advanced mode validations
     if (isAdvancedMode && subBookings.length > 0) {
@@ -353,6 +365,10 @@ export default function CustomerForm() {
      const processedData = {
        ...data,
        quantity: resolvedQty,
+       finalPrediction: {
+         spain: finalPrediction.spain,
+         argentina: finalPrediction.argentina,
+       },
        address: fullAddress,
        isDidActive,
        branch: resolvedBranchDisplay,
@@ -383,6 +399,7 @@ export default function CustomerForm() {
        sp: processedData.senderPhone || '',
        d: processedData.orderDate,
        q: processedData.quantity,
+       pr: processedData.finalPrediction,
        n: processedData.name,
        p: processedData.phone,
        a: processedData.addressLine1 || '',
@@ -913,6 +930,33 @@ export default function CustomerForm() {
                 </div>
               </div>
               {errors.customQuantity && <span style={{ color: 'var(--primary)', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem', fontWeight: 600 }}>กรุณาระบุจำนวนอย่างน้อย 50 ใบ</span>}
+            </div>
+            <div className="form-group" style={{ padding: '1rem', border: '2px solid #2563eb', borderRadius: '14px', background: '#eff6ff' }}>
+              <div className="form-label" style={{ color: '#1e3a8a', fontWeight: 800, marginBottom: '0.35rem' }}>
+                ทายผลคู่ชิง: เลือกประเทศและระบุจำนวนใบ
+              </div>
+              <div style={{ color: '#475569', fontSize: '0.85rem', marginBottom: '0.75rem' }}>
+                จำนวนของสเปนและอาร์เจนตินารวมกันต้องเท่ากับจำนวนที่สั่ง {quantity.toLocaleString()} ใบ
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
+                {FINALIST_COUNTRIES.map((country) => {
+                  const fieldName = country.key === 'spain' ? 'predictionSpain' : 'predictionArgentina';
+                  return (
+                    <label key={country.key} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontWeight: 700, color: '#0f172a' }}>
+                      <span style={{ minWidth: '82px' }}>{country.label}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        className="form-control"
+                        {...register(fieldName, { min: 0 })}
+                        placeholder="0"
+                        style={{ textAlign: 'center', fontWeight: 800 }}
+                      />
+                      <span>ใบ</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
             {/* ข้อมูลผู้สั่ง (Sender Profile) */}
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem', background: '#f8fafc', padding: '1rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>

@@ -1177,6 +1177,7 @@ export default function StaffPortal() {
             province: raw.pv || '',
             zipcode: raw.zp || '',
             did: raw.id || '',
+            finalPrediction: raw.pr || null,
             idx: raw.idx,
             tot: raw.tot
           };
@@ -1203,6 +1204,7 @@ export default function StaffPortal() {
     setValue("orderCode", data.orderCode || data.oc || "");
     setValue("senderNickname", data.senderNickname || data.sn || "");
     setValue("senderPhone", data.senderPhone || data.sp || "");
+    setValue("finalPrediction", data.finalPrediction || data.pr || null);
     setHasActiveData(true);
     if (data.id) {
       setEditingRecordId(data.id);

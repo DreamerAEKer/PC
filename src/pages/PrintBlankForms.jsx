@@ -138,6 +138,11 @@ export default function PrintBlankForms() {
               </div>
               
               <div style={{ borderTop: '1px dotted #ccc', paddingTop: '0.4rem', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <div style={{ fontWeight: 'bold', fontSize: '0.7rem' }}>ทายผลคู่ชิง</div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.15rem', fontSize: '0.68rem' }}>
+                  <span>สเปน</span><span className="line-input" style={{ flex: 1, minHeight: '1rem', marginLeft: '0.15rem' }}></span><span>ใบ</span>
+                  <span style={{ marginLeft: '0.25rem' }}>อาร์เจนตินา</span><span className="line-input" style={{ flex: 1, minHeight: '1rem', marginLeft: '0.15rem' }}></span><span>ใบ</span>
+                </div>
                 <div style={{ display: 'flex', alignItems: 'flex-end' }}>
                   <span style={{ whiteSpace: 'nowrap', marginBottom: '1px' }}>จนท:</span>
                   <div style={{ flex: 1, marginLeft: '0.2rem', paddingLeft: '0.5rem', borderBottom: '1px dotted #000', fontFamily: 'monospace', fontWeight: 'bold', minHeight: '1.2rem', color: '#000' }}>
