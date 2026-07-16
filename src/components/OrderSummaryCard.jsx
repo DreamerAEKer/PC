@@ -12,6 +12,7 @@ export default function OrderSummaryCard({ record, indexInfo = null }) {
   const phone = record.phone || record.p || '-';
   const quantity = record.quantity || record.q || 100;
   const orderDate = record.orderDate || record.d || new Date().toISOString().split('T')[0];
+  const finalPrediction = record.finalPrediction || record.pr || null;
   
   // Format Address
   let addressDisplay = record.address || record.a || '-';
@@ -142,6 +143,16 @@ export default function OrderSummaryCard({ record, indexInfo = null }) {
             {quantity} <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 'normal' }}>ใบ</span>
           </div>
         </div>
+
+        {finalPrediction && (
+          <div style={{ padding: '0.75rem', borderRadius: '8px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
+            <div style={{ fontWeight: '800', color: '#1e3a8a', marginBottom: '0.4rem' }}>⚽ ทายผลคู่ชิง</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', color: '#1e293b' }}>
+              <span>{finalPrediction.firstCountry || 'สเปน'} <strong>{finalPrediction.spain || 0} ใบ</strong></span>
+              <span>{finalPrediction.secondCountry || 'อาร์เจนตินา'} <strong>{finalPrediction.argentina || 0} ใบ</strong></span>
+            </div>
+          </div>
+        )}
 
         {/* Payment QR Section */}
         <div style={{ marginTop: '1rem', padding: '0.75rem', border: '2px dashed #0369a1', borderRadius: '12px', backgroundColor: '#f0f9ff', textAlign: 'center' }}>

@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "test": "node --test tests/orderHistory.test.js",
+    "test": "node --test tests/*.test.js",
     "check": "npm run test && npm run build",
     "preview": "vite preview",
     "predeploy": "npm run build",
