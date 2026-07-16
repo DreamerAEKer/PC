@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Settings, Printer, CheckSquare, ChevronLeft, X, List } from 'lucide-react';
+import { db } from '../firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { DEFAULT_FINALIST_SETTINGS, getFinalistCountries, getFinalistSettingsDocId, normalizeFinalistSettings } from '../utils/finalPrediction';
 
 const zones = [
   {
@@ -32,6 +35,7 @@ const zones = [
 const allInitialTeams = zones.flatMap(z => z.teams);
 
 function WorldCupPortal() {
+  const [finalistSettings, setFinalistSettings] = useState(DEFAULT_FINALIST_SETTINGS);
   const [wcPrintSettings, setWcPrintSettings] = useState(() => {
     try {
       const saved = localStorage.getItem('wcPrintSettings');
@@ -94,6 +98,23 @@ function WorldCupPortal() {
     if (saved === null) return true;
     return saved === 'true';
   });
+
+  useEffect(() => {
+    let branchCode = '10501';
+    try {
+      const savedUser = JSON.parse(sessionStorage.getItem('staffCurrentUser') || '{}');
+      branchCode = savedUser.username || branchCode;
+    } catch (e) {}
+    return onSnapshot(
+      doc(db, 'publicSettings', getFinalistSettingsDocId(branchCode)),
+      (snapshot) => {
+        const nextSettings = normalizeFinalistSettings(snapshot.exists() ? snapshot.data() : {});
+        setFinalistSettings(nextSettings);
+        setPrintTeam((current) => [nextSettings.firstCountry, nextSettings.secondCountry].includes(current) ? current : nextSettings.firstCountry);
+      },
+      () => setFinalistSettings(DEFAULT_FINALIST_SETTINGS),
+    );
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -304,7 +325,7 @@ function WorldCupPortal() {
 
         <div className="card glass-panel">
           
-          <div style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'none', marginBottom: '2rem' }}>
             <label className="form-label" style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '0.75rem' }}>ระบุประเทศที่จะพิมพ์ (1 ประเทศ)</label>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <div style={{ position: 'relative', flex: 1 }} id="country-dropdown-container">
@@ -658,6 +679,41 @@ function WorldCupPortal() {
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div style={{ marginTop: '1rem', marginBottom: '0.75rem' }}>
+                <div style={{ fontWeight: 800, color: '#1e293b', marginBottom: '0.6rem', textAlign: 'center' }}>
+                  เลือกประเทศที่จะพิมพ์
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '0.75rem' }}>
+                  {getFinalistCountries(finalistSettings).map((country, index) => {
+                    const isActive = printTeam === country.label;
+                    return (
+                      <button
+                        key={country.key}
+                        type="button"
+                        onClick={() => setPrintTeam(country.label)}
+                        style={{
+                          padding: '0.9rem 0.6rem',
+                          borderRadius: '12px',
+                          border: isActive ? '3px solid #2563eb' : '2px solid #cbd5e1',
+                          background: isActive ? '#dbeafe' : '#fff',
+                          color: isActive ? '#1d4ed8' : '#334155',
+                          fontWeight: 900,
+                          fontSize: '1.05rem',
+                          cursor: 'pointer',
+                          boxShadow: isActive ? '0 4px 12px rgba(37, 99, 235, 0.2)' : 'none',
+                        }}
+                      >
+                        <span style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#64748b', marginBottom: '0.2rem' }}>
+                          ประเทศที่ {index + 1}
+                        </span>
+                        {country.label}
+                        {isActive && <span style={{ marginLeft: '0.35rem' }}>✓</span>}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
