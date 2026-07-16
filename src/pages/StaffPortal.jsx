@@ -9,6 +9,7 @@ import DidBoxInput from '../components/DidBoxInput';
 import ThaiDatePicker from '../components/ThaiDatePicker';
 import OrderSummaryCard from '../components/OrderSummaryCard';
 import { analyzeHistoryMigration, buildFirestoreOrder, getHistoryLookupValues, markOrderPendingUpdate, mergeOrderHistory } from '../utils/orderHistory';
+import { DEFAULT_FINALIST_SETTINGS, getFinalistSettingsDocId, normalizeFinalistSettings } from '../utils/finalPrediction';
 import { QRCodeCanvas } from 'qrcode.react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -18,7 +19,7 @@ const Html5Qrcode = class { constructor() {} async clear() {} async scanFile() {
 const Html5QrcodeSupportedFormats = { QR_CODE: 1 };
 let Html5QrcodeScanner = class { render() {} clear() {} };
 import { db } from '../firebase';
-import { addDoc, collection, query, orderBy, onSnapshot, where, updateDoc, doc, getDocs, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { addDoc, collection, query, orderBy, onSnapshot, where, updateDoc, doc, getDocs, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore';
 let globalHiddenScanner = null;
 
 const playNotificationSound = () => {
@@ -262,11 +263,39 @@ export default function StaffPortal() {
   });
   const [staffName, setStaffName] = useState('');
   const [staffPhone, setStaffPhone] = useState('');
+  const [finalistSettings, setFinalistSettings] = useState(DEFAULT_FINALIST_SETTINGS);
+  const [isSavingFinalists, setIsSavingFinalists] = useState(false);
   const [isSettingsDirty, setIsSettingsDirty] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
   const [postcardRate, setPostcardRate] = useState(3);
   const [payerName, setPayerName] = useState('');
   const [bulkPaidStatus, setBulkPaidStatus] = useState(true);
+
+  useEffect(() => {
+    const settingsDoc = doc(db, 'publicSettings', getFinalistSettingsDocId(branchCode));
+    return onSnapshot(settingsDoc, (snapshot) => {
+      setFinalistSettings(normalizeFinalistSettings(snapshot.exists() ? snapshot.data() : {}));
+    }, () => setFinalistSettings(DEFAULT_FINALIST_SETTINGS));
+  }, [branchCode]);
+
+  const saveFinalistSettings = async () => {
+    const normalized = normalizeFinalistSettings(finalistSettings);
+    setIsSavingFinalists(true);
+    try {
+      await setDoc(doc(db, 'publicSettings', getFinalistSettingsDocId(branchCode)), {
+        ...normalized,
+        branchCode,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+      setFinalistSettings(normalized);
+      alert('บันทึกชื่อประเทศแล้ว หน้าสั่งซื้อของลูกค้าจะเปลี่ยนตามอัตโนมัติ');
+    } catch (error) {
+      console.error('Unable to save finalist settings', error);
+      alert('บันทึกชื่อประเทศไม่สำเร็จ กรุณาลองอีกครั้ง');
+    } finally {
+      setIsSavingFinalists(false);
+    }
+  };
   const [bulkPaidDate, setBulkPaidDate] = useState(() => {
     const today = new Date();
     const offset = today.getTimezoneOffset();
@@ -5144,6 +5173,36 @@ export default function StaffPortal() {
                 }}
               >
                 {showSaveSuccess ? 'บันทึกแล้ว' : 'บันทึก'}
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flex: '2 1 390px', flexWrap: 'wrap', padding: '0.45rem 0.6rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px' }}>
+              <span style={{ fontSize: '0.82rem', color: '#1e3a8a', fontWeight: 800, whiteSpace: 'nowrap' }}>⚽ ตั้งชื่อคู่ชิง:</span>
+              <input
+                type="text"
+                className="form-control"
+                value={finalistSettings.firstCountry}
+                onChange={(event) => setFinalistSettings(current => ({ ...current, firstCountry: event.target.value }))}
+                placeholder="ประเทศที่ 1"
+                style={{ flex: '1 1 110px', minWidth: '100px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }}
+              />
+              <span style={{ color: '#64748b', fontWeight: 700 }}>พบ</span>
+              <input
+                type="text"
+                className="form-control"
+                value={finalistSettings.secondCountry}
+                onChange={(event) => setFinalistSettings(current => ({ ...current, secondCountry: event.target.value }))}
+                placeholder="ประเทศที่ 2"
+                style={{ flex: '1 1 110px', minWidth: '100px', padding: '0.3rem 0.5rem', fontSize: '0.85rem' }}
+              />
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={saveFinalistSettings}
+                disabled={isSavingFinalists}
+                style={{ padding: '0.3rem 0.65rem', fontSize: '0.8rem', margin: 0, borderColor: '#2563eb', color: '#1d4ed8', background: '#fff' }}
+              >
+                {isSavingFinalists ? 'กำลังบันทึก...' : 'บันทึกชื่อประเทศ'}
               </button>
             </div>
             

@@ -148,8 +148,8 @@ export default function OrderSummaryCard({ record, indexInfo = null }) {
           <div style={{ padding: '0.75rem', borderRadius: '8px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
             <div style={{ fontWeight: '800', color: '#1e3a8a', marginBottom: '0.4rem' }}>⚽ ทายผลคู่ชิง</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', color: '#1e293b' }}>
-              <span>สเปน <strong>{finalPrediction.spain || 0} ใบ</strong></span>
-              <span>อาร์เจนตินา <strong>{finalPrediction.argentina || 0} ใบ</strong></span>
+              <span>{finalPrediction.firstCountry || 'สเปน'} <strong>{finalPrediction.spain || 0} ใบ</strong></span>
+              <span>{finalPrediction.secondCountry || 'อาร์เจนตินา'} <strong>{finalPrediction.argentina || 0} ใบ</strong></span>
             </div>
           </div>
         )}

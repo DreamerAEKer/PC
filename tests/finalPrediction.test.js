@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeFinalPrediction, validateFinalPrediction } from '../src/utils/finalPrediction.js';
+import { getFinalistCountries, getFinalistSettingsDocId, normalizeFinalPrediction, normalizeFinalistSettings, validateFinalPrediction } from '../src/utils/finalPrediction.js';
+
+test('uses safe default finalist names for old settings', () => {
+  assert.deepEqual(normalizeFinalistSettings({}), { firstCountry: 'สเปน', secondCountry: 'อาร์เจนตินา' });
+  assert.deepEqual(getFinalistCountries({ firstCountry: 'ฝรั่งเศส', secondCountry: 'บราซิล' }).map(item => item.label), ['ฝรั่งเศส', 'บราซิล']);
+  assert.equal(getFinalistSettingsDocId('10501/unsafe'), 'finalists-10501unsafe');
+});
 
 test('normalizes blank and negative prediction quantities', () => {
   assert.deepEqual(normalizeFinalPrediction('', -5), { spain: 0, argentina: 0 });

@@ -1,7 +1,22 @@
-export const FINALIST_COUNTRIES = [
-  { key: 'spain', label: 'สเปน' },
-  { key: 'argentina', label: 'อาร์เจนตินา' },
-];
+export const DEFAULT_FINALIST_SETTINGS = {
+  firstCountry: 'สเปน',
+  secondCountry: 'อาร์เจนตินา',
+};
+
+export const normalizeFinalistSettings = (settings = {}) => ({
+  firstCountry: String(settings.firstCountry || '').trim() || DEFAULT_FINALIST_SETTINGS.firstCountry,
+  secondCountry: String(settings.secondCountry || '').trim() || DEFAULT_FINALIST_SETTINGS.secondCountry,
+});
+
+export const getFinalistSettingsDocId = (branchCode) => `finalists-${String(branchCode || '10501').replace(/[^0-9A-Za-z_-]/g, '') || '10501'}`;
+
+export const getFinalistCountries = (settings) => {
+  const normalized = normalizeFinalistSettings(settings);
+  return [
+    { key: 'spain', label: normalized.firstCountry },
+    { key: 'argentina', label: normalized.secondCountry },
+  ];
+};
 
 export const normalizeFinalPrediction = (spain, argentina) => ({
   spain: Math.max(0, Number.parseInt(spain, 10) || 0),

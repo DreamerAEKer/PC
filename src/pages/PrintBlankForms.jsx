@@ -2,6 +2,9 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Printer, ArrowLeft } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
+import { db } from '../firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { DEFAULT_FINALIST_SETTINGS, getFinalistSettingsDocId, normalizeFinalistSettings } from '../utils/finalPrediction';
 
 export default function PrintBlankForms() {
   const navigate = useNavigate();
@@ -10,6 +13,14 @@ export default function PrintBlankForms() {
   const [branchCode, setBranchCode] = React.useState(location.state?.branchCode || '10501');
   const [staffName, setStaffName] = React.useState(location.state?.staffName || '');
   const [staffPhone, setStaffPhone] = React.useState(location.state?.staffPhone || '');
+  const [finalistSettings, setFinalistSettings] = React.useState(DEFAULT_FINALIST_SETTINGS);
+
+  React.useEffect(() => {
+    const settingsDoc = doc(db, 'publicSettings', getFinalistSettingsDocId(location.state?.branchCode || branchCode));
+    return onSnapshot(settingsDoc, (snapshot) => {
+      setFinalistSettings(normalizeFinalistSettings(snapshot.exists() ? snapshot.data() : {}));
+    }, () => setFinalistSettings(DEFAULT_FINALIST_SETTINGS));
+  }, [branchCode, location.state?.branchCode]);
 
   React.useEffect(() => {
     if (!location.state) {
@@ -140,8 +151,8 @@ export default function PrintBlankForms() {
               <div style={{ borderTop: '1px dotted #ccc', paddingTop: '0.4rem', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 <div style={{ fontWeight: 'bold', fontSize: '0.7rem' }}>ทายผลคู่ชิง</div>
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.15rem', fontSize: '0.68rem' }}>
-                  <span>สเปน</span><span className="line-input" style={{ flex: 1, minHeight: '1rem', marginLeft: '0.15rem' }}></span><span>ใบ</span>
-                  <span style={{ marginLeft: '0.25rem' }}>อาร์เจนตินา</span><span className="line-input" style={{ flex: 1, minHeight: '1rem', marginLeft: '0.15rem' }}></span><span>ใบ</span>
+                  <span>{finalistSettings.firstCountry}</span><span className="line-input" style={{ flex: 1, minHeight: '1rem', marginLeft: '0.15rem' }}></span><span>ใบ</span>
+                  <span style={{ marginLeft: '0.25rem' }}>{finalistSettings.secondCountry}</span><span className="line-input" style={{ flex: 1, minHeight: '1rem', marginLeft: '0.15rem' }}></span><span>ใบ</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-end' }}>
                   <span style={{ whiteSpace: 'nowrap', marginBottom: '1px' }}>จนท:</span>

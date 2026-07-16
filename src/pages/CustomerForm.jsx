@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import { Download, CheckCircle, Clock, Share2 } from 'lucide-react';
-import { FINALIST_COUNTRIES, validateFinalPrediction } from '../utils/finalPrediction';
+import { DEFAULT_FINALIST_SETTINGS, getFinalistCountries, getFinalistSettingsDocId, normalizeFinalistSettings, validateFinalPrediction } from '../utils/finalPrediction';
 import generatePayload from 'promptpay-qr';
 import ThaiAddressFields from '../components/ThaiAddressFields';
 import SubAddressFields from '../components/SubAddressFields';
@@ -12,7 +12,7 @@ import ThaiDatePicker, { formatThaiDate } from '../components/ThaiDatePicker';
 import OrderSummaryCard from '../components/OrderSummaryCard';
 import { useThaiAddress } from 'use-thai-address';
 import { db } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 
 const checkPhoneStatus = (val) => {
   if (!val || typeof val !== 'string' || val.trim() === '') return 'empty';
@@ -36,6 +36,7 @@ export default function CustomerForm() {
   });
 
   const [showRulesModal, setShowRulesModal] = useState(false);
+  const [finalistSettings, setFinalistSettings] = useState(DEFAULT_FINALIST_SETTINGS);
   const [rulesActiveTab, setRulesActiveTab] = useState(0);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [guideActiveTab, setGuideActiveTab] = useState(0);
@@ -127,6 +128,14 @@ export default function CustomerForm() {
 
   const { filteredData, searchByField } = useThaiAddress();
   const [resolvedBranchDisplay, setResolvedBranchDisplay] = useState('ไปรษณีย์กลาง 10501');
+
+  useEffect(() => {
+    const branchMatch = getBranchFromUrl().match(/\d{5}/);
+    const settingsDoc = doc(db, 'publicSettings', getFinalistSettingsDocId(branchMatch?.[0] || '10501'));
+    return onSnapshot(settingsDoc, (snapshot) => {
+      setFinalistSettings(normalizeFinalistSettings(snapshot.exists() ? snapshot.data() : {}));
+    }, () => setFinalistSettings(DEFAULT_FINALIST_SETTINGS));
+  }, []);
 
   useEffect(() => {
     const branchParam = getBranchFromUrl();
@@ -299,7 +308,7 @@ export default function CustomerForm() {
     }, resolvedQty);
 
     if (!finalPrediction.isValid) {
-      alert(`กรุณาระบุจำนวนที่ทายให้ครบ ${resolvedQty} ใบ (สเปน + อาร์เจนตินา)`);
+      alert(`กรุณาระบุจำนวนที่ทายให้ครบ ${resolvedQty} ใบ (${finalistSettings.firstCountry} + ${finalistSettings.secondCountry})`);
       return;
     }
 
@@ -368,6 +377,8 @@ export default function CustomerForm() {
        finalPrediction: {
          spain: finalPrediction.spain,
          argentina: finalPrediction.argentina,
+         firstCountry: finalistSettings.firstCountry,
+         secondCountry: finalistSettings.secondCountry,
        },
        address: fullAddress,
        isDidActive,
@@ -936,10 +947,10 @@ export default function CustomerForm() {
                 ทายผลคู่ชิง: เลือกประเทศและระบุจำนวนใบ
               </div>
               <div style={{ color: '#475569', fontSize: '0.85rem', marginBottom: '0.75rem' }}>
-                จำนวนของสเปนและอาร์เจนตินารวมกันต้องเท่ากับจำนวนที่สั่ง {quantity.toLocaleString()} ใบ
+                จำนวนของ {finalistSettings.firstCountry} และ {finalistSettings.secondCountry} รวมกันต้องเท่ากับจำนวนที่สั่ง {quantity.toLocaleString()} ใบ
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
-                {FINALIST_COUNTRIES.map((country) => {
+                {getFinalistCountries(finalistSettings).map((country) => {
                   const fieldName = country.key === 'spain' ? 'predictionSpain' : 'predictionArgentina';
                   return (
                     <label key={country.key} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontWeight: 700, color: '#0f172a' }}>
